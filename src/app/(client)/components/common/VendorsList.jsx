@@ -127,7 +127,7 @@ export const VendorsCard = ({ vendor }) => {
 
                     {/* Price */}
                     <p className="font-medium md:mt-2 text-primary !text-sm md:text-sm">
-                        Starting from <span className="font-bold text-base md:!text-lg">AED {vendor.price}</span>
+                        Starting from <span className="font-bold text-base md:!text-lg">AED{vendor.price}</span>
                     </p>
                 </div>
 

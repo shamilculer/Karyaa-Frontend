@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import Image from "next/image";
 import LightGallery from "lightgallery/react";
 
 // LightGallery styles
@@ -37,78 +38,84 @@ export default function VendorGallery() {
     <div className="w-full">
       {/* Custom Grid Layout */}
       <div className="grid grid-cols-3 grid-rows-2 gap-2 h-[420px] rounded-lg overflow-hidden">
-        {/* First image - tall left column */}
-        <a
-          href={images[0].src}
-          onClick={(e) => {
-            e.preventDefault();
-            openGallery(0);
-          }}
-          className="col-span-1 row-span-2 overflow-hidden"
-        >
-          <img
-            src={images[0].thumb}
-            alt=""
-            className="w-full h-full object-cover hover:scale-105 transition"
-          />
-        </a>
-
-        {/* Second image - top middle */}
-        <a
-          href={images[1].src}
-          onClick={(e) => {
-            e.preventDefault();
-            openGallery(0);
-          }}
-          className="col-span-1 row-span-2 overflow-hidden"
-        >
-          <img
-            src={images[1].thumb}
-            alt=""
-            className="w-full h-full object-cover hover:scale-105 transition"
-          />
-        </a>
-
-        {/* Fifth image - bottom right with overlay button */}
-        <div className="relative col-span-1 row-span-1 overflow-hidden">
-          <a
-            href={images[2].src}
-            onClick={(e) => {
-              e.preventDefault();
-              openGallery(4);
-            }}
-          >
-            <img
-              src={images[4].thumb}
-              alt=""
-              className="w-full h-full object-cover hover:scale-105 transition"
-            />
-          </a>
-        </div>
-
-        {/* Fifth image - bottom right with overlay button */}
-        <div className="relative col-span-1 row-span-1 overflow-hidden">
-          <a
-            href={images[2].src}
-            onClick={(e) => {
-              e.preventDefault();
-              openGallery(4);
-            }}
-          >
-            <img
-              src={images[3].thumb}
-              alt=""
-              className="w-full h-full object-cover hover:scale-105 transition"
-            />
-          </a>
-          <Button
-            onClick={() => openGallery()}
-            className="absolute bottom-2 right-2 bg-white text-black text-sm px-3 !py-1 !h-auto rounded-lg"
-          >
-            SEE ALL ({images.length})
-          </Button>
-        </div>
-      </div>
+  {/* First image - tall left column */}
+  <a
+    href={images[0].src}
+    onClick={(e) => {
+      e.preventDefault();
+      openGallery(0);
+    }}
+    className="relative col-span-1 row-span-2 overflow-hidden"
+  >
+    <Image
+      src={images[0].thumb}
+      alt=""
+      fill
+      className="object-cover hover:scale-105 transition-transform duration-300"
+    />
+  </a>
+  
+  {/* Second image - middle column */}
+  <a
+    href={images[1].src}
+    onClick={(e) => {
+      e.preventDefault();
+      openGallery(1);
+    }}
+    className="relative col-span-1 row-span-2 overflow-hidden"
+  >
+    <Image
+      src={images[1].thumb}
+      alt=""
+      fill
+      className="object-cover hover:scale-105 transition-transform duration-300"
+    />
+  </a>
+  
+  {/* Third image - top right */}
+  <div className="relative col-span-1 row-span-1 overflow-hidden">
+    <a
+      href={images[2].src}
+      onClick={(e) => {
+        e.preventDefault();
+        openGallery(2);
+      }}
+      className="block w-full h-full"
+    >
+      <Image
+        src={images[2].thumb}
+        alt=""
+        fill
+        className="object-cover hover:scale-105 transition-transform duration-300"
+      />
+    </a>
+  </div>
+  
+  {/* Fourth image - bottom right with overlay button */}
+  <div className="relative col-span-1 row-span-1 overflow-hidden">
+    <a
+      href={images[3].src}
+      onClick={(e) => {
+        e.preventDefault();
+        openGallery(3);
+      }}
+      className="block w-full h-full"
+    >
+      <Image
+        src={images[3].thumb}
+        alt=""
+        fill
+        className="object-cover hover:scale-105 transition-transform duration-300"
+      />
+    </a>
+    <Button
+      onClick={() => openGallery()}
+      className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-black text-sm px-3 !py-1 !h-auto rounded-lg hover:bg-white transition-colors z-10"
+    >
+      SEE ALL ({images.length})
+    </Button>
+  </div>
+</div>
 
       {/* LightGallery */}
       <LightGallery

@@ -1,7 +1,7 @@
 export const popularSubCategories = [
     {
-        title: "ballon-decor",
-        slug: "balloon-decor",
+        title: "Ballon Decor",
+        slug: "ballon-decor",
         image: "/categories/balloon-decor.webp",
         tag: "New",
         parent: "decor",
@@ -72,7 +72,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "elegant-event-decor",
     image: "/vendor/vendor-2.png",
-    price: 3000,
+    price: 599,
     name: "Elegant Event Decor",
     tagline:
       "Transforming spaces into breathtaking scenes, blending elegance and creativity to make your celebration truly unforgettable.",
@@ -102,7 +102,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "lux-blooms-decor",
     image: "/images/vendors/decor2.jpg",
-    price: 3500,
+    price: 499,
     name: "Lux Blooms Decor",
     tagline:
       "Elevating your event with lush floral arrangements, modern accents, and timeless elegance.",
@@ -116,7 +116,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "dreamscape-designs",
     image: "/images/vendors/decor3.jpg",
-    price: 4000,
+    price: 499,
     name: "Dreamscape Designs",
     tagline:
       "Turning your vision into reality with creative themes, intricate setups, and unforgettable details.",
@@ -130,7 +130,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "grand-gala-decor",
     image: "/images/vendors/decor4.jpg",
-    price: 3700,
+    price: 679,
     name: "Grand Gala Decor",
     tagline:
       "Crafting luxurious ambiances for weddings and events with premium setups and dazzling designs.",
@@ -144,7 +144,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "radiant-celebrations",
     image: "/images/vendors/decor5.jpg",
-    price: 3200,
+    price: 620,
     name: "Radiant Celebrations",
     tagline:
       "Brightening every moment with colorful themes, stylish props, and attention to every little detail.",
@@ -158,7 +158,7 @@ export const vendors = [
     subCategory: "ballon-decor",
     slug: "blissful-backdrops",
     image: "/images/vendors/decor6.jpg",
-    price: 4100,
+    price: 419,
     name: "Blissful Backdrops",
     tagline:
       "Specializing in stage and photo booth backdrops that create picture-perfect memories.",

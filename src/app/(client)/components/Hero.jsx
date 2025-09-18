@@ -12,8 +12,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Hero = () => {
   const images = [
-    "/cta-2.webp",
     "/new-banner-9.jpg",
+    "/new-banner-18.jpg",
+    "/cta-2.webp",
     "/new-banner-3.jpg",
     "/new-banner-6.jpg",
     "/new-banner-4.jpg",
