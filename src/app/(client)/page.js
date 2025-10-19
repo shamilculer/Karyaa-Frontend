@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import Adbanner from "./components/Adbanner";
 import Testimonials from "./components/Testimonials";
 import { Carousel } from "@/components/ui/carousel";
-import { VendorsCard } from "./components/common/VendorsList";
+import VendorsList, { VendorsCard } from "./components/common/VendorsList";
 
 import { vendors } from "@/utils";
 import CategoryFetcher from "./components/common/CategoryFetcher";
@@ -48,21 +48,7 @@ export default function LandingPage() {
                 <Link href="/vendors">View All</Link>
               </Button>
             </div>
-            <Carousel
-              spaceBetween={60}
-              slidesPerView={3}
-              autoplay
-              breakpoints={{
-                320: { slidesPerView: 1, spaceBetween: 20 },
-                640: { slidesPerView: 2, spaceBetween: 40 },
-                1024: { slidesPerView: 3, spaceBetween: 50 },
-              }}
-              className="w-[93%] lg:w-full mx-auto !pb-10"
-            >
-              {vendors.map((vendor) => (
-                <VendorsCard key={vendor.slug} vendor={vendor} />
-              ))}
-            </Carousel>
+            <VendorsList />
           </div>
         </section>
 

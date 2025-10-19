@@ -1,6 +1,6 @@
 import { ArrowUpDown, Earth, ListFilter } from "lucide-react";
 import { SubCategoryCarousel } from "../../components/common/SubCategories";
-import { VendorsCard } from "../../components/common/VendorsList";
+import VendorsList, { VendorsCard } from "../../components/common/VendorsList";
 import {
     Pagination,
     PaginationContent,
@@ -87,9 +87,7 @@ const CategoryPage = async ({ params }) => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        {vendors.map((vendor, index) => (
-                            <VendorsCard key={index} vendor={vendor} />
-                        ))}
+                        <VendorsList />
                     </div>
 
                     <Pagination className="mt-14">

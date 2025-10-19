@@ -1,5 +1,5 @@
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar";
-import { VendorsCard } from "@/app/(client)/components/common/VendorsList";
+import VendorsList from "@/app/(client)/components/common/VendorsList";
 import {
   Pagination,
   PaginationContent,
@@ -75,9 +75,7 @@ const SubCategoryPage = ({ params }) => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        {vendors.map((vendor, index) => (
-                            <VendorsCard key={index} vendor={vendor} />
-                        ))}
+                       <VendorsList />
                     </div>
 
                     <Pagination className="mt-14">
