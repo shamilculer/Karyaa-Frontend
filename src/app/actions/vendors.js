@@ -37,3 +37,37 @@ export const getActiveVendors = async (filters = {}) => {
         };
     }
 }
+
+/**
+ * @desc Fetches a single active vendor by their ID or slug.
+ * @param {string} identifier - The slug or MongoDB ID of the vendor.
+ * @returns {Promise<{data: Object} | {error: string}>}
+ */
+export const getSingleVendor = async (identifier) => {
+    if (!identifier) {
+        return { error: "Vendor identifier is required." };
+    }
+
+    try {
+        // The URL targets the new Express route: /vendors/:identifier
+        const url = `/vendor/${identifier}`;
+        
+        const responseData = await apiFetch(url); 
+        
+        // The API returns { success: true, message: ..., data: vendor }
+        return {
+            data: responseData.data,
+        };
+        
+    } catch (error) {
+        console.error(`Server Action: Error fetching vendor ${identifier}:`, error);
+
+        // Assume the API error message is useful for the client
+        const errorMessage = error.message || "Could not find the requested vendor.";
+        
+        return {
+            error: errorMessage,
+            data: null,
+        };
+    }
+}
