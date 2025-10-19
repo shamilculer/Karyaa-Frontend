@@ -1,6 +1,8 @@
-'use client';
+// src/app/vendor/reviews/page.js
 
-import { useState, useMemo } from 'react'
+'use client'; // This must remain at the very top for client-side functionality
+
+import { useState, useMemo, Suspense } from 'react' // Import Suspense
 import { useSearchParams, useRouter } from 'next/navigation';
 import OverViewStats from '../components/common/OverViewStats'
 import { Progress } from '@/components/ui/progress'
@@ -18,15 +20,13 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Button } from '@/components/ui/button';
-
-// Import the new toolbar component
 import ReviewsToolbar from '../components/ReviewsToolbar';
-
 import { vendors } from '@/utils'
 import { Trash } from 'lucide-react';
 
-// Mock data for reviews
+// Mock data for reviews (your data remains here)
 const reviews = [
+    // ... your reviews array ...
     {
         id: 1,
         author: 'Ananya Sharma',
@@ -45,6 +45,7 @@ const reviews = [
         avatar: vendors[3].image,
         fallback: 'YR'
     },
+    // ... rest of your reviews ...
     {
         id: 3,
         author: 'Fatima Ahmed',
@@ -83,10 +84,15 @@ const reviews = [
     }
 ]
 
-const ReviewsManagePage = () => {
+
+// **Step 1: Rename the default export component**
+const ReviewsManagePageContent = () => {
+    // This component remains the Client Component
+
     const searchParams = useSearchParams();
     const router = useRouter();
-
+    // ... rest of your hooks and logic ...
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRating, setFilterRating] = useState('all');
 
@@ -114,7 +120,8 @@ const ReviewsManagePage = () => {
     // Function to handle page change and update the URL
     const handlePageChange = (page) => {
         if (page < 1 || page > totalPages) return;
-        const params = new URLSearchParams(searchParams);
+        // Use searchParams.toString() to safely get current parameters
+        const params = new URLSearchParams(searchParams.toString());
         params.set('page', page);
         router.push(`?${params.toString()}`);
     };
@@ -158,7 +165,6 @@ const ReviewsManagePage = () => {
                 {/* Progress bars section */}
                 <div className="w-4/5 ">
                     <div className="w-[500px] space-y-3">
-                        {/* You'll need to calculate these values dynamically based on your data */}
                         <div className="w-full flex items-center gap-3">
                             <span className="text-sm">5</span>
                             <Progress value={80} />
@@ -230,7 +236,7 @@ const ReviewsManagePage = () => {
                             </div>
                         ))
                     ) : (
-                        <div className="text-center text-gray-500">
+                        <div className="text-center text-gray-500 col-span-2">
                             No reviews match your search or filter criteria.
                         </div>
                     )}
@@ -271,4 +277,18 @@ const ReviewsManagePage = () => {
     );
 };
 
-export default ReviewsManagePage;
+
+// **Step 2: Create a Server Component Wrapper to Export**
+// This function runs first on the server.
+export default function ReviewsManagePage() {
+    return (
+        // 🚨 Wrap the Client Component with Suspense
+        <Suspense fallback={<div className="text-center py-20 text-lg text-gray-500">Loading reviews...</div>}>
+            <ReviewsManagePageContent />
+        </Suspense>
+    );
+}
+
+// **Step 3: Export the Client Component as a named export if needed elsewhere**
+// (Optional, but can be useful)
+export { ReviewsManagePageContent };
