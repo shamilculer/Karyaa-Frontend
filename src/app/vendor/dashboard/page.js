@@ -34,7 +34,19 @@ const VendorDashboardPage = () => {
       </div>
 
 
-      <div className="w-full">
+      <div className="w-full my-16">
+        <div className="w-full flex-between mb-5">
+          <div>
+            <h4 className="uppercase text-sidebar-foreground text-xl !font-body !font-normal !tracking-widest">
+              Leads
+            </h4>
+            <span className="text-xs">View and Manage Leads</span>
+          </div>
+
+          <Button asChild variant="outline" >
+            <Link href="/vendor/manage-gallery">Manage Leads</Link>
+          </Button>
+        </div>
         <LeadsTable />
       </div>
 
@@ -45,17 +57,17 @@ const VendorDashboardPage = () => {
           </h4>
 
           <Button asChild variant="outline" >
-            <Link href="/vendor/manage-gallery">Manage Gallery</Link>
+            <Link href="/vendor/gallery">Manage Gallery</Link>
           </Button>
         </div>
 
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" >
-            <Image src="/why-us.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-            <Image src="/banner-2.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-            <Image src="/blog-2.webp" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-            <Image src="/banner-1.avif" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-            <Image src="/new-banner-1.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
+          <Image src="/why-us.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
+          <Image src="/banner-2.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
+          <Image src="/blog-2.webp" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
+          <Image src="/banner-1.avif" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
+          <Image src="/new-banner-1.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
         </div>
       </div>
     </div>

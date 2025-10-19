@@ -1,9 +1,10 @@
-import CategoriesList from "../components/common/CategoriesList";
 import PageSearchBar from "../components/common/PageSearchBar";
 import BlogPosts from "../components/common/BlogPosts";
 import Link from "next/link";
 import SubCategories from "../components/common/SubCategories";
 import Image from "next/image";
+import CategoryFetcher from "../components/common/CategoryFetcher";
+import { initialBlogParams } from "@/utils";
 
 const CategoriesPage = () => {
   return (
@@ -25,7 +26,7 @@ const CategoriesPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-semibold uppercase">Popular Categories</h2>
           </div>
-          <CategoriesList />
+          <CategoryFetcher />
         </div>
       </section>
 
@@ -35,7 +36,7 @@ const CategoriesPage = () => {
             <h2 className="text-2xl font-semibold uppercase">Popular Sub-Categories</h2>
           </div>
           <div>
-            <SubCategories />
+            <SubCategories searchParams={{ isPopular: true }} />
           </div>
         </div>
       </section>
@@ -54,7 +55,7 @@ const CategoriesPage = () => {
         </div>
 
         <div className="pt-5">
-          <BlogPosts />
+          <BlogPosts searchParams={initialBlogParams} showPagination={false} />
         </div>
       </section>
 

@@ -1,115 +1,49 @@
 import { Button } from "@/components/ui/button";
-import PageSearchBar from "../components/common/PageSearchBar"
-import { VendorsCard } from "../components/common/VendorsList";
-
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
-
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { ArrowUpDown, Earth, ListFilter } from "lucide-react";
-
-import { vendors } from "@/utils";
+import PageSearchBar from "../components/common/PageSearchBar";
+import VendorsList from "../components/common/VendorsList";
+import { Earth, ListFilter } from "lucide-react";
+import VendorSorter from "../components/VendorSorter";
+import VendorFilterModal from "../components/VendorFilterModal";
 
 const VendorsPage = () => {
-    return (
-        <div className="min-h-screen">
-            <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
-                <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-                <div className="relative z-10 text-white text-center">
-                    <h1 className="!text-white !text-5xl lg:!text-7xl">Vendors</h1>
-                    <p className="mt-2 max-md:text-xs">Ideas, Inspiration & Expert Tips for Every Event</p>
-                </div>
-            </section>
-
-            <section className="container !mb-14">
-                <PageSearchBar />
-            </section>
-
-            <section className="container">
-                <div className="relative">
-                    <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
-                        <h2 className=" font-semibold uppercase">Featured Partners</h2>
-                        <div className="flex-center gap-4">
-                            <Button className="bg-[#F2F4FF] border border-gray-300 text-primary hover:bg-gray-300 !px-6 ">
-                                <Earth />Map View
-                            </Button>
-
-                            <Button className="bg-[#F2F4FF] border border-gray-300 text-primary hover:bg-gray-300 !px-6 ">
-                                <ListFilter /> Filter
-                            </Button>
-
-                            <Select>
-                                <SelectTrigger
-                                    id="sort"
-                                    className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold "
-                                >
-                                    <ArrowUpDown />
-                                    <SelectValue placeholder="Sort By" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="popular">Most Popular</SelectItem>
-                                    <SelectItem value="rating-high">Highest Rated</SelectItem>
-                                    <SelectItem value="rating-low">Lowest Rated</SelectItem>
-                                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                                    <SelectItem value="newest">Newest First</SelectItem>
-                                    <SelectItem value="oldest">Oldest First</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        {vendors.map((vendor, index) => (
-                            <VendorsCard key={index} vendor={vendor} />
-                        ))}
-                    </div>
-
-                    <Pagination className="mt-14">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious href="#" className="text-base" />
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base" isActive>1</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">
-                                    2
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">3</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">4</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">5</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">6</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationEllipsis />
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationNext href="#" className="text-base" />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-
-                </div>
-            </section>
+  return (
+    <div className="min-h-screen">
+      <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
+        <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
+        <div className="relative z-10 text-white text-center">
+          <h1 className="!text-white !text-5xl lg:!text-7xl">Vendors</h1>
+          <p className="mt-2 max-md:text-xs">
+            Ideas, Inspiration & Expert Tips for Every Event
+          </p>
         </div>
-    )
-}
+      </section>
 
-export default VendorsPage
+      <section className="container !mb-14">
+        <PageSearchBar />
+      </section>
+
+      <section className="container">
+        <div className="relative">
+          <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
+            <h2 className=" font-semibold uppercase">Featured Partners</h2>
+            <div className="flex-center gap-4">
+              <Button className="bg-[#F2F4FF] border border-gray-300 text-primary hover:bg-gray-300 !px-6 ">
+                <Earth />
+                Map View
+              </Button>
+
+              <VendorFilterModal />
+
+              <VendorSorter />
+
+            </div>
+          </div>
+
+          <VendorsList />
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default VendorsPage;

@@ -24,8 +24,8 @@ import Image from "next/image";
 import { vendors } from "@/utils";
 
 
-const CategoryPage = ({ params }) => {
-    const { category } = params;
+const CategoryPage = async ({ params }) => {
+    const { category } = await params;
 
     return (
         <div>
@@ -43,7 +43,7 @@ const CategoryPage = ({ params }) => {
                         <h2 className="max-md:!text-[26px] font-semibold uppercase">Popular Sub-Categories In {category}</h2>
                     </div>
                     <div>
-                        <SubCategoryCarousel />
+                        <SubCategoryCarousel searchParams={{ mainCategory : category }} />
                     </div>
                 </div>
             </section>

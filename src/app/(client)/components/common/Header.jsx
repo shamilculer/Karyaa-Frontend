@@ -1,6 +1,6 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -8,7 +8,7 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
 
 import {
     Sheet,
@@ -17,19 +17,26 @@ import {
     SheetFooter,
     SheetHeader,
     SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
-import { categoriesMenu } from "@/utils"
-import { Menu } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-const Header = () => {
+import { categoriesMenu } from "@/utils";
+import { Menu } from "lucide-react";
+import { checkAuthStatus } from "../../../actions/user/auth";
+
+import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
+
+const Header = async () => {
+    const { isAuthenticated, user } = await checkAuthStatus();
+
     return (
         <header className="sticky top-0 bg-[#FFFEF9] z-50">
             {/* Desktop Header */}
@@ -152,9 +159,39 @@ const Header = () => {
                             </NavigationMenuList>
                         </NavigationMenu>
 
-                        <Link href="/signup">
-                            <Button>Login/Signup</Button>
-                        </Link>
+                        {/* ✅ Conditional Login/Profile */}
+                        {isAuthenticated ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="!border border-gray-300 p-1 pr-1.5 h-10">
+                                        <Image
+                                            src={user?.profileImage || "/default-avatar.png"}
+                                            alt="User"
+                                            width={36}
+                                            height={36}
+                                            className="rounded-full size-8 border border-gray-300"
+                                        />
+                                        <span className="text-sm font-semibold">{user?.username || "User"}</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-48">
+                                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/profile">Profile</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/orders">My Orders</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <LogoutAlertModal />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button asChild>
+                                <Link href="/auth/register">Login/Signup</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -162,7 +199,6 @@ const Header = () => {
             {/* Mobile Header */}
             <div className="flex lg:hidden w-full py-4 h-[65px] border-b border-gray-300 items-center">
                 <div className="container flex items-center justify-between">
-
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost" className="!p-0 w-1/3 flex justify-start">
@@ -181,7 +217,6 @@ const Header = () => {
                             <div className="p-6 pt-3">
                                 <NavigationMenu className="w-full max-w-full justify-start" >
                                     <NavigationMenuList className="w-full flex flex-col items-start gap-6">
-
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
@@ -190,7 +225,6 @@ const Header = () => {
                                                 <Link href="/">Home</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
-
 
                                         <Accordion
                                             type="single"
@@ -201,7 +235,6 @@ const Header = () => {
                                                 <AccordionTrigger className="w-full text-lg font-medium font-sans hover:underline hover:text-secondary cursor-pointer p-0">Categories</AccordionTrigger>
                                                 <AccordionContent className="w-full">
                                                     {categoriesMenu.map((cat, index) => (
-
                                                         <NavigationMenuItem key={index} className="w-full">
                                                             <NavigationMenuLink
                                                                 asChild
@@ -210,13 +243,10 @@ const Header = () => {
                                                                 <Link href={`/categories/${cat.slug}`}>{cat.name}</Link>
                                                             </NavigationMenuLink>
                                                         </NavigationMenuItem>
-
                                                     ))}
                                                 </AccordionContent>
                                             </AccordionItem>
                                         </Accordion>
-
-
 
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
@@ -234,7 +264,6 @@ const Header = () => {
                                                 <Link href="/ideas">Ideas</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
-
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
@@ -243,7 +272,6 @@ const Header = () => {
                                                 <Link href="/blog">Blog</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
-
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
@@ -257,9 +285,22 @@ const Header = () => {
                             </div>
 
                             <SheetFooter>
-                                <Button asChild className="max-md:py-2 max-md:px-3 !h-auto text-xs" >
-                                    <Link href="#">Login / SignUp</Link>
-                                </Button>
+                                {isAuthenticated ? (
+                                    <div className="flex items-center gap-3">
+                                        <Image
+                                            src={user?.profileImage || "/default-avatar.png"}
+                                            alt="User"
+                                            width={32}
+                                            height={32}
+                                            className="rounded-full border"
+                                        />
+                                        <span className="text-sm font-semibold">{user?.name || "User"}</span>
+                                    </div>
+                                ) : (
+                                    <Button asChild className="max-md:py-2 max-md:px-3 !h-auto text-xs" >
+                                        <Link href="/auth/register">Login / SignUp</Link>
+                                    </Button>
+                                )}
                             </SheetFooter>
                         </SheetContent>
                     </Sheet>
@@ -269,14 +310,36 @@ const Header = () => {
                     </Link>
 
                     <div className="w-1/3 flex justify-end">
-                        <Button asChild variant="ghost" className="!p-0 text-xs" >
-                            <Link href="#">Login / SignUp</Link>
-                        </Button>
+                        {isAuthenticated ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="p-0">
+                                        <Image
+                                            src={user?.profileImage || "/default-avatar.png"}
+                                            alt="User"
+                                            width={32}
+                                            height={32}
+                                            className="rounded-full size-9 border border-gray-300"
+                                        />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-40">
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/profile">Profile</Link>
+                                    </DropdownMenuItem>
+                                    <LogoutAlertModal />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button asChild variant="ghost" className="!p-0 text-xs">
+                                <Link href="/auth/create-account">Login / SignUp</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
         </header>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;

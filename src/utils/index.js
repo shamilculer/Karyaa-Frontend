@@ -459,3 +459,9 @@ export const ideasData = [
     slug: "romantic-candlelit-dinner-party"
   }
 ];
+
+
+export const initialBlogParams = {
+  page: "1",
+  limit: "3",
+};

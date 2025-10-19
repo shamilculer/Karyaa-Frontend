@@ -32,34 +32,29 @@ const items = [
         icon: ChartPie,
     },
     {
-        title: "Gallery",
-        url: "/vendor/gallery",
-        icon: ImageIcon,
-    },
-    {
-        title: "Services and Packages",
-        url: "/vendor/service-and-packages",
-        icon: SquareMenu,
-    },
-    {
         title: "Leads",
         url: "/vendor/leads",
         icon: BriefcaseBusiness,
     },
     {
-        title: "Reviews",
-        url: "/vendor/reviews",
-        icon: Star,
+        title: "Services and Packages",
+        url: "/vendor/packages",
+        icon: SquareMenu,
     },
-     {
+    {
         title: "Analytics",
         url: "/vendor/analytics",
         icon: ChartNoAxesCombined,
     },
-     {
-        title: "Users",
-        url: "/vendor/users",
-        icon: Users,
+    {
+        title: "Gallery",
+        url: "/vendor/gallery",
+        icon: ImageIcon,
+    },
+    {
+        title: "Reviews",
+        url: "/vendor/reviews",
+        icon: Star,
     },
      {
         title: "Settings",

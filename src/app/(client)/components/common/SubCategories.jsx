@@ -1,30 +1,51 @@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { popularSubCategories } from "@/utils";
+import Image from "next/image";
 import { Carousel } from "@/components/ui/carousel";
+import { getSubcategories } from "../../../actions/categories";
 
+const SubCategories = async ({ searchParams = {} }) => {
+  // Fetch from backend
+  const response = await getSubcategories(searchParams);
+  const subcategories = response?.subcategories || [];
 
-const SubCategories = () => {
+  if (!subcategories.length)
+    return <p className="text-center py-10">No subcategories found.</p>;
+
   return (
     <>
+      {/* Desktop Grid */}
       <div className="hidden md:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 xl:gap-14">
-
-        {popularSubCategories.map((item, index) => (
+        {subcategories.map((item, index) => (
           <SubCategoryCard item={item} key={index} />
         ))}
       </div>
 
+      {/* Mobile Carousel */}
       <div className="w-full block md:hidden">
-        <SubCategoryCarousel />
+        <SubCategoryCarousel items={subcategories} />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default SubCategories
+export default SubCategories;
 
+/* --------------------- */
+/*     Carousel View     */
+/* --------------------- */
+export const SubCategoryCarousel = async ({ items, searchParams = {} }) => {
+  let subcategories = items;
 
-export const SubCategoryCarousel = () => {
+  // Fetch if not provided
+  if (!subcategories) {
+    const response = await getSubcategories(searchParams);
+    subcategories = response?.subcategories || [];
+  }
+
+  if (!subcategories.length)
+    return <p className="text-center py-10">No subcategories found.</p>;
+
   return (
     <Carousel
       spaceBetween={20}
@@ -38,42 +59,48 @@ export const SubCategoryCarousel = () => {
       className="!pb-10"
       autoplay
     >
-
-      {popularSubCategories.map((item, index) => (
+      {subcategories.map((item, index) => (
         <SubCategoryCard item={item} key={index} />
       ))}
-
     </Carousel>
   );
 };
 
+/* --------------------- */
+/*      Card Layout      */
+/* --------------------- */
 export const SubCategoryCard = ({ item }) => (
   <Link
-    href={`/categories/${item.parent}/${item.slug}`}
+    href={`/categories/${item.mainCategory?.slug || "unknown"}/${item.slug}`}
     className="relative rounded-xl overflow-hidden shadow-md cursor-pointer"
   >
     {/* Image */}
-    <img
-      src={item.image}
-      alt={item.title}
+    <Image
+      src={item.coverImage || "/placeholder.webp"}
+      alt={item.name}
+      height={300}
+      width={300}
       className="w-full h-72 object-cover rounded-xl"
     />
 
     {/* Tag */}
-    {item.tag && (
+    {item.isNewSub && (
       <Badge className="absolute top-3 left-3 z-10 bg-white text-primary font-medium text-sm flex items-center gap-1">
-        {item.tag}
+        New
+      </Badge>
+    )}
+    {item.isPopular && !item.isNewSub && (
+      <Badge className="absolute top-3 left-3 z-10 bg-white text-primary font-medium text-sm flex items-center gap-1">
+        Popular
       </Badge>
     )}
 
-    {/* Title overlay */}
+    {/* Title Overlay */}
     <div className="absolute bottom-5 left-5 w-full z-10">
-      <h4 className="!text-white text-lg !font-medium">
-        {item.title}
-      </h4>
+      <h4 className="!text-white text-lg !font-medium">{item.name}</h4>
     </div>
 
-    {/* Hover effect */}
+    {/* Gradient Overlay */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent rounded-xl"></div>
   </Link>
-)
+);

@@ -1,16 +1,8 @@
 import BlogPosts from "../components/common/BlogPosts"
 import PageSearchBar from "../components/common/PageSearchBar"
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
 
-const BlogPage = () => {
+const BlogPage = async ({ searchParams }) => {
+
     return (
         <div className="min-h-screen">
             <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
@@ -34,40 +26,7 @@ const BlogPage = () => {
                 </div>
 
                 <div className="pt-5">
-                    <BlogPosts />
-                    <Pagination className="mt-14">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious href="#" className="text-base" />
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base" isActive>1</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">
-                                    2
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">3</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">4</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">5</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" className="text-base">6</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationEllipsis />
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationNext href="#" className="text-base" />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                    <BlogPosts searchParams={searchParams} />
                 </div>
             </section>
         </div>

@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Great_Vibes } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 
 const greatVibes = Great_Vibes({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
         className={`${greatVibes.variable} antialiased`}
       >
         {children}
+        <Toaster  />
       </body>
     </html>
   );

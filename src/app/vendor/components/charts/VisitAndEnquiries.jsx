@@ -1,5 +1,5 @@
 "use client"
-import { TrendingUp } from "lucide-react"
+import React, { useState, useMemo } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import {
     Card,
@@ -14,10 +14,17 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
-export const description = "Profile Visits vs Enquiries (Bar Chart)"
+export const description = "Profile Visits vs Enquiries (Bar Chart with Timeframe Filter)"
 
-const chartData = [
+const fullChartData = [
     { month: "January", visits: 1200, enquiries: 85 },
     { month: "February", visits: 950, enquiries: 70 },
     { month: "March", visits: 1400, enquiries: 110 },
@@ -38,15 +45,41 @@ const chartConfig = {
 }
 
 function VisitAndEnquiries() {
+    const [timeframe, setTimeframe] = useState("6m")
+
+    const chartData = useMemo(() => {
+        if (timeframe === "3m") {
+            return fullChartData.slice(-3)
+        }
+        return fullChartData
+    }, [timeframe])
+
+    const months = chartData.map(d => d.month)
+    const cardDescription = months.length > 0
+        ? `${months[0]} – ${months[months.length - 1]}`
+        : "No data available"
+
     return (
         <Card className="w-full h-full bg-white border border-gray-200 shadow-none rounded-md">
-            <CardHeader>
-                <CardTitle className="uppercase text-sidebar-foreground font-normal tracking-widest">
-                    Profile Visits vs Enquiries
-                </CardTitle>
-                <CardDescription className="text-xs">
-                    January – June 2024
-                </CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between">
+                <div>
+                    <CardTitle className="uppercase text-sidebar-foreground font-normal tracking-widest">
+                        Profile Visits vs Enquiries
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                        {cardDescription}
+                    </CardDescription>
+                </div>
+                {/* Timeframe Filter Dropdown */}
+                <Select value={timeframe} onValueChange={setTimeframe}>
+                    <SelectTrigger className="h-8 w-[130px] text-xs">
+                        <SelectValue placeholder="Select timeframe" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="3m">Last 3 Months</SelectItem>
+                        <SelectItem value="6m">Last 6 Months</SelectItem>
+                    </SelectContent>
+                </Select>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
@@ -85,12 +118,11 @@ function VisitAndEnquiries() {
                     <span>{chartConfig.enquiries.label}</span>
                 </div>
                 <div className="text-muted-foreground leading-none">
-                    Showing profile visits vs enquiries for the last 6 months.
+                    Showing profile visits vs enquiries for the last {timeframe === "3m" ? "3" : "6"} months.
                 </div>
             </CardFooter>
         </Card>
     )
 }
-
 
 export default VisitAndEnquiries
