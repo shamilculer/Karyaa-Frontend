@@ -72,7 +72,7 @@ const CategoriesPage = () => {
           </div>
 
           <div className="flex-center flex-col gap-6">
-            <Image width={310} height={210} src="/plan-banner-2.jpg" alt="Plan your event with karyaa" />
+            <Image width={310} height={210} src="/plan-banner-2.webp" alt="Plan your event with karyaa" />
             <div className="text-center space-y-2">
               <h4 className="text-2xl">Customize every detail</h4>
               <p className="text-[#6A6A6A]">From photographers to performers, explore a handpicked list of trusted vendors. Compare their portfolios, read reviews, and shortlist the ones that align with your vision.</p>

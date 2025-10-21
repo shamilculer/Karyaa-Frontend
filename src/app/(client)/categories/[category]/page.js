@@ -84,7 +84,7 @@ const CategoryPage = async ({ params, searchParams }) => {
             <Image
               width={310}
               height={210}
-              src="/plan-banner-2.jpg"
+              src="/plan-banner-2.webp"
               alt="Plan your event with karyaa"
             />
             <div className="text-center space-y-2">
