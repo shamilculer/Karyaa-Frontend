@@ -235,3 +235,10 @@ export const FinalVendorSchema = Step1Schema
   .merge(Step2Schema)
   .merge(Step3Schema)
   .strict();
+
+export const contactFormSchema = z.object({
+    fullname: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    phone: z.string().optional(),
+    message: z.string().min(1, "Message is required"),
+  });

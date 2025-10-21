@@ -10,7 +10,7 @@ const CreateAccountPage = () => {
         <Image
           fill
           alt="Create Account in Karyaa"
-          src="/new-banner-3.jpg"
+          src="/new-banner-10.jpg"
           className="h-full object-cover"
         />
       </div>
@@ -42,7 +42,7 @@ const CreateAccountPage = () => {
 
         <div className="mt-5">
           <Button asChild variant="outline" className="w-full">
-            <Link href="/auth/register">Login as a Vendor</Link>
+            <Link href="/auth/vendor/register">Login as a Vendor</Link>
           </Button>
         </div>
       </div>

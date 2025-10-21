@@ -103,15 +103,15 @@ const Hero = () => {
           ))}
         </Swiper>
 
-        <div className="w-full flex-center gap-4 mt-4">
-          <Button className="hero_slider-prev bg-white h-10 w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
+        <div className="w-full flex-center gap-2 md:gap-4 mt-4">
+          <Button className="hero_slider-prev bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
             <ChevronLeft className="text-gray-700" />
           </Button>
 
           {/* pagination dots */}
-          <div className="hero_slider-pagination !w-fit flex gap-2" style={{ transform: "translateX(0%) !important" }}></div>
+          <div className="hero_slider-pagination !w-fit hidden md:flex gap-2" style={{ transform: "translateX(0%) !important" }}></div>
 
-          <Button className="hero_slider-next bg-white h-10 w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
+          <Button className="hero_slider-next bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
             <ChevronRight className="text-gray-700" />
           </Button>
 

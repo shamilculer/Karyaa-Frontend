@@ -6,52 +6,58 @@ import {
     AvatarFallback
 } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { vendors } from "@/utils"
+// import { vendors } from "@/utils" // Removed: Assume data is passed as props
 import Image from "next/image"
 import { Send } from "lucide-react"
 import Link from "next/link"
 
 const VendorPopupHeader = ({
     vendorName,
+    vendorLogo, // New prop for logo
+    ownerName,  // New prop for owner name
     showHeader = false
 }) => {
+    // Helper to get initials (similar to the main page)
+    const getInitials = (name) => name?.split(" ").map(word => word[0]).join("").toUpperCase().substring(0, 3) || 'VNR';
+    
     return (
         <div className={`w-full flex items-center pt-5 min-h-24 z-[51] bg-white border-b border-b-gray-300 fixed top-0 left-0 transition-transform duration-300 ease-in-out ${
             showHeader ? 'translate-y-0' : '-translate-y-[100%]'
         }`}>
-            <div className="container">
-                <div className="h-full w-full flex-between">
-                    <div className="flex items-center gap-5">
-                        <Avatar className="size-16 rounded-full overflow-hidden border border-gray-200">
-                            <AvatarImage className="size-full object-cover" src={vendors[0].image} />
-                            <AvatarFallback>OWR</AvatarFallback>
+            <div className="container px-4 sm:px-6 md:px-10"> {/* Added responsive padding */}
+                <div className="h-full w-full flex items-center justify-between">
+                    <div className="flex items-center gap-3 sm:gap-5">
+                        <Avatar className="size-12 sm:size-16 rounded-full overflow-hidden border border-gray-200">
+                            <AvatarImage className="size-full object-cover" src={vendorLogo} />
+                            <AvatarFallback>{getInitials(ownerName)}</AvatarFallback>
                         </Avatar>
 
-                        <div className="">
-                            <span className="font-heading font-medium uppercase">{vendorName}</span>
-                            <div className="text-sm">
-                                Nora Khuder | Owner
+                        <div className="min-w-0">
+                            <span className="font-heading font-medium uppercase text-sm sm:text-base truncate block">{vendorName}</span>
+                            <div className="text-xs sm:text-sm text-gray-600 truncate">
+                                {ownerName} | Owner
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-center gap-5">
-                        <Button> 
-                            <Image width={20} height={20} src="/whatsapp.svg" alt="whatsapp" /> 
-                            Contact Us On Whatsapp
+                    <div className="flex items-center gap-3">
+                        <Button className="!h-8 sm:!h-10 text-xs sm:text-sm px-2 sm:px-4 hidden md:flex"> 
+                            <Image width={16} height={16} src="/whatsapp.svg" alt="whatsapp" className="mr-1" /> 
+                            Contact Us
                         </Button>
-                        <Button> 
-                            <Send className="w-5" /> 
-                            Send Us a Message
+                        <Button className="!h-8 sm:!h-10 text-xs sm:text-sm px-2 sm:px-4"> 
+                            <Send className="w-4 sm:w-5 mr-1" /> 
+                            Message
                         </Button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-10 mt-4">
-                    <Link href="#about" className="py-3 px-3 text-xs font-medium uppercase tracking-widest border-b">About</Link>
-                    <Link href="#services" className="py-3 px-3 text-xs font-medium uppercase tracking-widest border-b">Services</Link>
-                    <Link href="#reviews" className="py-3 px-3 text-xs font-medium uppercase tracking-widest border-b">Reviews</Link>
-                    <Link href="#packages" className="py-3 px-3 text-xs font-medium uppercase tracking-widest border-b">Packages</Link>
+                {/* Navigation links - Adjusted font size for responsiveness */}
+                <div className="flex items-center gap-4 sm:gap-10 mt-2 sm:mt-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                    <Link href="#about" className="py-2 px-1 text-xs sm:text-sm font-medium uppercase tracking-widest border-b-2 border-transparent hover:border-primary transition-colors">About</Link>
+                    <Link href="#services" className="py-2 px-1 text-xs sm:text-sm font-medium uppercase tracking-widest border-b-2 border-transparent hover:border-primary transition-colors">Services</Link>
+                    <Link href="#reviews" className="py-2 px-1 text-xs sm:text-sm font-medium uppercase tracking-widest border-b-2 border-transparent hover:border-primary transition-colors">Reviews</Link>
+                    <Link href="#packages" className="py-2 px-1 text-xs sm:text-sm font-medium uppercase tracking-widest border-b-2 border-transparent hover:border-primary transition-colors">Packages</Link>
                 </div>
             </div>
         </div>

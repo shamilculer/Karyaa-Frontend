@@ -13,9 +13,10 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { logoutUser } from '@/app/actions/user/auth';
+import { logoutUser } from '@/app/actions/user/user';
 import { useClientStore } from '@/store/clientStore';
 import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 
 const LogoutAlertModal = () => {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -39,7 +40,7 @@ const LogoutAlertModal = () => {
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Logout
+                   <LogOut className='w-4 h-4' /> Logout
                 </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>

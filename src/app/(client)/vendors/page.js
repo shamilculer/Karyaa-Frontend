@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
-import PageSearchBar from "../components/common/PageSearchBar";
+import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import VendorsList from "../components/common/VendorsList";
-import { Earth, ListFilter } from "lucide-react";
-import VendorSorter from "../components/VendorSorter";
-import VendorFilterModal from "../components/VendorFilterModal";
 
-const VendorsPage = () => {
+const VendorsPage = async ({ searchParams }) => {
+
+  const filters = await searchParams;
   return (
     <div className="min-h-screen">
       <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
@@ -26,20 +24,9 @@ const VendorsPage = () => {
         <div className="relative">
           <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
             <h2 className=" font-semibold uppercase">Featured Partners</h2>
-            <div className="flex-center gap-4">
-              <Button className="bg-[#F2F4FF] border border-gray-300 text-primary hover:bg-gray-300 !px-6 ">
-                <Earth />
-                Map View
-              </Button>
-
-              <VendorFilterModal />
-
-              <VendorSorter />
-
-            </div>
           </div>
 
-          <VendorsList />
+          <VendorsList showControls={true} filters={filters} />
         </div>
       </section>
     </div>

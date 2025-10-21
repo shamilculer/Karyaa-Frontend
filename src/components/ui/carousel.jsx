@@ -98,7 +98,7 @@ export function Carousel({
           >
             <Button
               className={cn(
-                "bg-white h-10 w-10 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
+                "bg-white size-8 md:size-10 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
                 navigationStyles
               )}
             >
@@ -116,7 +116,7 @@ export function Carousel({
           >
             <Button
               className={cn(
-                "bg-white h-10 w-10 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
+                "bg-white size-8 md:size-10 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
                 navigationStyles
               )}
             >

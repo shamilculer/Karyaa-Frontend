@@ -1,5 +1,5 @@
 import BlogPosts from "../components/common/BlogPosts"
-import PageSearchBar from "../components/common/PageSearchBar"
+import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar"
 
 const BlogPage = async ({ searchParams }) => {
 

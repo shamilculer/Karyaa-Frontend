@@ -1,15 +1,15 @@
-import PageSearchBar from "../components/common/PageSearchBar";
+import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import BlogPosts from "../components/common/BlogPosts";
 import Link from "next/link";
-import SubCategories from "../components/common/SubCategories";
 import Image from "next/image";
-import CategoryFetcher from "../components/common/CategoryFetcher";
 import { initialBlogParams } from "@/utils";
+import CategoryList from "../components/common/CategoriesList/CategoriesList";
+import SubCategoriesWrapper from "../components/common/SubCategories";
 
 const CategoriesPage = () => {
   return (
     <div className="min-h-screen">
-      <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative">
+      <section className="!m-0 bg-[url('/new-banner-6.jpg')] bg-cover bg-center h-72 md:h-96 flex-center relative">
         <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
         <div className="relative z-10 text-white text-center">
           <h1 className="!text-white !text-4xl lg:!text-7xl">Categories</h1>
@@ -26,7 +26,7 @@ const CategoriesPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-semibold uppercase">Popular Categories</h2>
           </div>
-          <CategoryFetcher />
+          <CategoryList />
         </div>
       </section>
 
@@ -36,7 +36,7 @@ const CategoriesPage = () => {
             <h2 className="text-2xl font-semibold uppercase">Popular Sub-Categories</h2>
           </div>
           <div>
-            <SubCategories searchParams={{ isPopular: true }} />
+            <SubCategoriesWrapper searchParams={{ isPopular: true }} />
           </div>
         </div>
       </section>

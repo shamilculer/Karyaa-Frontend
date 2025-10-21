@@ -26,16 +26,27 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
+import { Heart, Menu } from "lucide-react";
 
 import { categoriesMenu } from "@/utils";
-import { Menu } from "lucide-react";
-import { checkAuthStatus } from "../../../actions/user/auth";
+import { checkAuthStatus } from "../../../actions/user/user";
+import { getCategories } from "@/app/actions/categories";
 
-import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
 
 const Header = async () => {
+    const categoriesResponse = await getCategories();
     const { isAuthenticated, user } = await checkAuthStatus();
+
+    const categories = categoriesResponse.categories || [];
 
     return (
         <header className="sticky top-0 bg-[#FFFEF9] z-50">
@@ -64,7 +75,7 @@ const Header = async () => {
                                     <div className="flex">
                                         {/* Main Categories (Left Column) */}
                                         <div className="w-48 border-r border-gray-200 p-8 bg-white">
-                                            {categoriesMenu.map((cat, index) => (
+                                            {categories.map((cat, index) => (
                                                 <div key={index} className="py-1">
                                                     <Link
                                                         href={`/categories/${cat.slug}`}
@@ -78,13 +89,13 @@ const Header = async () => {
 
                                         {/* Subcategories Grid (Right Column) */}
                                         <div className="flex-1 grid grid-cols-5 gap-4 p-8">
-                                            {categoriesMenu.map((cat, index) => (
+                                            {categories.map((cat, index) => (
                                                 <div key={index}>
                                                     <h4 className="text-sm font-semibold mb-2">
                                                         {cat.name}
                                                     </h4>
                                                     <ul className="space-y-1">
-                                                        {cat.subcategories.map((subCat, idx) => (
+                                                        {cat.subCategories.map((subCat, idx) => (
                                                             <li key={idx}>
                                                                 <Link
                                                                     href={`/categories/${cat.slug}/${subCat.slug}`}
@@ -175,15 +186,13 @@ const Header = async () => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-48">
-                                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
+                                    {/* <DropdownMenuItem asChild>
                                         <Link href="/profile">Profile</Link>
-                                    </DropdownMenuItem>
+                                    </DropdownMenuItem> */}
                                     <DropdownMenuItem asChild>
-                                        <Link href="/orders">My Orders</Link>
+                                        <Link href="/vendors/saved"><Heart className="h-4 w-4" />Saved Vendors</Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
+                                    <DropdownMenuSeparator  />
                                     <LogoutAlertModal />
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -325,7 +334,7 @@ const Header = async () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-40">
                                     <DropdownMenuItem asChild>
-                                        <Link href="/profile">Profile</Link>
+                                       <Link href="/vendors/saved"><Heart className="h-4 w-4" />Saved Vendors</Link>
                                     </DropdownMenuItem>
                                     <LogoutAlertModal />
                                 </DropdownMenuContent>

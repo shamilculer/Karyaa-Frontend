@@ -17,7 +17,7 @@ export async function middleware(request) {
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
     // Define protected routes (auth required)
-    const protectedRoutes = ['/profile', '/settings', '/dashboard', '/orders'];
+    const protectedRoutes = ['/profile', '/settings', '/dashboard', '/orders', '/vendors/saved'];
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
     // --- SCENARIO 1: User accessing public auth pages while logged in ---
@@ -36,7 +36,7 @@ export async function middleware(request) {
     if (!accessToken && refreshToken) {
         try {
             // Call Express refresh endpoint
-            const response = await fetch(`${process.env.BACKEND_URL}/api/v1/user/auth/refresh`, {
+            const response = await fetch(`${process.env.BACKEND_URL}/user/auth/refresh`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

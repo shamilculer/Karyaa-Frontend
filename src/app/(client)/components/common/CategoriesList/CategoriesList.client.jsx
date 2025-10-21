@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-const CategoriesList = ({ initialCategories }) => {
+const CategoriesListClient = ({ initialCategories }) => {
   const categories = initialCategories;
 
 
@@ -55,7 +55,7 @@ const CategoriesList = ({ initialCategories }) => {
   );
 };
 
-export default CategoriesList;
+export default CategoriesListClient;
 
 // Mobile Category Card Component
 export const MobileCategoryCard = ({ category }) => {

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOff } from "lucide-react";
 import Link from "next/link";
 
-import { registerUser } from "@/app/actions/user/auth";
+import { registerUser } from "@/app/actions/user/user";
 import { useClientStore } from "@/store/clientStore";
 
 const UserCreateForm = () => {

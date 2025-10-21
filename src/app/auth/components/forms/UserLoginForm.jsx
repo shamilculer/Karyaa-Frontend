@@ -18,7 +18,7 @@ import { EyeIcon, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
-import { loginUser } from "@/app/actions/user/auth";
+import { loginUser } from "@/app/actions/user/user";
 import { useClientStore } from "@/store/clientStore";
 
 const loginSchema = z.object({

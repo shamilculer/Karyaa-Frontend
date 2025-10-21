@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import Hero from "./components/Hero";
-import PageSearchBar from "./components/common/PageSearchBar";
+import PageSearchBar from "./components/common/PageSearchBar/PageSearchBar";
+import CategoryList from "./components/common/CategoriesList/CategoriesList";
+
 import BlogPosts from "./components/common/BlogPosts";
 import { Button } from "@/components/ui/button";
 import Adbanner from "./components/Adbanner";
@@ -10,9 +12,8 @@ import Testimonials from "./components/Testimonials";
 import { Carousel } from "@/components/ui/carousel";
 import VendorsList, { VendorsCard } from "./components/common/VendorsList";
 
-import { vendors } from "@/utils";
-import CategoryFetcher from "./components/common/CategoryFetcher";
 import { initialBlogParams } from "@/utils";
+import VendorsCarousel from "./components/common/VendorsCarousel";
 
 
 export default function LandingPage() {
@@ -32,7 +33,7 @@ export default function LandingPage() {
             <div className="flex justify-between items-center mb-6 md:mb-8">
               <h2 className="uppercase">Popular Categories</h2>
             </div>
-            <CategoryFetcher />
+            <CategoryList />
           </div>
         </section>
 
@@ -48,7 +49,7 @@ export default function LandingPage() {
                 <Link href="/vendors">View All</Link>
               </Button>
             </div>
-            <VendorsList />
+            <VendorsCarousel  />
           </div>
         </section>
 
@@ -79,7 +80,9 @@ export default function LandingPage() {
                 streamlined way to plan any event. Karyaa helps local vendors
                 grow while making event planning simple, fast, and stress-free.
               </p>
-              <Button>Find Your Vendor</Button>
+              <Button asChild>
+                <Link href="/vendors">Find Your Vendor</Link>
+              </Button>
             </div>
           </div>
         </section>

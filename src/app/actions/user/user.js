@@ -4,6 +4,7 @@
 
 import { cookies } from "next/headers";
 import { apiFetch } from "@/lib/api";
+import { revalidatePath } from "next/cache";
 
 /**
  * Register a new user
@@ -119,19 +120,82 @@ export async function checkAuthStatus() {
             return { isAuthenticated: false, user: null };
         }
 
-        // apiFetch will:
-        // 1. Send request with accessToken
-        // 2. If 401, automatically try to refresh
-        // 3. Retry request with new token
-        // 4. If refresh fails, redirect to login
         const data = await apiFetch('/user/auth/session', {
             credentials: 'include',
         });
         
         return { isAuthenticated: true, user: data.user };
     } catch (error) {
-        // Only reaches here if both accessToken and refreshToken are invalid
         console.error('Auth check failed:', error);
         return { isAuthenticated: false, user: null };
     }
 }
+
+/**
+ * @desc Fetches the list of vendors saved by the currently authenticated user.
+ * @returns {Promise<{data: Array<Object>} | {error: string}>}
+ */
+export const getSavedVendors = async () => {
+    try {
+        const url = `/user/saved-vendors`; 
+        
+        const responseData = await apiFetch(url, {
+            credentials: "include"
+        }); 
+        
+        return {
+            data: responseData.data?.savedVendors || [],
+        };
+        
+    } catch (error) {
+        console.error("Server Action: Error fetching saved vendors:", error);
+
+        const errorMessage = error.message || "Could not retrieve your saved vendors list.";
+        
+        return {
+            error: errorMessage,
+            data: [],
+        };
+    }
+}
+
+
+/**
+ * @desc Toggles a vendor's ID in the current user's savedVendors list.
+ * @param {string} vendorId - The MongoDB ID of the vendor to save/unsave.
+ * @returns {Promise<{success: boolean, message: string, saved: boolean} | {error: string}>}
+ */
+export const toggleSavedVendor = async (vendorId) => {
+    if (!vendorId) {
+        return { error: "Vendor ID is required.", success: false };
+    }
+    
+    try {
+        const url = `/user/saved-vendors/toggle`; 
+        
+        const response = await apiFetch(url, {
+            method: 'PATCH', 
+            body: { vendorId },
+            credentials: "include"
+        });
+        
+        revalidatePath('/vendors'); 
+        
+        return {
+            success: true,
+            message: response.message,
+            saved: response.saved, 
+        };
+        
+    } catch (error) {
+        console.error("Server Action: Error toggling saved vendor:", error);
+        
+        const errorMessage = error.message || "Failed to update saved vendor list.";
+        
+        return {
+            error: errorMessage,
+            success: false,
+        };
+    }
+};
+// -----------------------------------------------------------------------------------

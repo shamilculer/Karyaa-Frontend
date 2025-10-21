@@ -23,8 +23,8 @@ const Footer = () => {
               <h2 className="text-[26px] sm:text-2xl !lg:text-5xl uppercase !text-white font-bold leading-tight">
                 List your services and get discovered
               </h2>
-              <Button className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
-                Join As a Vendor
+              <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
+                <Link href="/auth/vendor/register">Join As a Vendor</Link>
               </Button>
             </div>
           </div>
@@ -35,8 +35,8 @@ const Footer = () => {
               <h2 className="text-[26px] sm:text-2xl !lg:text-5xl uppercase !text-white font-bold leading-tight">
                 Find The Best Services For You
               </h2>
-              <Button className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
-                Find Your Perfect Service
+              <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
+                <Link href="/auth/user/register">Find Your Perfect Service</Link>
               </Button>
             </div>
           </div>

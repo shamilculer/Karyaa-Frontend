@@ -16,6 +16,16 @@ export const getCategories = async () => {
   }
 };
 
+export const getCategoryDetails = async (categorySlug) => {
+  try {
+    const response = await apiFetch(`/categories/${categorySlug}`);
+    return response.category;
+  } catch (error) {
+    console.error("Error fetching category details:", error);
+    return { success: false, message: error.message };
+  }
+};
+
 export const getSubcategories = async (searchParams = {}) => {
   try {
     const params = new URLSearchParams();
@@ -39,5 +49,15 @@ export const getSubcategories = async (searchParams = {}) => {
   } catch (error) {
     console.error("Error fetching subcategories:", error);
     throw error;
+  }
+};
+
+export const getSubcategoryDetails = async (subcategorySlug) => {
+  try {
+    const response = await apiFetch(`/subcategories/${subcategorySlug}`);
+    return response.subcategory;
+  } catch (error) {
+    console.error("Error fetching subcategory details:", error);
+    return { success: false, message: error.message };
   }
 };
