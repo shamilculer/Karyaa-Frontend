@@ -37,7 +37,6 @@ import {
 import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
 import { Heart, Menu } from "lucide-react";
 
-import { categoriesMenu } from "@/utils";
 import { checkAuthStatus } from "../../../actions/user/user";
 import { getCategories } from "@/app/actions/categories";
 
@@ -186,13 +185,11 @@ const Header = async () => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-48">
-                                    {/* <DropdownMenuItem asChild>
-                                        <Link href="/profile">Profile</Link>
-                                    </DropdownMenuItem> */}
+                                    {/* Removed placeholder /profile link */}
                                     <DropdownMenuItem asChild>
-                                        <Link href="/vendors/saved"><Heart className="h-4 w-4" />Saved Vendors</Link>
+                                        <Link href="/vendors/saved"><Heart className="h-4 w-4 mr-2" />Saved Vendors</Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuSeparator  />
+                                    <DropdownMenuSeparator />
                                     <LogoutAlertModal />
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -223,7 +220,7 @@ const Header = async () => {
                                 </SheetTitle>
                             </SheetHeader>
 
-                            <div className="p-6 pt-3">
+                            <div className="p-6 pt-3 w-full">
                                 <NavigationMenu className="w-full max-w-full justify-start" >
                                     <NavigationMenuList className="w-full flex flex-col items-start gap-6">
                                         <NavigationMenuItem>
@@ -235,44 +232,55 @@ const Header = async () => {
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
 
+                                        {/* 👇 UPDATED CATEGORIES ACCORDION 👇 */}
                                         <Accordion
                                             type="single"
                                             collapsible
                                             className="w-full"
                                         >
-                                            <AccordionItem value="item-1" className="w-full">
-                                                <AccordionTrigger className="w-full text-lg font-medium font-sans hover:underline hover:text-secondary cursor-pointer p-0">Categories</AccordionTrigger>
-                                                <AccordionContent className="w-full">
-                                                    {categoriesMenu.map((cat, index) => (
-                                                        <NavigationMenuItem key={index} className="w-full">
+                                            <AccordionItem value="item-1" className="w-full border-b-0">
+                                                <AccordionTrigger className="w-full text-base hover:underline hover:text-secondary cursor-pointer p-0 gap-10">
+                                                    <Link href="/categories" className="!no-underline text-lg !font-body font-semibold mt-1">
+                                                        Categories
+                                                    </Link>
+                                                </AccordionTrigger>
+                                                <AccordionContent className="w-full pl-4 space-y-2 mt-4">
+                                                    {categories.map((cat, index) => ( // Using fetched 'categories'
+                                                        <NavigationMenuItem key={index} className="w-full list-none">
                                                             <NavigationMenuLink
                                                                 asChild
-                                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                                                                className="text-base font-medium hover:underline hover:text-secondary cursor-pointer p-0"
                                                             >
-                                                                <Link href={`/categories/${cat.slug}`}>{cat.name}</Link>
+                                                                <Link href={`/categories/${cat.slug}`}>
+                                                                    {cat.name}
+                                                                </Link>
                                                             </NavigationMenuLink>
                                                         </NavigationMenuItem>
                                                     ))}
                                                 </AccordionContent>
                                             </AccordionItem>
                                         </Accordion>
+                                        {/* 👆 END UPDATED CATEGORIES ACCORDION 👆 */}
+                                        
+                                        <NavigationMenuItem>
+                                            <NavigationMenuLink
+                                                asChild
+                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                                            >
+                                                <Link href="/vendors">Vendors</Link>
+                                            </NavigationMenuLink>
+                                        </NavigationMenuItem>
+                                        
+                                        {/* You had /gallery here, but the desktop version has /ideas. Keeping /ideas for consistency. */}
+                                        <NavigationMenuItem>
+                                            <NavigationMenuLink
+                                                asChild
+                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                                            >
+                                                <Link href="/ideas">Ideas</Link> 
+                                            </NavigationMenuLink>
+                                        </NavigationMenuItem>
 
-                                        <NavigationMenuItem>
-                                            <NavigationMenuLink
-                                                asChild
-                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
-                                            >
-                                                <Link href="/gallery">Gallery</Link>
-                                            </NavigationMenuLink>
-                                        </NavigationMenuItem>
-                                        <NavigationMenuItem>
-                                            <NavigationMenuLink
-                                                asChild
-                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
-                                            >
-                                                <Link href="/ideas">Ideas</Link>
-                                            </NavigationMenuLink>
-                                        </NavigationMenuItem>
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
@@ -281,10 +289,11 @@ const Header = async () => {
                                                 <Link href="/blog">Blog</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
+
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
-                                                className="text-sm font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                                                className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
                                             >
                                                 <Link href="/contact">Contact</Link>
                                             </NavigationMenuLink>
@@ -293,23 +302,30 @@ const Header = async () => {
                                 </NavigationMenu>
                             </div>
 
-                            <SheetFooter>
-                                {isAuthenticated ? (
-                                    <div className="flex items-center gap-3">
-                                        <Image
-                                            src={user?.profileImage || "/default-avatar.png"}
-                                            alt="User"
-                                            width={32}
-                                            height={32}
-                                            className="rounded-full border"
-                                        />
-                                        <span className="text-sm font-semibold">{user?.name || "User"}</span>
-                                    </div>
-                                ) : (
-                                    <Button asChild className="max-md:py-2 max-md:px-3 !h-auto text-xs" >
-                                        <Link href="/auth/register">Login / SignUp</Link>
-                                    </Button>
-                                )}
+                            <SheetFooter className="absolute bottom-0 left-0 w-full p-6 border-t border-gray-200">
+                                <div className="w-full flex justify-between items-center">
+                                    {isAuthenticated ? (
+                                        <div className="flex items-center gap-3">
+                                            <Image
+                                                src={user?.profileImage || "/default-avatar.png"}
+                                                alt="User"
+                                                width={32}
+                                                height={32}
+                                                className="rounded-full border"
+                                            />
+                                            <span className="text-sm font-semibold">{user?.name || "User"}</span>
+                                        </div>
+                                    ) : (
+                                        // Moved the button logic outside the SheetFooter's default slot
+                                        <Button asChild className="max-md:py-2 max-md:px-3 !h-auto text-xs" >
+                                            <Link href="/auth/register">Login / SignUp</Link>
+                                        </Button>
+                                    )}
+                                    {/* Added a placeholder for the logout button if authenticated */}
+                                    {isAuthenticated && (
+                                        <LogoutAlertModal isMobile={true} />
+                                    )}
+                                </div>
                             </SheetFooter>
                         </SheetContent>
                     </Sheet>
@@ -334,8 +350,9 @@ const Header = async () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-40">
                                     <DropdownMenuItem asChild>
-                                       <Link href="/vendors/saved"><Heart className="h-4 w-4" />Saved Vendors</Link>
+                                       <Link href="/vendors/saved"><Heart className="h-4 w-4 mr-2" />Saved Vendors</Link>
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <LogoutAlertModal />
                                 </DropdownMenuContent>
                             </DropdownMenu>

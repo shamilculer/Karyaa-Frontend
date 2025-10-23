@@ -20,6 +20,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Search, ChevronDown, MoreVertical } from "lucide-react";
+import { getInitials } from "@/utils";
 
 
 const TICKET_DATA = [
@@ -33,9 +34,6 @@ const TICKET_DATA = [
     { id: 8, name: "Olivia", status: "Active", issue: "Floral Arrangements", date: "1 July, 2025", avatarUrl: "https://placehold.co/50x50/F2F4FF/4B68FF?text=OL" },
 ];
 
-const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-};
 
 const TicketTable = () => {
     const [currentPage, setCurrentPage] = React.useState(1);

@@ -9,10 +9,11 @@ import { toggleSavedVendor } from "@/app/actions/user/user";
 /**
  * Renders a clickable heart icon to toggle a vendor's saved/wishlist status.
  * Handles optimistic UI updates and server action calls with toast notifications.
- * * @param {string} vendorId - The MongoDB ID of the vendor to save/unsave.
+ * @param {string} vendorId - The MongoDB ID of the vendor to save/unsave.
  * @param {boolean} isInitialSaved - The initial saved status fetched from the server.
+ * @param {boolean} isVendorPage - Flag to indicate if the button is on the dedicated vendor page.
  */
-export default function VendorSaveButton({ vendorId, isInitialSaved }) {
+export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPage }) {
     
     // 1. State for the current saved status
     const [isSaved, setIsSaved] = useState(isInitialSaved);
@@ -59,15 +60,33 @@ export default function VendorSaveButton({ vendorId, isInitialSaved }) {
         });
     };
 
-    // Dynamic Class Names (Tailwind CSS)
-    const buttonClassName = `
-        w-8 h-8 p-2 rounded-full flex items-center justify-center 
-        absolute top-3 right-3 z-10 transition-colors duration-200
-        ${isSaved 
-            ? 'bg-red-600 text-white hover:bg-red-700' 
-            : 'bg-white text-primary hover:bg-primary/90 hover:text-white'
-        }
-    `;
+    // --- Dynamic Class Name Calculation ---
+    let buttonClassName = '';
+
+    if (isVendorPage) {
+        // Style for the main Vendor Page (as requested)
+        buttonClassName = `
+            size-10 p-3 rounded-full border border-gray-400 bg-transparent
+            flex items-center justify-center text-primary transition-colors
+            ${isSaved
+                ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700'
+                : 'hover:bg-red-700 hover:text-white hover:border-red-700'
+            }
+        `;
+    } else {
+        // Default Style for Card/List View
+        buttonClassName = `
+            w-8 h-8 p-2 bg-white text-primary rounded-full flex items-center justify-center 
+            absolute top-3 right-3 z-10 transition-colors duration-200
+            ${isSaved 
+                ? 'bg-red-600 text-white hover:bg-red-700' 
+                : 'hover:bg-red-700 hover:text-white hover:border-red-700'
+            }
+        `;
+    }
+    
+    // Determine the icon size based on the page
+    const iconSize = isVendorPage ? 20 : 18;
 
     return (
         <Button 
@@ -75,9 +94,11 @@ export default function VendorSaveButton({ vendorId, isInitialSaved }) {
             onClick={handleSaveToggle}
             disabled={isPending}
             aria-label={isSaved ? "Unsave Vendor" : "Save Vendor"}
+            // Set the button type to prevent form submission if it's placed inside a form
+            type="button" 
         >
             {/* Conditional fill for the Heart icon */}
-            <Heart fill={isSaved ? 'white' : 'currentColor'} size={18} />
+            <Heart fill={isSaved ? 'white' : 'none'} size={iconSize} />
         </Button>
     );
 }

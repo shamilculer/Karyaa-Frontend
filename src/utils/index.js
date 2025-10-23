@@ -465,3 +465,13 @@ export const initialBlogParams = {
   page: "1",
   limit: "3",
 };
+
+// Helper to get initials (to replace the hardcoded 'VNR')
+export function getInitials(name) {
+  return name
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 3); // Limit to 3 for the fallback
+}

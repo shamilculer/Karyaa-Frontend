@@ -1,13 +1,20 @@
 import { VendorsCard } from "./VendorsList";
 import { Carousel } from "@/components/ui/carousel";
 import { getActiveVendors } from "@/app/actions/vendors";
+import { checkAuthStatus } from "@/app/actions/user/user";
 
-const VendorsCarousel = async ({ filter = {} }) => {
+const VendorsCarousel = async ({ filter = {}, currentVendor, }) => {
 
     const resultVendors = await getActiveVendors(filter);
-    const vendors = resultVendors.data || [];
+    let vendors = resultVendors.data || []; // Use 'let' so we can reassign
 
-    const isAuthenticated = true;
+    const authStatus = await checkAuthStatus();
+    const isAuthenticated = authStatus.isAuthenticated;
+
+
+    if(currentVendor){
+        vendors = vendors.filter(vendor => vendor._id !== currentVendor);
+    }
 
     return (
         <Carousel

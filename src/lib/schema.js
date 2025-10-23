@@ -52,8 +52,8 @@ export const Step1Schema = z.object({
 
   password: z.string()
     .min(8, "Password must be at least 8 characters.")
-    .regex(strongPasswordRegex, { 
-      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number." 
+    .regex(strongPasswordRegex, {
+      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number."
     }),
 
   // Optional - will auto-generate if not provided
@@ -99,8 +99,8 @@ export const Step2Schema = z.object({
     z.number().int().min(0, "Experience must be a positive number.")
   ).default(0),
 })
-// ✅ Conditional Validation: Subcategories are required if main categories are selected
-.superRefine((data, ctx) => {
+  // ✅ Conditional Validation: Subcategories are required if main categories are selected
+  .superRefine((data, ctx) => {
     // If mainCategory is selected, subCategories cannot be empty.
     if (data.mainCategory.length > 0 && data.subCategories.length === 0) {
       ctx.addIssue({
@@ -112,7 +112,7 @@ export const Step2Schema = z.object({
     }
 
     return true;
-});
+  });
 
 // --- STEP 3: Business Profile & Location ---
 export const Step3Schema = z.object({
@@ -146,7 +146,7 @@ export const Step3Schema = z.object({
       .trim()
       .optional()
       .or(z.literal('')),
-      
+
     // Google Map Link
     googleMapLink: z.string()
       .url({ message: "Must be a valid Google Maps URL." })
@@ -212,7 +212,7 @@ export const Step3Schema = z.object({
       .url({ message: "Must be a valid URL." })
       .optional()
       .or(z.literal('')),
-      
+
     instagram: z.string()
       .url({ message: "Must be a valid URL." })
       .optional()
@@ -237,8 +237,30 @@ export const FinalVendorSchema = Step1Schema
   .strict();
 
 export const contactFormSchema = z.object({
-    fullname: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().optional(),
-    message: z.string().min(1, "Message is required"),
-  });
+  fullname: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  message: z.string().min(1, "Message is required"),
+});
+
+
+export const vendorFormSchema = z.object({
+  fullName: z.string().min(1, "Your full name is required"),
+
+  // Email is optional (allows empty string or valid email)
+  email: z.email("Invalid email address").optional().or(z.literal("")),
+
+  // NEW REQUIRED FIELD
+  location: z.string().min(1, "Event location is required"),
+
+  // Kept mandatory
+  eventDate: z.string().min(1, "Event date is required"),
+  numberOfGuests: z.string().min(1, "Number of guests is required"),
+  eventType: z.string().min(1, "Event type is required"),
+
+  // Message is optional
+  message: z.string().optional(),
+
+  // Phone number is mandatory based on your last provided schema
+  phoneNumber: z.string().min(1, "Phone number is required"),
+});  

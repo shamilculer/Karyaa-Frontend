@@ -15,6 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { getInitials } from '@/utils';
 
 
 // --- Sample Data ---
@@ -44,11 +45,7 @@ const ReviewDataTable = () => {
             case 'Rejected': return 'bg-red-100 text-red-700 hover:bg-red-200 border-red-300';
             default: return 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300';
         }
-    };
-
-    const getInitials = (name) => {
-        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    };
+    };;
 
     // --- Filtering and Searching Logic ---
     const reviewsAfterFilter = useMemo(() => {

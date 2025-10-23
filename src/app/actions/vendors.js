@@ -84,10 +84,11 @@ export const getSingleVendor = async (identifier) => {
     }
 }
 
+
+
 /**
- * @desc Fetches full details for a list of vendors based on their slugs from the API.
- * @param {string[]} slugs - Array of vendor slugs (e.g., ['vendor-a', 'vendor-b']).
- * @returns {Promise<{success: boolean, data: object[] | null, error: string | null}>}
+ * @desc Fetches full details for a list of vendors based on their slugs.
+ * Calls: GET /api/vendors/compare?slugs=...
  */
 export async function getVendorsBySlugs(slugs) {
     if (!slugs || slugs.length === 0) {
@@ -95,32 +96,41 @@ export async function getVendorsBySlugs(slugs) {
     }
     
     try {
-        // Assume your backend has an endpoint like /api/vendors/compare that accepts a list of slugs
-        const response = await apiFetch(`/vendor/compare?slugs=${slugs.join(',')}`);
+        const slugsParam = slugs.join(',');
+       
+        console.log('🔍 Fetching vendors with slugs:', slugsParam);
+        console.log('🔍 Full API URL:', `/vendor/compare?slugs=${slugsParam}`);
+        
+        const responseData = await apiFetch(`/vendor/compare?slugs=${slugsParam}`); 
 
-        console.log(response)
+        console.log('✅ API Response:', JSON.stringify(responseData, null, 2));
 
-        // Assuming response.data is the array of full vendor objects
-        return { success: true, data: response.data || [], error: null };
+        if (responseData.success) {
+            console.log('✅ Found vendors:', responseData.data?.length || 0);
+            return { success: true, data: responseData.data || [], error: null };
+        } else {
+            console.error('❌ API returned error:', responseData.message);
+            return { success: false, data: null, error: responseData.message || "Failed to load vendor comparison data." };
+        }
     } catch (error) {
-        console.error("Server Action: Error fetching vendors by slugs:", error);
-        return { success: false, data: null, error: error.message || "Failed to load vendor data for comparison." };
+        console.error("❌ Server Action: Error fetching vendors by slugs:", error);
+        return { success: false, data: null, error: error.message || "Failed to connect to API." };
     }
 }
 
 /**
  * @desc Fetches minimal data for all vendors to populate the Combobox dropdowns.
- * @returns {Promise<{success: boolean, data: {slug: string, businessName: string}[] | null, error: string | null}>}
  */
 export async function getAllVendorOptions() {
     try {
-        // Assume your backend has an endpoint like /api/vendors/options for minimal data
-        const response = await apiFetch(`/vendor/options`);
+        const responseData = await apiFetch(`/vendor/options`);
 
-        // Assuming the backend returns an array of { slug, businessName } objects
-        return { success: true, data: response.data || [], error: null };
+        if (responseData.success) {
+            return { success: true, data: responseData.data || [], error: null };
+        } else {
+            return { success: false, data: null, error: responseData.message || "Failed to load vendor options." };
+        }
     } catch (error) {
-        console.error("Server Action: Error fetching vendor options:", error);
-        return { success: false, data: null, error: error.message || "Failed to load vendor options." };
+        return { success: false, data: null, error: error.message || "Failed to connect to API." };
     }
 }

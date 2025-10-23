@@ -9,8 +9,6 @@ import BlogPosts from "./components/common/BlogPosts";
 import { Button } from "@/components/ui/button";
 import Adbanner from "./components/Adbanner";
 import Testimonials from "./components/Testimonials";
-import { Carousel } from "@/components/ui/carousel";
-import VendorsList, { VendorsCard } from "./components/common/VendorsList";
 
 import { initialBlogParams } from "@/utils";
 import VendorsCarousel from "./components/common/VendorsCarousel";

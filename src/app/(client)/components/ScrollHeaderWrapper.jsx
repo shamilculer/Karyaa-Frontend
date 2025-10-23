@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import VendorPopupHeader from "./VendorPopupHeader";
 
-const ScrollHeaderWrapper = ({ vendorName }) => {
+const ScrollHeaderWrapper = ({ vendorData, hasPackages }) => {
     const [showPopupHeader, setShowPopupHeader] = useState(false);
 
     useEffect(() => {
@@ -12,7 +12,7 @@ const ScrollHeaderWrapper = ({ vendorName }) => {
             if (vendorNav) {
                 const vendorNavTop = vendorNav.offsetTop;
                 const scrollTop = window.scrollY;
-                
+
                 // Show popup header when scrolled past the vendor nav
                 setShowPopupHeader(scrollTop > vendorNavTop);
             }
@@ -20,7 +20,7 @@ const ScrollHeaderWrapper = ({ vendorName }) => {
 
         // Add scroll event listener
         window.addEventListener('scroll', handleScroll);
-        
+
         // Cleanup
         return () => {
             window.removeEventListener('scroll', handleScroll);
@@ -28,8 +28,9 @@ const ScrollHeaderWrapper = ({ vendorName }) => {
     }, []);
 
     return (
-        <VendorPopupHeader 
-            vendorName={vendorName} 
+        <VendorPopupHeader
+            vendorData={vendorData}
+            hasPackages={hasPackages}
             showHeader={showPopupHeader}
         />
     );

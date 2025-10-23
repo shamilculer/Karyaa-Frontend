@@ -1,256 +1,373 @@
-"use client"
+// app/components/CompareTable.jsx
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useState, useMemo } from "react" // useEffect import removed
-import { Combobox } from "@/components/ui/combo-box" 
-import Image from "next/image"
-import { Carousel } from "@/components/ui/carousel"
-import { useRouter } from "next/navigation"
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+'use client';
 
-// Define a placeholder object for empty comparison slots
-const EMPTY_SLOT = { empty: true, businessName: "Select Vendor", slug: null };
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+// Import the Server Action for client-side fetching
+import { getVendorsBySlugs } from "@/app/actions/vendors";
+
+// Import shadcn/ui table components
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+
+// Import shadcn/ui Select components
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Carousel } from '@/components/ui/carousel';
+import Image from 'next/image';
+
+
+// --- CONSTANTS & HELPERS ---
 const MAX_COMPARISON_SLOTS = 3;
 
+const EMPTY_SLOT = {
+    _id: 'empty_id',
+    slug: 'empty',
+    businessName: 'Select Vendor',
+    businessLogo: null,
+    averageRating: null,
+    reviewCount: null,
+    pricingStartingFrom: null,
+    address: { city: null, country: null },
+    isSponsored: false,
+    mainCategory: null,
+    serviceAreaCoverage: null,
+    gallery: [],
+    tagline: null,
+};
+
+// Helper to create empty slots
+const createEmptySlot = (index) => ({
+    ...EMPTY_SLOT,
+    _id: `empty_${index}`
+});
+
+// --- Main Client Component ---
 const CompareTable = ({ initialVendors, vendorOptions }) => {
     const router = useRouter();
-    
-    // State to hold the vendors being compared (max 3 slots)
-    // FIX: State initialization is performed only once here, resolving the "Cannot update a component ('Router')" error.
+
+    // State initialization: Always maintain exactly 3 slots
     const [compareList, setCompareList] = useState(() => {
-        const list = initialVendors.slice(0, MAX_COMPARISON_SLOTS);
-        while (list.length < MAX_COMPARISON_SLOTS) {
-            list.push(EMPTY_SLOT);
+        const initialList = [];
+
+        // Add initial vendors (up to 3)
+        const validVendors = initialVendors.filter(v => v && v.slug);
+        for (let i = 0; i < MAX_COMPARISON_SLOTS; i++) {
+            if (i < validVendors.length) {
+                initialList.push(validVendors[i]);
+            } else {
+                initialList.push(createEmptySlot(i));
+            }
         }
-        return list;
+
+        return initialList;
     });
 
-    // The synchronization useEffect that caused stability issues has been removed.
+    // Track loading state for individual slots
+    const [loadingSlots, setLoadingSlots] = useState([false, false, false]);
 
-    // Base options list (all vendors)
-    const allComboboxOptions = useMemo(() => 
-        vendorOptions.map(v => ({ 
-            value: v.slug, 
-            label: v.businessName,
-        }))
-    , [vendorOptions]);
+    // Use useEffect to push the URL after the component has mounted/hydrated
+    useEffect(() => {
+        updateUrlWithSlugs(compareList);
+    }, []); // Run once on mount
 
-    // Helper to generate the new URL query string
-    const generateUrlQuery = (list) => {
-        const activeSlugs = list
-            .filter(v => !v.empty && v.slug)
+    // --- HANDLERS ---
+
+    const updateUrlWithSlugs = useCallback((list) => {
+        const slugsToKeep = list
+            .filter(v => v.slug !== 'empty')
             .map(v => v.slug)
             .join(',');
-            
-        return activeSlugs ? `?vendors=${activeSlugs}` : '';
-    };
 
-    // Function to update the URL based on the current list
-    const updateUrl = (updatedList) => {
-        const query = generateUrlQuery(updatedList);
-        router.replace(`/compare${query}`, { scroll: false });
-    };
+        if (slugsToKeep) {
+            router.push(`/compare?vendors=${slugsToKeep}`, { scroll: false });
+        } else {
+            router.push('/compare', { scroll: false });
+        }
+    }, [router]);
 
-    // Function to handle a selection from any Combobox
-    const handleVendorSelection = (newSlug, index) => {
-        if (!newSlug) return;
+    // Async handler for vendor selection
+    const handleVendorSelection = async (newVendorSlug, slotIndex) => {
 
-        // Fallback: If the selected vendor isn't in the full initial data, use the basic option data
-        const newVendor = initialVendors.find(v => v.slug === newSlug) || 
-                          vendorOptions.find(v => v.slug === newSlug); 
+        // Handle empty/deselect case
+        if (newVendorSlug === '' || newVendorSlug === 'empty') {
+            setCompareList(prevList => {
+                const newList = [...prevList];
+                newList[slotIndex] = createEmptySlot(slotIndex);
+                updateUrlWithSlugs(newList);
+                return newList;
+            });
+            return;
+        }
 
-        if (!newVendor) return; 
+        // Check for duplicates before fetching
+        const isDuplicate = compareList.some((v, idx) =>
+            v.slug === newVendorSlug && idx !== slotIndex && v.slug !== 'empty'
+        );
 
-        setCompareList(prevList => {
-            const newList = [...prevList];
-            
-            // Note: The combobox filtering below makes this check mostly redundant, but kept as a safeguard.
-            const isAlreadyAdded = newList.some((v, i) => i !== index && v.slug === newSlug);
-            if (isAlreadyAdded) {
-                return prevList; 
+        if (isDuplicate) {
+            alert('This vendor is already selected in another slot.');
+            return;
+        }
+
+        // Set loading state for this specific slot
+        setLoadingSlots(prev => {
+            const newLoading = [...prev];
+            newLoading[slotIndex] = true;
+            return newLoading;
+        });
+
+        try {
+            // Fetch the full data for the selected vendor
+            const fetchResult = await getVendorsBySlugs([newVendorSlug]);
+
+            if (fetchResult.success && fetchResult.data && fetchResult.data.length > 0) {
+                // Successfully fetched vendor data
+                const newVendor = fetchResult.data[0];
+
+                setCompareList(prevList => {
+                    const newList = [...prevList];
+                    newList[slotIndex] = newVendor;
+                    updateUrlWithSlugs(newList);
+                    return newList;
+                });
+            } else {
+                // Fetch failed - show error and reset to empty
+                alert(fetchResult.error || 'Failed to load vendor data');
+
+                setCompareList(prevList => {
+                    const newList = [...prevList];
+                    newList[slotIndex] = createEmptySlot(slotIndex);
+                    return newList;
+                });
             }
+        } catch (error) {
+            console.error('Error fetching vendor:', error);
+            alert('An error occurred while loading vendor data');
 
-            // Replace the item at the specific index
-            newList[index] = newVendor;
-            
-            updateUrl(newList);
-            return newList;
-        });
-    };
-    
-    // Function to handle removing a vendor
-    const handleRemoveVendor = (index) => {
-        setCompareList(prevList => {
-            const newList = [...prevList];
-            // Replace the vendor with an empty slot
-            newList[index] = EMPTY_SLOT;
-            
-            // Reorder the list so empty slots are always at the end
-            const reorderedList = newList.filter(v => !v.empty).concat(newList.filter(v => v.empty));
-            
-            updateUrl(reorderedList);
-            return reorderedList;
-        });
+            setCompareList(prevList => {
+                const newList = [...prevList];
+                newList[slotIndex] = createEmptySlot(slotIndex);
+                return newList;
+            });
+        } finally {
+            // Always clear loading state
+            setLoadingSlots(prev => {
+                const newLoading = [...prev];
+                newLoading[slotIndex] = false;
+                return newLoading;
+            });
+        }
     };
 
-    // Helper to render the table cells for comparison attributes
-    const renderComparisonRow = (attributeKey, label, formatter = (val) => val) => (
-        <TableRow key={attributeKey}>
-            <TableHead className="w-[30%] font-semibold text-gray-900 border border-gray-400 p-4">{label}</TableHead>
-            {compareList.map((vendor, index) => (
-                <TableCell key={index} className="text-center border border-gray-400 p-4">
-                    {vendor.empty ? (
-                        <span className="text-muted-foreground">—</span>
-                    ) : (
-                        // Check for the special case of mainCategory (populated with objects)
-                        attributeKey === 'mainCategory' && Array.isArray(vendor.mainCategory) ? 
-                            // Display the name of the first category
-                            formatter(vendor.mainCategory[0]?.name)
-                        :
-                        // Handle nested properties like address.city
-                        attributeKey.includes('.') ? 
-                            formatter(vendor[attributeKey.split('.')[0]]?.[attributeKey.split('.')[1]])
-                            : formatter(vendor[attributeKey])
-                    )}
-                </TableCell>
-            ))}
-        </TableRow>
-    );
-
+    // --- RENDER ---
     return (
-        <div className="w-full">
-            <div className="overflow-x-auto">
-                <Table className="min-w-[1000px] border-collapse border border-gray-400">
-                    {/* TABLE HEADER (Vendor Selection) */}
-                    <TableHeader>
-                        <TableRow className="h-20 bg-gray-50">
-                            <TableHead className="w-[30%] font-bold text-xl text-gray-900 border border-gray-400 p-8">
-                                Comparison Metrics
-                            </TableHead>
-                            {/* Map over the comparison list to render the 3 slots */}
-                            {compareList.map((vendor, index) => {
-                                // FEATURE 2: Filter options dynamically
-                                // Get slugs of all vendors currently in OTHER slots
-                                const otherVendorSlugs = compareList
-                                    .filter((v, i) => i !== index && !v.empty)
-                                    .map(v => v.slug);
+        <div className="comparison-table-wrapper overflow-x-auto border rounded-lg">
+            <Table className="min-w-[700px] table-fixed">
+                <TableHeader className="bg-gray-50">
+                    <TableRow className="hover:bg-gray-50/90">
+                        {/* Metrics Column: Fixed width */}
+                        <TableHead className="font-bold w-[180px] text-left text-base bg-gray-100">
+                            Comparison Metrics
+                        </TableHead>
+                        {compareList.map((vendor, index) => (
+                            <TableHead key={`header-${index}`} className="w-auto text-center border-l bg-gray-100">
 
-                                // Filter all available options
-                                const filteredOptions = allComboboxOptions.filter(option => 
-                                    // 1. Always include the vendor currently selected in this slot
-                                    option.value === vendor.slug || 
-                                    // 2. Exclude any vendor already selected in other slots
-                                    !otherVendorSlugs.includes(option.value)
-                                );
-                                // END FILTERING LOGIC
+                                {/* Select component */}
+                                <Select
+                                    value={vendor.slug !== 'empty' ? vendor.slug : undefined}
+                                    onValueChange={(newVendorSlug) => handleVendorSelection(newVendorSlug, index)}
+                                    disabled={loadingSlots[index]}
+                                >
+                                    <SelectTrigger
+                                        className={`w-full text-sm ${loadingSlots[index]
+                                            ? 'opacity-50 cursor-wait bg-gray-100'
+                                            : 'cursor-pointer hover:border-gray-400'
+                                            }`}
+                                    >
+                                        <SelectValue
+                                            placeholder={
+                                                loadingSlots[index]
+                                                    ? 'Loading...'
+                                                    : vendor.businessName
+                                            }
+                                        />
+                                    </SelectTrigger>
 
-                                return (
-                                <TableHead key={index} className="text-center relative border border-gray-400 p-4">
-                                    <div className="flex flex-col items-center gap-2">
-                                        
-                                        {/* Remove Button */}
-                                        {!vendor.empty && (
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="absolute top-2 right-2 h-6 w-6 text-gray-500 hover:text-red-500"
-                                                onClick={() => handleRemoveVendor(index)}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
+                                    <SelectContent>
+                                        {/* Option to deselect/clear the slot. Value is 'empty' */}
+                                        {vendor.slug !== 'empty' && (
+                                            <SelectItem value="empty" className="text-red-500">
+                                                Deselect Vendor
+                                            </SelectItem>
                                         )}
 
-                                        {/* Combobox for Selection */}
-                                        <Combobox
-                                            data={filteredOptions} // <-- Pass the dynamically filtered list
-                                            value={vendor.empty ? "" : vendor.slug} 
-                                            onValueChange={(newSlug) => handleVendorSelection(newSlug, index)}
-                                            placeholder={vendor.empty ? "Select Vendor" : vendor.businessName}
-                                            searchPlaceholder="Search vendors..."
-                                            emptyMessage="Vendor not found."
-                                            className="w-full max-w-[280px]"
-                                        />
-                                    </div>
-                                </TableHead>
-                            )})}
-                        </TableRow>
-                    </TableHeader>
-
-                    {/* TABLE BODY (Comparison Data) */}
-                    <TableBody>
-                        {/* Row 1: Vendor Image/Carousel */}
-                        <TableRow>
-                            <TableHead className="w-[30%] font-bold text-gray-900 border border-gray-400 p-8">
-                                Gallery/Cover Images
+                                        {/* Map through all vendor options */}
+                                        {vendorOptions
+                                            .filter(option => {
+                                                // Filter out vendors already selected in *other* slots
+                                                const isAlreadySelected = compareList.some((v, idx) =>
+                                                    v.slug === option.slug && idx !== index && v.slug !== 'empty'
+                                                );
+                                                return !isAlreadySelected;
+                                            })
+                                            .map(option => (
+                                                <SelectItem key={option.slug} value={option.slug}>
+                                                    {option.businessName}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
                             </TableHead>
-                            {compareList.map((vendor, index) => (
-                                <TableCell key={index} className="border border-gray-400">
-                                    {vendor.empty ? (
-                                        <div className="flex-center w-full h-48 text-muted-foreground p-5">
-                                            No Vendor Selected
-                                        </div>
-                                    ) : (
-                                        <div className="flex-center w-full p-5 h-48">
-                                            <Carousel
-                                                spaceBetween={0}
-                                                loop
-                                                slidesPerView={1}
-                                                navigationInside
-                                                withPagination={false}
-                                                navigationStyles="size-7 p-0 opacity-50"
-                                                className="w-full h-full max-w-[300px]"
-                                            >
-                                                {/* Check for vendor.gallery and ensure it's an array */}
-                                                {Array.isArray(vendor.gallery) && vendor.gallery.slice(0, 3).map((img, idx) => (
-                                                    <Image
-                                                        key={idx}
-                                                        height={240}
-                                                        width={300}
-                                                        // Ensure the image object has a 'url' property
-                                                        src={img.url}
-                                                        alt={`${vendor.businessName} cover ${idx + 1}`}
-                                                        className="w-full h-full object-cover rounded-xl"
-                                                    />
-                                                ))}
-                                            </Carousel>
-                                        </div>
-                                    )}
-                                </TableCell>
-                            ))}
-                        </TableRow>
+                        ))}
+                    </TableRow>
+                </TableHeader>
 
-                        {/* Row 2: Business Name (Link) */}
-                        <TableRow>
-                            <TableHead className="w-[30%] font-bold text-gray-900 border border-gray-400 p-4 bg-gray-50">Business Name</TableHead>
-                            {compareList.map((vendor, index) => (
-                                <TableCell key={index} className="text-center border border-gray-400 p-4 bg-gray-50">
-                                    {vendor.empty ? (
-                                        <span className="text-muted-foreground">—</span>
-                                    ) : (
-                                        <Link href={`/vendors/${vendor.slug}`} className="text-primary font-semibold hover:underline">
-                                            {vendor.businessName}
-                                        </Link>
-                                    )}
-                                </TableCell>
-                            ))}
-                        </TableRow>
+                <TableBody>
+                    {/* Row 1: Gallery/Cover Images */}
+                    <TableRow className="h-40">
+                        <TableCell className="font-medium p-4 bg-gray-50 align-top w-[180px]">Gallery/Cover Images</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`gallery-${index}`} className="p-4 border-l text-center align-top w-auto">
+                                {loadingSlots[index] ? (
+                                    <div className="w-full h-32 bg-gray-200 animate-pulse rounded"></div>
+                                ) : vendor.slug !== 'empty' && vendor.gallery && vendor.gallery[0]?.url ? (
+                                    <Carousel
+                                        slidesPerView={1}
+                                        withNavigation={true}
+                                        navigationInside={true}
+                                    >
+                                        {vendor.gallery.map(img => (
 
-                        {/* Comparison Rows */}
-                        {renderComparisonRow('averageRating', 'Average Rating (out of 5)')}
-                        {renderComparisonRow('pricingStartingFrom', 'Starting Price', (price) => price ? `AED ${price}` : 'N/A')}
-                        {renderComparisonRow('address.city', 'City')}
-                        {renderComparisonRow('isSponsored', 'Featured Status', (isSponsored) => isSponsored ? 'Yes' : 'No')}
-                        {renderComparisonRow('mainCategory', 'Main Category')}
-                        {renderComparisonRow('serviceAreaCoverage', 'Service Coverage')}
-                        {renderComparisonRow('tagline', 'Tagline')} 
+                                            <Image
+                                                width={300}
+                                                height={300}
+                                                src={img.url}
+                                                alt={`Cover for ${vendor.businessName}`}
+                                                className="w-full h-72 object-cover rounded mx-auto"
+                                            />
 
-                    </TableBody>
-                </Table>
-            </div>
+                                        ))}
+                                    </Carousel>
+                                    // <img
+                                    //     src={vendor.gallery[0].url}
+                                    //     alt={`Cover for ${vendor.businessName}`}
+                                    //     className="w-full h-72 object-cover rounded mx-auto"
+                                    // />
+                                ) : (
+                                    <span className="text-sm text-gray-400">No Vendor Selected</span>
+                                )}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 2: Average Rating (out of 5) */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Average Rating (out of 5)</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`rating-${index}`} className="p-4 border-l text-center w-auto">
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
+                                ) : vendor.averageRating && vendor.slug !== 'empty' ? (
+                                    <span className="font-semibold text-amber-600">
+                                        {vendor.averageRating.toFixed(1)} / 5.0
+                                    </span>
+                                ) : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 3: Starting Price */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Starting Price</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`price-${index}`} className="p-4 border-l text-center w-auto">
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
+                                ) : vendor.pricingStartingFrom && vendor.slug !== 'empty' ? (
+                                    <span className="font-semibold text-green-700">
+                                        AED {vendor.pricingStartingFrom.toLocaleString()}
+                                    </span>
+                                ) : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 4: City */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">City</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`city-${index}`} className="p-4 border-l text-center w-auto">
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-16 mx-auto"></div>
+                                ) : vendor.address?.city && vendor.slug !== 'empty' ? vendor.address.city : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 5: Featured Status */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Featured Status</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`featured-${index}`} className="p-4 border-l text-center w-auto">
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
+                                ) : vendor.slug !== 'empty' ? (
+                                    vendor.isSponsored === true ? 'Karyaa Recommended' : 'Standard'
+                                ) : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 6: Main Category */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Main Category</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell
+                                key={`category-${index}`}
+                                // Added break-words to ensure multiple categories wrap correctly
+                                className="p-4 border-l text-center w-auto break-words"
+                            >
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
+                                ) : vendor.slug !== 'empty' && Array.isArray(vendor.mainCategory) && vendor.mainCategory.length > 0 ? (
+                                    // Maps over the array, extracts the name, and joins them with ", "
+                                    vendor.mainCategory.map(category => category.name).join(', ')
+                                ) : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {/* Row 7: Service Coverage */}
+                    <TableRow>
+                        <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Service Coverage</TableCell>
+                        {compareList.map((vendor, index) => (
+                            <TableCell key={`coverage-${index}`} className="p-4 border-l text-center w-auto overflow-hidden">
+                                {loadingSlots[index] ? (
+                                    <div className="h-6 bg-gray-200 animate-pulse rounded w-32 mx-auto"></div>
+                                ) : vendor.serviceAreaCoverage && vendor.slug !== 'empty'
+                                    ? vendor.serviceAreaCoverage
+                                    : '—'}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                </TableBody>
+            </Table>
         </div>
-    )
-}
+    );
+};
 
-export default CompareTable
+export default CompareTable;

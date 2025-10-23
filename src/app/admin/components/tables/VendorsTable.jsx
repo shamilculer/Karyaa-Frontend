@@ -45,16 +45,9 @@ import {
     Tag,
 } from "lucide-react"
 
-export const description = "Vendors Management Table with HoverCard and Avatars"
+import { getInitials } from "@/utils"
 
-// --- Helper function to get initials from a name
-const getInitials = (name) => {
-    return name
-        .split(" ")
-        .map((part) => part[0])
-        .join("")
-        .toUpperCase();
-};
+export const description = "Vendors Management Table with HoverCard and Avatars"
 
 // --- Vendor Sample Data with contact image URLs
 const sampleData = [

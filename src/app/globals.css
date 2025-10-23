@@ -145,8 +145,8 @@ section {
   --color-text: #232536;
   --color-body: #FFFEF9;
 
-  --font-body: var(--font-lato);
-  --font-heading: var(--font-sen);
+  --font-body: var(--font-body);
+  --font-heading: var(--font-heading);
   --font-script: var(--font-great-vibes);
 
   --width-container: 1400px;
