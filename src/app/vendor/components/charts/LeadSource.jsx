@@ -111,8 +111,8 @@ function LeadSource() {
     }, [currentChartData])
 
     return (
-        <Card className="flex flex-col h-full w-full bg-white border border-gray-200 shadow-none rounded-md">
-            <CardHeader className="flex flex-row items-start justify-between pb-0">
+        <Card className="flex flex-col h-full w-full bg-white border border-gray-200 shadow-none rounded-md max-lg:!py-4">
+            <CardHeader className="flex flex-row items-start justify-between pb-0 max-lg:!px-3">
                 <div>
                     <CardTitle className="uppercase text-[#2F4A9D] font-medium tracking-widest text-base">
                         Lead Sources
@@ -211,10 +211,10 @@ function LeadSource() {
                     return (
                         <div key={item.source} className="flex items-center gap-2">
                             <span
-                                className="w-3 h-3 rounded-full"
+                                className="w-3 h-3 rounded-full max-lg:!text-sm"
                                 style={{ backgroundColor: `${item.fill}` }}
                             />
-                            <span>
+                            <span className="max-lg:!text-sm">
                                 {item.source}: **{percentage}%** ({item.leads})
                             </span>
                         </div>

@@ -3,12 +3,11 @@ import PageSearchBar from "../../components/common/PageSearchBar/PageSearchBar";
 import Image from "next/image";
 import { getCategoryDetails } from "@/app/actions/categories";
 import VendorsList from "../../components/common/VendorsList";
+import CategoryList from "../../components/common/CategoriesList/CategoriesList";
 
 const CategoryPage = async ({ params, searchParams }) => {
   const { category } = await params;
   const filters = await searchParams || {};
-
-  console.log(filters)
 
   const categoryData = await getCategoryDetails(category);
   return (
@@ -27,10 +26,14 @@ const CategoryPage = async ({ params, searchParams }) => {
       </section>
 
       <section className="container">
+        <PageSearchBar />
+      </section>
+
+      <section className="container">
         <div className="relative space-y-8">
           <div className="flex items-center">
             <h2 className="max-md:!text-[26px] font-semibold uppercase">
-              Popular Sub-Categories In {categoryData.name}
+              Popular Sub-Categories
             </h2>
           </div>
           <div>
@@ -42,18 +45,14 @@ const CategoryPage = async ({ params, searchParams }) => {
       </section>
 
       <section className="container">
-        <PageSearchBar />
-      </section>
-
-      <section className="container">
         <div className="relative">
           <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
             <h2 className=" font-semibold uppercase">
-              Featured Partners In {category}
+              KARYAA Recommends
             </h2>
           </div>
 
-            <VendorsList showControls={true} filters={{ mainCategory: category, ...filters }} />
+          <VendorsList showControls={true} filters={{ mainCategory: category, ...filters }} />
 
         </div>
       </section>

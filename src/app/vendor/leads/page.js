@@ -4,9 +4,7 @@ import LeadsTable from '../components/tables/LeadsTable'
 
 const LeadsPage = () => {
   return (
-    <div className="h-full dashboard-container space-y-8">
-        <OverViewStats />
-        
+    <div className="h-full dashboard-container space-y-8">        
         <div className='mb-16'>
             <LeadsTable />
         </div>

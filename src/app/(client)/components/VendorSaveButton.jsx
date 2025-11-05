@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button"; // Assuming your button component
 import { toast } from "sonner"; // Assuming Sonner is configured and available
 import { toggleSavedVendor } from "@/app/actions/user/user";
+import { useClientStore } from "@/store/clientStore";
 
 /**
  * Renders a clickable heart icon to toggle a vendor's saved/wishlist status.
@@ -14,6 +15,8 @@ import { toggleSavedVendor } from "@/app/actions/user/user";
  * @param {boolean} isVendorPage - Flag to indicate if the button is on the dedicated vendor page.
  */
 export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPage }) {
+
+    const { isAuthenticated } = useClientStore();
     
     // 1. State for the current saved status
     const [isSaved, setIsSaved] = useState(isInitialSaved);
@@ -22,6 +25,15 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
     const [isPending, startTransition] = useTransition();
 
     const handleSaveToggle = () => {
+
+        // FIX: Redirect unauthenticated users immediately on the client
+        if (!isAuthenticated) {
+            toast.info("Please log in to save items to your wishlist.", { duration: 3000 });
+            // Use window.location.assign for full page redirect
+            window.location.assign('/auth/login'); 
+            return;
+        }
+
         // Prevent multiple rapid clicks
         if (isPending) return;
 
@@ -42,13 +54,16 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
             try {
                 const result = await toggleSavedVendor(vendorId);
 
+                // No need to check for result.redirectTo here, as the client check handles it.
+                // However, we still handle potential errors or unexpected redirect signals 
+                // that might be returned if the Server Action failed for auth reasons after all.
+                
                 if (result.error || !result.success) {
                     // Revert the state if the request fails
                     setIsSaved(previousSavedState); 
                     toast.error(result.error || "Failed to update saved status.", { id: loadingToastId });
                 } else {
                     // Success: Update state based on the backend's final status
-                    // This handles cases where the optimistic state might be wrong
                     setIsSaved(result.saved);
                     toast.success(result.message, { id: loadingToastId });
                 }
@@ -88,13 +103,16 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
     // Determine the icon size based on the page
     const iconSize = isVendorPage ? 20 : 18;
 
+    // Use isSaved to determine the fill color. If !isAuthenticated, the fill is red 
+    // only if it was initially saved (to match server state), but the click redirects.
+
     return (
         <Button 
             className={buttonClassName} 
             onClick={handleSaveToggle}
-            disabled={isPending}
+            // Disable button only during pending server transition, not for unauthenticated status
+            disabled={isPending} 
             aria-label={isSaved ? "Unsave Vendor" : "Save Vendor"}
-            // Set the button type to prevent form submission if it's placed inside a form
             type="button" 
         >
             {/* Conditional fill for the Heart icon */}

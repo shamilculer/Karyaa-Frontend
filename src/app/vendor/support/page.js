@@ -1,4 +1,5 @@
-import OverViewStats from "../components/common/OverViewStats"
+
+
 import {
     Accordion,
     AccordionItem,
@@ -7,14 +8,14 @@ import {
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import RaiseTicketModal from "../components/RaiseTicketModal";
 
 
 const SUpportPage = () => {
-    return (
-        <div className="h-full dashboard-container space-y-8">
-            <OverViewStats />
 
-            <div className='w-full bg-white flex flex-col gap-6 p-10 border border-gray-200'>
+    return (
+        <div className="dashboard-container space-y-8 mb-12">
+            <div className='w-full bg-white flex flex-col gap-6 p-5 lg:p-10 border border-gray-200'>
                 <h3 className="pb-5 border-b border-b-gray-300">Frequently Asked Questions</h3>
 
                 <div className="w-full">
@@ -58,25 +59,30 @@ const SUpportPage = () => {
                 </div>
             </div>
 
-            <div className='w-full bg-white flex flex-col gap-6 p-10 border border-gray-200'>
+            <div className='w-full bg-white flex flex-col gap-6 p-5 lg:p-10 border border-gray-200'>
                 <h3 className="pb-5 border-b border-b-gray-300">Support</h3>
                 <div className="space-y-10">
                     <div className="w-full">
-                        <div className="flex-between gap-8">
+                        <div className="flex-between max-lg:flex-col max-lg:!items-start gap-8">
                             <div>
                                 <h3 className="!font-normal">Customer Care</h3>
                                 <p className="!text-sm text-gray-400">Lorem ipsum dolor sit amet, consect adipiscing elit, sed do sit amet.</p>
                             </div>
 
                             <div className="flex-center gap-5">
-                                <Button >Raise a Ticket</Button>
-                                <Button >Contact Us</Button>
+                                {/* 👈 This opens the Shadcn Modal */}
+                                <RaiseTicketModal /> 
+                                
+                                {/* 👈 This triggers the separate handler (e.g., live chat) */}
+                                <Button asChild >
+                                    <Link href="/contact" target="_blank" >Contact Us</Link>
+                                </Button>
                             </div>
                         </div>
                     </div>
 
                     <div className="w-full">
-                        <div className="flex-between gap-8">
+                        <div className="flex-between max-lg:flex-col max-lg:!items-start gap-8">
                             <div>
                                 <h3 className="!font-normal">Privacy Ploicy</h3>
                                 <p className="!text-sm text-gray-400">Lorem ipsum dolor sit amet, consect adipiscing elit, sed do sit amet.</p>
@@ -89,7 +95,7 @@ const SUpportPage = () => {
                     </div>
 
                     <div className="w-full">
-                        <div className="flex-between gap-8">
+                        <div className="flex-between max-lg:flex-col max-lg:!items-start gap-8">
                             <div>
                                 <h3 className="!font-normal">Terms and Conditions</h3>
                                 <p className="!text-sm text-gray-400">Lorem ipsum dolor sit amet, consect adipiscing elit, sed do sit amet.</p>

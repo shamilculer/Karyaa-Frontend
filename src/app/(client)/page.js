@@ -47,7 +47,7 @@ export default function LandingPage() {
                 <Link href="/vendors">View All</Link>
               </Button>
             </div>
-            <VendorsCarousel  />
+            <VendorsCarousel filter={{isRecommended: true}} />
           </div>
         </section>
 

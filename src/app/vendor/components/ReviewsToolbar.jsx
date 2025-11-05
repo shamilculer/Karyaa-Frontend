@@ -12,19 +12,19 @@ import {
 
 const ReviewsToolbar = ({ searchTerm, onSearchChange, filterRating, onFilterChange }) => {
     return (
-        <div className="flex-between gap-4 w-full">
-            <div className="w-1/2 relative">
-                <Search className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400 !w-7" />
+        <div className="flex-between max-md:flex-col max-md:!items-end gap-4 w-full">
+            <div className="w-full md:w-1/2 relative">
+                <Search className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400 w-4 h-4 md:w-7 md:h-7" />
                 <Input
                     id="search"
                     placeholder="Search reviews by name or content"
-                    className="border border-gray-300 bg-white rounded-lg placeholder:text-primary/50 placeholder:font-medium placeholder:text-base h-12 pl-10 !py-0 !text-base"
+                    className="border border-gray-300 bg-white rounded-lg placeholder:text-primary/50 placeholder:font-medium placeholder:text-base md:h-12 pl-10 !py-0 !text-base"
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
                 />
             </div>
             <Select value={filterRating} onValueChange={onFilterChange}>
-                <SelectTrigger className="w-[180px] bg-[#F2F4FF] rounded-4xl border-0 !h-12 px-4">
+                <SelectTrigger className="w-[180px] bg-[#F2F4FF] rounded-4xl border-0 md:!h-12 px-4">
                     <SelectValue placeholder="Filter by Rating" />
                 </SelectTrigger>
                 <SelectContent>

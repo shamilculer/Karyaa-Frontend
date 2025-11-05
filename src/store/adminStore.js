@@ -4,15 +4,15 @@ import { persist } from "zustand/middleware";
 export const useAdminStore = create(
   persist(
     (set) => ({
-      user: null,             // logged-in admin user
-      isAuthenticated: false, // true if user is logged in
+      admin: null,            // logged-in admin user
+      isAuthenticated: false,  // true if admin is logged in
 
       // --- actions ---
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      setAdmin: (admin) => set({ admin, isAuthenticated: !!admin }),
+      logout: () => set({ admin: null, isAuthenticated: false }),
     }),
     {
-      name: "admin-store",
+      name: "admin-store", // key in localStorage
     }
   )
 );

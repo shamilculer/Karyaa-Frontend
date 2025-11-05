@@ -1,200 +1,216 @@
-// src/app/vendor/reviews/page.js
+'use client';
 
-'use client'; // This must remain at the very top for client-side functionality
-
-import { useState, useMemo, Suspense } from 'react' // Import Suspense
-import { useSearchParams, useRouter } from 'next/navigation';
-import OverViewStats from '../components/common/OverViewStats'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation';
 import { Progress } from '@/components/ui/progress'
 import {
     Avatar,
     AvatarFallback,
     AvatarImage
 } from '@/components/ui/avatar'
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
 import { Button } from '@/components/ui/button';
 import ReviewsToolbar from '../components/ReviewsToolbar';
-import { vendors } from '@/utils'
-import { Trash } from 'lucide-react';
-
-// Mock data for reviews (your data remains here)
-const reviews = [
-    // ... your reviews array ...
-    {
-        id: 1,
-        author: 'Ananya Sharma',
-        date: '11 MAR 2025',
-        rating: 5,
-        content: 'Elegant Event Decor completely transformed our wedding venue into a fairytale setting. From the floral arrangements to the lighting, every detail was handled with such creativity and care. The team was professional, attentive, and made the entire process stress-free. Our guests were blown away by how beautiful everything looked!',
-        avatar: vendors[3].image,
-        fallback: 'AS'
-    },
-    {
-        id: 2,
-        author: 'Yusuf Rahman',
-        date: '11 MAR 2025',
-        rating: 5,
-        content: 'We hired Elegant Event Decor for our company’s annual gala, and they delivered beyond expectations. The décor perfectly reflected our brand while still creating a warm and elegant atmosphere. Their team was punctual, organized, and extremely easy to work with. Truly a five-star experience.',
-        avatar: vendors[3].image,
-        fallback: 'YR'
-    },
-    // ... rest of your reviews ...
-    {
-        id: 3,
-        author: 'Fatima Ahmed',
-        date: '05 MAR 2025',
-        rating: 4,
-        content: 'Good service overall, but communication could be a bit faster. The final setup was beautiful and met our expectations for the birthday party.',
-        avatar: vendors[3].image,
-        fallback: 'FA'
-    },
-    {
-        id: 4,
-        author: 'David Chen',
-        date: '28 FEB 2025',
-        rating: 5,
-        content: 'Outstanding professionalism and stunning creativity. They made my event truly special. Highly recommend!',
-        avatar: vendors[3].image,
-        fallback: 'DC'
-    },
-    {
-        id: 5,
-        author: 'Sara Khan',
-        date: '20 FEB 2025',
-        rating: 3,
-        content: 'The decor was nice, but some details were overlooked. It was a good experience, but not perfect.',
-        avatar: vendors[3].image,
-        fallback: 'SK'
-    },
-    {
-        id: 6,
-        author: 'Omar Al-Mansoori',
-        date: '15 JAN 2025',
-        rating: 5,
-        content: 'Absolutely fantastic! Every single detail was perfect. The team is very talented and professional.',
-        avatar: vendors[3].image,
-        fallback: 'OA'
-    }
-]
+import { Star, Trash } from 'lucide-react';
+import { useVendorStore } from '@/store/vendorStore';
+import { getReviewStats } from '@/app/actions/vendor/reviews';
+import { getAllVendorReviews } from '@/app/actions/reviews';
+import { flagReviewForRemoval } from '@/app/actions/vendor/reviews';
+import { GlobalPagination } from '@/components/common/GlobalPagination';
+import { toast } from "sonner";
 
 
-// **Step 1: Rename the default export component**
-const ReviewsManagePageContent = () => {
-    // This component remains the Client Component
+export default function ReviewsManagePage() {
+    return (
+        <Suspense
+            fallback={<div className="text-center py-20 text-lg text-gray-500">Loading reviews...</div>}
+        >
+            <ReviewsManagePageContent />
+        </Suspense>
+    );
+}
+
+function ReviewsManagePageContent() {
+
+    const { vendor } = useVendorStore();
+    const vendorId = vendor?.id;
 
     const searchParams = useSearchParams();
-    const router = useRouter();
-    // ... rest of your hooks and logic ...
-    
+
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRating, setFilterRating] = useState('all');
 
-    // Get the current page from the URL search parameters, defaulting to 1
+    // ✅ Reviews state
+    const [reviews, setReviews] = useState([]);
+    const [loadingReviews, setLoadingReviews] = useState(true);
+
+    // ✅ Pagination state
+    const [pagination, setPagination] = useState({
+        totalPages: 1,
+        currentPage: 1,
+        totalReviews: 0,
+    });
+
+    // ✅ Stats state
+    const [stats, setStats] = useState(null);
+    const [loadingStats, setLoadingStats] = useState(true);
+
+    // ✅ Error
+    const [error, setError] = useState(null);
+
+    // ✅ Loading flag state
+    const [flaggingId, setFlaggingId] = useState(null);
+
     const currentPage = Number(searchParams.get('page')) || 1;
-    const reviewsPerPage = 2;
+    const limit = 6;
 
-    // Filter reviews based on search term and rating filter
-    const filteredReviews = useMemo(() => {
-        return reviews.filter(review => {
-            const matchesSearch = review.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                review.author.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesRating = filterRating === 'all' || review.rating === Number(filterRating);
-            return matchesSearch && matchesRating;
-        });
-    }, [searchTerm, filterRating]);
+    // Fetch Stats
+    useEffect(() => {
+        if (!vendorId) return;
 
-    // Calculate pagination values
-    const indexOfLastReview = currentPage * reviewsPerPage;
-    const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
-    const currentReviews = filteredReviews.slice(indexOfFirstReview, indexOfLastReview);
+        async function fetchStats() {
+            try {
+                setLoadingStats(true);
+                const data = await getReviewStats(vendorId);
+                setStats(data);
+            } catch {
+                setError("Failed to load review statistics.");
+            } finally {
+                setLoadingStats(false);
+            }
+        }
 
-    const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+        fetchStats();
+    }, [vendorId]);
 
-    // Function to handle page change and update the URL
-    const handlePageChange = (page) => {
-        if (page < 1 || page > totalPages) return;
-        // Use searchParams.toString() to safely get current parameters
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('page', page);
-        router.push(`?${params.toString()}`);
-    };
+    // Fetch Reviews
+    useEffect(() => {
+        if (!vendorId) return;
+
+        async function fetchReviews() {
+            try {
+                setLoadingReviews(true);
+                const data = await getAllVendorReviews(
+                    vendorId,
+                    currentPage,
+                    limit,
+                    filterRating,
+                    searchTerm,
+                );
+
+                setReviews(data.reviews || []);
+                setPagination({
+                    totalPages: data.totalPages,
+                    currentPage: data.page,
+                    totalReviews: data.totalReviews,
+                });
+
+            } catch {
+                setError("Something went wrong fetching reviews.");
+            } finally {
+                setLoadingReviews(false);
+            }
+        }
+
+        fetchReviews();
+    }, [vendorId, currentPage, filterRating, searchTerm]);
+
+
+    async function handleFlag(reviewId) {
+        try {
+            setFlaggingId(reviewId);
+    
+            const res = await flagReviewForRemoval(reviewId);
+    
+            if (res.error) {
+                toast.error(res.error || "Failed to flag review.");
+                return;
+            }
+    
+            toast.success("Review flagged successfully!");
+    
+            // reflect UI instantly
+            setReviews(prev =>
+                prev.map(r => r._id === reviewId
+                    ? { ...r, flaggedForRemoval: true, status: "Pending" }
+                    : r
+                )
+            );
+    
+        } catch (error) {
+            toast.error("Something went wrong!");
+            console.error(error);
+        } finally {
+            setFlaggingId(null);
+        }
+    }
+
 
     const renderStars = (rating) => {
         const stars = [];
         for (let i = 0; i < 5; i++) {
             stars.push(
-                <svg
+                <Star
                     key={i}
-                    className={`w-5 h-5 me-1 ${i < rating ? 'text-yellow-300' : 'text-gray-300'}`}
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 22 20"
-                >
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
+                    className={`w-4 h-4 ${i < rating ? 'text-yellow-300 fill-yellow-300' : 'text-gray-300'}`}
+                />
             );
         }
         return stars;
     };
 
     return (
-        <div className="h-full dashboard-container space-y-8">
-            <OverViewStats />
+        <div className="dashboard-container space-y-8 mb-14">
+            {/* Error Banner */}
+            {error && (
+                <div className="bg-red-100 text-red-700 border border-red-300 p-3 rounded-md">
+                    {error}
+                </div>
+            )}
 
-            <div className='w-full flex gap-14 my-10'>
-                {/* Review summary section */}
-                <div className="w-1/5 flex-center flex-col gap-3">
-                    <div className="text-7xl font-heading text-[#121217] font-medium">
-                        4.6<span className="text-2xl">/5</span>
-                    </div>
-
-                    <div className="flex items-center">
-                        {renderStars(4.6)}
-                    </div>
-                    <div>{reviews.length} Reviews</div>
+            {/* Summary */}
+            <div className='w-full flex max-lg:flex-col max-lg:items-center gap-14 my-10'>
+                <div className="w-full lg:w-1/5 flex-center flex-col gap-3">
+                    {loadingStats ? (
+                        <div className="text-lg text-gray-500">Loading stats...</div>
+                    ) :  (
+                        <>
+                            <div className="text-5xl font-heading font-medium">
+                                {stats.averageRating?.toFixed(1)}
+                                <span className="text-2xl">/5</span>
+                            </div>
+                            <div className="flex items-center">
+                                {renderStars(Math.round(stats.averageRating))}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                                {stats.totalReviews} Approved Reviews
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                {/* Progress bars section */}
-                <div className="w-4/5 ">
-                    <div className="w-[500px] space-y-3">
-                        <div className="w-full flex items-center gap-3">
-                            <span className="text-sm">5</span>
-                            <Progress value={80} />
-                            <span className="text-xs font-medium text-gray-500">42%</span>
-                        </div>
-                        <div className="w-full flex items-center gap-3">
-                            <span className="text-sm">4</span>
-                            <Progress value={20} />
-                            <span className="text-xs font-medium text-gray-500">20%</span>
-                        </div>
-                        <div className="w-full flex items-center gap-3">
-                            <span className="text-sm">3</span>
-                            <Progress value={10} />
-                            <span className="text-xs font-medium text-gray-500">10%</span>
-                        </div>
-                        <div className="w-full flex items-center gap-3">
-                            <span className="text-sm">2</span>
-                            <Progress value={5} />
-                            <span className="text-xs font-medium text-gray-500">5%</span>
-                        </div>
-                        <div className="w-full flex items-center gap-3">
-                            <span className="text-sm">1</span>
-                            <Progress value={5} />
-                            <span className="text-xs font-medium text-gray-500">5%</span>
-                        </div>
+                {/* Breakdown */}
+                <div className="w-full lg:w-4/5">
+                    <div className="max-w-md space-y-3">
+                        {[5, 4, 3, 2, 1].map((star) => {
+                            const count = stats?.ratingBreakdown?.[star] || 0;
+                            const percentage = stats?.totalReviews
+                                ? Math.round((count / stats.totalReviews) * 100)
+                                : 0;
+
+                            return (
+                                <div key={star} className="flex items-center gap-3">
+                                    <div className="flex items-center">
+                                        {star} <Star className="text-yellow-300 fill-yellow-300 w-3 h-3 ml-1" />
+                                    </div>
+                                    <Progress value={percentage} className="h-2 flex-1 bg-gray-200" />
+                                    <span className="text-sm font-medium text-gray-700">{count}</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* Use the new toolbar component */}
             <ReviewsToolbar
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
@@ -202,93 +218,81 @@ const ReviewsManagePageContent = () => {
                 onFilterChange={setFilterRating}
             />
 
-            {/* Render reviews from the current page */}
+            {/* Review Listing */}
             <div className="mt-8 mb-16">
-                <div className="w-full grid grid-cols-2 gap-7">
-                    {currentReviews.length > 0 ? (
-                        currentReviews.map(review => (
-                            <div key={review.id} className="border border-gray-300 rounded-lg p-8">
-                                <div className='w-full flex-between border-b border-gray-300'>
-                                    <div className="w-full flex items-center gap-5 pb-5 ">
-                                        <Avatar className="size-16 rounded-full">
-                                            <AvatarImage className="object-cover size-full" src={review.avatar} />
-                                            <AvatarFallback className="bg-blue-200">{review.fallback}</AvatarFallback>
+                {loadingReviews ? (
+                    <div className="text-gray-500 text-center">Loading reviews...</div>
+                ) : reviews.length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+                        {reviews.map(review => (
+                            <div key={review._id} className="border border-gray-300 rounded-lg p-4 md:p-8">
+                                <div className='w-full flex-between max-md:flex-col max-md:!items-start border-b gap-5 border-gray-300 pb-5'>
+                                    <div className="flex items-center  gap-5">
+                                        <Avatar className="size-12 md:size-16 rounded-full">
+                                            <AvatarImage src={review.user?.profileImage} />
+                                            <AvatarFallback>{review.user?.username?.slice(0, 2)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <h5 className="text-lg !font-medium">{review.author}</h5>
-                                            <span className="text-sm text-gray-500 px-2">{review.date}</span>
+                                            <h5 className="text-base md:text-lg font-medium">{review.user?.username}</h5>
+                                            <span className="!text-xs md:!text-sm text-gray-500">
+                                                {new Date(review.createdAt).toDateString()}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <Button variant="ghost" className="!font-semibold text-red-500"><Trash className='w-4'/> Request To Remove</Button>
+                                    <div className="flex items-center max-md:justify-end gap-3">
+                                        {/* Status */}
+                                        <span
+                                            className={`text-xs px-2 py-1 rounded-full capitalize
+                                                ${review.status === "Approved" ? "bg-green-100 text-green-700" : ""}
+                                                ${review.status === "Pending" ? "bg-yellow-100 text-yellow-700" : ""}
+                                                ${review.status === "Rejected" ? "bg-red-100 text-red-700" : ""}
+                                            `}
+                                        >
+                                            {review.status}
+                                        </span>
+
+                                        {/* Flag UI */}
+                                        {review.flaggedForRemoval ? (
+                                            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                                Flagged for Removal
+                                            </span>
+                                        ) : (
+                                            <Button
+                                                size="icon"
+                                                variant="destructive"
+                                                disabled={flaggingId === review._id}
+                                                onClick={() => handleFlag(review._id)}
+                                            >
+                                                <Trash className="w-4" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="py-5">
+
+                                <div className="pt-5">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex items-center">
-                                            {renderStars(review.rating)}
-                                        </div>
+                                        {renderStars(review.rating)}
                                         <span className="font-semibold">{review.rating}/5</span>
                                     </div>
-                                    <p className="mt-4 !text-sm">{review.content}</p>
+
+                                    <p className="mt-4 text-sm text-gray-700">{review.comment}</p>
                                 </div>
                             </div>
-                        ))
-                    ) : (
-                        <div className="text-center text-gray-500 col-span-2">
-                            No reviews match your search or filter criteria.
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-gray-500">No reviews match your search or filter.</div>
+                )}
             </div>
 
-            {/* Pagination controls with shadcn/ui */}
-            <Pagination className="mt-4">
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious
-                            href="#"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                        />
-                    </PaginationItem>
-                    {Array.from({ length: totalPages }, (_, index) => (
-                        <PaginationItem key={index}>
-                            <PaginationLink
-                                href="#"
-                                isActive={currentPage === index + 1}
-                                onClick={() => handlePageChange(index + 1)}
-                            >
-                                {index + 1}
-                            </PaginationLink>
-                        </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                        <PaginationNext
-                            href="#"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                        />
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
+            <GlobalPagination
+                totalPages={pagination.totalPages}
+                currentPage={pagination.currentPage}
+                pageQueryKey="page"
+            />
         </div>
-    );
-};
-
-
-// **Step 2: Create a Server Component Wrapper to Export**
-// This function runs first on the server.
-export default function ReviewsManagePage() {
-    return (
-        // 🚨 Wrap the Client Component with Suspense
-        <Suspense fallback={<div className="text-center py-20 text-lg text-gray-500">Loading reviews...</div>}>
-            <ReviewsManagePageContent />
-        </Suspense>
     );
 }
 
-// **Step 3: Export the Client Component as a named export if needed elsewhere**
-// (Optional, but can be useful)
 export { ReviewsManagePageContent };

@@ -1,10 +1,10 @@
-// src/app/(client)/actions/auth.js
-
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { revalidatePath } from "next/cache";
+import { decodeJWT } from "@/utils/decodeJWT";
 
 /**
  * Register a new user
@@ -12,37 +12,41 @@ import { revalidatePath } from "next/cache";
  */
 export async function registerUser(data) {
     try {
-        // Use apiFetch without credentials (public endpoint)
+        // Public endpoint - no auth required
         const response = await apiFetch('/user/auth/create', {
             method: 'POST',
-            body: data,
+            body: data, // Auto-stringified by apiFetch
         });
 
         const { user, accessToken, refreshToken } = response;
 
-        // Set httpOnly cookies in Next.js
+        // Set httpOnly cookies
         const cookieStore = await cookies();
-        
-        cookieStore.set('accessToken', accessToken, {
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        cookieStore.set('accessToken_user', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isProduction,
             sameSite: 'lax',
             maxAge: 15 * 60, // 15 minutes
             path: '/',
         });
 
-        cookieStore.set('refreshToken', refreshToken, {
+        cookieStore.set('refreshToken_user', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isProduction,
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
         });
 
-        return user;
-    } catch (err) {
-        console.error('Registration failed:', err.message);
-        throw err;
+        return { success: true, user };
+    } catch (error) {
+        console.error('Registration failed:', error.message);
+        return {
+            success: false,
+            error: error.message || 'Registration failed'
+        };
     }
 }
 
@@ -50,81 +54,86 @@ export async function registerUser(data) {
  * Login user
  * Validates credentials with Express, receives tokens, sets httpOnly cookies
  */
-export const loginUser = async (data) => {
+export async function loginUser(data) {
     try {
-        // Use apiFetch without credentials (public endpoint)
+        // Public endpoint - no auth required
         const response = await apiFetch('/user/auth/login', {
             method: 'POST',
-            body: data,
+            body: data, // Auto-stringified by apiFetch
         });
 
         const { user, accessToken, refreshToken } = response;
 
-        // Set httpOnly cookies in Next.js
+        // Set httpOnly cookies
         const cookieStore = await cookies();
-        
-        cookieStore.set('accessToken', accessToken, {
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        cookieStore.set('accessToken_user', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isProduction,
             sameSite: 'lax',
-            maxAge: 60 * 60, // 1 hour
+            maxAge: 15 * 60, // 15 minutes (match your token expiry)
             path: '/',
         });
 
-        cookieStore.set('refreshToken', refreshToken, {
+        cookieStore.set('refreshToken_user', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isProduction,
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
         });
 
-        return user;
-    } catch (err) {
-        console.error('Login failed:', err.message);
-        throw err;
+        return { success: true, user };
+    } catch (error) {
+        console.error('Login failed:', error.message);
+        return {
+            success: false,
+            error: error.message || 'Login failed'
+        };
     }
-};
+}
 
 /**
  * Logout user
- * Clears httpOnly cookies from Next.js
+ * Clears httpOnly cookies and redirects to login
  */
-export const logoutUser = async () => {
-    try {
-        const cookieStore = await cookies();
-        
-        // Clear auth-related cookies
-        cookieStore.delete('accessToken');
-        cookieStore.delete('refreshToken');
+export async function logoutUser() {
+    const cookieStore = await cookies();
 
-        return { success: true, message: 'Logged out successfully' };
-    } catch (error) {
-        console.error("Logout Failed:", error.message);
-        throw error;
-    }
-};
+    // Clear auth-related cookies
+    cookieStore.delete('accessToken_user');
+    cookieStore.delete('refreshToken_user');
+
+    // Redirect to login page
+    redirect('/auth/login');
+}
 
 /**
- * Check authentication status
- * apiFetch automatically handles token refresh if accessToken expired
+ * Check authentication status (FAST - no backend call)
+ * Decodes JWT locally instead of making expensive API calls
  */
-export async function checkAuthStatus() {
+export async function checkAuthStatus(role = 'user') {
     try {
         const cookieStore = await cookies();
-        const accessToken = cookieStore.get('accessToken')?.value;
-        const refreshToken = cookieStore.get('refreshToken')?.value;
+        const accessToken = cookieStore.get(`accessToken_${role}`)?.value;
+        const refreshToken = cookieStore.get(`refreshToken_${role}`)?.value;
 
-        // If no tokens at all, user is not authenticated
         if (!accessToken && !refreshToken) {
             return { isAuthenticated: false, user: null };
         }
 
-        const data = await apiFetch('/user/auth/session', {
-            credentials: 'include',
-        });
-        
-        return { isAuthenticated: true, user: data.user };
+        // Decode JWT to get user info (no backend call!)
+        const user = decodeJWT(accessToken || refreshToken);
+
+        if (!user) {
+            return { isAuthenticated: false, user: null };
+        }
+
+        return {
+            isAuthenticated: true,
+            user
+        };
     } catch (error) {
         console.error('Auth check failed:', error);
         return { isAuthenticated: false, user: null };
@@ -132,70 +141,67 @@ export async function checkAuthStatus() {
 }
 
 /**
- * @desc Fetches the list of vendors saved by the currently authenticated user.
- * @returns {Promise<{data: Array<Object>} | {error: string}>}
+ * Fetch the list of vendors saved by the authenticated user
+ * @returns {Promise<{success: boolean, data?: Array, error?: string}>}
  */
-export const getSavedVendors = async () => {
+export async function getSavedVendors() {
     try {
-        const url = `/user/saved-vendors`; 
-        
-        const responseData = await apiFetch(url, {
-            credentials: "include"
-        }); 
-        
+        const responseData = await apiFetch('/user/saved-vendors', {
+            auth: true,
+            role: 'user',
+        });
+
         return {
+            success: true,
             data: responseData.data?.savedVendors || [],
         };
-        
     } catch (error) {
-        console.error("Server Action: Error fetching saved vendors:", error);
+        console.error("Error fetching saved vendors:", error);
 
-        const errorMessage = error.message || "Could not retrieve your saved vendors list.";
-        
         return {
-            error: errorMessage,
+            success: false,
+            error: error.message || "Could not retrieve your saved vendors list.",
             data: [],
         };
     }
 }
 
-
 /**
- * @desc Toggles a vendor's ID in the current user's savedVendors list.
- * @param {string} vendorId - The MongoDB ID of the vendor to save/unsave.
- * @returns {Promise<{success: boolean, message: string, saved: boolean} | {error: string}>}
+ * Toggle a vendor in the user's saved list
+ * @param {string} vendorId - The MongoDB ID of the vendor
+ * @returns {Promise<{success: boolean, message?: string, saved?: boolean, error?: string}>}
  */
-export const toggleSavedVendor = async (vendorId) => {
+export async function toggleSavedVendor(vendorId) {
     if (!vendorId) {
-        return { error: "Vendor ID is required.", success: false };
+        return {
+            success: false,
+            error: "Vendor ID is required."
+        };
     }
-    
+
     try {
-        const url = `/user/saved-vendors/toggle`; 
-        
-        const response = await apiFetch(url, {
-            method: 'PATCH', 
-            body: { vendorId },
-            credentials: "include"
+        const response = await apiFetch('/user/saved-vendors/toggle', {
+            method: 'PATCH',
+            body: { vendorId }, // Auto-stringified by apiFetch
+            auth: true,
+            role: 'user',
         });
-        
-        revalidatePath('/vendors'); 
-        
+
+        // Revalidate relevant pages
+        revalidatePath('/vendors');
+        revalidatePath('/saved-vendors');
+
         return {
             success: true,
             message: response.message,
-            saved: response.saved, 
+            saved: response.saved,
         };
-        
     } catch (error) {
-        console.error("Server Action: Error toggling saved vendor:", error);
-        
-        const errorMessage = error.message || "Failed to update saved vendor list.";
-        
+        console.error("Error toggling saved vendor:", error);
+
         return {
-            error: errorMessage,
             success: false,
+            error: error.message || "Failed to update saved vendor list.",
         };
     }
-};
-// -----------------------------------------------------------------------------------
+}

@@ -95,8 +95,8 @@ function EnquiryOverTime() {
 
 
     return (
-        <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md">
-            <CardHeader className="flex flex-row items-start justify-between">
+        <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md max-lg:!py-4">
+            <CardHeader className="flex flex-row items-start justify-between max-lg:!px-3">
                 <div>
                     <CardTitle className="uppercase text-[#2F4A9D] font-medium tracking-widest text-base">
                         Enquiries Over Time
@@ -199,12 +199,12 @@ function EnquiryOverTime() {
                 </ChartContainer>
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex items-center gap-2 font-medium leading-none">
+                <div className="flex items-center gap-2 font-medium leading-none max-lg:!text-xs">
                     {/* Display the trend calculation */}
                     {isPositiveTrend ? "Up" : "Down"} by {percentageChange}% this period 
                     <TrendingUp className={`h-4 w-4 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`} />
                 </div>
-                <div className="leading-none text-muted-foreground">
+                <div className="leading-none text-muted-foreground max-lg:!text-xs">
                     Total inquiries received in the {timeframeLabel}: {totalEnquiries.toLocaleString()}
                 </div>
             </CardFooter>

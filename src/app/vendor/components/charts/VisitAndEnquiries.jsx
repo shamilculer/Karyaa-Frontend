@@ -60,10 +60,10 @@ function VisitAndEnquiries() {
         : "No data available"
 
     return (
-        <Card className="w-full h-full bg-white border border-gray-200 shadow-none rounded-md">
-            <CardHeader className="flex flex-row items-start justify-between">
+        <Card className="w-full h-full bg-white border border-gray-200 shadow-none rounded-md max-lg:!py-4">
+            <CardHeader className="flex flex-row items-start justify-between max-lg:!px-3">
                 <div>
-                    <CardTitle className="uppercase text-sidebar-foreground font-normal tracking-widest">
+                    <CardTitle className="uppercase text-sidebar-foreground font-normal tracking-widest max-lg:!text-base">
                         Profile Visits vs Enquiries
                     </CardTitle>
                     <CardDescription className="text-xs">
@@ -101,7 +101,7 @@ function VisitAndEnquiries() {
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex gap-6 text-sm">
+            <CardFooter className="flex max-lg:flex-col max-lg:items-start gap-3 lg:gap-6 text-sm">
                 {/* Legends */}
                 <div className="flex items-center gap-2">
                     <span

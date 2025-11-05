@@ -326,7 +326,7 @@ export default function LeadsTable({ controls = true }) {
                             </DropdownMenu>
                         )}
                     </div>
-                    <div className="relative w-2/5">
+                    <div className="relative w-3/4 md:w-1/2 lg:w-2/5">
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4" />
                         <Input
                             placeholder="Search by client name, event type, or location..."

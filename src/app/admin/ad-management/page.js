@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Added Table components and DropdownMenu for actions
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { IconCircleFilled } from "@tabler/icons-react";
 import { FileEdit, ShieldMinus, Trash, Search, Plus, MoreVertical, Ban, Check, Users } from "lucide-react";
 
@@ -19,12 +17,6 @@ const vendorAds = [
     { id: 3, img: "/ads/ad-banner-3.webp", alt: "Photography ad" },
 ];
 
-const featuredVendors = [
-    { id: 'v001', name: 'Luxury Decor Dubai', category: 'Decor', status: 'Active', slot: 'Homepage', addedDate: '2025-08-15' },
-    { id: 'v002', name: 'Catering Elite', category: 'Catering', status: 'Active', slot: 'Sidebar', addedDate: '2025-09-01' },
-    { id: 'v003', name: 'Bridal Makeup by Sara', category: 'Beauty', status: 'Expired', slot: 'Homepage', addedDate: '2024-12-10' },
-    { id: 'v004', name: 'A-List Photographers', category: 'Media', status: 'Active', slot: 'Homepage', addedDate: '2025-07-20' },
-];
 
 // --- Component ---
 const AdManagementPage = () => {
@@ -133,100 +125,6 @@ const AdManagementPage = () => {
                 </div>
             </div>
 
-
-            {/* Karyaa Recommends Management Section (NEW) */}
-            <div className="p-7 bg-white border border-gray-200 space-y-5 mb-12">
-                
-                {/* Header and Controls */}
-                <div className="flex justify-between items-center flex-wrap">
-                    <span className="uppercase text-sidebar-foreground tracking-widest text-lg font-semibold" >Karyaa Recommends (Featured Vendors)</span>
-                    
-                    {/* Add Vendor Combobox and Bulk Actions */}
-                    <div className="flex items-center gap-3">
-                        
-                        {/* Add Vendor Combobox (Placeholder for Select) */}
-                        <div className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-gray-500" />
-                            <Select>
-                                <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Add Vendor to Recommends..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {/* These items would be dynamically loaded from unfeatured vendors */}
-                                    <SelectItem value="vendorA">Vendor A - Decor</SelectItem>
-                                    <SelectItem value="vendorB">Vendor B - Catering</SelectItem>
-                                    <SelectItem value="vendorC">Vendor C - Photography</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button className="h-full bg-green-600 hover:bg-green-700">
-                                <Plus className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        
-                        {/* Bulk Actions Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="text-gray-600">
-                                    Bulk Actions
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem><Ban className="w-4 h-4 mr-2" /> Remove Selected</DropdownMenuItem>
-                                <DropdownMenuItem><ShieldMinus className="w-4 h-4 mr-2" /> Deactivate Selected</DropdownMenuItem>
-                                <DropdownMenuItem><Check className="w-4 h-4 mr-2" /> Reactivate Selected</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
-
-                {/* Featured Vendor Table */}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[50px]"><Checkbox /></TableHead>
-                            <TableHead className="w-[100px]">Vendor ID</TableHead>
-                            <TableHead>Vendor Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Added Date</TableHead>
-                            <TableHead className="text-center">Status</TableHead>
-                            <TableHead className="w-[50px] text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {featuredVendors.map((vendor) => (
-                            <TableRow key={vendor.id}>
-                                <TableCell><Checkbox /></TableCell>
-                                <TableCell className="font-medium text-gray-500">{vendor.id}</TableCell>
-                                <TableCell className="font-semibold">{vendor.name}</TableCell>
-                                <TableCell><Badge variant="outline">{vendor.category}</Badge></TableCell>
-                                <TableCell className="text-sm text-gray-500">{vendor.addedDate}</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge 
-                                        className={`rounded-full ${vendor.status === 'Active' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}
-                                        variant="default"
-                                    >
-                                        {vendor.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem><FileEdit className="w-4 h-4 mr-2" /> Edit/View Profile</DropdownMenuItem>
-                                            <DropdownMenuItem><ShieldMinus className="w-4 h-4 mr-2" /> Deactivate Listing</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-red-600"><Trash className="w-4 h-4 mr-2" /> Remove from Recommends</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
         </div>
     )
 }

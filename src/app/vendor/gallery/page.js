@@ -1,118 +1,207 @@
-"use client"
+// GalleryPage.jsx
+"use client";
 
-import * as React from 'react'
-import Image from 'next/image'
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { IconGripVertical } from '@tabler/icons-react'
-import OverViewStats from '../components/common/OverViewStats'
-import GalleryToolBar from '../components/GalleryToolbar'
+import * as React from "react";
+import Image from "next/image";
+import GalleryToolBar from "../components/GalleryToolbar";
+import { useVendorStore } from "@/store/vendorStore";
+import { getVendorGalleryItems, deleteVendorGalleryItems } from "@/app/actions/gallery";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox"; // ✅ <-- SHADCN CHECKBOX
 
 
-// Initial image data with order key
-const initialImages = [
-  { id: '1', order: 1, src: "/why-us.jpg" },
-  { id: '2', order: 2, src: "/banner-2.jpg" },
-  { id: '3', order: 3, src: "/blog-2.webp" },
-  { id: '4', order: 4, src: "/banner-1.avif" },
-  { id: '5', order: 5, src: "/new-banner-1.jpg" },
-]
+// 🔥 Skeleton loader for suspense fallback
+function GallerySkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Skeleton key={i} className="h-72 w-full rounded-2xl" />
+      ))}
+    </div>
+  );
+}
 
-// Draggable component for each image
-function DraggableImage({ item }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id })
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : 0,
-    opacity: isDragging ? 0.8 : 1,
+// =============================
+//      Gallery Grid
+// =============================
+function GalleryContent({ vendorId, refreshKey, bulkMode, selected, setSelected }) {
+  const [gallery, setGallery] = React.useState([]);
+  const [error, setError] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // ✅ Fetch gallery
+  React.useEffect(() => {
+    if (!vendorId) return;
+
+    let isMounted = true;
+
+    async function fetchGallery() {
+      setIsLoading(true);
+      const data = await getVendorGalleryItems(vendorId);
+
+      if (!isMounted) return;
+      if (data.error) {
+        setError(data.error);
+        toast.error(data.error);
+      } else {
+        setGallery(data.items);
+      }
+      setIsLoading(false);
+    }
+
+    fetchGallery();
+    return () => (isMounted = false);
+  }, [vendorId, refreshKey]);
+
+  // ✅ Toggle selection
+  const toggleSelect = (id) => {
+    if (selected.includes(id)) {
+      setSelected(selected.filter((x) => x !== id));
+    } else {
+      setSelected([...selected, id]);
+    }
+  };
+
+  if (isLoading) return <GallerySkeleton />;
+
+  if (error)
+    return (
+      <div className="text-center text-red-600 py-20 text-lg">
+        Failed to load gallery: {error}
+      </div>
+    );
+
+  if (gallery.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-500 text-lg">No gallery items yet.</p>
+        <p className="text-gray-400 text-sm mt-1">Upload something to get started!</p>
+      </div>
+    );
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="relative rounded-2xl border border-gray-300 overflow-hidden group"
-    >
-      <div
-        className="absolute top-2 left-2 p-1 bg-white rounded-full shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-        {...attributes}
-        {...listeners}
-      >
-        <IconGripVertical className="size-4 text-gray-600 cursor-grab active:cursor-grabbing" />
-      </div>
-      <Image
-        src={item.src}
-        className="h-72 w-full object-cover"
-        width={300}
-        height={300}
-        alt="Gallery Image"
-      />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {gallery.map((item) => {
+        const isSelected = selected.includes(item._id);
+
+        return (
+          <div
+            key={item._id}
+            onClick={() => bulkMode && toggleSelect(item._id)} // ✅ whole image clickable
+            className={`relative rounded-lg overflow-hidden cursor-pointer group transition-all
+                ${bulkMode ? "hover:scale-[1.01]" : ""}
+            `}
+          >
+            {/* ✅ Checkbox visible in bulk mode */}
+            {bulkMode && (
+              <div
+                className="absolute size-7 flex-center top-2 left-2 z-20 bg-white rounded-md shadow p-1"
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent double-toggle
+                  toggleSelect(item._id);
+                }}
+              >
+                <Checkbox checked={isSelected} readOnly className="border-gray-400" />
+              </div>
+            )}
+
+            {/* ✅ White overlay when selected */}
+            {bulkMode && isSelected && (
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10" />
+            )}
+
+            <Image
+              src={item.url}
+              alt="Gallery Image"
+              width={300}
+              height={300}
+              className="h-72 w-full object-cover rounded-lg transition-all"
+            />
+          </div>
+        );
+      })}
     </div>
-  )
+  );
 }
 
-const GalleryPage = () => {
-  const [galleryImages, setGalleryImages] = React.useState(initialImages)
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor),
-  )
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event
+// =============================
+//          PAGE ROOT
+// =============================
+export default function GalleryPage() {
+  const { vendor } = useVendorStore();
+  const vendorId = vendor?.id;
 
-    if (active.id !== over.id) {
-      setGalleryImages((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id)
-        const newIndex = items.findIndex((item) => item.id === over.id)
-        return arrayMove(items, oldIndex, newIndex)
-      })
-    }
+  // ✅ Selection state
+  const [selected, setSelected] = React.useState([]);
+  const [bulkMode, setBulkMode] = React.useState(false);
+
+  // ✅ Refresh key
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // ✅ Hydration check
+  const [isHydrated, setIsHydrated] = React.useState(false);
+  React.useEffect(() => setIsHydrated(true), []);
+
+  // ✅ After upload
+  const handleUploadComplete = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  // ✅ Delete
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return;
+
+    const loading = toast.loading("Deleting items...");
+    const res = await deleteVendorGalleryItems(selected);
+
+    toast.dismiss(loading);
+
+    if (res.error) return toast.error(res.error);
+
+    toast.success("Items deleted!");
+    setSelected([]);
+    setBulkMode(false);
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  if (!isHydrated || !vendorId) {
+    return (
+      <div className="h-full dashboard-container space-y-8">
+        <div className="flex items-end lg:gap-6 w-full max-lg:flex-wrap">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <GallerySkeleton />
+      </div>
+    );
   }
 
   return (
     <div className="h-full dashboard-container space-y-8">
-      <OverViewStats />
-      <GalleryToolBar />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={galleryImages} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {galleryImages.map((item) => (
-              <DraggableImage key={item.id} item={item} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <GalleryToolBar
+        vendorId={vendorId}
+        onUploadComplete={handleUploadComplete}
+        bulkMode={bulkMode}
+        setBulkMode={setBulkMode}
+        selectedCount={selected.length}
+        onDeleteSelected={handleBulkDelete}
+        clearSelection={() => setSelected([])}
+      />
+
+      <React.Suspense fallback={<GallerySkeleton />}>
+        <GalleryContent
+          vendorId={vendorId}
+          refreshKey={refreshKey}
+          bulkMode={bulkMode}
+          selected={selected}
+          setSelected={setSelected}
+        />
+      </React.Suspense>
     </div>
-  )
+  );
 }
-
-export default GalleryPage

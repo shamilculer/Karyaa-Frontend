@@ -475,3 +475,29 @@ export function getInitials(name) {
       .toUpperCase()
       .substring(0, 3); // Limit to 3 for the fallback
 }
+
+export const formatDate = (dateInput) => {
+  // 1. Create a Date object from the input
+  const date = new Date(dateInput);
+
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+      return "Invalid Date";
+  }
+
+  // 2. Get the date components
+  // getDate() returns the day of the month (1-31)
+  const day = date.getDate(); 
+  // getMonth() returns the month index (0-11), so we add 1
+  const month = date.getMonth() + 1; 
+  // getFullYear() returns the four-digit year
+  const year = date.getFullYear();
+
+  // 3. Pad single-digit day and month with a leading zero
+  // String(day).padStart(2, '0') will turn 5 into '05'
+  const formattedDay = String(day).padStart(2, '0');
+  const formattedMonth = String(month).padStart(2, '0');
+
+  // 4. Combine the parts
+  return `${formattedDay}-${formattedMonth}-${year}`;
+};

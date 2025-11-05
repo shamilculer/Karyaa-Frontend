@@ -1,7 +1,6 @@
 "use client"
 import { usePathname } from "next/navigation"
 import { SquareMenu, ChartPie, Image as ImageIcon, BriefcaseBusiness, Star, ChartNoAxesCombined, Users, Settings, CircleQuestionMark } from "lucide-react"
-
 import {
     Sidebar,
     SidebarContent,
@@ -13,16 +12,17 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from "@/components/ui/sidebar"
 import {
     Avatar,
     AvatarImage,
     AvatarFallback
 } from "@/components/ui/avatar"
-
-import { vendors } from "@/utils"
+import { getInitials } from "@/utils"
 import Image from "next/image"
 import Link from "next/link"
+import { useVendorStore } from "@/store/vendorStore"
 
 // Menu items.
 const items = [
@@ -56,12 +56,12 @@ const items = [
         url: "/vendor/reviews",
         icon: Star,
     },
-     {
+    {
         title: "Settings",
         url: "/vendor/settings",
         icon: Settings,
     },
-     {
+    {
         title: "Help and Support",
         url: "/vendor/support",
         icon: CircleQuestionMark,
@@ -69,18 +69,24 @@ const items = [
 ]
 
 function VendorSideBar() {
-    const pathname = usePathname()
+    const { vendor } = useVendorStore();
+    const pathname = usePathname();
+    const { setOpenMobile } = useSidebar();
+
+    // Close sidebar on mobile when navigating
+    const handleLinkClick = () => {
+        setOpenMobile(false);
+    };
 
     return (
         <Sidebar>
-            <SidebarHeader className="p-7">
-                <div className="flex items-center gap-5">
+            <SidebarHeader className="py-7 px-4">
+                <div className="flex items-center gap-1 p-2 bg-white rounded-lg border border-gray-200">
                     <Avatar className="size-10 overflow-hidden">
-                        <AvatarImage className="size-full object-cover" src={vendors[0].image} />
-                        <AvatarFallback>VND</AvatarFallback>
+                        <AvatarImage className="size-full object-cover" src={vendor?.businessLogo || ""} />
+                        <AvatarFallback>{getInitials(vendor?.businessName || "")}</AvatarFallback>
                     </Avatar>
-
-                    <span className="font-heading font-semibold leading-[1.2em] text-black">{vendors[0].name}</span>
+                    <span className="font-heading font-medium text-[15px] leading-[1.2em] text-black">{vendor?.businessName}</span>
                 </div>
             </SidebarHeader>
             <SidebarContent>
@@ -90,14 +96,13 @@ function VendorSideBar() {
                         <SidebarMenu>
                             {items.map((item) => {
                                 const isActive = pathname === item.url
-                                
                                 return (
                                     <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton 
+                                        <SidebarMenuButton
                                             asChild
                                             className={isActive ? "bg-primary text-white hover:bg-primary/90 hover:text-white" : ""}
                                         >
-                                            <Link href={item.url}>
+                                            <Link href={item.url} onClick={handleLinkClick}>
                                                 <item.icon />
                                                 <span>{item.title}</span>
                                             </Link>
@@ -110,7 +115,9 @@ function VendorSideBar() {
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter className="flex-center p-7">
-              <Image width={150} height={40} alt="Logo" className="w-32" src="/logo.svg" />
+                <Link href="/" onClick={handleLinkClick}>
+                    <Image width={150} height={40} alt="Logo" className="w-32" src="/logo.svg" />
+                </Link>
             </SidebarFooter>
         </Sidebar>
     )

@@ -2,46 +2,76 @@
 
 import { apiFetch } from "@/lib/api";
 
-export const getPublishedIdeasPosts = async ({
-  limit = 15,
+export const getAllIdeasAction = async ({
   page = 1,
-  category,
-}) => {
+  limit = 20, 
+  search = "",
+  category = "",
+  role="user"
+} = {}) => {
+
+  console.log(category)
+  const queryParams = new URLSearchParams();
+  queryParams.append("page", String(page));
+  queryParams.append("limit", String(limit));
+  if (search) queryParams.append("search", search);
+  if (category) queryParams.append("category", category);
+
+  const endpoint = `/ideas?${queryParams.toString()}`;
+
   try {
-    const params = new URLSearchParams();
+    const response = await apiFetch(endpoint, {
+      role: role,
+    });
 
-    params.append("limit", limit);
 
-    params.append("page", page);
-
-    if (category) {
-      params.append("category", category);
+    if (response.success) {
+      return {
+        success: true,
+        data: response.data,
+        pagination: response.pagination || null,
+        message: "Ideas fetched successfully.",
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || "Failed to fetch ideas.",
+      };
     }
-
-    const url = `/idea/published?${params.toString()}`;
-
-    const ideaResponse = await apiFetch(url);
-
-    return ideaResponse;
   } catch (error) {
-    console.error("Error fetching published idea posts:", error);
+    console.error("Error fetching ideas:", error);
     return {
       success: false,
-      ideas: [], 
-      total: 0,
-      totalPages: 0,
-      currentPage: page,
-      error: error.message || "Failed to fetch data",
+      message: error.message || "An unexpected network error occurred.",
     };
   }
 };
 
-export const getIdeaPost = async (slugOrId) => {
-    try {
-        const postResponse = await apiFetch(`/idea/${slugOrId}`);
-        return postResponse.ideaPost
-    } catch (error) {
-        console.error("Error fetching published idea post:", error);
-        throw error
-    }
-}
+export const getAllIdeaCategoriesAction = async ({role = "user"}) => {
+  const endpoint = `/ideas/categories`; 
+
+  try {
+      const response = await apiFetch(endpoint, {
+          role: role,
+      });
+
+      if (response.success) {
+          return {
+              success: true,
+              data: response.data, // Array of { _id, name } objects
+              message: "Idea categories fetched successfully.",
+          };
+      } else {
+          return {
+              success: false,
+              message: response.message || "Failed to fetch idea categories.",
+          };
+      }
+  } catch (error) {
+      console.error("Error fetching idea categories:", error);
+      return {
+          success: false,
+          message: error.message || "An unexpected network error occurred.",
+      };
+  }
+};

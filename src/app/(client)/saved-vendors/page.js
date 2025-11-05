@@ -1,10 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
-// --- UI Component Imports ---
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
-import { VendorsCard } from "../../components/common/VendorsList";
+import { VendorsCard } from "../components/common/VendorsList";
 import { getSavedVendors } from "@/app/actions/user/user";
 
 

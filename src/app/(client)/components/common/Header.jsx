@@ -30,16 +30,14 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
 import { Heart, Menu } from "lucide-react";
-
 import { checkAuthStatus } from "../../../actions/user/user";
 import { getCategories } from "@/app/actions/categories";
-
 
 const Header = async () => {
     const categoriesResponse = await getCategories();
@@ -50,7 +48,7 @@ const Header = async () => {
     return (
         <header className="sticky top-0 bg-[#FFFEF9] z-50">
             {/* Desktop Header */}
-            <div className="hidden lg:flex w-full py-4 h-[90px] border-b border-gray-300 items-center">
+            <div className="hidden lg:flex w-full py-4 h-[80px] border-b border-gray-300 items-center">
                 <div className="container flex items-center justify-between">
                     {/* Left Navigation */}
                     <NavigationMenu>
@@ -64,50 +62,43 @@ const Header = async () => {
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
 
-                            {/* Categories Dropdown */}
-                            <NavigationMenuItem>
+                            {/* ✅ Fixed Categories Dropdown */}
+                            <NavigationMenuItem className="relative"> {/* Added relative here */}
                                 <NavigationMenuTrigger className="text-sm font-semibold cursor-pointer hover:text-secondary hover:bg-primary/10">
                                     <Link href="/categories">Categories</Link>
                                 </NavigationMenuTrigger>
 
-                                <NavigationMenuContent className="w-full min-w-[var(--container-width)] p-0 bg-[#F8FAFC] shadow-lg">
-                                    <div className="flex">
-                                        {/* Main Categories (Left Column) */}
-                                        <div className="w-48 border-r border-gray-200 p-8 bg-white">
-                                            {categories.map((cat, index) => (
-                                                <div key={index} className="py-1">
-                                                    <Link
-                                                        href={`/categories/${cat.slug}`}
-                                                        className="block px-2 py-1 text-sm hover:text-blue-600 font-semibold"
-                                                    >
-                                                        {cat.name}
-                                                    </Link>
-                                                </div>
-                                            ))}
-                                        </div>
+                                <NavigationMenuContent className="!left-0 !top-0 mt-2 bg-white border border-gray-200 shadow-xl">
+                                    {/* Main Categories */}
+                                    <div className="w-56 bg-white">
+                                        {categories.map((cat, index) => (
+                                            <div key={index} className="group relative">
+                                                <Link
+                                                    href={`/categories/${cat.slug}`}
+                                                    className="block px-4 py-2 text-sm font-semibold hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    {cat.name}
+                                                </Link>
 
-                                        {/* Subcategories Grid (Right Column) */}
-                                        <div className="flex-1 grid grid-cols-5 gap-4 p-8">
-                                            {categories.map((cat, index) => (
-                                                <div key={index}>
-                                                    <h4 className="text-sm font-semibold mb-2">
-                                                        {cat.name}
-                                                    </h4>
-                                                    <ul className="space-y-1">
-                                                        {cat.subCategories.map((subCat, idx) => (
-                                                            <li key={idx}>
-                                                                <Link
-                                                                    href={`/categories/${cat.slug}/${subCat.slug}`}
-                                                                    className="text-sm text-gray-700 hover:underline hover:text-secondary"
-                                                                >
-                                                                    {subCat.name}
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                {/* Subcategories */}
+                                                {cat.subCategories && cat.subCategories.length > 0 && (
+                                                    <div className="absolute left-full top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible bg-white border border-gray-200 shadow-lg min-w-[230px] p-4 transition-all duration-200 ease-in-out">
+                                                        <ul className="space-y-1">
+                                                            {cat.subCategories.map((subCat, idx) => (
+                                                                <li key={idx}>
+                                                                    <Link
+                                                                        href={`/categories/${cat.slug}/${subCat.slug}`}
+                                                                        className="text-sm text-gray-700 hover:text-secondary hover:underline"
+                                                                    >
+                                                                        {subCat.name}
+                                                                    </Link>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
@@ -117,7 +108,7 @@ const Header = async () => {
                                     asChild
                                     className="text-sm font-semibold hover:underline hover:text-secondary cursor-pointer"
                                 >
-                                    <Link href="/vendors">Vendors</Link>
+                                    <Link href="/gallery">Gallery</Link>
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
                         </NavigationMenuList>
@@ -131,7 +122,7 @@ const Header = async () => {
                                 alt="Karyaa"
                                 width={132}
                                 height={24}
-                                className=""
+                                className="w-44"
                             />
                         </Link>
                     </div>
@@ -148,7 +139,6 @@ const Header = async () => {
                                         <Link href="/ideas">Ideas</Link>
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
-
                                 <NavigationMenuItem>
                                     <NavigationMenuLink
                                         asChild
@@ -157,7 +147,6 @@ const Header = async () => {
                                         <Link href="/blog">Blog</Link>
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
-
                                 <NavigationMenuItem>
                                     <NavigationMenuLink
                                         asChild
@@ -169,25 +158,28 @@ const Header = async () => {
                             </NavigationMenuList>
                         </NavigationMenu>
 
-                        {/* ✅ Conditional Login/Profile */}
+                        {/* Login/Profile */}
                         {isAuthenticated ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="!border border-gray-300 p-1 pr-1.5 h-10">
                                         <Image
                                             src={user?.profileImage || "/default-avatar.png"}
-                                            alt="User"
+                                            alt={user.username || "user"}
                                             width={36}
                                             height={36}
                                             className="rounded-full size-8 border border-gray-300"
                                         />
-                                        <span className="text-sm font-semibold">{user?.username || "User"}</span>
+                                        <span className="text-sm font-semibold ml-0">
+                                            {user?.username || "User"}
+                                        </span>
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-48">
-                                    {/* Removed placeholder /profile link */}
                                     <DropdownMenuItem asChild>
-                                        <Link href="/vendors/saved"><Heart className="h-4 w-4 mr-2" />Saved Vendors</Link>
+                                        <Link href="/saved-vendors">
+                                            <Heart className="h-4 w-4 mr-2" />Saved Vendors
+                                        </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <LogoutAlertModal />
@@ -261,7 +253,7 @@ const Header = async () => {
                                             </AccordionItem>
                                         </Accordion>
                                         {/* 👆 END UPDATED CATEGORIES ACCORDION 👆 */}
-                                        
+
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
@@ -270,14 +262,14 @@ const Header = async () => {
                                                 <Link href="/vendors">Vendors</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
-                                        
+
                                         {/* You had /gallery here, but the desktop version has /ideas. Keeping /ideas for consistency. */}
                                         <NavigationMenuItem>
                                             <NavigationMenuLink
                                                 asChild
                                                 className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
                                             >
-                                                <Link href="/ideas">Ideas</Link> 
+                                                <Link href="/ideas">Ideas</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
 
@@ -350,7 +342,7 @@ const Header = async () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-40">
                                     <DropdownMenuItem asChild>
-                                       <Link href="/vendors/saved"><Heart className="h-4 w-4 mr-2" />Saved Vendors</Link>
+                                        <Link href="/saved-vendors"><Heart className="h-4 w-4 mr-2" />Saved Vendors</Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <LogoutAlertModal />

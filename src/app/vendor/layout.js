@@ -1,17 +1,23 @@
+import OverViewStats from "./components/common/OverViewStats";
 import VendorSideBar from "./components/common/VendorSideBar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function ClientLayout({ children }) {
+export default function VendorLayout({ children }) {
+
     return (
         <SidebarProvider>
             <VendorSideBar />
-                <main
-                    style={{
-                        width: `calc(100% - var(--sidebar-width))`,
-                    }}
-                >
-                    {children}
-                </main>
+            <main
+                className="w-full lg:w-[calc(100% - var(--sidebar-width))]"
+            >
+
+                        <SidebarTrigger />
+
+                <div className="dashboard-container">
+                    <OverViewStats />
+                </div>
+                {children}
+            </main>
         </SidebarProvider>
     );
 }

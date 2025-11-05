@@ -1,4 +1,5 @@
 import BlogPosts from "../components/common/BlogPosts"
+import CategoryList from "../components/common/CategoriesList/CategoriesList"
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar"
 
 const BlogPage = async ({ searchParams }) => {
@@ -15,6 +16,10 @@ const BlogPage = async ({ searchParams }) => {
 
             <section className="container !mb-14">
                 <PageSearchBar />
+            </section>
+
+            <section className="container">
+                <CategoryList />
             </section>
 
             <section className="container divide-y divide-gray-300">

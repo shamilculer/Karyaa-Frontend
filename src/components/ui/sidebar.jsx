@@ -234,7 +234,7 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("size-9 bg-[#FAFAFB] border border-gray-300 rounded-none rounded-r-md sticky top-0 left-[--sidebar-width]", className)}
+      className={cn("size-9 bg-[#FAFAFB] border border-gray-300 rounded-none rounded-r-md sticky top-0 left-[--sidebar-width] lg:hidden", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

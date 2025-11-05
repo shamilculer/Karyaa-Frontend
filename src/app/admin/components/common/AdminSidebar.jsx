@@ -21,10 +21,11 @@ import {
     AvatarFallback
 } from "@/components/ui/avatar"
 
-// Assuming 'vendors' utility is available (keeping original import)
-import { vendors } from "@/utils"
 import Image from "next/image"
 import Link from "next/link"
+
+import { useAdminStore } from "@/store/adminStore"
+import { getInitials } from "@/utils"
 
 // Menu items.
 const items = [
@@ -47,12 +48,8 @@ const items = [
                 url: "/admin/content-moderation/ideas",
             },
             {
-                title: "Pages",
-                url: "/admin/content-moderation/pages",
-            },
-            {
-                title: "Branding",
-                url: "/admin/content-moderation/branding",
+                title: "Contact Details",
+                url: "/admin/content-moderation/contact-details",
             },
         ],
     },
@@ -106,17 +103,7 @@ const items = [
     {
         title: "Bundle Management",
         icon: SquareStack,
-        isGroup: true,
-        children: [
-            {
-                title: "Bundles",
-                url: "/admin/bundle-management",
-            },
-            {
-                title: "Subscribers",
-                url: "/admin/bundle-subscribers",
-            },
-        ],
+        url: "/admin/bundle-management",
     },
     {
         title: "Admin Settings",
@@ -127,6 +114,7 @@ const items = [
 
 function AdminSidebar() {
     const pathname = usePathname()
+    const { admin } = useAdminStore();
     
     // State for the Bundle Management dropdown (EXISTING)
     const [isBundleOpen, setIsBundleOpen] = useState(
@@ -251,14 +239,14 @@ function AdminSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="flex-center p-7 border-t border-gray-200">
+            <SidebarFooter className="flex-center py-7 px-4 border-t border-gray-200">
                 <div className="flex items-center gap-3">
                     <Avatar className="size-10 overflow-hidden border border-gray-300">
-                        <AvatarImage className="size-full object-cover" src="/owner.png" />
-                        <AvatarFallback>VND</AvatarFallback>
+                        <AvatarImage className="size-full object-cover" src={admin?.profileImage} />
+                        <AvatarFallback>{getInitials(admin?.fullName || "")}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <span className="font-heading font-medium leading-[1.2em] text-black">Nora Khuder</span>
+                        <span className="font-heading font-medium leading-[1.2em] text-black">{admin?.fullName}</span>
                         <span className="text-xs block">Administrator</span>
                     </div>
                 </div>

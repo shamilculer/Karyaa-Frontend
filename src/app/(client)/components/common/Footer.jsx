@@ -16,11 +16,11 @@ const Footer = () => {
     <footer className="w-full py-10 px-4 bg-[#f5f5f5] flex-center flex-col mt-28 lg:mt-36">
       {/* Only show CTA section if user is NOT logged in */}
       {!isLoggedIn && (
-        <section className="container !m-0 !p-0 !-mt-20 bg-white flex flex-col lg:flex-row items-center gap-0 h-auto lg:h-80 rounded-xl border border-gray-200 overflow-hidden max-lg:gap-8">
+        <section className="container !m-0 !p-0 !-mt-20 bg-white flex flex-col lg:flex-row items-center gap-0 h-auto lg:h-72 rounded-xl border border-gray-200 overflow-hidden max-lg:gap-8">
           <div className="h-60 lg:h-full w-full lg:w-1/2 bg-[url('/cta-1.webp')] bg-cover lg:bg-[length:120%] bg-center lg:bg-top rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none flex items-center justify-center relative overflow-hidden clippath-left">
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
-            <div className="text-center space-y-3 lg:space-y-5 px-6 sm:px-10 lg:px-20 z-10">
-              <h2 className="text-[26px] sm:text-2xl !lg:text-5xl uppercase !text-white font-bold leading-tight">
+            <div className="flex-center flex-col text-center space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
+              <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
                 List your services and get discovered
               </h2>
               <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
@@ -31,8 +31,8 @@ const Footer = () => {
 
           <div className="h-60 lg:h-full w-full lg:w-1/2 bg-[url('/cta-2.webp')] bg-cover lg:bg-[length:180%] bg-center rounded-b-xl lg:rounded-r-xl lg:rounded-bl-none flex items-center justify-center relative overflow-hidden clippath-right">
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
-            <div className="text-center space-y-3 lg:space-y-5 px-6 sm:px-10 lg:px-20 z-10">
-              <h2 className="text-[26px] sm:text-2xl !lg:text-5xl uppercase !text-white font-bold leading-tight">
+            <div className="text-center flex-center flex-col space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
+              <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
                 Find The Best Services For You
               </h2>
               <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">

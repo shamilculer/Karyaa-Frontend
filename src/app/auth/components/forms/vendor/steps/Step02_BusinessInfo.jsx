@@ -10,383 +10,428 @@ import { Step2Schema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import { Textarea } from "@/components/ui/textarea"; 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
-// Assuming getCategories is in the same actions file as registerVendor
 import { getCategories as fetchCategoriesAction } from "@/app/actions/categories";
+import { getBundleOptions } from "@/app/actions/vendor/bundles";
 
 // =================================================================
-// Generalized Multi-Select Component for Categories (Main and Sub)
+// 🌟 NEW: OCCASION OPTIONS DATA 🌟
+// These correspond to the slugs in the Mongoose Model and Zod Schema
 // =================================================================
-const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, valueKey = '_id' }) => {
+const OCCASION_OPTIONS = [
+    { slug: 'baby-showers-gender-reveals', name: 'Baby Showers & Gender Reveals' },
+    { slug: 'birthdays-anniversaries', name: 'Birthdays & Anniversaries' },
+    { slug: 'corporate-events', name: 'Corporate Events' },
+    { slug: 'cultural-festival-events', name: 'Cultural & Festival Events' },
+    { slug: 'engagement-proposal-events', name: 'Engagement & Proposal Events' },
+    { slug: 'graduation-celebrations', name: 'Graduation Celebrations' },
+    { slug: 'private-parties', name: 'Private Parties' },
+    { slug: 'product-launches-brand-events', name: 'Product Launches & Brand Events' },
+];
 
-  // Function to add/remove a selection (value is based on valueKey prop)
-  const toggleSelection = (optionValue) => {
-    if (disabled) return;
-
-    if (value.includes(optionValue)) {
-      // Remove the selection
-      onChange(value.filter(v => v !== optionValue));
-    } else {
-      // Add the selection
-      onChange([...value, optionValue]);
-    }
-  };
-
-  return (
-    <div className={`p-2 rounded-md bg-[#f0f0f0] ${disabled ? 'opacity-70' : ''}`}>
-      {options.length === 0 ? (
-        <p className="!text-sm text-gray-500 pt-1">{placeholder}</p>
-      ) : (
-        <div className="flex flex-wrap gap-2 py-1">
-          {options.map((option) => {
-            // Determine the actual value to store in RHF (e.g., option.name or option._id)
-            const optionValue = option[valueKey];
-            const isSelected = value.includes(optionValue);
-
-            return (
-              <button
-                key={option.slug}
-                type="button"
-                onClick={() => toggleSelection(optionValue)}
-                disabled={disabled} // Apply disabled attribute
-                className={`px-3 py-1 !text-sm rounded-full cursor-pointer transition-colors font-medium ${isSelected
-                  ? "bg-primary text-white border-primary"
-                  : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-gray-200"
-                  }`}
-              >
-                {option.name} {isSelected ? '×' : '+'}
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-export default function Step02_BusinessInfo() {
-  const { formData, updateFields, nextStep, prevStep } = useVendorFormStore();
-
-  // State to manage fetched category data and loading status
-  const [categories, setCategories] = useState([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [categoryError, setCategoryError] = useState(null);
-
-  // Construct Cloudinary folder path for vendor temp uploads
-  const tempUploadToken = formData.tempUploadToken;
-  const FOLDER_PATH = `temp_vendors/${tempUploadToken}`;
-
-  // Initialize form with Step 2 fields
-  const form = useForm({
-    resolver: zodResolver(Step2Schema),
-    defaultValues: {
-      businessName: formData.businessName || "",
-      businessLogo: formData.businessLogo || "",
-      tagline: formData.tagline || "",
-      mainCategory: formData.mainCategory || [],
-      subCategories: formData.subCategories || [],
-      tradeLicenseNumber: formData.tradeLicenseNumber || "",
-      tradeLicenseCopy: formData.tradeLicenseCopy || "",
-      yearsOfExperience: formData.yearsOfExperience || 0,
-    },
-    mode: "onChange",
-    reValidateMode: "onChange",
-    criteriaMode: "all",
-  });
-
-  // RHF watch for mainCategory selection (this now holds an array of category _ids)
-  // 🟢 UPDATED: Variable name changed to reflect it holds IDs
-  const selectedMainCategoryIds = form.watch('mainCategory');
-
-  // Aggregates all subcategories from ALL selected main categories
-  const allSubCategories = categories.reduce((acc, cat) => {
-    // 🟢 UPDATED: Check if the category _id is in the selected IDs array
-    if (selectedMainCategoryIds.includes(cat._id)) {
-      // Append all subCategories from the current cat to the accumulator
-      return acc.concat(cat.subCategories);
-    }
-    return acc;
-  }, []);
-
-  // Helper for conditional rendering of the subcategory field
-  // 🟢 UPDATED: Check the IDs array length
-  const isMainCategorySelected = selectedMainCategoryIds.length > 0;
-
-  // --- Data Fetching Effect (Remains the same) ---
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetchCategoriesAction();
-        console.log(response)
-        if (response.success) {
-          setCategories(response.categories || []);
-          setCategoryError(null);
-        } else {
-          setCategoryError(response.message || "Failed to load categories.");
-        }
-      } catch (err) {
-        console.error("Fetch categories error:", err);
-        setCategoryError("A network error occurred while loading categories.");
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
-
-  // Effect to clear subcategories if main categories are unselected
-  useEffect(() => {
-    // If the list of selected main categories becomes empty, reset subCategories
-    if (!isMainCategorySelected) {
-      form.setValue('subCategories', [], { shouldValidate: true });
-    }
-  }, [isMainCategorySelected, form]);
-
-
-  const handleNext = (data) => {
-    updateFields(data);
-    nextStep();
-  };
-
-  const handleBack = () => {
-    // Save current form data before going back
-    const currentData = form.getValues();
-    updateFields(currentData);
-    prevStep();
-  };
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleNext)} className="space-y-8">
-        <h4 className="!text-2xl font-bold text-primary mb-6">
-          Step 2: Business Details & Verification
-        </h4>
-
-        {/* --- Business Name (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="businessName"
-          render={({ field }) => (
+// =================================================================
+// Helper Component: Renders a standard text input field
+// =================================================================
+const renderInputField = ({ control, name, label, placeholder, type = "text" }) => (
+    <FormField
+        control={control}
+        name={name}
+        render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Business Name
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter your business name"
-                  {...field}
-                  className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* --- Business Logo (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="businessLogo"
-          render={() => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Business Logo
-              </FormLabel>
-              <FormControl>
-                <ControlledFileUpload
-                  control={form.control}
-                  name="businessLogo"
-                  label="Upload Business Logo (JPG/PNG)"
-                  errors={form.formState.errors}
-                  allowedMimeType={["image/jpeg", "image/png"]}
-                  folderPath={FOLDER_PATH}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* --- Tagline (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="tagline"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Tagline (Optional)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="A catchy tagline for your business (max 150 chars)"
-                  {...field}
-                  className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                />
-              </FormControl>
-              <p className="!text-[12px] text-gray-500 mt-1">
-                This will appear under your business name on your profile.
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* --- Main Category - CRITICAL CHANGE HERE --- */}
-        <FormField
-          control={form.control}
-          name="mainCategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Main Categories (Select multiple)
-              </FormLabel>
-              <div className="relative">
+                <FormLabel className="text-xs leading-0 font-medium">{label}</FormLabel>
                 <FormControl>
-                  <CategoryMultiSelect
-                    options={categories}
-                    value={field.value}
-                    onChange={field.onChange}
-                    // 🟢 CRITICAL: Use '_id' to store the MongoDB ID in the form state
-                    valueKey="_id"
-                    disabled={isLoadingCategories || !!categoryError}
-                    placeholder={isLoadingCategories ? "Loading categories..." : categoryError ? "Error loading categories" : "Select one or more main categories"}
-                  />
-                </FormControl>
-                {categoryError && (
-                  <p className="!text-[12px] text-red-500 mt-1">
-                    {categoryError}
-                  </p>
-                )}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* --- Sub Categories - Now correctly relies on IDs being selected --- */}
-        {isMainCategorySelected && (
-          <FormField
-            control={form.control}
-            name="subCategories"
-            render={({ field }) => (
-              <FormItem className="border-0">
-                <FormLabel className="text-xs leading-0 font-medium">
-                  Sub Categories (Select multiple)
-                </FormLabel>
-                <FormControl>
-                  <CategoryMultiSelect
-                    options={allSubCategories}
-                    value={field.value}
-                    onChange={field.onChange}
-                    // Use '_id' as the value key for Sub Categories
-                    valueKey="_id"
-                    disabled={isLoadingCategories}
-                    placeholder={
-                      isLoadingCategories ? "Loading subcategories..." :
-                        (allSubCategories.length === 0 ? `No subcategories found for your selection.` : "Select one or more subcategories")
-                    }
-                  />
+                    <Input
+                        placeholder={placeholder}
+                        {...field}
+                        value={field.value === 0 || field.value === undefined || field.value === null ? "" : field.value}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(type === "number" ? (value === "" ? "" : Number(value)) : value);
+                        }}
+                        type={type}
+                        className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
+                    />
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
+            </FormItem>
         )}
+    />
+);
 
-        {/* --- Trade License Number (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="tradeLicenseNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Trade License Number
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter your official Trade License Number"
-                  {...field}
-                  className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+// =================================================================
+// Generalized Multi-Select Component (Used for Categories and now Occasions)
+// The logic uses 'slug' for occasions and '_id' for categories/subcategories.
+// =================================================================
+const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, valueKey = '_id' }) => {
+    const toggleSelection = (optionValue) => {
+        if (disabled) return;
 
-        {/* --- Trade License Copy (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="tradeLicenseCopy"
-          render={() => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Trade License Copy
-              </FormLabel>
-              <FormControl>
-                <ControlledFileUpload
-                  control={form.control}
-                  name="tradeLicenseCopy"
-                  label="Upload Trade License Document (PDF/Image)"
-                  errors={form.formState.errors}
-                  allowedMimeType={[
-                    "application/pdf",
-                    "image/jpeg",
-                    "image/png",
-                  ]}
-                  folderPath={FOLDER_PATH}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        if (Array.isArray(value) && value.includes(optionValue)) {
+            onChange(value.filter(v => v !== optionValue));
+        } else {
+            onChange(Array.isArray(value) ? [...value, optionValue] : [optionValue]);
+        }
+    };
 
-        {/* --- Years of Experience (Unchanged) --- */}
-        <FormField
-          control={form.control}
-          name="yearsOfExperience"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs leading-0 font-medium">
-                Years of Experience
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Enter years of experience"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value === '' ? 0 : Number(e.target.value))}
-                  className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    const isItemSelected = (val) => Array.isArray(value) && value.includes(val);
 
-        {/* --- Navigation Buttons (Unchanged) --- */}
-        <div className="flex justify-between pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleBack}
-            className="w-40 text-base"
-          >
-            ← Back
-          </Button>
-          <Button
-            type="submit"
-            className="w-40 text-base"
-            disabled={form.formState.isSubmitting || !form.formState.isValid}
-          >
-            Next Step →
-          </Button>
+    return (
+        <div className={`p-2 rounded-md bg-[#f0f0f0] ${disabled ? 'opacity-70' : ''}`}>
+            {options.length === 0 ? (
+                <p className="!text-sm text-gray-500 pt-1">{placeholder}</p>
+            ) : (
+                <div className="flex flex-wrap gap-2 py-1">
+                    {options.map((option) => {
+                        const optionValue = option[valueKey];
+                        const nameToDisplay = option.name || option.slug || optionValue;
+
+                        return (
+                            <button
+                                key={option.slug || optionValue}
+                                type="button"
+                                onClick={() => toggleSelection(optionValue)}
+                                disabled={disabled}
+                                className={`px-3 py-1 !text-sm rounded-full cursor-pointer transition-colors font-medium ${isItemSelected(optionValue)
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
+                                    }`}
+                            >
+                                {nameToDisplay} {isItemSelected(optionValue) ? '×' : '+'}
+                            </button>
+                        )
+                    })}
+                </div>
+            )}
         </div>
-      </form>
-    </Form>
-  );
+    );
+};
+
+// =================================================================
+// Step 2 Component
+// =================================================================
+export default function Step02_BusinessInfo() {
+    const { formData, updateFields, nextStep, prevStep } = useVendorFormStore();
+
+    const [categories, setCategories] = useState([]);
+    const [bundles, setBundles] = useState([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const [isLoadingBundles, setIsLoadingBundles] = useState(true);
+    const [categoryError, setCategoryError] = useState(null);
+    const [bundleError, setBundleError] = useState(null);
+
+    const tempUploadToken = formData.tempUploadToken;
+    const FOLDER_PATH = `temp_vendors/${tempUploadToken}`;
+
+    // Initialize form with Step 2 fields from the schema
+    const form = useForm({
+        resolver: zodResolver(Step2Schema),
+        defaultValues: {
+            businessName: formData.businessName || "",
+            businessLogo: formData.businessLogo || "",
+            tagline: formData.tagline || "",
+            businessDescription: formData.businessDescription || "", 
+            whatsAppNumber: formData.whatsAppNumber || "", 
+            pricingStartingFrom: formData.pricingStartingFrom || "",
+            mainCategory: formData.mainCategory || [],
+            subCategories: formData.subCategories || [],
+            occasionsServed: formData.occasionsServed || [], // 🌟 Initialise new field 🌟
+            selectedBundle: formData.selectedBundle || "",
+            address: { 
+                street: formData.address?.street || "",
+                area: formData.address?.area || "",
+                city: formData.address?.city || "",
+                state: formData.address?.state || "",
+                zipCode: formData.address?.zipCode || "",
+                googleMapLink: formData.address?.googleMapLink || "",
+                coordinates: {
+                    latitude: formData.address?.coordinates?.latitude,
+                    longitude: formData.address?.coordinates?.longitude,
+                },
+            },
+            websiteLink: formData.websiteLink || "", 
+            facebookLink: formData.facebookLink || "", 
+            instagramLink: formData.instagramLink || "", 
+            twitterLink: formData.twitterLink || "", 
+        },
+        mode: "onBlur", 
+        reValidateMode: "onChange",
+        criteriaMode: "all",
+    });
+
+    const selectedMainCategoryIds = form.watch('mainCategory');
+
+    const allSubCategories = categories.reduce((acc, cat) => {
+        if (selectedMainCategoryIds.includes(cat._id)) {
+            return acc.concat(cat.subCategories);
+        }
+        return acc;
+    }, []);
+
+    const isMainCategorySelected = selectedMainCategoryIds.length > 0;
+
+    // --- Data Fetching Effect (Categories & Bundles) ---
+    useEffect(() => {
+        const loadInitialData = async () => {
+            try {
+                // Fetch categories
+                const categoryResponse = await fetchCategoriesAction(); 
+                if (categoryResponse.success) {
+                    setCategories(categoryResponse.categories || []);
+                    setCategoryError(null);
+                } else {
+                    setCategoryError(categoryResponse.message || "Failed to load categories.");
+                }
+
+                // Fetch bundles
+                const bundleResponse = await getBundleOptions();
+                if (!bundleResponse.error) {
+                    setBundles(bundleResponse.bundles || []);
+                    // Set first bundle as default if none selected
+                    if (!formData.selectedBundle && bundleResponse.bundles.length > 0) {
+                        form.setValue('selectedBundle', bundleResponse.bundles[0]._id);
+                    }
+                    setBundleError(null);
+                } else {
+                    setBundleError(bundleResponse.error || "Failed to load bundles.");
+                }
+            } catch (err) {
+                console.error("Fetch initial data error:", err);
+                setCategoryError("A network error occurred while loading categories.");
+                setBundleError("A network error occurred while loading bundles.");
+            } finally {
+                setIsLoadingCategories(false);
+                setIsLoadingBundles(false);
+            }
+        };
+
+        loadInitialData();
+    }, []);
+
+    // Effect to clear subcategories if main categories are unselected
+    useEffect(() => {
+        if (!isMainCategorySelected) {
+            form.setValue('subCategories', [], { shouldValidate: true });
+        }
+    }, [isMainCategorySelected, form]);
+
+    const handleNext = (data) => {
+        updateFields(data);
+        nextStep();
+    };
+
+    const handleBack = () => {
+        const currentData = form.getValues();
+        updateFields(currentData);
+        prevStep();
+    };
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleNext)} className="space-y-8">
+                <h4 className="!text-2xl font-bold text-primary mb-6">
+                    Step 2: Business Profile, Offerings & Location
+                </h4>
+
+                {renderInputField({ control: form.control, name: "businessName", label: "Business Name", placeholder: "Enter your business name" })}
+
+                <FormField
+                    control={form.control}
+                    name="businessLogo"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel className="text-xs leading-0 font-medium">Business Logo</FormLabel>
+                            <FormControl>
+                                <ControlledFileUpload
+                                    control={form.control}
+                                    name="businessLogo"
+                                    label="Upload Business Logo (JPG/PNG)"
+                                    errors={form.formState.errors}
+                                    allowedMimeType={["image/jpeg", "image/png"]}
+                                    folderPath={FOLDER_PATH}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {renderInputField({ control: form.control, name: "tagline", label: "Tagline (Optional)", placeholder: "A catchy tagline for your business (max 120 chars)" })}
+
+                <FormField
+                    control={form.control}
+                    name="businessDescription"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs leading-0 font-medium">Business Description</FormLabel>
+                            <FormControl>
+                                <Textarea 
+                                    placeholder="Describe your business, services, and unique selling points (min 50 chars, max 1000 chars)"
+                                    {...field}
+                                    rows={5}
+                                    className="p-4 bg-[#f0f0f0] border-none focus-visible:ring-1 focus-visible:ring-offset-0"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {renderInputField({ control: form.control, name: "whatsAppNumber", label: "WhatsApp Number", placeholder: "Enter WhatsApp number for customer contact (e.g., 97150xxxxxxx)" })}
+
+                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Business Offerings</h5>
+
+                {renderInputField({ 
+                    control: form.control, 
+                    name: "pricingStartingFrom", 
+                    label: "Pricing Starting From (AED)", 
+                    placeholder: "e.g., 1500 (enter a number)",
+                    type: "number"
+                })}
+
+                {/* Main Categories */}
+                <FormField
+                    control={form.control}
+                    name="mainCategory"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs leading-0 font-medium">Main Categories (Select multiple)</FormLabel>
+                            <FormControl>
+                                <CategoryMultiSelect
+                                    options={categories}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    valueKey="_id"
+                                    disabled={isLoadingCategories || !!categoryError}
+                                    placeholder={isLoadingCategories ? "Loading categories..." : categoryError ? "Error loading categories" : "Select one or more main categories"}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Sub Categories (Conditional) */}
+                {isMainCategorySelected && (
+                    <FormField
+                        control={form.control}
+                        name="subCategories"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs leading-0 font-medium">Sub Categories (Select multiple)</FormLabel>
+                                <FormControl>
+                                    <CategoryMultiSelect
+                                        options={allSubCategories}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        valueKey="_id"
+                                        disabled={isLoadingCategories}
+                                        placeholder={
+                                            isLoadingCategories ? "Loading subcategories..." :
+                                                (allSubCategories.length === 0 ? `No subcategories found for your selection.` : "Select one or more subcategories")
+                                        }
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+                
+                {/* 🌟 NEW: OCCASIONS SERVED FIELD 🌟 */}
+                <FormField
+                    control={form.control}
+                    name="occasionsServed"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs leading-0 font-medium">Occasions Served (Select multiple)</FormLabel>
+                            <FormControl>
+                                <CategoryMultiSelect
+                                    options={OCCASION_OPTIONS} // Use the local array of occasion objects
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    valueKey="slug" // Use 'slug' since the Mongoose model stores slugs
+                                    disabled={false}
+                                    placeholder="Select all the types of events you cater to"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {/* ------------------------------------ */}
+                
+                {/* Updated Bundle Select with Dynamic Data */}
+                <FormField
+                    control={form.control}
+                    name="selectedBundle"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs leading-0 font-medium">Launch Bundle (Select one)</FormLabel>
+                            <Select 
+                                onValueChange={field.onChange} 
+                                value={field.value}
+                                disabled={isLoadingBundles || !!bundleError}
+                            >
+                                <FormControl>
+                                    <SelectTrigger 
+                                        className="p-4 bg-[#f0f0f0] w-full h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
+                                    >
+                                        <SelectValue placeholder={
+                                            isLoadingBundles ? "Loading bundles..." : 
+                                            bundleError ? "Error loading bundles" :
+                                            "Select a launch bundle for your subscription"
+                                            } />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {bundles.map((bundle) => (
+                                        <SelectItem key={bundle._id} value={bundle._id}>
+                                            {bundle.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Location Details</h5>
+
+                {renderInputField({ control: form.control, name: "address.city", label: "City (Required)", placeholder: "Enter your primary operating city (e.g., Dubai, Abu Dhabi)" })}
+                {renderInputField({ control: form.control, name: "address.street", label: "Street Address (Optional)", placeholder: "Street name or building name" })}
+                {renderInputField({ control: form.control, name: "address.area", label: "Area/District (Optional)", placeholder: "Area or neighborhood (e.g., Downtown, JLT)" })}
+                {renderInputField({ control: form.control, name: "address.state", label: "Emirate/State (Optional)", placeholder: "e.g., Dubai" })}
+                {renderInputField({ control: form.control, name: "address.zipCode", label: "Zip Code (Optional)", placeholder: "e.g., 00000" })}
+                {renderInputField({ control: form.control, name: "address.googleMapLink", label: "Google Maps Link (Optional)", placeholder: "Paste a link to your location on Google Maps. This is required to show you on the map view." })}
+                
+                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Online Presence (All Optional)</h5>
+
+                {renderInputField({ control: form.control, name: "websiteLink", label: "Website Link", placeholder: "e.g., https://yourbusiness.com" })}
+                {renderInputField({ control: form.control, name: "instagramLink", label: "Instagram Link", placeholder: "e.g., https://instagram.com/yourhandle" })}
+                {renderInputField({ control: form.control, name: "facebookLink", label: "Facebook Link", placeholder: "e.g., https://facebook.com/yourpage" })}
+                {renderInputField({ control: form.control, name: "twitterLink", label: "Twitter/X Link", placeholder: "e.g., https://twitter.com/yourhandle" })}
+
+                <div className="flex justify-between pt-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleBack}
+                        className="w-40 text-base"
+                    >
+                        ← Back
+                    </Button>
+                    <Button
+                        type="submit"
+                        className="w-40 text-base"
+                        disabled={form.formState.isSubmitting || isLoadingCategories || isLoadingBundles} 
+                    >
+                        Next Step →
+                    </Button>
+                </div>
+            </form>
+        </Form>
+    );
 }

@@ -1,5 +1,5 @@
 import OverViewStats from '../components/common/OverviewStatsAdmin'
-import BundleTable from '../components/tables/BundleTable'
+import BundlesTable from '../components/tables/BundleTable'
 
 const BundleManagementPage = () => {
     return (
@@ -30,7 +30,7 @@ const BundleManagementPage = () => {
                 </div>
             </div>
 
-            <BundleTable />
+            <BundlesTable />
         </div>
     )
 }

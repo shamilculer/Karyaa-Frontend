@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { CldUploadWidget } from 'next-cloudinary';
 
@@ -10,10 +10,33 @@ export default function ControlledFileUpload({
     label, 
     errors, 
     allowedMimeType,
-    folderPath, // Used to set the destination folder in Cloudinary
+    folderPath,
+    multiple = false,
+    onSuccess,
 }) {
 
     const [isUploading, setIsUploading] = useState(false);
+    const [widgetReady, setWidgetReady] = useState(false);
+    const uploadedFilesRef = useRef([]);
+
+    // Helper function to reset body overflow
+    const resetBodyOverflow = () => {
+        document.body.style.overflow = '';
+        document.body.style.removeProperty('overflow');
+    };
+
+    // Ensure widget is ready before rendering
+    useEffect(() => {
+        setWidgetReady(true);
+    }, []);
+
+    if (!widgetReady) {
+        return (
+            <div className="w-full py-2 border border-gray-300 rounded-lg text-gray-700 bg-[#f0f0f0] flex items-center justify-center">
+                <span className="text-sm">Loading uploader...</span>
+            </div>
+        );
+    }
 
     return (
         <Controller
@@ -22,59 +45,124 @@ export default function ControlledFileUpload({
             render={({ field: { onChange, value } }) => (
                 <div className="space-y-2">
                     
-                    {/* Display current status and removal button */}
-                    {value && !isUploading ? (
-                        <p className="text-sm text-green-600 truncate p-2 border border-green-200 rounded-lg bg-green-50 flex justify-between items-center">
-                            ✅ File uploaded: <span className="font-medium">{value.substring(value.lastIndexOf('/') + 1)}</span> 
+                    {/* Single File Mode - Show uploaded file info */}
+                    {!multiple && value && !isUploading ? (
+                        <p className="!text-xs text-green-600 truncate p-2 border border-green-200 rounded-lg bg-green-50 flex justify-between items-center">
+                            ✅ File uploaded: <span className="font-medium max-md:!text-[0px]">{value.substring(value.lastIndexOf('/') + 1)}</span> 
                             <button 
                                 type="button" 
-                                onClick={() => onChange('')} // Clear the RHF value
+                                onClick={() => onChange('')}
                                 className="ml-2 text-red-500 hover:text-red-700 text-xs underline font-normal"
                             >
                                 Remove
                             </button>
                         </p>
                     ) : (
-                        // CldUploadWidget replaces the file input and custom upload button
                         <CldUploadWidget
-                            // NOTE: Replace 'your_upload_preset' with the actual preset name configured in Cloudinary
                             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                             options={{
                                 sources: ['local'],
-                                multiple: false,
-                                maxFileSize: 10485760, // 10MB in bytes
-                                acceptedMimeTypes: allowedMimeType,
-                                // Use the folderPath (e.g., 'temp_vendors/TOKEN') for organization
-                                folder: folderPath, 
+                                multiple: multiple,
+                                maxFileSize: 10485760,
+                                clientAllowedFormats: allowedMimeType?.map(type => type.split('/')[1]),
+                                folder: folderPath,
+                                resourceType: 'auto'
+                            }}
+                            onOpen={() => {
+                                console.log('Widget opened');
                             }}
                             onSuccess={(result) => {
-                                // Check if result and result.info exist and is an object
                                 if (typeof result.info !== 'object') return;
                                 
-                                // Update RHF with the secure URL upon success
-                                onChange(result.info.secure_url);
-                                setIsUploading(false);
+                                const uploadedUrl = result.info.secure_url;
+                                
+                                if (multiple) {
+                                    uploadedFilesRef.current.push(uploadedUrl);
+                                } else {
+                                    onChange(uploadedUrl);
+                                    setIsUploading(false);
+                                }
+                                
+                                setTimeout(() => {
+                                    resetBodyOverflow();
+                                }, 100);
                             }}
-                            onUploadAdded={() => setIsUploading(true)}
-                            onError={() => setIsUploading(false)}
-                            onClose={() => setIsUploading(false)}
+                            onQueuesEnd={(result, { widget }) => {
+                                if (multiple && uploadedFilesRef.current.length > 0) {
+                                    uploadedFilesRef.current.forEach(url => {
+                                        if (onSuccess) {
+                                            onSuccess(url);
+                                        }
+                                    });
+                                    uploadedFilesRef.current = [];
+                                }
+                                
+                                setIsUploading(false);
+                                
+                                setTimeout(() => {
+                                    resetBodyOverflow();
+                                }, 100);
+                            }}
+                            onUploadAdded={() => {
+                                setIsUploading(true);
+                            }}
+                            onError={(error) => {
+                                console.error('Upload error:', error);
+                                setIsUploading(false);
+                                uploadedFilesRef.current = [];
+                                setTimeout(() => {
+                                    resetBodyOverflow();
+                                }, 100);
+                            }}
+                            onClose={() => {
+                                if (multiple && uploadedFilesRef.current.length > 0) {
+                                    uploadedFilesRef.current.forEach(url => {
+                                        if (onSuccess) {
+                                            onSuccess(url);
+                                        }
+                                    });
+                                    uploadedFilesRef.current = [];
+                                }
+                                
+                                setIsUploading(false);
+                                setTimeout(() => {
+                                    resetBodyOverflow();
+                                }, 100);
+                            }}
                         >
-                            {({ open }) => {
+                            {({ open, isLoading }) => {
+                                // Add safety check
+                                const handleClick = () => {
+                                    if (open && typeof open === 'function') {
+                                        open();
+                                    } else {
+                                        console.error('Upload widget not ready');
+                                    }
+                                };
+
                                 return (
                                     <button 
                                         type="button" 
-                                        onClick={() => open()} 
-                                        disabled={isUploading || !!value}
+                                        onClick={handleClick} 
+                                        disabled={isUploading || isLoading || (!multiple && !!value)}
                                         className="w-full py-2 border border-gray-300 rounded-lg text-gray-700 bg-[#f0f0f0] hover:bg-gray-100 disabled:opacity-50 transition duration-150 flex items-center justify-center space-x-2"
                                     >
-                                        {isUploading ? (
-                                            'Processing...'
+                                        {isUploading || isLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Uploading...</span>
+                                            </>
                                         ) : (
                                             <>
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L6.293 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                                 </svg>
-                                                <span>{value ? 'Change File' : label}</span>
+                                                <span>
+                                                    {!multiple && value ? 'Change File' : label}
+                                                </span>
                                             </>
                                         )}
                                     </button>
@@ -88,4 +176,4 @@ export default function ControlledFileUpload({
             )}
         />
     );
-}
+};

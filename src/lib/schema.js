@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // --- Regex Patterns ---
 const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+const phoneRegex = /^\+?[0-9\s-()]{7,20}$/;
 const uaeMobileRegex = /^(?:(?:\+|00)971)?(?:0)?(5[0-9]{8})$/;
 const objectIdString = z.string().length(24, "ID must be a 24-character hexadecimal string.");
 
@@ -14,7 +15,7 @@ export const userSchema = z.object({
 
   mobileNumber: z.string()
     .trim()
-    .regex(uaeMobileRegex, {
+    .regex(phoneRegex, {
       message: "Please enter a valid UAE mobile number (e.g., 0501234567 or +971501234567).",
     }),
 
@@ -34,207 +35,170 @@ export const userSchema = z.object({
     .min(2, { message: "Location (City/Area) is required." }),
 });
 
-// --- STEP 1: Basic Account Information ---
 export const Step1Schema = z.object({
   ownerName: z.string()
     .trim()
-    .min(1, "Owner's Name is required."),
+    .min(1, "Owner's Full name is required."),
 
-  email: z.string()
+  tradeLicenseNumber: z.string()
     .trim()
-    .email({ message: "Invalid email address." })
+    .min(1, "Trade License Number is required."),
+
+  personalEmiratesIdNumber: z.string()
+    .trim()
+    .min(1, "Personal Emirates ID Number is required."),
+
+  email: z.email({ message: "Invalid email address." })
+  .trim()
     .min(1, "Email is required."),
 
   phoneNumber: z.string()
     .trim()
-    .regex(uaeMobileRegex, { message: "Please enter a valid UAE mobile number." })
-    .min(1, "Phone Number is required."),
-
+    .min(1, "Phone Number is required.")
+    .regex(phoneRegex, { message: "Please enter a valid UAE mobile number." }),
+    
+  // --- NEW REQUIRED PASSWORD FIELD ---
   password: z.string()
     .min(8, "Password must be at least 8 characters.")
     .regex(strongPasswordRegex, {
-      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number."
+      message: "Must contain at least 8 characters, one uppercase, one lowercase, and one number.",
     }),
+  // -----------------------------------
 
-  // Optional - will auto-generate if not provided
-  ownerProfileImage: z.string()
-    .url({ message: "Must be a valid URL." })
+  emiratesIdCopy: z.url({ message: "A valid URL for the uploaded Emirates ID is required." })
+  .trim()
+    .min(1, "Emirates ID Copy (Front and Back) is required."),
+
+  tradeLicenseCopy: z.url({ message: "A valid URL for the uploaded Trade License is required." })
+  .trim()
+    .min(1, "Trade License upload is required."),
+
+  ownerProfileImage: z.url({ message: "Owner Profile Image must be a valid URL." })
     .optional()
     .or(z.literal('')),
 });
 
-// --- STEP 2: Business Details & Verification ---
+
 export const Step2Schema = z.object({
-  businessName: z.string()
+
+    businessName: z.string()
     .trim()
-    .min(1, "Business Name is required."),
+    .min(1, "Business name is required."),
 
-  businessLogo: z.string()
-    .url({ message: "Business Logo URL is required and must be valid." }),
+    businessLogo: z.url({ message: "Business Logo URL is required and must be valid." }),
 
-  tagline: z.string()
+    tagline: z.string()
     .trim()
     .max(120, "Tagline cannot exceed 120 characters.")
     .optional()
     .or(z.literal('')),
 
-  // ✅ Uses objectIdString
-  mainCategory: z.array(objectIdString)
-    .min(1, "At least one Main Category is required."),
-
-  // ✅ Uses objectIdString
-  subCategories: z.array(objectIdString)
-    .optional()
-    .default([]),
-
-  tradeLicenseNumber: z.string()
-    .trim()
-    .min(5, "Trade License Number is required for verification."),
-
-  tradeLicenseCopy: z.string()
-    .url({ message: "Trade License Copy URL is required and must be valid." }),
-
-  yearsOfExperience: z.preprocess(
-    (a) => (a === '' ? 0 : Number(a)),
-    z.number().int().min(0, "Experience must be a positive number.")
-  ).default(0),
-})
-  // ✅ Conditional Validation: Subcategories are required if main categories are selected
-  .superRefine((data, ctx) => {
-    // If mainCategory is selected, subCategories cannot be empty.
-    if (data.mainCategory.length > 0 && data.subCategories.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['subCategories'],
-        message: 'At least one Sub Category is required if a Main Category is selected.',
-      });
-      return false;
-    }
-
-    return true;
-  });
-
-// --- STEP 3: Business Profile & Location ---
-export const Step3Schema = z.object({
-  aboutDescription: z.string()
-    .trim()
-    .min(20, "About description must be at least 20 characters.")
-    .max(2000, "About description cannot exceed 2000 characters."),
-
-  // Address Object (nested validation)
-  address: z.object({
-    street: z.string()
+    businessDescription: z.string()
       .trim()
-      .optional()
-      .or(z.literal('')),
+      .min(50, "A detailed Business Description is required (min 50 chars).")
+      .max(1000, "Description cannot exceed 1000 characters."),
 
-    area: z.string()
+    whatsAppNumber: z.string()
       .trim()
-      .optional()
-      .or(z.literal('')),
+      .regex(phoneRegex, { message: "Please enter a valid WhatsApp number." })
+      .min(1, "WhatsApp Number is required."),
 
-    city: z.string()
-      .trim()
-      .min(1, "City is required."),
-
-    state: z.string()
-      .trim()
-      .optional()
-      .or(z.literal('')),
-
-    zipCode: z.string()
-      .trim()
-      .optional()
-      .or(z.literal('')),
-
-    // Google Map Link
-    googleMapLink: z.string()
-      .url({ message: "Must be a valid Google Maps URL." })
-      .optional()
-      .or(z.literal('')),
-
-    // Optional coordinates for map integration
-    coordinates: z.object({
-      latitude: z.number().optional(),
-      longitude: z.number().optional(),
-    }).optional(),
-  }),
-
-  serviceAreaCoverage: z.string()
-    .trim()
-    .min(1, "Service Area Coverage is required (e.g., Dubai, UAE)."),
-
-  pricingStartingFrom: z.preprocess(
-    (a) => (a === '' ? 0 : Number(a)),
-    z.number().min(0, "Pricing cannot be negative.")
-  ).default(0),
-
-  // Gallery validation (optional)
-  gallery: z.array(z.object({
-    url: z.string().url({ message: "Must be a valid URL." }),
-    type: z.enum(["image", "video"]).default("image"),
-  })).optional().default([]),
-
-  // Packages validation (optional)
-  packages: z.array(z.object({
-    name: z.string()
-      .trim()
-      .min(1, "Package name is required."),
-
-    description: z.string()
-      .trim()
-      .max(500, "Package description cannot exceed 500 characters.")
-      .optional()
-      .or(z.literal('')),
-
-    priceStartsFrom: z.preprocess(
-      (a) => Number(a),
-      z.number().min(0, "Price must be 0 or greater.")
+    pricingStartingFrom: z.preprocess(
+        (a) => a === "" ? 0 : a,
+        z.number({
+            required_error: "Starting price is required.",
+            invalid_type_error: "Starting price must be a number."
+        })
+        .min(0, "Price cannot be negative.")
     ),
 
-    features: z.array(z.string().trim())
+    // Category (Main Category, dropdown)
+    mainCategory: z.array(objectIdString)
+      .min(1, "At least one Category is required."),
+
+    subCategories: z.array(objectIdString)
       .optional()
       .default([]),
+      
+    // 🌟 NEW FIELD: occasionsServed 🌟
+    occasionsServed: z.array(z.string().trim())
+        .min(1, "At least one occasion you serve must be selected.") // Enforce minimum selection
+        .default([]),
+    // ---------------------------------
+        
+    selectedBundle: objectIdString
+      .min(1, "A Launch Bundle must be selected."),
 
-    isPopular: z.boolean()
-      .optional()
-      .default(false),
+    address: z.object({
+      street: z.string()
+        .trim()
+        .optional()
+        .or(z.literal('')),
 
-    image: z.string()
-      .url({ message: "Must be a valid URL." })
+      area: z.string()
+        .trim()
+        .optional()
+        .or(z.literal('')),
+
+      city: z.string()
+        .trim()
+        .min(1, "City is required."),
+
+      state: z.string()
+        .trim()
+        .optional()
+        .or(z.literal('')),
+
+      zipCode: z.string()
+        .trim()
+        .optional()
+        .or(z.literal('')),
+
+      googleMapLink: z.url({ message: "Must be a valid Google Maps URL." })
+        .optional()
+        .or(z.literal('')),
+
+      coordinates: z.object({
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+      }).optional(),
+    }),
+
+    websiteLink: z.url({ message: "Must be a valid URL." })
       .optional()
       .or(z.literal('')),
-  })).optional().default([]),
-
-  // Social Media Links (updated to match user request)
-  socialMediaLinks: z.object({
-    facebook: z.string()
-      .url({ message: "Must be a valid URL." })
+      
+    facebookLink: z.url({ message: "Must be a valid Facebook URL." })
       .optional()
       .or(z.literal('')),
 
-    instagram: z.string()
-      .url({ message: "Must be a valid URL." })
+    instagramLink: z.url({ message: "Must be a valid Instagram URL." })
       .optional()
       .or(z.literal('')),
 
-    linkedin: z.string() // NEW FIELD
-      .url({ message: "Must be a valid URL." })
+    twitterLink: z.url({ message: "Must be a valid Twitter URL." })
       .optional()
       .or(z.literal('')),
 
-    tiktok: z.string() // NEW FIELD
-      .url({ message: "Must be a valid URL." })
-      .optional()
-      .or(z.literal('')),
-  }).optional(),
-});
+  })
+    // ✅ SuperRefine for Conditional Validation: Subcategories required if categories selected
+    .superRefine((data, ctx) => {
+      // If a main category is selected, subCategories cannot be empty.
+      if (data.mainCategory.length > 0 && data.subCategories.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['subCategories'],
+          message: 'At least one Sub Category is required if a Main Category is selected.',
+        });
+        return false;
+      }
+
+      return true;
+    });
+
 
 // --- FINAL COMBINED SCHEMA ---
-export const FinalVendorSchema = Step1Schema
-  .merge(Step2Schema)
-  .merge(Step3Schema)
-  .strict();
+export const FinalVendorSchema = Step1Schema.merge(Step2Schema).strict();
 
 export const contactFormSchema = z.object({
   fullname: z.string().min(1, "Name is required"),
@@ -264,3 +228,13 @@ export const vendorFormSchema = z.object({
   // Phone number is mandatory based on your last provided schema
   phoneNumber: z.string().min(1, "Phone number is required"),
 });  
+
+
+export const packageSchema = z.object({
+  name: z.string().min(2, "Package name is required"),
+  subheading: z.string().optional(),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  services: z.array(z.string()).min(1, "Select at least 1 service"),
+  includes: z.array(z.string()).min(1, "Add at least 1 included item"),
+  coverImage: z.string().url("Upload a valid image"),
+});

@@ -1,135 +1,134 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useEffect } from "react"
-import { useDropzone } from "react-dropzone"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose
-} from "@/components/ui/dialog"
-import { CircleX, Search, Upload, UploadCloud } from "lucide-react"
+import { useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Upload, Trash2, CheckSquare, XSquare } from "lucide-react";
+import { CldUploadWidget } from "next-cloudinary";
+import { toast } from "sonner";
+import { addVendorGalleryItems } from "@/app/actions/gallery";
 
+export default function GalleryToolBar({
+  vendorId,
+  onUploadComplete,
+  bulkMode,
+  setBulkMode,
+  selectedCount,
+  onDeleteSelected,
+  clearSelection,
+}) {
+  const uploadedBatchRef = useRef([]);
 
-const GalleryToolBar = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [files, setFiles] = useState([]);
+  // Collect uploaded items
+  const handleUploadSuccess = (result) => {
+    if (typeof result.info !== "object") return;
+    const url = result.info.secure_url;
+    uploadedBatchRef.current.push(url);
+  };
 
-  const onDrop = useCallback(acceptedFiles => {
-    setFiles(
-      acceptedFiles.map(file =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
-      )
-    );
-  }, []);
+  // When uploading finishes
+  const handleQueuesEnd = async (result, { widget }) => {
+    widget.close();
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': []
+    if (!vendorId) {
+      toast.error("Vendor ID missing — refresh and try again.");
+      uploadedBatchRef.current = [];
+      return;
     }
-  });
 
-  // Clean up the object URLs to prevent memory leaks
-  useEffect(() => {
-    return () => files.forEach(file => URL.revokeObjectURL(file.preview));
-  }, [files]);
+    if (uploadedBatchRef.current.length === 0) return;
+
+    const loadingToast = toast.loading("Saving images...");
+
+    const payload = uploadedBatchRef.current.map((url) => ({
+      url,
+      type: "image",
+    }));
+
+    try {
+      const res = await addVendorGalleryItems(vendorId, payload);
+
+      toast.dismiss(loadingToast);
+
+      if (res.error) toast.error(res.error);
+      else {
+        toast.success(`${payload.length} image(s) added!`);
+        onUploadComplete?.();
+      }
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to save gallery items");
+    } finally {
+      uploadedBatchRef.current = [];
+    }
+  };
+
+  if (!vendorId) {
+    return (
+      <div className="flex items-end justify-between gap-4 flex-wrap">
+        <Button disabled>Bulk Select</Button>
+        <Button disabled>
+          <Upload className="w-5 mr-2" /> Loading...
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-end lg:gap-6 w-full max-lg:flex-wrap">
-      <div className="w-full flex items-end gap-5">
-        {/* Search Input */}
-        <div className="w-4/6 lg:w-2/5 pr-2.5 lg:pr-0 relative">
-          <Search className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400 !w-7" />
-          <Input
-            id="search"
-            placeholder="Search"
-            className="border border-gray-300 bg-white rounded-lg placeholder:text-primary/50 placeholder:font-medium placeholder:text-base h-10 pl-10 !py-0 !text-base"
-          />
-        </div>
+    <div className="flex items-end justify-between gap-4 flex-wrap">
+      {/* LEFT SECTION */}
+      <div className="flex gap-3 items-center">
+        {/* Toggle Bulk Select Mode */}
+        <Button
+          variant={bulkMode ? "destructive" : "outline"}
+          onClick={() => {
+            if (bulkMode) clearSelection();
+            setBulkMode(!bulkMode);
+          }}
+          className="max-md:px-3.5 max-md:py-2 max-md:h-auto max-md:text-[0px]"
+        >
+          {bulkMode ? (
+            <>
+              <XSquare className="w-5" /> Cancel
+            </>
+          ) : (
+            <>
+              <CheckSquare className="w-5" /> Bulk Select
+            </>
+          )}
+        </Button>
 
-        {/* Search Button */}
-        <Button className="mt-5 lg:mt-0">
-          Search Gallery
+        {/* Delete Selected */}
+        <Button
+          variant="destructive"
+          disabled={!bulkMode || selectedCount === 0}
+          onClick={onDeleteSelected}
+          className="max-md:px-3.5 max-md:py-2 max-md:h-auto max-md:text-[0px]"
+        >
+          <Trash2 className="w-5" /> Delete ({selectedCount})
         </Button>
       </div>
 
-      {/* Upload Dialog Here */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button><Upload className="w-5" /> Upload Image</Button>
-        </DialogTrigger>
-        <DialogContent className="">
-          <DialogHeader className="border-b border-b-gray-300 pb-5">
-            <DialogTitle>Upload New Images</DialogTitle>
-            <DialogDescription>
-              Add new images to your gallery.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            {/* File Dropzone */}
-            <div
-              {...getRootProps()}
-              className={`
-                border-2 border-dashed rounded-lg p-10 text-center transition-colors
-                ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"}
-                cursor-pointer
-              `}
-            >
-              <input {...getInputProps()} />
-              <div className="flex flex-col items-center">
-                <UploadCloud className="mx-auto size-24 text-gray-400 mb-4" />
-                <p className="text-gray-500">
-                  {isDragActive
-                    ? "Drop the files here ..."
-                    : "Drag 'n' drop some files here, or click to select files"}
-                </p>
-              </div>
-            </div>
-            
-            {/* File Preview Grid */}
-            {files.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Selected Files:</p>
-                <div className="flex flex-wrap gap-4">
-                  {files.map(file => (
-                    <div key={file.name} className="relative h-28 aspect-square rounded-md overflow-hidden border border-gray-200">
-                      <Image
-                        fill
-                        src={file.preview}
-                        alt={file.name}
-                        className="h-full w-full object-cover"
-                        onLoad={() => URL.revokeObjectURL(file.preview)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <DialogFooter className="border-t border-gray-300 pt-5">
-            <Button onClick={() => console.log(files)} disabled={files.length === 0}>
-              Upload
-            </Button>
-            <DialogClose asChild>
-              <Button variant="outline" onClick={() => setFiles([])}>
-                <CircleX className="w-4 mr-2" /> Cancel
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* RIGHT SECTION — Upload */}
+      <CldUploadWidget
+        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+        options={{
+          folder: `vendors/${vendorId}/gallery`,
+          multiple: true,
+          sources: ["local"],
+          maxFiles: 15,
+          acceptedMimeTypes: ["image/*"],
+          showAdvancedOptions: true,
+        }}
+        onSuccess={handleUploadSuccess}
+        onQueuesEnd={handleQueuesEnd}
+        onError={() => toast.error("Upload failed")}
+      >
+        {({ open }) => (
+          <Button className="max-md:px-3.5 max-md:py-2 max-md:h-auto" onClick={() => open()}>
+            <Upload className="w-4 md:w-5" /> Upload
+          </Button>
+        )}
+      </CldUploadWidget>
     </div>
   );
-};
-
-export default GalleryToolBar;
+}

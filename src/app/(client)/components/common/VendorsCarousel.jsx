@@ -3,7 +3,7 @@ import { Carousel } from "@/components/ui/carousel";
 import { getActiveVendors } from "@/app/actions/vendors";
 import { checkAuthStatus } from "@/app/actions/user/user";
 
-const VendorsCarousel = async ({ filter = {}, currentVendor, }) => {
+const VendorsCarousel = async ({ filter = {}, currentVendor }) => {
 
     const resultVendors = await getActiveVendors(filter);
     let vendors = resultVendors.data || []; // Use 'let' so we can reassign

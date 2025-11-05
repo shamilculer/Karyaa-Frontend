@@ -93,8 +93,8 @@ function InquiriesByLocation() {
 
 
     return (
-        <Card className="flex flex-col h-full w-full bg-white border border-gray-200 shadow-none rounded-md">
-            <CardHeader className="flex flex-row items-start justify-between pb-0">
+        <Card className="flex flex-col h-full w-full bg-white border border-gray-200 shadow-none rounded-md max-lg:py-3">
+            <CardHeader className="flex flex-row items-start justify-between pb-0 max-lg:px-3">
                 <div>
                     <CardTitle className="uppercase text-[#2F4A9D] font-medium tracking-widest text-base">
                         Inquiries by Location

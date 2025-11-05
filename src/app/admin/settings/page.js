@@ -2,9 +2,15 @@ import OverViewStats from '../components/common/OverviewStatsAdmin'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Eye, LogOut, UserPen } from 'lucide-react'
+import { LogOut, UserPen } from 'lucide-react'
+import { getAdminFromToken } from '../utils/getAdminFromToken'
+import { getInitials } from '@/utils'
+import LogoutAlertModal from '../components/LogoutAlertModal'
 
-const AdminSettingsPage = () => {
+const AdminSettingsPage = async () => {
+
+    const { admin } = await getAdminFromToken();
+
     return (
         <div className="h-full dashboard-container space-y-8">
             <OverViewStats />
@@ -13,12 +19,12 @@ const AdminSettingsPage = () => {
                 <div className='w-full flex-between gap-48 pb-10 border-b border-gray-300'>
                     <div className='flex items-center gap-4'>
                         <Avatar className="size-24 border border-gray-200" >
-                            <AvatarImage src="/owner.png" />
-                            <AvatarFallback >VNR</AvatarFallback>
+                            <AvatarImage src={admin?.profileImage} />
+                            <AvatarFallback >{getInitials(admin?.fullName || admin?.username)}</AvatarFallback>
                         </Avatar>
 
                         <div>
-                            <h3>Nora Khuder</h3>
+                            <h3>{admin?.fullName || admin?.username}</h3>
                             <p className='!text-sm text-gray-500'>Administrator</p>
                         </div>
                     </div>
@@ -35,7 +41,7 @@ const AdminSettingsPage = () => {
                     </div>
 
                     <div>
-                        <Button ><LogOut /> Logout</Button>
+                        <LogoutAlertModal />
                     </div>
                 </div>
             </div>

@@ -2,208 +2,175 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { AuthError } from '@/utils/error';
+// import { AuthError } from '@/utils/error'; // Assuming this utility exists
 
 /**
- * Universal fetch wrapper for ALL API calls (internal backend or external APIs).
- * Automatically handles:
- * - JWT token injection from cookies (only when credentials: 'include')
- * - 401 error handling (clear cookies + redirect)
- * - Network retry logic
- * - Consistent error handling
- * 
- * @param {string} url - Full URL or API path (e.g. '/user/auth/register', 'https://api.example.com/data')
- * @param {object} [options={}] - Fetch options
- * @param {string} [options.method] - HTTP method (GET, POST, PUT, DELETE, etc.)
- * @param {object|string} [options.body] - Request body
- * @param {object} [options.headers] - Additional headers
- * @param {string} [options.credentials] - 'include' | 'omit' | 'same-origin' (default: 'omit')
- * @param {boolean} [options.redirectOn401=true] - Auto-redirect to login on 401 (default: true)
- * @param {number} [options.retries=1] - Max retry attempts for network errors
- * @returns {Promise<object>} Parsed JSON response data
+ * Helper function to clear auth cookies for a specific role and redirect.
+ * This pattern ensures cookie mutations are finalized before redirect() is called.
+ * @param {string} role - 'user' | 'vendor' | 'admin'
+ * @param {string} path - The path to redirect to (e.g., '/auth/login')
+ */
+function clearAuthAndRedirect(role, path) {
+    const cookieStore = cookies();
+    
+    // Clear the specific role-based cookies
+    cookieStore.delete(`accessToken_${role}`);
+    cookieStore.delete(`refreshToken_${role}`);
+    
+    // Perform the redirect, which must be the last step
+    redirect(path);
+}
+
+/**
+ * Get login URL for a role
+ */
+function getLoginUrl(role) {
+    const loginUrls = {
+        user: '/auth/login',
+        vendor: '/auth/vendor/login',
+        admin: '/auth/admin/login',
+    };
+    return loginUrls[role] || '/auth/login';
+}
+
+/**
+ * Universal API wrapper for server-side requests
+ * Handles multi-tenant auth (user/vendor/admin)
+ * * @param {string} url - API endpoint
+ * @param {object} options - Request options
+ * @param {string} [options.role='user'] - 'user' | 'vendor' | 'admin'
+ * @param {boolean} [options.auth=false] - Require authentication
+ * @param {number} [options.retries=1] - Retry attempts
  */
 export async function apiFetch(url, options = {}) {
-    // Determine if this is an internal API call or external
-    const isInternalAPI = url.startsWith('/');
-    
-    // Build full URL for internal APIs
-    const fullUrl = isInternalAPI 
+    const { 
+        role = 'user', 
+        auth = false, 
+        retries = 1,
+        ...fetchOptions 
+    } = options;
+
+    const fullUrl = url.startsWith('/') 
         ? `${process.env.BACKEND_URL}${url}`
         : url;
 
-    if (isInternalAPI && !process.env.BACKEND_URL) {
-        throw new Error("❌ BACKEND_URL environment variable is not set.");
-    }
+    // Get cookie store ONCE at the beginning - this is crucial!
+    const cookieStore = await cookies();
 
-    // Check if credentials should be included
-    const includeCredentials = options.credentials === 'include';
-
-    // Get accessToken from cookies only if credentials: 'include'
+    // Get tokens if auth required
     let accessToken = null;
-    if (includeCredentials) {
-        const cookieStore = await cookies();
-        accessToken = cookieStore.get('accessToken')?.value;
+    let refreshToken = null;
+
+    if (auth) {
+        accessToken = cookieStore.get(`accessToken_${role}`)?.value;
+        refreshToken = cookieStore.get(`refreshToken_${role}`)?.value;
+
+        if (!accessToken && !refreshToken) {
+            redirect(getLoginUrl(role));
+        }
     }
 
-    // Default headers
-    const defaultHeaders = {
-        "Content-Type": "application/json",
-        // Include Authorization header only if token exists and credentials: 'include'
-        ...(accessToken && includeCredentials && { Authorization: `Bearer ${accessToken}` }),
+    // Smart body handling - stringify objects, leave strings/FormData alone
+    let body = fetchOptions.body;
+    let contentType = 'application/json';
+
+    if (body) {
+        if (typeof body === 'string') {
+            contentType = 'application/json';
+        } else if (body instanceof FormData) {
+            contentType = null; // Browser handles it
+        } else if (body instanceof URLSearchParams) {
+            contentType = 'application/x-www-form-urlencoded';
+        } else {
+            body = JSON.stringify(body);
+            contentType = 'application/json';
+        }
+    }
+
+    const headers = {
+        ...(contentType && { 'Content-Type': contentType }),
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        ...fetchOptions.headers,
     };
 
-    // Final request options
-    const finalOptions = {
-        method: options.method || "GET",
-        headers: {
-            ...defaultHeaders,
-            ...options.headers,
-        },
-        cache: options.method !== "GET" ? "no-store" : options.cache || "force-cache",
-        body: options.body && typeof options.body !== "string"
-            ? JSON.stringify(options.body)
-            : options.body,
-        signal: options.signal,
-    };
-
-    // Optional retry mechanism for transient errors
-    const MAX_RETRIES = options.retries ?? 1;
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    // Attempt request with retries
+    for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const response = await fetch(fullUrl, finalOptions);
+            const response = await fetch(fullUrl, {
+                ...fetchOptions,
+                headers,
+                body,
+                cache: fetchOptions.method !== 'GET' ? 'no-store' : fetchOptions.cache,
+            });
 
-            // Handle non-successful responses
+            // Handle 401 - try token refresh once
+            if (response.status === 401 && auth && refreshToken) {
+                // Try to refresh the token
+                const refreshResponse = await fetch(`${process.env.BACKEND_URL}/util/refresh-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken }),
+                });
+
+                if (refreshResponse.ok) {
+                    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
+
+                    // Update cookies using the SAME cookieStore instance
+                    const isProduction = process.env.NODE_ENV === 'production';
+
+                    cookieStore.set(`accessToken_${role}`, newAccessToken, {
+                        httpOnly: true,
+                        secure: isProduction,
+                        sameSite: 'lax',
+                        maxAge: 15 * 60,
+                        path: '/',
+                    });
+
+                    cookieStore.set(`refreshToken_${role}`, newRefreshToken, {
+                        httpOnly: true,
+                        secure: isProduction,
+                        sameSite: 'lax',
+                        maxAge: 30 * 24 * 60 * 60,
+                        path: '/',
+                    });
+
+                    // Retry original request with new token
+                    const retryResponse = await fetch(fullUrl, {
+                        ...fetchOptions,
+                        headers: {
+                            ...headers,
+                            Authorization: `Bearer ${newAccessToken}`,
+                        },
+                        body,
+                    });
+
+                    if (retryResponse.ok) {
+                        return await retryResponse.json().catch(() => ({}));
+                    }
+                }
+
+                // **FIX APPLIED HERE**
+                // Refresh failed - use the clean utility to clear cookies and redirect
+                clearAuthAndRedirect(role, getLoginUrl(role));
+            }
+
             if (!response.ok) {
-                let message = `Request failed with status ${response.status}`;
-
-                try {
-                    // Attempt to parse JSON body for a friendly error message
-                    const errorData = await response.json();
-                    message = errorData.message || message;
-                } catch (parseError) {
-                    if (process.env.NODE_ENV === "development") {
-                        console.warn(
-                            `⚠️ Non-JSON error response from ${fullUrl}:`,
-                            parseError.message
-                        );
-                    }
-                }
-
-                // Handle 401 Unauthorized (only for authenticated requests)
-                if (response.status === 401 && includeCredentials) {
-                    // Try to refresh the token before giving up
-                    const cookieStore = await cookies();
-                    const refreshToken = cookieStore.get('refreshToken')?.value;
-
-                    if (refreshToken) {
-                        try {
-                            // Attempt to refresh the access token
-                            const refreshResponse = await fetch(
-                                `${process.env.BACKEND_URL}/user/auth/refresh`,
-                                {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ refreshToken }),
-                                }
-                            );
-
-                            if (refreshResponse.ok) {
-                                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = 
-                                    await refreshResponse.json();
-
-                                // Update cookies with new tokens
-                                cookieStore.set('accessToken', newAccessToken, {
-                                    httpOnly: true,
-                                    secure: process.env.NODE_ENV === 'production',
-                                    sameSite: 'lax',
-                                    maxAge: 15 * 60,
-                                    path: '/',
-                                });
-
-                                cookieStore.set('refreshToken', newRefreshToken, {
-                                    httpOnly: true,
-                                    secure: process.env.NODE_ENV === 'production',
-                                    sameSite: 'lax',
-                                    maxAge: 30 * 24 * 60 * 60,
-                                    path: '/',
-                                });
-
-                                // Retry the original request with the new token
-                                const retryHeaders = {
-                                    ...finalOptions.headers,
-                                    Authorization: `Bearer ${newAccessToken}`,
-                                };
-
-                                const retryResponse = await fetch(fullUrl, {
-                                    ...finalOptions,
-                                    headers: retryHeaders,
-                                });
-
-                                if (retryResponse.ok) {
-                                    try {
-                                        return await retryResponse.json();
-                                    } catch {
-                                        return { success: true, message: "No content" };
-                                    }
-                                }
-
-                                // If retry also fails, fall through to clear cookies
-                            }
-                        } catch (refreshError) {
-                            if (process.env.NODE_ENV === "development") {
-                                console.error('Token refresh failed:', refreshError);
-                            }
-                            // Fall through to clear cookies and redirect
-                        }
-                    }
-
-                    // Token refresh failed or no refresh token available
-                    // Clear cookies and redirect to login
-                    cookieStore.delete('accessToken');
-                    cookieStore.delete('refreshToken');
-
-                    redirect('/auth/login');
-                }
-
-                // Throw generic error for other status codes
-                throw new Error(message);
+                console.log(response)
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || `HTTP ${response.status}`);
             }
 
-            // Try parsing JSON response (fallback for no-content responses)
-            try {
-                return await response.json();
-            } catch {
-                return { success: true, message: "No content" };
-            }
+            return await response.json().catch(() => ({}));
+
         } catch (error) {
-            // Don't retry redirects or AuthErrors
-            if (error instanceof AuthError || error.message === 'NEXT_REDIRECT') {
-                throw error;
-            }
+            if (error.message === 'NEXT_REDIRECT') throw error;
 
-            // Network error and retry mechanism
-            const isNetworkError =
-                error.name === "FetchError" || error.message.includes("network");
-            const isLastAttempt = attempt === MAX_RETRIES;
-
-            if (isNetworkError && !isLastAttempt) {
-                if (process.env.NODE_ENV === "development") {
-                    console.warn(
-                        `⚠️ Network error, retrying (${attempt + 1}/${MAX_RETRIES})...`
-                    );
-                }
-                await new Promise((res) => setTimeout(res, 300 * (attempt + 1)));
+            const isNetworkError = error.name === 'FetchError' || error.message.includes('network');
+            if (isNetworkError && attempt < retries) {
+                await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
                 continue;
             }
 
-            if (process.env.NODE_ENV === "development") {
-                console.error(`❌ API Fetch Error (${fullUrl}):`, error);
-            }
-
-            // Re-throw the error to be handled by the caller
             throw error;
         }
     }

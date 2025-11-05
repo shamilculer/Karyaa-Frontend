@@ -1,5 +1,3 @@
-// File: actions/vendorActions.js (Your Server Action)
-
 "use server"
 
 import { apiFetch } from "@/lib/api";
@@ -12,13 +10,15 @@ import { apiFetch } from "@/lib/api";
  */
 export const getActiveVendors = async (filters = {}) => {
     try {
-        // Construct Query String from the passed filters object
-        // This handles all the filtering and sorting parameters correctly.
         const params = new URLSearchParams();
-        
-        // Only append non-null/non-undefined/non-empty values
+
         Object.keys(filters).forEach(key => {
             const value = filters[key];
+
+            // ❌ Remove deprecated filter
+            if (key === "hasPackages") return;
+
+            // ✅ Append only valid values
             if (value !== undefined && value !== null && value !== '') {
                 params.append(key, value);
             }
@@ -26,26 +26,36 @@ export const getActiveVendors = async (filters = {}) => {
 
         const queryString = params.toString();
         
-        // Final URL includes all parameters: /vendor/active?page=1&city=Dubai&sort=price-high
-        const url = `/vendor/active?${queryString}`;
-        
-        // Assuming apiFetch is a client-side library/function that makes the actual API call
-        // The implementation of apiFetch and the response format must be correct.
+        const url = `/vendors/active?${queryString}`;
+
         const responseData = await apiFetch(url);
 
         return {
             data: responseData.data || [],
-            pagination: responseData.pagination || { totalVendors: 0, totalPages: 0, currentPage: 1, limit: 10, hasNextPage: false, hasPrevPage: false },
+            pagination: responseData.pagination || {
+                totalVendors: 0,
+                totalPages: 0,
+                currentPage: 1,
+                limit: 10,
+                hasNextPage: false,
+                hasPrevPage: false,
+            },
         };
         
     } catch (error) {
         console.error("Server Action: Error fetching active vendors:", error);
-        const errorMessage = error.message || "Failed to fetch vendor list.";
-        
+
         return {
-            error: errorMessage,
+            error: error.message || "Failed to fetch vendor list.",
             data: [],
-            pagination: { totalVendors: 0, totalPages: 0, currentPage: 1, limit: 10, hasNextPage: false, hasPrevPage: false },
+            pagination: {
+                totalVendors: 0,
+                totalPages: 0,
+                currentPage: 1,
+                limit: 10,
+                hasNextPage: false,
+                hasPrevPage: false,
+            },
         };
     }
 }
@@ -62,7 +72,7 @@ export const getSingleVendor = async (identifier) => {
 
     try {
         // The URL targets the new Express route: /vendors/:identifier
-        const url = `/vendor/${identifier}`;
+        const url = `/vendors/${identifier}`;
         
         const responseData = await apiFetch(url); 
         
@@ -98,18 +108,13 @@ export async function getVendorsBySlugs(slugs) {
     try {
         const slugsParam = slugs.join(',');
        
-        console.log('🔍 Fetching vendors with slugs:', slugsParam);
-        console.log('🔍 Full API URL:', `/vendor/compare?slugs=${slugsParam}`);
         
-        const responseData = await apiFetch(`/vendor/compare?slugs=${slugsParam}`); 
+        const responseData = await apiFetch(`/vendors/compare?slugs=${slugsParam}`); 
 
-        console.log('✅ API Response:', JSON.stringify(responseData, null, 2));
 
         if (responseData.success) {
-            console.log('✅ Found vendors:', responseData.data?.length || 0);
             return { success: true, data: responseData.data || [], error: null };
         } else {
-            console.error('❌ API returned error:', responseData.message);
             return { success: false, data: null, error: responseData.message || "Failed to load vendor comparison data." };
         }
     } catch (error) {
@@ -123,7 +128,7 @@ export async function getVendorsBySlugs(slugs) {
  */
 export async function getAllVendorOptions() {
     try {
-        const responseData = await apiFetch(`/vendor/options`);
+        const responseData = await apiFetch(`/vendors/options`);
 
         if (responseData.success) {
             return { success: true, data: responseData.data || [], error: null };
@@ -134,3 +139,36 @@ export async function getAllVendorOptions() {
         return { success: false, data: null, error: error.message || "Failed to connect to API." };
     }
 }
+
+// --- 7. GET VENDOR CITIES (For Filter Dropdown) ---
+export const getVendorCitiesAction = async ({role = "user"}) => {
+    const endpoint = `/vendors/cities`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            role: role,
+            auth: true
+        });
+
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data || [],
+                message: "Cities fetched successfully."
+            };
+        } else {
+            return {
+                success: false,
+                data: [],
+                message: response.message || "Failed to fetch cities."
+            };
+        }
+    } catch (error) {
+        console.error("Error fetching vendor cities:", error);
+        return {
+            success: false,
+            data: [],
+            message: error.message || "An unexpected network error occurred."
+        };
+    }
+};

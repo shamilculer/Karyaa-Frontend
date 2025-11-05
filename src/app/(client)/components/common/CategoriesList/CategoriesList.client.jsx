@@ -102,20 +102,19 @@ export const CategoryCard = ({
         setActiveIndex(idx);
         setPaused(true);
       }}
-      className={`relative h-60 md:h-72 lg:h-80 bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-500 ${
-        activeIndex === idx ? "flex-[2.5]" : "flex-1"
+      className={`relative h-64 bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-500 ${
+        activeIndex === idx ? "flex-[3.2]" : "flex-1"
       }`}
     >
       <Image
         src={imgSrc}
         alt={category.name}
         fill
-        sizes="(max-width: 768px) 25vw, (max-width: 1024px) 20vw, 15vw"
         className="object-cover"
       />
       <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10">
         <span
-          className={`text-white text-2xl lg:text-[42px] font-script delay-200 duration-200 transition-opacity ${
+          className={`text-white text-2xl lg:text-[32px] font-heading delay-200 duration-200 transition-opacity ${
             activeIndex === idx ? "opacity-100" : "opacity-0"
           }`}
         >

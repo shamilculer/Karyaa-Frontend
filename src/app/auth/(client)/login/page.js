@@ -3,7 +3,7 @@ import UserLoginForm from "../../components/forms/UserLoginForm";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const CreateAccountPage = () => {
+const UserLoginPage = () => {
   return (
     <section className="flex !my-0">
       <div className="w-2/3 min-h-screen bg-secondary relative">
@@ -50,4 +50,4 @@ const CreateAccountPage = () => {
   );
 };
 
-export default CreateAccountPage;
+export default UserLoginPage;

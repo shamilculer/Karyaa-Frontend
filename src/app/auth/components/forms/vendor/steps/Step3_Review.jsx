@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { registerVendor } from "@/app/actions/vendor/auth";
 
-export default function Step4_Review({ isLastStep }) {
+export default function Step03_Review({ isLastStep }) {
     const router = useRouter(); // NEW: Initialize router
     // Added resetForm from store to clear state after successful submission
     const { formData, resetForm } = useVendorFormStore(); 
@@ -77,7 +77,6 @@ export default function Step4_Review({ isLastStep }) {
         { label: "Email", value: displayData.email },
         { label: "Phone Number", value: displayData.phoneNumber },
         { label: "Trade License No.", value: displayData.tradeLicenseNumber },
-        { label: "Service Area", value: displayData.serviceAreaCoverage },
         { label: "Pricing Starts From", value: `AED ${displayData.pricingStartingFrom}` },
     ];
 

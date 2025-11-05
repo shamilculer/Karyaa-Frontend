@@ -5,14 +5,12 @@ import { useVendorFormStore } from '@/store/vendorFormStore';
 // Import all step components
 import Step01_BasicInfo from './steps/Step01_BasicInfo';
 import Step02_BusinessInfo from './steps/Step02_BusinessInfo';
-import Step03_Profile from './steps/Step03_Profile';
-import Step4_Review from './steps/Step4_Review';
+import Step03_Review from './steps/Step3_Review';
 
 const STEPS = [
   { component: Step01_BasicInfo, title: "Basic Account Information" },
   { component: Step02_BusinessInfo, title: "Business Details & Verification" },
-  { component: Step03_Profile, title: "Business Profile & Location" },
-  { component: Step4_Review, title: "Review & Submit" },
+  { component: Step03_Review, title: "Review & Submit" },
 ];
 
 

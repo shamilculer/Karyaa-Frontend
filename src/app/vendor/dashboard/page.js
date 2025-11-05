@@ -1,4 +1,3 @@
-import OverViewStats from "../components/common/OverViewStats"
 import EnquiryOverTime from "../components/charts/EnquiryOverTime"
 import LeadSource from "../components/charts/LeadSource"
 import ReviewInsights from "../components/ReviewInsights"
@@ -10,25 +9,23 @@ import Image from "next/image"
 
 const VendorDashboardPage = () => {
   return (
-    <div className="h-full dashboard-container space-y-8">
-      <OverViewStats />
-
-      <div className="flex gap-6">
-        <div className="w-4/6">
+    <div className="dashboard-container space-y-8">
+      <div className="w-full flex max-lg:flex-col gap-6">
+        <div className="w-full lg:w-4/6">
           <EnquiryOverTime />
         </div>
 
-        <div className="w-2/6">
+        <div className="w-full lg:w-2/6">
           <LeadSource />
         </div>
       </div>
 
-      <div className="flex gap-6">
-        <div className="w-2/5">
+      <div className="flex max-lg:flex-col gap-6">
+        <div className="w-full lg:w-2/5">
           <ReviewInsights />
         </div>
 
-        <div className="w-3/5">
+        <div className="w-full lg:w-3/5">
           <VisitAndEnquiries />
         </div>
       </div>
@@ -43,7 +40,7 @@ const VendorDashboardPage = () => {
             <span className="text-xs">View and Manage Leads</span>
           </div>
 
-          <Button asChild variant="outline" >
+          <Button asChild variant="outline" className="max-md:!px-3 max-md:py-1 max-md:h-auto" >
             <Link href="/vendor/manage-gallery">Manage Leads</Link>
           </Button>
         </div>
@@ -56,13 +53,13 @@ const VendorDashboardPage = () => {
             Gallery
           </h4>
 
-          <Button asChild variant="outline" >
+          <Button asChild variant="outline" className="max-md:!px-3 max-md:py-1 max-md:h-auto" >
             <Link href="/vendor/gallery">Manage Gallery</Link>
           </Button>
         </div>
 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full place-items-center gap-5" >
           <Image src="/why-us.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
           <Image src="/banner-2.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
           <Image src="/blog-2.webp" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />

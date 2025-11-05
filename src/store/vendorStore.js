@@ -4,15 +4,15 @@ import { persist } from "zustand/middleware";
 export const useVendorStore = create(
   persist(
     (set) => ({
-      user: null,             // logged-in vendor user
-      isAuthenticated: false, // true if user is logged in
+      vendor: null,            // logged-in vendor user
+      isAuthenticated: false,  // true if vendor is logged in
 
       // --- actions ---
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      setVendor: (vendor) => set({ vendor, isAuthenticated: !!vendor }),
+      logout: () => set({ vendor: null, isAuthenticated: false }),
     }),
     {
-      name: "vendor-store",
+      name: "vendor-store", // key in localStorage
     }
   )
 );

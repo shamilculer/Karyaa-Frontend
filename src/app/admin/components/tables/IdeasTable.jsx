@@ -1,476 +1,356 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState, useMemo } from "react"
-
-// --- Shadcn UI Imports ---
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox" 
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" 
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-    DropdownMenuLabel,
-    DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu"
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-
-import {
-    EllipsisVertical,
     Search,
-    ChevronDown,
+    Plus,
+    Loader2,
+    Calendar,
+    SquarePen,
+    Trash2,
     Image as ImageIcon,
-    FileText,
-    ChevronLeft,
-    ChevronRight,
-} from "lucide-react"
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
-export const description = "Idea Management Table"
+import LightGallery from "lightgallery/react";
+import "lightgallery/css/lightgallery.css";
+import "lightgallery/css/lg-zoom.css";
+import "lightgallery/css/lg-thumbnail.css";
+import lgThumbnail from "lightgallery/plugins/thumbnail";
+import lgZoom from "lightgallery/plugins/zoom";
 
-// --- Idea Sample Data ---
-const initialIdeaData = [
-    {
-        id: 1,
-        title: "The Ultimate Guide to Event Planning in Dubai",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Nora Khuder",
-        createdAt: "2025-09-28",
-        slug: "ultimate-guide-event-planning-dubai",
-        status: "Published",
-    },
-    {
-        id: 2,
-        title: "Top 5 Unique Wedding Venues for 2026",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Admin User",
-        createdAt: "2025-09-25",
-        slug: "top-5-unique-wedding-venues-2026",
-        status: "Draft",
-    },
-    {
-        id: 3,
-        title: "How to Choose the Right Florist for Your Event",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Nora Khuder",
-        createdAt: "2025-09-20",
-        slug: "choose-right-florist-event",
-        status: "Published",
-    },
-    {
-        id: 4,
-        title: "Budgeting Tips for a Destination Wedding",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Guest Writer",
-        createdAt: "2025-09-15",
-        slug: "budgeting-tips-destination-wedding",
-        status: "Draft",
-    },
-    {
-        id: 5,
-        title: "Must-Have Tech for Modern Event Planners",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Tech Ideager",
-        createdAt: "2025-09-10",
-        slug: "must-have-tech-modern-event-planners",
-        status: "Published",
-    },
-    {
-        id: 6,
-        title: "A Deep Dive into Dubai's Wedding Market",
-        imageUrl: "https://via.placeholder.com/50",
-        author: "Nora Khuder",
-        createdAt: "2025-09-01",
-        slug: "deep-dive-dubais-wedding-market",
-        status: "Published",
-    },
-];
+import { getAllIdeasAction } from "@/app/actions/ideas";
+import AddIdeaModal from "../AddIdeaModal";
+import { deleteIdeaAction } from "@/app/actions/admin/ideas";
+import { Badge } from "@/components/ui/badge";
 
-// --- Table Pagination Sub-Component (Uses Shadcn Select and Button) ---
-const TablePagination = ({
-    pageIndex,
-    pageCount,
-    pageSize,
-    setPageIndex,
-    setPageSize,
-    selectedRowCount,
-    filteredArticlesCount,
-    totalArticles,
-    pageSizes = [3, 5, 10]
-}) => (
-    <div className="mt-4 flex items-center justify-between">
-        {/* Left Side: Page Size Selector and Row Count */}
-        <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium text-muted-foreground">Articles per page</p>
-                <Select
-                    value={String(pageSize)}
-                    onValueChange={(value) => {
-                        setPageSize(Number(value));
-                        setPageIndex(0);
-                    }}
-                >
-                    <SelectTrigger className="h-8 w-[70px]">
-                        <SelectValue placeholder={pageSize} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {pageSizes.map((size) => (
-                            <SelectItem key={size} value={String(size)}>
-                                {size}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="text-sm text-muted-foreground">
-                {selectedRowCount > 0 
-                    ? `${selectedRowCount} selected. ` 
-                    : ''} 
-                {filteredArticlesCount} of {totalArticles} article(s) visible.
-            </div>
-        </div>
+export default function IdeasTable({ categories = [] }) {
+    const [ideas, setIdeas] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState(null);
+    const [addModalOpen, setAddModalOpen] = useState(false);
 
-        {/* Right Side: Page Counter and Navigation */}
-        <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="text-sm font-medium text-muted-foreground">
-                Page {pageIndex + 1} of {pageCount}
-            </div>
-            <div className="flex items-center space-x-2">
-                {/* Previous Button */}
-                <Button
-                    variant="outline" 
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-                    disabled={pageIndex === 0}
-                >
-                    <span className="sr-only">Go to previous page</span>
-                    <ChevronLeft />
-                </Button>
-                {/* Next Button */}
-                <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => prev + 1)}
-                    disabled={pageIndex >= pageCount - 1 || pageCount === 0}
-                >
-                    <span className="sr-only">Go to next page</span>
-                    <ChevronRight />
-                </Button>
-            </div>
-        </div>
-    </div>
-);
+    // ✅ Only track the idea currently being deleted
+    const [deletingId, setDeletingId] = useState(null);
 
+    const limit = 20;
 
-// --- Main Idea Table Component ---
-const IdeasTable = ({ controls = true }) => {
-    const [data] = useState(initialIdeaData);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filterStatuses, setFilterStatuses] = useState([]);
+    // Fetch ideas
+    const fetchIdeas = async () => {
+        setLoading(true);
+        try {
+            const result = await getAllIdeasAction({
+                page: currentPage,
+                limit,
+                search: searchTerm,
+                category: selectedCategory,
+                role: "admin",
+            });
 
-    // --- State for Selection and Pagination ---
-    const [rowSelection, setRowSelection] = useState({});
-    const [pageIndex, setPageIndex] = useState(0);
-    // Note: page size set to 3 initially
-    const [pageSize, setPageSize] = useState(3); 
-
-    // Helper to extract unique options for filters
-    const uniqueStatuses = useMemo(() => Array.from(new Set(data.map(d => d.status))).sort(), [data]);
-
-    // --- Core Filtering Logic ---
-    const filteredData = useMemo(() => {
-        let currentData = data;
-
-        // 1. Apply Global Search Filter
-        if (globalFilter) {
-            const lowerCaseFilter = globalFilter.toLowerCase();
-            currentData = currentData.filter(row =>
-                row.title.toLowerCase().includes(lowerCaseFilter) ||
-                row.author.toLowerCase().includes(lowerCaseFilter) ||
-                row.slug.toLowerCase().includes(lowerCaseFilter)
-            );
-        }
-
-        // 2. Apply Status Filter
-        if (filterStatuses.length > 0) {
-            currentData = currentData.filter(row => filterStatuses.includes(row.status));
-        }
-        
-        // Reset page index on filter change (using requestAnimationFrame for safe state update)
-        if (pageIndex !== 0) {
-            requestAnimationFrame(() => setPageIndex(0));
-        }
-
-        return currentData;
-    }, [data, globalFilter, filterStatuses]);
-
-    // --- Pagination Logic ---
-    const paginatedData = useMemo(() => {
-        const start = pageIndex * pageSize;
-        const end = start + pageSize;
-        return filteredData.slice(start, end);
-    }, [filteredData, pageIndex, pageSize]);
-
-    const pageCount = Math.ceil(filteredData.length / pageSize);
-    const totalArticles = data.length;
-    const filteredArticlesCount = filteredData.length;
-
-
-    // --- Row Selection Logic ---
-    const toggleAllRowsSelected = (checked) => {
-        const currentPageIds = paginatedData.map(row => row.id);
-
-        setRowSelection(prev => {
-            // Filter out previously selected items that are on the current page
-            let newSelection = Object.fromEntries(
-                Object.entries(prev).filter(([id]) => !currentPageIds.includes(parseInt(id)))
-            );
-
-            if (checked) {
-                // Add all current page IDs to selection
-                currentPageIds.forEach(id => {
-                    newSelection[id] = true;
-                });
-            }
-            return newSelection;
-        });
-    };
-
-    const toggleRowSelected = (id) => {
-        setRowSelection(prev => {
-            const newSelection = { ...prev };
-            if (newSelection[id]) {
-                delete newSelection[id];
+            if (result.success) {
+                setIdeas(result.data || []);
+                setPagination(result.pagination);
             } else {
-                newSelection[id] = true;
+                toast.error(result.message || "Failed to fetch ideas");
+                setIdeas([]);
             }
-            return newSelection;
-        });
+        } catch (error) {
+            console.error("Error fetching ideas:", error);
+            toast.error("An error occurred while fetching ideas");
+            setIdeas([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const isRowSelected = (id) => !!rowSelection[id];
+    useEffect(() => {
+        fetchIdeas();
+    }, [currentPage, searchTerm, selectedCategory]);
 
-    // Checkbox states based on current page
-    const isAllSelected = paginatedData.length > 0 && paginatedData.every(row => isRowSelected(row.id));
-    const isSomeSelected = paginatedData.some(row => isRowSelected(row.id)) && !isAllSelected;
-
-    const selectedRowCount = Object.keys(rowSelection).length;
-    
-    // --- Filter Handler ---
-    const handleStatusChange = (status) => {
-        setFilterStatuses(prev =>
-            prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
-        );
-        // Clearing selection on filter change
-        setRowSelection({}); 
+    const handleCategoryChange = (value) => {
+        setSelectedCategory(value === "all" ? "" : value);
+        setCurrentPage(1);
     };
 
-    const headers = [
-        "ID",
-        "Title",
-        "Image",
-        "Author",
-        "Created At",
-        "Slug",
-        "Status",
-        "Actions"
-    ];
+    const handleDeleteIdea = async (id) => {
+        try {
+            if (!confirm("Are you sure you want to delete this idea?")) return;
 
+            setDeletingId(id);
+
+            const res = await deleteIdeaAction(id);
+
+            if (res.success) {
+                toast.success(res.message || "Idea deleted successfully.");
+                fetchIdeas();
+            } else {
+                toast.error(res.message || "Failed to delete idea.");
+            }
+        } catch (error) {
+            toast.error("Unexpected error deleting idea.");
+            console.error(error);
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    // Search debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    const goToPage = (page) => {
+        if (page >= 1 && page <= (pagination?.totalPages || 1)) {
+            setCurrentPage(page);
+        }
+    };
+
+    const handleRefresh = () => {
+        fetchIdeas();
+    };
 
     return (
-        <div className="w-full">
-            {controls && (
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
-
-                    {/* Left: Search Input */}
-                    <div className="relative w-full md:w-2/5 lg:max-w-md">
-                        <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
+        <div className="space-y-6 mt-3">
+            {/* Header */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center flex-1">
+                    {/* Search */}
+                    <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
-                            placeholder="Search by title, author, or slug..."
-                            value={globalFilter ?? ""}
-                            onChange={(event) => {
-                                setGlobalFilter(event.target.value);
-                                setRowSelection({}); // Clear selection on search
-                            }}
-                            className="w-full bg-white border-gray-300 h-10 pl-10 placeholder:text-gray-500"
+                            placeholder="Search ideas..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
                         />
                     </div>
 
-                    {/* Right: Bulk Actions, Filters and New Idea Button */}
-                    <div className="flex items-center gap-2 flex-wrap justify-end">
-                        
-                        {/* Bulk Actions Dropdown (Conditional) */}
-                        {selectedRowCount > 0 && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button className="flex items-center gap-2 !bg-[#F2F4FF] text-primary h-10 border border-gray-300">
-                                        <span className="font-semibold">Bulk Actions</span>
-                                        <Badge className="bg-primary hover:bg-primary text-white p-1 px-2 rounded-full h-auto text-xs">{selectedRowCount}</Badge>
-                                        <ChevronDown className="w-4 h-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-white">
-                                    <DropdownMenuItem onClick={() => { /* Implement bulk publish */ }}>Publish Selected</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { /* Implement bulk draft */ }}>Draft Selected</DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => { /* Implement bulk deletion */ }} className="text-red-600">
-                                        Delete Selected Articles
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        )}
-                        
-                        {/* Status Filter */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary h-10 border border-gray-300">
-                                    <span>Status</span> {filterStatuses.length > 0 && <Badge className="bg-primary hover:bg-primary text-white p-1 px-2 rounded-full h-auto text-xs">{filterStatuses.length}</Badge>}
-                                    <ChevronDown className="w-4 h-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-white w-56">
-                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {uniqueStatuses.map(status => (
-                                    <DropdownMenuCheckboxItem
-                                        key={status}
-                                        checked={filterStatuses.includes(status)}
-                                        onCheckedChange={() => handleStatusChange(status)}
-                                    >
-                                        {status}
-                                    </DropdownMenuCheckboxItem>
-                                ))}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => setFilterStatuses([])} className="text-blue-600 font-medium cursor-pointer">
-                                    Clear Filter
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                    {/* Category Filter */}
+                    <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
+                        <SelectTrigger className="w-full md:w-[200px]">
+                            <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Categories</SelectItem>
+                            {categories.map((cat) => (
+                                <SelectItem key={cat._id} value={cat.name}>
+                                    {cat.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                        {/* Create New Idea Button */}
-                        <Button className="ml-4 flex items-center gap-2 bg-primary hover:bg-blue-700 h-10" variant="default">
-                            <FileText className="w-4 h-4" />
-                            <span>Create New Idea</span>
+                {/* Add Button */}
+                <Button onClick={() => setAddModalOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Idea
+                </Button>
+            </div>
+
+            {/* Cards */}
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    <p className="text-gray-500 ml-3">Loading ideas...</p>
+                </div>
+            ) : ideas.length === 0 ? (
+                <div className="flex items-center justify-center py-20">
+                    <div className="text-center">
+                        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-500 text-lg">
+                            {searchTerm || selectedCategory
+                                ? "No ideas found matching your filters"
+                                : "No ideas yet. Add one to get started!"}
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {ideas.map((idea) => (
+                        <IdeaCard
+                            key={idea._id}
+                            idea={idea}
+                            onDelete={handleDeleteIdea}
+                            deletingId={deletingId}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4">
+                    <p className="text-sm text-gray-600">
+                        Showing {((currentPage - 1) * limit) + 1} to{" "}
+                        {Math.min(currentPage * limit, pagination.totalCount)} of{" "}
+                        {pagination.totalCount} ideas
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => goToPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
                         </Button>
-
+                        <span className="text-sm px-3">
+                            Page {currentPage} of {pagination.totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => goToPage(currentPage + 1)}
+                            disabled={currentPage === pagination.totalPages}
+                        >
+                            Next
+                        </Button>
                     </div>
                 </div>
             )}
-            <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden">
-                    <Table className="w-full">
-                        <TableHeader className="sticky top-0 z-10 bg-gray-50">
-                            <TableRow>
-                                <TableHead className="font-medium text-[#727272] h-12 w-12">
-                                    {/* Checkbox for selecting all visible rows */}
-                                    <Checkbox
-                                        checked={isAllSelected}
-                                        // The 'indeterminate' prop/value is specific to the Checkbox component's internal handling of state, 
-                                        // often controlled by an `aria-checked="mixed"` or a specific visual prop. 
-                                        // The original code used a conditional string, which is correct for Shadcn's visual indeterminate state.
-                                        indeterminate={isSomeSelected ? "indeterminate" : undefined}
-                                        onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
-                                        aria-label="Select all"
-                                    />
-                                </TableHead>
-                                {headers.map((header, index) => (
-                                    <TableHead key={index} className="font-medium text-[#727272] h-12">
-                                        {header}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {paginatedData.map((row) => {
-                                const isPublished = row.status === "Published";
-                                return (
-                                    <TableRow key={row.id} className="bg-white hover:bg-gray-50">
-                                        {/* Row Checkbox */}
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={isRowSelected(row.id)}
-                                                onCheckedChange={() => toggleRowSelected(row.id)}
-                                                aria-label="Select row"
-                                            />
-                                        </TableCell>
-                                        {/* ID */}
-                                        <TableCell className="font-medium text-gray-500">{row.id}</TableCell>
-                                        {/* Title */}
-                                        <TableCell className="font-semibold text-gray-800 max-w-xs truncate">{row.title}</TableCell>
-                                        {/* Image */}
-                                        <TableCell>
-                                            <div className="size-10 bg-gray-100 rounded flex items-center justify-center border">
-                                                <ImageIcon className="size-5 text-gray-400" />
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{row.author}</TableCell>
-                                        <TableCell className="text-sm text-gray-600">{row.createdAt}</TableCell>
-                                        <TableCell className="text-sm text-blue-600 max-w-xs truncate">{row.slug}</TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                className={`font-medium ${isPublished ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                                            >
-                                                {row.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-center w-20">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="size-8 p-0" aria-label="More actions">
-                                                        <EllipsisVertical className="w-5 text-gray-600" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48 bg-white">
-                                                    <DropdownMenuItem className="cursor-pointer">View Post</DropdownMenuItem>
-                                                    <DropdownMenuItem className="cursor-pointer">Edit Content</DropdownMenuItem>
-                                                    <DropdownMenuItem className="cursor-pointer">Change Status</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem className="text-red-600 cursor-pointer">
-                                                        Delete Idea
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                            {!paginatedData.length && (
-                                <TableRow>
-                                    <TableCell colSpan={headers.length + 1} className="h-24 text-center text-gray-500">
-                                        No Ideas found matching your current filters.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
-            {/* Pagination Controls Component */}
-            {controls && (
-                <TablePagination
-                    pageIndex={pageIndex}
-                    pageCount={pageCount}
-                    pageSize={pageSize}
-                    setPageIndex={setPageIndex}
-                    setPageSize={setPageSize}
-                    selectedRowCount={selectedRowCount}
-                    filteredArticlesCount={filteredArticlesCount}
-                    totalArticles={totalArticles}
-                />
-            )}
+
+            {/* Add Idea Modal */}
+            <AddIdeaModal
+                open={addModalOpen}
+                onOpenChange={setAddModalOpen}
+                categories={categories}
+                onSuccess={handleRefresh}
+            />
         </div>
-    )
+    );
 }
 
-export default IdeasTable
+/* =======================================================
+   ✅ Card UI
+======================================================= */
+
+const IdeaCard = ({ idea, onDelete, deletingId }) => {
+    const lightGalleryRef = useRef(null);
+
+    const images = useMemo(
+        () => (idea.gallery || []).map((url) => ({ src: url, thumb: url })),
+        [idea.gallery]
+    );
+
+    const totalImages = images.length;
+    const previewImages = images.slice(0, 4);
+
+    const openGallery = (index = 0) => {
+        if (lightGalleryRef.current) lightGalleryRef.current.openGallery(index);
+    };
+
+    let gridClasses = "grid gap-1 rounded-t-lg overflow-hidden w-full h-[250px]";
+    if (totalImages === 1) gridClasses += " grid-cols-1 grid-rows-1";
+    else if (totalImages === 2) gridClasses += " grid-cols-2 grid-rows-1";
+    else gridClasses += " grid-cols-2 grid-rows-2";
+
+    const hasGallery = totalImages > 0;
+
+    return (
+        <div className="border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full bg-white">
+            {/* Image Grid */}
+            <div className="min-h-[250px] flex-shrink-0">
+                {!hasGallery ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 rounded-t-lg">
+                        No Images Available
+                    </div>
+                ) : (
+                    <div className={gridClasses}>
+                        {previewImages.map((img, index) => {
+                            const isLast = index === Math.min(totalImages, 4) - 1;
+                            return (
+                                <div
+                                    key={index}
+                                    className="relative cursor-pointer"
+                                    onClick={() => openGallery(index)}
+                                >
+                                    <Image
+                                        src={img.thumb}
+                                        alt={`Image ${index + 1}`}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                        className="object-cover"
+                                    />
+                                    {isLast && totalImages > 4 && (
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-xs">
+                                            +{totalImages - 3} more
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col flex-grow justify-between">
+                <div>
+                    <div className="flex-between">
+                        <Badge className="bg-indigo-300 text-white">
+                            {idea.category?.name}
+                        </Badge>
+                        <div className="flex items-center !text-xs">
+                            <Calendar className="w-3 h-3 mb-0.5" />
+                            {format(new Date(idea.createdAt), "dd-MM-yyyy")}
+                        </div>
+                    </div>
+                    <h3 className="!text-xl font-bold mt-4 mb-2 line-clamp-2">{idea.title}</h3>
+                    <p className="!text-sm text-gray-600 line-clamp-4">{idea.description}</p>
+                </div>
+
+                <div className="flex gap-3 mt-4 border-t border-t-gray-300 pt-4">
+                    <Button asChild variant="outline">
+                        <Link href={`/admin/content-moderation/ideas/edit?id=${idea._id}`}>
+                            <SquarePen className="w-4 h-4 mr-2" /> Edit
+                        </Link>
+                    </Button>
+
+                    {/* ✅ Only disable button of this idea */}
+                    <Button
+                        variant="destructive"
+                        disabled={deletingId === idea._id}
+                        onClick={() => onDelete(idea._id)}
+                    >
+                        {deletingId === idea._id ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Deleting...
+                            </>
+                        ) : (
+                            <>
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Gallery */}
+            <LightGallery
+                dynamic
+                dynamicEl={images}
+                plugins={[lgThumbnail, lgZoom]}
+                onInit={(ref) => (lightGalleryRef.current = ref.instance)}
+            />
+        </div>
+    );
+};

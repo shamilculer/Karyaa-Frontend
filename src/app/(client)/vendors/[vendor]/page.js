@@ -69,7 +69,7 @@ const VendorPage = async ({ params }) => {
 
       {/* Gallery Section - Now passing dynamic data */}
       <div className="container rounded-xl overflow-hidden">
-        <VendorGallery gallery={vendorData.gallery} />
+        {/* <VendorGallery gallery={vendorData.gallery} /> */}
       </div>
 
       <div className="container flex flex-col lg:flex-row gap-6 lg:gap-12 !px-4 sm:!px-6 md:!px-10 relative">

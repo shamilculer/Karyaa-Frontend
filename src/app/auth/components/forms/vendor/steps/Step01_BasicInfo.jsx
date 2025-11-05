@@ -7,7 +7,6 @@ import { useVendorFormStore } from '@/store/vendorFormStore';
 import { Step1Schema } from '@/lib/schema';
 import { EyeIcon, EyeOff } from "lucide-react";
 
-// Shadcn/ui imports
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -19,11 +18,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import ControlledFileUpload from "@/components/common/ControlledFileUploads";
+import ControlledFileUpload from '@/components/common/ControlledFileUploads';
+
+// Helper for simple text inputs
+const renderInputField = (form, name, label, placeholder, type = "text") => (
+    <FormField
+        key={name}
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+            <FormItem>
+                <FormLabel className="text-xs leading-0 font-medium">{label}</FormLabel>
+                <FormControl>
+                    <Input
+                        placeholder={placeholder}
+                        {...field}
+                        type={type}
+                        className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
+                    />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        )}
+    />
+);
+
 
 export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
     const { formData, updateFields, nextStep, prevStep } = useVendorFormStore();
-    const [showPassword, setShowPassword] = useState(false);
+    // Reinstated state for password visibility
+    const [showPassword, setShowPassword] = useState(false); 
 
     // Construct Cloudinary folder path for vendor temp uploads
     const tempUploadToken = formData.tempUploadToken;
@@ -36,8 +60,13 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
             ownerName: formData.ownerName || '',
             email: formData.email || '',
             phoneNumber: formData.phoneNumber || '',
-            password: formData.password || '',
+            password: formData.password || '', 
             ownerProfileImage: formData.ownerProfileImage || '',
+            // Required Fields
+            tradeLicenseNumber: formData.tradeLicenseNumber || '',
+            personalEmiratesIdNumber: formData.personalEmiratesIdNumber || '',
+            emiratesIdCopy: formData.emiratesIdCopy || '',
+            tradeLicenseCopy: formData.tradeLicenseCopy || '',
         },
         mode: 'onBlur',
     });
@@ -51,13 +80,13 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
         nextStep();
     };
 
+    // Reinstated function to toggle password visibility
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
     return (
         <>
-
             <div className='mb-8 space-y-5'>
                 <h1 className="text-primary !capitalize leading-[1.2em]">Welcome to the UAE’s premier events vendor platform.</h1>
                 <p> Whether you offer catering, photography, décor, entertainment, or any other event service – this is where your business gets discovered!</p>
@@ -66,68 +95,24 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleNext)} className="space-y-8">
-
-                    <h4 className="!text-2xl font-bold text-primary mb-6">Step 1: Basic Account Information</h4>
+                    <h4 className="!text-2xl font-bold text-primary mb-6">Step 1: Basic Account & Verification Information</h4>
 
                     {/* Owner Name Field */}
-                    <FormField
-                        control={form.control}
-                        name="ownerName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-xs leading-0 font-medium">Owner Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter owner's full name"
-                                        {...field}
-                                        className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
+                    {renderInputField(form, "ownerName", "Owner Name", "Enter owner's full name")}
+                    
                     {/* Email Address Field */}
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-xs leading-0 font-medium">Email Address</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter your email address"
-                                        {...field}
-                                        type="email"
-                                        className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderInputField(form, "email", "Email Address", "Enter your email address", "email")}
 
                     {/* Phone Number Field */}
-                    <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-xs leading-0 font-medium">Phone Number (UAE)</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter mobile number (e.g., 971501234567), Whatsapp Mandatory"
-                                        {...field}
-                                        className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderInputField(form, "phoneNumber", "Phone Number (UAE)", "Enter mobile number (e.g., 971501234567), WhatsApp Mandatory")}
 
-                    {/* Password Field */}
+                    {/* Trade License Number Field */}
+                    {renderInputField(form, "tradeLicenseNumber", "Trade License Number", "Enter your business trade license number")}
+
+                    {/* Personal Emirates ID Number Field */}
+                    {renderInputField(form, "personalEmiratesIdNumber", "Personal Emirates ID Number", "Enter your Emirates ID number")}
+
+                    {/* Password Field (REINSTATED) */}
                     <FormField
                         control={form.control}
                         name="password"
@@ -160,6 +145,7 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
                             </FormItem>
                         )}
                     />
+                    {/* End Password Field */}
 
                     {/* Owner Profile Image Field (Optional) */}
                     <FormField
@@ -171,6 +157,7 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
                                     Profile Image (Optional)
                                 </FormLabel>
                                 <FormControl>
+                                    {/* FIX: Use relative path for ControlledFileUpload */}
                                     <ControlledFileUpload
                                         control={form.control}
                                         name="ownerProfileImage"
@@ -183,6 +170,56 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
                                 <p className="!text-[12px] text-gray-500 mt-1">
                                     Leave empty to auto-generate a profile image based on your name.
                                 </p>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    {/* Emirates ID Copy Upload Field (REQUIRED) */}
+                    <FormField
+                        control={form.control}
+                        name="emiratesIdCopy"
+                        render={() => (
+                            <FormItem>
+                                <FormLabel className="text-xs leading-0 font-medium">
+                                    Emirates ID Copy (Front and Back)
+                                </FormLabel>
+                                <FormControl>
+                                    {/* FIX: Use relative path for ControlledFileUpload */}
+                                    <ControlledFileUpload
+                                        control={form.control}
+                                        name="emiratesIdCopy"
+                                        label="Upload Emirates ID Copy"
+                                        errors={form.formState.errors}
+                                        allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                        folderPath={FOLDER_PATH}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Trade License Copy Upload Field (REQUIRED) */}
+                    <FormField
+                        control={form.control}
+                        name="tradeLicenseCopy"
+                        render={() => (
+                            <FormItem>
+                                <FormLabel className="text-xs leading-0 font-medium">
+                                    Trade License Copy
+                                </FormLabel>
+                                <FormControl>
+                                    {/* FIX: Use relative path for ControlledFileUpload */}
+                                    <ControlledFileUpload
+                                        control={form.control}
+                                        name="tradeLicenseCopy"
+                                        label="Upload Trade License Document"
+                                        errors={form.formState.errors}
+                                        allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                        folderPath={FOLDER_PATH}
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -201,6 +238,5 @@ export default function Step01_BasicInfo({ currentStepIndex, isLastStep }) {
                 </form>
             </Form>
         </>
-
     );
 }

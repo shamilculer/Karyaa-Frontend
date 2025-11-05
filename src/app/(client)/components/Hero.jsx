@@ -1,8 +1,8 @@
 "use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, EffectCoverflow } from "swiper/modules";
-import "swiper/css";
+import { Navigation, Autoplay, Pagination, EffectCoverflow } from "swiper/modules";
+import "swiper/css"; 
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import 'swiper/css/effect-coverflow';
@@ -32,16 +32,21 @@ const Hero = () => {
 
   return (
     <div className='h-auto md:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
-      <div className='w-full text-center px-4'>
-        <h1 className='text-center max-md:!text-3xl'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
+      <div className='w-full flex-center flex-col text-center px-4'>
+        <h1 className='text-center max-md:!text-3xl w-full lg:w-3xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
         <p className="max-md:mt-2 max-md:text-xs">Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.</p>
       </div>
 
       <div className="w-full max-w-[1600px] relative">
         <Swiper
-          modules={[Navigation, Pagination, EffectCoverflow]}
+          modules={[Navigation, Autoplay, Pagination, EffectCoverflow]}
           effect={'coverflow'}
           grabCursor={true}
+          autoplay={{
+            delay: 2000,
+            disableOnInteraction: false, // Keeps autoplay running after user interaction
+            pauseOnMouseEnter: true, // Optional: pause when hovering
+          }}
           centeredSlides={true}
           loop={true}
           slidesPerView={"auto"}
