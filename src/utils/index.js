@@ -468,6 +468,7 @@ export const initialBlogParams = {
 
 // Helper to get initials (to replace the hardcoded 'VNR')
 export function getInitials(name) {
+  if (!name) return "";  // Return empty string if name is null/undefined
   return name
       .split(" ")
       .map(word => word[0])

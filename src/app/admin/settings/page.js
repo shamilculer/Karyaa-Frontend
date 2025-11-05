@@ -19,12 +19,12 @@ const AdminSettingsPage = async () => {
                 <div className='w-full flex-between gap-48 pb-10 border-b border-gray-300'>
                     <div className='flex items-center gap-4'>
                         <Avatar className="size-24 border border-gray-200" >
-                            <AvatarImage src={admin?.profileImage} />
-                            <AvatarFallback >{getInitials(admin?.fullName || admin?.username)}</AvatarFallback>
+                            <AvatarImage src={admin?.profileImage || ''} alt={admin?.fullName || 'Admin'} />
+                            <AvatarFallback>{getInitials(admin?.fullName || admin?.username || 'Admin')}</AvatarFallback>
                         </Avatar>
 
                         <div>
-                            <h3>{admin?.fullName || admin?.username}</h3>
+                            <h3>{admin?.fullName || admin?.username || 'Administrator'}</h3>
                             <p className='!text-sm text-gray-500'>Administrator</p>
                         </div>
                     </div>
