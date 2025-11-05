@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm, Controller } from "react-hook-form"
-import { useRouter } from "next/navigation"
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
-import TextAlign from '@tiptap/extension-text-align'
-import Underline from '@tiptap/extension-underline'
-import { Color } from '@tiptap/extension-color'
-import { TextStyle } from '@tiptap/extension-text-style'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Save,
@@ -43,64 +43,28 @@ import {
   AlignRight,
   Heading1,
   Heading2,
-  Heading3
-} from "lucide-react"
-import ControlledFileUpload from "@/components/common/ControlledFileUploads"
-import { createBlogPost } from "@/app/actions/admin/blog"
-
-// Tiptap Editor Component with hooks
-const TiptapEditor = ({ field }) => {
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Underline,
-            Link.configure({
-                openOnClick: false,
-            }),
-            Image,
-            TextAlign.configure({
-                types: ['heading', 'paragraph'],
-            }),
-            TextStyle,
-            Color,
-        ],
-        content: field.value,
-        onUpdate: ({ editor }) => {
-            field.onChange(editor.getHTML())
-        },
-        immediatelyRender: false,
-    })
-
-    if (!editor) return null;
-
-    return (
-        <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
-            <EditorToolbar editor={editor} />
-            <EditorContent
-                editor={editor}
-                className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
-            />
-        </div>
-    );
-}
+  Heading3,
+} from "lucide-react";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
+import { createBlogPost } from "@/app/actions/admin/blog";
 
 // Tiptap Editor Toolbar Component
 const EditorToolbar = ({ editor }) => {
-  if (!editor) return null
+  if (!editor) return null;
 
   const addLink = () => {
-    const url = window.prompt('Enter URL:')
+    const url = window.prompt("Enter URL:");
     if (url) {
-      editor.chain().focus().setLink({ href: url }).run()
+      editor.chain().focus().setLink({ href: url }).run();
     }
-  }
+  };
 
   const addImage = () => {
-    const url = window.prompt('Enter image URL:')
+    const url = window.prompt("Enter image URL:");
     if (url) {
-      editor.chain().focus().setImage({ src: url }).run()
+      editor.chain().focus().setImage({ src: url }).run();
     }
-  }
+  };
 
   return (
     <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
@@ -108,7 +72,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
+        variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         className="h-8 w-8 p-0"
       >
@@ -117,7 +81,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
+        variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className="h-8 w-8 p-0"
       >
@@ -126,7 +90,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
+        variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         className="h-8 w-8 p-0"
       >
@@ -139,7 +103,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('bold') ? 'default' : 'ghost'}
+        variant={editor.isActive("bold") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleBold().run()}
         className="h-8 w-8 p-0"
       >
@@ -148,7 +112,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('italic') ? 'default' : 'ghost'}
+        variant={editor.isActive("italic") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className="h-8 w-8 p-0"
       >
@@ -157,7 +121,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('underline') ? 'default' : 'ghost'}
+        variant={editor.isActive("underline") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         className="h-8 w-8 p-0"
       >
@@ -170,7 +134,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
+        variant={editor.isActive("bulletList") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className="h-8 w-8 p-0"
       >
@@ -179,7 +143,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
+        variant={editor.isActive("orderedList") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className="h-8 w-8 p-0"
       >
@@ -192,8 +156,8 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"}
+        onClick={() => editor.chain().focus().setTextAlign("left").run()}
         className="h-8 w-8 p-0"
       >
         <AlignLeft className="w-4 h-4" />
@@ -201,8 +165,8 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"}
+        onClick={() => editor.chain().focus().setTextAlign("center").run()}
         className="h-8 w-8 p-0"
       >
         <AlignCenter className="w-4 h-4" />
@@ -210,8 +174,8 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        variant={editor.isActive({ textAlign: "right" }) ? "default" : "ghost"}
+        onClick={() => editor.chain().focus().setTextAlign("right").run()}
         className="h-8 w-8 p-0"
       >
         <AlignRight className="w-4 h-4" />
@@ -223,7 +187,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
+        variant={editor.isActive("blockquote") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className="h-8 w-8 p-0"
       >
@@ -232,7 +196,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('codeBlock') ? 'default' : 'ghost'}
+        variant={editor.isActive("codeBlock") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         className="h-8 w-8 p-0"
       >
@@ -245,7 +209,7 @@ const EditorToolbar = ({ editor }) => {
       <Button
         type="button"
         size="sm"
-        variant={editor.isActive('link') ? 'default' : 'ghost'}
+        variant={editor.isActive("link") ? "default" : "ghost"}
         onClick={addLink}
         className="h-8 w-8 p-0"
       >
@@ -285,12 +249,12 @@ const EditorToolbar = ({ editor }) => {
         <Redo className="w-4 h-4" />
       </Button>
     </div>
-  )
-}
+  );
+};
 
 const AddBlogPage = () => {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -311,47 +275,47 @@ const AddBlogPage = () => {
       metaTitle: "",
       metaDescription: "",
     },
-  })
+  });
 
-  const title = watch("title")
+  const title = watch("title");
 
   // Auto-generate slug from title
   const handleTitleChange = (e) => {
-    const newTitle = e.target.value
+    const newTitle = e.target.value;
     const slug = newTitle
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "")
-    setValue("slug", slug)
-  }
+      .replace(/(^-|-$)+/g, "");
+    setValue("slug", slug);
+  };
 
   // MODIFIED onSubmit to use the Server Action
   const onSubmit = async (data) => {
     if (!data.content || data.content === "<p></p>") {
-      toast.error("Content is required")
-      return
+      toast.error("Content is required");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // Call the new Server Action
-      const result = await createBlogPost(data)
+      const result = await createBlogPost(data);
 
       if (!result.success) {
-        toast.error(result.message || "Failed to create blog post")
-        return
+        toast.error(result.message || "Failed to create blog post");
+        return;
       }
 
-      toast.success(result.message)
-      router.push("/admin/content-moderation/blog")
+      toast.success(result.message);
+      router.push("/admin/content-moderation/blog");
     } catch (error) {
-      console.error("Error creating blog:", error)
-      toast.error("An error occurred while creating the blog post")
+      console.error("Error creating blog:", error);
+      toast.error("An error occurred while creating the blog post");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="dashboard-container">
@@ -367,8 +331,12 @@ const AddBlogPage = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="!text-2xl !tracking-wide !text-primary/80 font-bold">Create New Blog Post</h1>
-            <p className="!text-sm text-gray-500">Write and publish engaging content</p>
+            <h1 className="!text-2xl !tracking-wide !text-primary/80 font-bold">
+              Create New Blog Post
+            </h1>
+            <p className="!text-sm text-gray-500">
+              Write and publish engaging content
+            </p>
           </div>
         </div>
       </div>
@@ -396,8 +364,8 @@ const AddBlogPage = () => {
                   },
                 })}
                 onChange={(e) => {
-                  register("title").onChange(e)
-                  handleTitleChange(e)
+                  register("title").onChange(e);
+                  handleTitleChange(e);
                 }}
               />
               {errors.title && (
@@ -470,7 +438,39 @@ const AddBlogPage = () => {
                 name="content"
                 control={control}
                 rules={{ required: "Content is required" }}
-                render={({ field }) => <TiptapEditor field={field} />}
+                render={({ field }) => {
+                  // eslint-disable-next-line react-hooks/rules-of-hooks
+                  const editor = useEditor({
+                    extensions: [
+                      StarterKit,
+                      Underline,
+                      Link.configure({
+                        openOnClick: false,
+                      }),
+                      Image,
+                      TextAlign.configure({
+                        types: ["heading", "paragraph"],
+                      }),
+                      TextStyle,
+                      Color,
+                    ],
+                    content: field.value,
+                    onUpdate: ({ editor }) => {
+                      field.onChange(editor.getHTML());
+                    },
+                    immediatelyRender: false,
+                  });
+
+                  return (
+                    <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
+                      <EditorToolbar editor={editor} />
+                      <EditorContent
+                        editor={editor}
+                        className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
+                      />
+                    </div>
+                  );
+                }}
               />
               {errors.content && (
                 <p className="text-red-500 text-sm">{errors.content.message}</p>
@@ -478,7 +478,6 @@ const AddBlogPage = () => {
             </div>
           </CardContent>
         </Card>
-
 
         {/* Call to Action */}
         <Card>
@@ -500,7 +499,9 @@ const AddBlogPage = () => {
                   })}
                 />
                 {errors.ctaText && (
-                  <p className="text-red-500 text-sm">{errors.ctaText.message}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.ctaText.message}
+                  </p>
                 )}
               </div>
 
@@ -535,7 +536,9 @@ const AddBlogPage = () => {
                 })}
               />
               {errors.metaTitle && (
-                <p className="text-red-500 text-sm">{errors.metaTitle.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.metaTitle.message}
+                </p>
               )}
               <p className="text-xs text-gray-500">
                 {watch("metaTitle")?.length || 0}/60 characters
@@ -658,7 +661,7 @@ const AddBlogPage = () => {
                 }
             `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default AddBlogPage
+export default AddBlogPage;

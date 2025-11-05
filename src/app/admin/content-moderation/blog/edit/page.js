@@ -52,48 +52,6 @@ import ControlledFileUpload from "@/components/common/ControlledFileUploads"
 import { getBlogPostAsAdmin, editBlogPost } from "@/app/actions/admin/blog"
 
 
-// Tiptap Editor Component with hooks
-const TiptapEditor = ({ field }) => {
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Underline,
-            Link.configure({ openOnClick: false }),
-            Image,
-            TextAlign.configure({ types: ['heading', 'paragraph'] }),
-            TextStyle,
-            Color,
-        ],
-        content: field.value,
-        onUpdate: ({ editor }) => {
-            field.onChange(editor.getHTML())
-        },
-        immediatelyRender: false,
-    })
-
-    // Effect to manually sync react-hook-form's value to the Tiptap editor
-    useEffect(() => {
-        if (editor && field.value) {
-            const isContentDifferent = editor.getHTML() !== field.value;
-            if (isContentDifferent) {
-                editor.commands.setContent(field.value, false);
-            }
-        }
-    }, [editor, field.value])
-
-    if (!editor) return null;
-
-    return (
-        <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
-            <EditorToolbar editor={editor} />
-            <EditorContent
-                editor={editor}
-                className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
-            />
-        </div>
-    );
-}
-
 // Tiptap Editor Toolbar Component
 const EditorToolbar = ({ editor }) => {
     if (!editor) return null
@@ -554,7 +512,44 @@ const EditBlogPage = () => {
                                 control={control}
                                 rules={{ required: "Content is required" }}
                                 render={({ field }) => {
-                                    return <TiptapEditor field={field} />
+                                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                                    const editor = useEditor({
+                                        extensions: [
+                                            StarterKit,
+                                            Underline,
+                                            Link.configure({ openOnClick: false }),
+                                            Image,
+                                            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+                                            TextStyle,
+                                            Color,
+                                        ],
+                                        // Initial content from form state (which is initially empty or loaded via values prop)
+                                        content: field.value,
+                                        onUpdate: ({ editor }) => {
+                                            // This ensures form state tracks changes from the editor
+                                            field.onChange(editor.getHTML())
+                                        },
+                                        immediatelyRender: false,
+                                    })
+
+                                    // --- FIX START ---
+                                    // Effect to manually sync react-hook-form's value to the Tiptap editor
+                                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                                    useEffect(() => {
+                                        if (editor && field.value) {
+                                            // Check if the editor's current content is different from the form value 
+                                            // to prevent infinite loop (set content -> onUpdate -> field.onChange -> useEffect)
+                                            const isContentDifferent = editor.getHTML() !== field.value;
+
+                                            if (isContentDifferent) {
+                                                // Set the content without setting the focus (false)
+                                                editor.commands.setContent(field.value, false);
+                                            }
+                                        }
+                                    }, [editor, field.value]) // Dependency on the editor instance and the RHF value
+
+                                    if (!editor) return null
+                                    // --- FIX END ---
 
                                     return (
                                         <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
