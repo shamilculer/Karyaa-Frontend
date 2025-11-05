@@ -48,6 +48,42 @@ import {
 import ControlledFileUpload from "@/components/common/ControlledFileUploads"
 import { createBlogPost } from "@/app/actions/admin/blog"
 
+// Tiptap Editor Component with hooks
+const TiptapEditor = ({ field }) => {
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            Link.configure({
+                openOnClick: false,
+            }),
+            Image,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            TextStyle,
+            Color,
+        ],
+        content: field.value,
+        onUpdate: ({ editor }) => {
+            field.onChange(editor.getHTML())
+        },
+        immediatelyRender: false,
+    })
+
+    if (!editor) return null;
+
+    return (
+        <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
+            <EditorToolbar editor={editor} />
+            <EditorContent
+                editor={editor}
+                className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
+            />
+        </div>
+    );
+}
+
 // Tiptap Editor Toolbar Component
 const EditorToolbar = ({ editor }) => {
   if (!editor) return null
@@ -434,38 +470,7 @@ const AddBlogPage = () => {
                 name="content"
                 control={control}
                 rules={{ required: "Content is required" }}
-                render={({ field }) => {
-                  const editor = useEditor({
-                    extensions: [
-                      StarterKit,
-                      Underline,
-                      Link.configure({
-                        openOnClick: false,
-                      }),
-                      Image,
-                      TextAlign.configure({
-                        types: ['heading', 'paragraph'],
-                      }),
-                      TextStyle,
-                      Color,
-                    ],
-                    content: field.value,
-                    onUpdate: ({ editor }) => {
-                      field.onChange(editor.getHTML())
-                    },
-                    immediatelyRender: false,
-                  })
-
-                  return (
-                    <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
-                      <EditorToolbar editor={editor} />
-                      <EditorContent
-                        editor={editor}
-                        className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
-                      />
-                    </div>
-                  )
-                }}
+                render={({ field }) => <TiptapEditor field={field} />}
               />
               {errors.content && (
                 <p className="text-red-500 text-sm">{errors.content.message}</p>
