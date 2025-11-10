@@ -1,7 +1,7 @@
 // app/loading.js (or wherever your routes are)
 export default function Loading() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+    <div className="fixed inset-0 z-1002 flex items-center justify-center bg-white">
       <div className="flex flex-col items-center space-y-4">
         {/* Spinner */}
         <div className="relative">

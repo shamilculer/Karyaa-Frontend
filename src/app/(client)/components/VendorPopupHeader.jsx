@@ -21,7 +21,7 @@ const VendorPopupHeader = ({
     // Helper to get initials (similar to the main page)
 
     return (
-        <div className={`w-full flex items-center pt-5 min-h-24 z-[51] bg-white border-b border-b-gray-300 fixed top-0 left-0 transition-transform duration-300 ease-in-out ${showHeader ? 'translate-y-0' : '-translate-y-[100%]'
+        <div className={`w-full flex items-center pt-5 min-h-24 z-1001 bg-white border-b border-b-gray-300 fixed top-0 left-0 transition-transform duration-300 ease-in-out ${showHeader ? 'translate-y-0' : '-translate-y-[100%]'
             }`}>
             <div className="container px-4 sm:px-6 md:px-10"> {/* Added responsive padding */}
                 <div className="h-full w-full flex items-center justify-between">

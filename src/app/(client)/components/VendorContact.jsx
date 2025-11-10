@@ -80,7 +80,7 @@ const MobileVendorContact = ({ vendorInfo }) => {
             {/* The Floating Button (Bottom Right) */}
             <DialogTrigger asChild>
                 <Button
-                    className="fixed bottom-4 right-4 bg-white flex items-center justify-start border border-gray-300 px-1 h-12 shadow rounded-3xl z-[51]"
+                    className="fixed bottom-4 right-4 bg-white flex items-center justify-start border border-gray-300 px-1 h-12 shadow rounded-3xl"
                     aria-label={`Contact ${vendorInfo.businessName}`}
                 >
                     <Avatar className="size-9 rounded-full overflow-hidden border border-gray-200">
@@ -98,7 +98,7 @@ const MobileVendorContact = ({ vendorInfo }) => {
             </DialogTrigger>
 
             {/* The Modal Content */}
-            <DialogContent className="p-0 max-w-[90vw] md:max-w-md max-h-[90vh] overflow-y-auto z-52">
+            <DialogContent className="p-0 max-w-[90vw] md:max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="sr-only">Contact Us</DialogTitle>
                 {/* 👈 3. Pass the state setter down */}
                 <VendorContactComponent vendorInfo={vendorInfo} setIsOpen={setIsOpen} /> 

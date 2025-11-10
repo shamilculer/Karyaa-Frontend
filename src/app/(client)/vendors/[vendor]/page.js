@@ -170,7 +170,6 @@ const VendorPage = async ({ params }) => {
 
             {/* Action Buttons - Repositioned for responsiveness */}
             <div className="absolute top-0 right-0 flex items-center gap-3 max-lg:-top-16 max-lg:right-2">
-              {authResult.isAuthenticated && (
                 <VendorSaveButton
                   vendorId={vendorData._id}
                   isInitialSaved={savedVendorIds.includes(
@@ -178,7 +177,6 @@ const VendorPage = async ({ params }) => {
                   )}
                   isVendorPage={true}
                 />
-              )}
               <VendorShareButton
                 businessName={vendorData.businessName}
                 slug={vendorData.slug}
