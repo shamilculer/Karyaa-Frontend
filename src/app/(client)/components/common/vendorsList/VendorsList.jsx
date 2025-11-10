@@ -150,7 +150,11 @@ const VendorsList = async ({ showControls, filters }) => {
         <>
           {viewMode === 'map' ? (
             <div className="space-y-6">
-              <VendorsMapView vendors={vendors} />
+              <VendorsMapView 
+                vendors={vendors} 
+                isAuthenticated={authResult.isAuthenticated}
+                savedVendorIds={savedVendorIds}
+              />
               {totalPages > 1 && (
                 <GlobalPagination
                   totalPages={totalPages}

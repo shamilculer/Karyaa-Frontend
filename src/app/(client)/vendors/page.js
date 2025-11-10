@@ -1,5 +1,5 @@
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
-import VendorsList from "../components/common/VendorsList";
+import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
 
 const VendorsPage = async ({ searchParams }) => {
 
@@ -26,7 +26,7 @@ const VendorsPage = async ({ searchParams }) => {
             <h2 className=" font-semibold uppercase">Featured Partners</h2>
           </div>
 
-          <VendorsList showControls={true} filters={filters} />
+          <VendorsListWrapper showControls={true} filters={filters} />
         </div>
       </section>
     </div>

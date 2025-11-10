@@ -287,9 +287,6 @@ section[aria-label="Notifications alt+T"]{
 }
 
 
-/* Custom styles for Leaflet map */
-
-/* Custom marker animation */
 .custom-marker {
   animation: markerBounce 0.5s ease-out;
 }
@@ -317,7 +314,20 @@ section[aria-label="Notifications alt+T"]{
 
 .leaflet-popup-content {
   margin: 0;
-  min-width: 250px;
+  min-width: 340px;
+  width: 340px !important;
+}
+
+/* Special styling for vendor card popup */
+.vendor-card-popup .leaflet-popup-content-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.vendor-card-popup .leaflet-popup-content {
+  margin: 0;
+  padding: 0;
+  width: 340px !important;
 }
 
 .leaflet-popup-tip {
