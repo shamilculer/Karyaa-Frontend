@@ -1,3 +1,7 @@
+// Landing page uses components that may call server helpers which read cookies (auth/data). Force dynamic rendering
+// to prevent build-time prerender errors caused by cookie usage.
+export const dynamic = 'force-dynamic';
+
 import Image from "next/image";
 import Link from "next/link";
 

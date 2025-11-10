@@ -1,3 +1,6 @@
+// Blog listing may call server helpers that use cookies; prevent static prerender errors by forcing dynamic.
+export const dynamic = 'force-dynamic';
+
 import BlogPosts from "../components/common/BlogPosts"
 import CategoryList from "../components/common/CategoriesList/CategoriesList"
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar"

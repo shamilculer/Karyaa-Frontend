@@ -1,3 +1,6 @@
+// Individual blog posts fetch content server-side and may trigger cookie reads via shared helpers; force dynamic.
+export const dynamic = 'force-dynamic';
+
 import Image from "next/image";
 import BlogPosts, { BlogCarousel } from "../../components/common/BlogPosts";
 import { getBlogPost } from "../../../actions/blog";

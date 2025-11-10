@@ -1,3 +1,6 @@
+// Gallery may use server helpers that access cookies; mark dynamic to prevent static prerender errors.
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import GalleryContent from "../components/galleryContent/GalleryContent";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";

@@ -1,3 +1,6 @@
+// Vendors page relies on server-side helpers (auth, saved vendors) that use cookies; make dynamic.
+export const dynamic = 'force-dynamic';
+
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
 

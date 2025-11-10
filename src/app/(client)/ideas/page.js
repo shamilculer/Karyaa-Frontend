@@ -3,6 +3,10 @@
 import IdeasContainer from "../components/IdeasContainer";
 import { getAllIdeaCategoriesAction } from "@/app/actions/ideas";
 
+// This route uses server-only cookies via apiFetch; force dynamic rendering so Next
+// doesn't attempt to statically prerender it and error on cookie usage.
+export const dynamic = 'force-dynamic';
+
 export default async function IdeasPage() {
   let categories = [];
   let error = null;

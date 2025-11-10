@@ -1,3 +1,6 @@
+// Settings pages use server-side token/cookie-based helpers; mark dynamic to avoid static prerender errors.
+export const dynamic = 'force-dynamic';
+
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'

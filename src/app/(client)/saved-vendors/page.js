@@ -1,3 +1,6 @@
+// Saved vendors list requires user cookies for fetching saved items; force dynamic rendering.
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";

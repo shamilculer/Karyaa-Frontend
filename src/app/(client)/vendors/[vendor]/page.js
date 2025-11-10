@@ -1,3 +1,6 @@
+// Vendor profile page performs server-side auth and data fetching using cookies; mark dynamic.
+export const dynamic = 'force-dynamic';
+
 import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {

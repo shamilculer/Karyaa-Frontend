@@ -1,3 +1,6 @@
+// Admin pages often require server-side auth via cookies; force dynamic rendering to avoid build prerender errors.
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import { getBundleOverviewStats } from "@/app/actions/admin/analytics";
 import BundlesTable from "../components/tables/BundleTable";

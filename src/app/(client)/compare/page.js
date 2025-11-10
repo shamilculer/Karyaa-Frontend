@@ -1,3 +1,6 @@
+// This page performs server-side vendor lookups (may use cookie-backed helpers). Force dynamic rendering.
+export const dynamic = 'force-dynamic';
+
 // app/compare/page.js
 import { Suspense } from "react";
 import CompareTable from "../components/CompareTable";

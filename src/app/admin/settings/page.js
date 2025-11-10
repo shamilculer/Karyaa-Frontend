@@ -20,7 +20,7 @@ const AdminSettingsPage = async () => {
 
                         <div>
                             <h3>{admin?.fullName || admin?.username || 'Administrator'}</h3>
-                            <p className='!text-sm text-gray-500'>{admin.email}</p>
+                            <p className='!text-sm text-gray-500'>{admin?.email || ''}</p>
                         </div>
                     </div>
 

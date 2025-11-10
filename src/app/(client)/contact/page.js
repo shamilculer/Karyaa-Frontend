@@ -1,3 +1,6 @@
+// This page uses server actions that read cookies; force dynamic to avoid static prerender errors.
+export const dynamic = 'force-dynamic';
+
 import { Mail, MapPin, PhoneCall } from "lucide-react"
 import Link from "next/link"
 import {

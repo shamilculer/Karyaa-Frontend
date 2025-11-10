@@ -1,3 +1,6 @@
+// Subcategory pages fetch server data and may rely on cookies; force dynamic rendering.
+export const dynamic = 'force-dynamic';
+
 import CategoryList from "@/app/(client)/components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar/PageSearchBar";
 import VendorsListWrapper from "@/app/(client)/components/common/vendorsList/VendorListWrapper";

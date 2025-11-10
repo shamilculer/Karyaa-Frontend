@@ -1,3 +1,7 @@
+// This page relies on server-side data that uses cookies during render (auth/api helper).
+// Mark as dynamic to prevent Next from attempting static prerender which errors on cookie usage.
+export const dynamic = 'force-dynamic';
+
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import BlogPosts from "../components/common/BlogPosts";
 import Link from "next/link";
