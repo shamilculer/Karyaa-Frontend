@@ -2,11 +2,17 @@ import Image from "next/image";
 import BlogPosts, { BlogCarousel } from "../../components/common/BlogPosts";
 import { getBlogPost } from "../../../actions/blog";
 import { initialBlogParams } from "@/utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { CircleArrowRight } from "lucide-react";
 
 const BlogPostPage = async ({ params }) => {
   const { post } = await params;
 
   const blogPost = await getBlogPost(post);
+  
+  const ctaUrl = blogPost.ctaLink?.trim();
+  const isExternal = ctaUrl?.startsWith("http");
 
   if (!blogPost) {
     return (
@@ -38,9 +44,9 @@ const BlogPostPage = async ({ params }) => {
   );
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  px-4 sm:px-6 lg:px-8">
       {/* ---- Blog Header ---- */}
-      <section className="!mt-8 mb-16 space-y-6">
+      <section className="!mt-8 mb-16 space-y-6 max-w-6xl mx-auto">
         <div>
           <span className="font-medium uppercase text-primary text-[11px] md:text-sm tracking-widest">
             Blog / {blogPost.slug.replace(/-/g, " ")}
@@ -74,14 +80,36 @@ const BlogPostPage = async ({ params }) => {
           className="prose prose-lg max-w-none text-gray-700"
           dangerouslySetInnerHTML={{ __html: blogPost.content }}
         ></div>
+
+        <div className="mt-10">
+          {ctaUrl ? (
+            isExternal ? (
+              <Button asChild>
+                <a href={ctaUrl} target="_blank" rel="noopener noreferrer">
+                  {blogPost.ctaText} <CircleArrowRight />
+                </a>
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link href={ctaUrl}>
+                  {blogPost.ctaText} <CircleArrowRight />
+                </Link>
+              </Button>
+            )
+          ) : null}
+        </div>
       </section>
 
       {/* ---- Related Articles ---- */}
-      <section>
+      <section className="container">
         <div className="flex items-center mb-8">
-          <h2 className="text-2xl font-semibold uppercase">Related Articles</h2>
+          <h2 className="text-2xl font-semibold uppercase">More Articles</h2>
         </div>
-        <BlogPosts searchParams={initialBlogParams} showPagination={false} />
+        <BlogPosts
+          searchParams={initialBlogParams}
+          showPagination={false}
+          exclude={blogPost._id}
+        />
       </section>
     </div>
   );

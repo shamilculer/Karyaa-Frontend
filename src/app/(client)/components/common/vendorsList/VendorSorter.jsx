@@ -43,7 +43,7 @@ export const VendorPriceSorter = () => {
     >
       <SelectTrigger
         id="sort-price"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-sm"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
       >
         <SelectValue placeholder="Sort by Price" />
       </SelectTrigger>
@@ -85,7 +85,7 @@ export const VendorRatingSorter = () => {
     >
       <SelectTrigger
         id="sort-rating"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-sm"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
       >
         <SelectValue placeholder="Sort by Rating" />
       </SelectTrigger>
@@ -105,12 +105,31 @@ export const VendorOccasionSorter = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Uses 'occasion' query parameter
-  const currentOccasion = searchParams.get("occasion") || "none";
+  const currentOccasion = searchParams.get("occasion") || "";
+
+  // Your enum values
+  const occasions = [
+    "baby-showers-gender-reveals",
+    "birthdays-anniversaries",
+    "corporate-events",
+    "cultural-festival-events",
+    "engagement-proposal-events",
+    "graduation-celebrations",
+    "private-parties",
+    "product-launches-brand-events",
+  ];
+
+  // Format for UI: "baby-showers-gender-reveals" -> "Baby Showers Gender Reveals"
+  const capitalizeDisplay = (str) =>
+    str
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
 
   const handleSortChange = (value) => {
     const params = new URLSearchParams(searchParams);
-    if (value === "none") {
+
+    if (value === "") {
       params.delete("occasion");
     } else {
       params.set("occasion", value);
@@ -120,25 +139,20 @@ export const VendorOccasionSorter = () => {
   };
 
   return (
-    <Select
-      onValueChange={handleSortChange}
-      // Value is the current occasion sort, defaulting to 'none'
-      value={currentOccasion}
-    >
+    <Select onValueChange={handleSortChange} value={currentOccasion}>
       <SelectTrigger
         id="sort-occasion"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-sm"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
       >
-        <SelectValue placeholder="Sort by Occasion" />
+        <SelectValue placeholder="Occasion" />
       </SelectTrigger>
       <SelectContent>
-        {/* Note: The values for occasions should match what your API expects for filtering. 
-            These are placeholders based on common wedding/event occasions. */}
-        <SelectItem value="none">All Occasions</SelectItem>
-        <SelectItem value="wedding">Wedding</SelectItem>
-        <SelectItem value="reception">Reception</SelectItem>
-        <SelectItem value="pre-wedding">Pre-Wedding Shoot</SelectItem>
-        <SelectItem value="birthday">Birthday/Party</SelectItem>
+        <SelectItem value="all">All Occasions</SelectItem>
+        {occasions.map((o) => (
+          <SelectItem key={o} value={o}>
+            {capitalizeDisplay(o)}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

@@ -1,7 +1,21 @@
-"use client"
-import { useState } from "react"
-import { usePathname } from "next/navigation"
-import { SquareMenu, ChartPie, Image as ImageIcon, BriefcaseBusiness, Star, ChartNoAxesCombined, Users, Settings, CircleQuestionMark, SquareStack, Headset, ChevronDown } from "lucide-react"
+"use client";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import {
+    SquareMenu,
+    ChartPie,
+    Image as ImageIcon,
+    BriefcaseBusiness,
+    Star,
+    ChartNoAxesCombined,
+    Users,
+    Settings,
+    CircleQuestionMark,
+    SquareStack,
+    Headset,
+    ChevronDown,
+    Network,
+} from "lucide-react";
 
 import {
     Sidebar,
@@ -14,202 +28,206 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
     Avatar,
     AvatarImage,
-    AvatarFallback
-} from "@/components/ui/avatar"
+    AvatarFallback,
+} from "@/components/ui/avatar";
 
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-import { useAdminStore } from "@/store/adminStore"
-import { getInitials } from "@/utils"
+import { useAdminStore } from "@/store/adminStore";
+import { getInitials } from "@/utils";
+import { AdminDataSync } from "./AdminDataSync";
 
-// Menu items.
 const items = [
     {
         title: "Dashboard",
         url: "/admin/dashboard",
         icon: ChartPie,
+        accessKey: "dashboard",
     },
     {
         title: "Content Moderation",
         icon: ImageIcon,
         isGroup: true,
+        accessKey: "contentModeration",
         children: [
-            {
-                title: "Blog",
-                url: "/admin/content-moderation/blog",
-            },
-            {
-                title: "Ideas",
-                url: "/admin/content-moderation/ideas",
-            },
-            {
-                title: "Contact Details",
-                url: "/admin/content-moderation/contact-details",
-            },
+            { title: "Blog", url: "/admin/content-moderation/blog" },
+            { title: "Ideas", url: "/admin/content-moderation/ideas" },
+            { title: "Contact Details", url: "/admin/content-moderation/contact-details" },
         ],
     },
     {
         title: "Category Management",
         url: "/admin/category-management",
         icon: SquareMenu,
+        accessKey: "categoryManagement",
     },
     {
         title: "Vendor Management",
         url: "/admin/vendor-management",
         icon: BriefcaseBusiness,
+        accessKey: "vendorManagement",
     },
     {
         title: "Review Management",
         url: "/admin/review-management",
         icon: Star,
+        accessKey: "reviewManagement",
     },
     {
         title: "Analytics & Insights",
         icon: ChartNoAxesCombined,
         isGroup: true,
+        accessKey: "analyticsInsights",
         children: [
-            {
-                title: "Vendor Analytics",
-                url: "/admin/analytics-insights/vendor-analytics",
-            },
-
-            {
-                title: "Revenue Insights",
-                url: "/admin/analytics-insights/revenue-insights", // CORRECTED URL TYPO (was vendor-Insights)
-            },
-
-            {
-                title: "Platform Analytics", // CORRECTED TYPO (was Platfotm)
-                url: "/admin/analytics-insights/platform-analytics",
-            },
-            
+            { title: "Vendor Analytics", url: "/admin/analytics-insights/vendor-analytics" },
+            { title: "Revenue Insights", url: "/admin/analytics-insights/revenue-insights" },
+            { title: "Platform Analytics", url: "/admin/analytics-insights/platform-analytics" },
         ],
     },
     {
         title: "Support and Tickets",
         url: "/admin/support-tickets",
         icon: Headset,
+        accessKey: "supportTickets",
     },
     {
         title: "Ad Management",
         url: "/admin/ad-management",
         icon: CircleQuestionMark,
+        accessKey: "adManagement",
+    },
+    {
+        title: "Referrals Management",
+        url: "/admin/referrals-management",
+        icon: Network,
+        accessKey: "referralManagement",
     },
     {
         title: "Bundle Management",
-        icon: SquareStack,
         url: "/admin/bundle-management",
+        icon: SquareStack,
+        accessKey: "bundleManagement",
+    },
+    {
+        title: "Admin Users",
+        url: "/admin/admin-users",
+        icon: Users,
+        accessKey: "adminUserSettings",
     },
     {
         title: "Admin Settings",
         url: "/admin/settings",
         icon: Settings,
+        accessKey: "adminSettings",
     },
 ];
 
 function AdminSidebar() {
-    const pathname = usePathname()
+    const pathname = usePathname();
     const { admin } = useAdminStore();
-    
-    // State for the Bundle Management dropdown (EXISTING)
-    const [isBundleOpen, setIsBundleOpen] = useState(
-        items.find(item => item.isGroup && item.title === "Bundle Management")?.children.some(
-            child => pathname === child.url
-        ) || false
-    );
 
-    // State for Content Moderation dropdown (EXISTING)
-    const [isContentOpen, setIsContentOpen] = useState(
-        items.find(item => item.isGroup && item.title === "Content Moderation")?.children.some(
-            child => pathname === child.url
-        ) || false
-    );
+    const [openGroups, setOpenGroups] = useState({});
 
-    // 1. ADD NEW STATE for Analytics & Insights
-    const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(
-        items.find(item => item.isGroup && item.title === "Analytics & Insights")?.children.some(
-            child => pathname.startsWith(child.url.split('/').slice(0, 3).join('/')) // Use startsWith for parent match
-        ) || false
-    );
+    // auto-open correct group on load and route change
+    useEffect(() => {
+        items.forEach((item) => {
+            if (item.isGroup) {
+                const active = item.children.some((child) =>
+                    pathname.startsWith(child.url)
+                );
+                if (active) {
+                    setOpenGroups((prev) => ({
+                        ...prev,
+                        [item.title]: true,
+                    }));
+                }
+            }
+        });
+    }, [pathname]);
+
+    const toggleGroup = (title) => {
+        setOpenGroups((prev) => ({
+            ...prev,
+            [title]: !prev[title],
+        }));
+    };
+
+    const filteredItems =
+        admin?.adminLevel === "admin"
+            ? items
+            : items.filter((item) => {
+                if (item.isGroup) return admin?.accessControl?.[item.accessKey];
+                return admin?.accessControl?.[item.accessKey];
+            });
 
     return (
         <Sidebar>
             <SidebarHeader className="p-7">
+                <AdminDataSync currentAdminId={admin?.id || admin?._id} />
                 <div className="flex items-center gap-5">
                     <Image width={150} height={40} alt="Logo" className="w-32" src="/logo.svg" />
                 </div>
             </SidebarHeader>
+
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel className="uppercase text-xs text-[#636387]">Menu</SidebarGroupLabel>
+                    <SidebarGroupLabel className="uppercase text-xs text-[#636387]">
+                        Menu
+                    </SidebarGroupLabel>
+
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => {
-                                
-                                // --- Dropdown Group Logic (For all groups) ---
+                            {filteredItems.map((item) => {
+                                // GROUP
                                 if (item.isGroup) {
-                                    const isGroupActive = item.children.some(child => pathname === child.url);
-                                    
-                                    let isOpen, setIsOpen;
-                                    
-                                    // Determine which state to use based on the group title
-                                    if (item.title === "Bundle Management") {
-                                        isOpen = isBundleOpen;
-                                        setIsOpen = setIsBundleOpen;
-                                    } else if (item.title === "Content Moderation") {
-                                        isOpen = isContentOpen;
-                                        setIsOpen = setIsContentOpen;
-                                    } else if (item.title === "Analytics & Insights") { 
-                                        // 2. NEW LOGIC for Analytics & Insights
-                                        isOpen = isAnalyticsOpen;
-                                        setIsOpen = setIsAnalyticsOpen;
-                                    } 
-                                    else {
-                                        // Fallback for future groups
-                                        isOpen = false;
-                                        setIsOpen = () => {};
-                                    }
+                                    const groupActive = item.children.some((child) =>
+                                        pathname.startsWith(child.url)
+                                    );
 
                                     return (
                                         <SidebarGroup key={item.title}>
-                                            {/* Parent button for the dropdown. Toggles the submenu. */}
                                             <SidebarMenuButton
-                                                onClick={() => setIsOpen(prev => !prev)}
-                                                className={` px-2
-                                                    ${isGroupActive ? "bg-primary text-white hover:bg-primary/90 hover:text-white" : ""}
-                                                `}
+                                                onClick={() => toggleGroup(item.title)}
+                                                className={`px-2 ${groupActive
+                                                    ? "bg-primary text-white hover:bg-primary/90"
+                                                    : ""
+                                                    }`}
                                             >
                                                 <item.icon />
                                                 <span className="text-[13px]">{item.title}</span>
-                                                <ChevronDown 
-                                                    className={`ml-auto h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+                                                <ChevronDown
+                                                    className={`ml-auto h-4 w-4 transition-transform ${openGroups[item.title] ? "rotate-180" : ""
+                                                        }`}
                                                 />
                                             </SidebarMenuButton>
 
-                                            {/* Collapsible Content */}
-                                            {isOpen && (
+                                            {openGroups[item.title] && (
                                                 <SidebarGroupContent className="pl-4 pt-1">
                                                     <SidebarMenu>
-                                                        {item.children.map(child => {
-                                                            const isChildActive = pathname === child.url;
+                                                        {item.children.map((child) => {
+                                                            const childActive = pathname.startsWith(child.url);
                                                             return (
                                                                 <SidebarMenuItem key={child.title}>
                                                                     <SidebarMenuButton
                                                                         asChild
-                                                                        // Child links use different styling for active state
-                                                                        className={`${isChildActive ? "bg-primary text-white hover:bg-primary/90 hover:text-white" : "text-[#636387]"}`}
+                                                                        className={`${childActive
+                                                                            ? "bg-primary text-white"
+                                                                            : "text-[#636387]"
+                                                                            }`}
                                                                     >
                                                                         <Link href={child.url}>
-                                                                            <span className="text-[13px]">{child.title}</span>
+                                                                            <span className="text-[13px]">
+                                                                                {child.title}
+                                                                            </span>
                                                                         </Link>
                                                                     </SidebarMenuButton>
                                                                 </SidebarMenuItem>
-                                                            )
+                                                            );
                                                         })}
                                                     </SidebarMenu>
                                                 </SidebarGroupContent>
@@ -218,14 +236,17 @@ function AdminSidebar() {
                                     );
                                 }
 
-                                // --- Single Menu Item Logic (Existing) ---
-                                const isActive = pathname === item.url
+                                // SINGLE
+                                const isActive = pathname.startsWith(item.url);
 
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton
                                             asChild
-                                            className={`px-2 ${isActive ? "bg-primary text-white hover:bg-primary/90 hover:text-white" : ""}`}
+                                            className={`px-2 ${isActive
+                                                ? "bg-primary text-white hover:bg-primary/90"
+                                                : ""
+                                                }`}
                                         >
                                             <Link href={item.url}>
                                                 <item.icon />
@@ -233,12 +254,13 @@ function AdminSidebar() {
                                             </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
-                                )
+                                );
                             })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+
             <SidebarFooter className="flex-center py-7 px-4 border-t border-gray-200">
                 <div className="flex items-center gap-3">
                     <Avatar className="size-10 overflow-hidden border border-gray-300">
@@ -246,13 +268,15 @@ function AdminSidebar() {
                         <AvatarFallback>{getInitials(admin?.fullName || "")}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <span className="font-heading font-medium leading-[1.2em] text-black">{admin?.fullName}</span>
+                        <span className="font-heading font-medium text-black">
+                            {admin?.fullName}
+                        </span>
                         <span className="text-xs block">Administrator</span>
                     </div>
                 </div>
             </SidebarFooter>
         </Sidebar>
-    )
+    );
 }
 
-export default AdminSidebar
+export default AdminSidebar;

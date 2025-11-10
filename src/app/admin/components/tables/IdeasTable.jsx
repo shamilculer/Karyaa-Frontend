@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,25 +34,54 @@ import lgZoom from "lightgallery/plugins/zoom";
 
 import { getAllIdeasAction } from "@/app/actions/ideas";
 import AddIdeaModal from "../AddIdeaModal";
+import EditIdeaModal from "../EditIdeaModal"; // ⬅️ IMPORT THE EDIT MODAL
 import { deleteIdeaAction } from "@/app/actions/admin/ideas";
 import { Badge } from "@/components/ui/badge";
 
 export default function IdeasTable({ categories = [] }) {
+    // ➡️ Hooks for URL-based navigation
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const [ideas, setIdeas] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState(null);
     const [addModalOpen, setAddModalOpen] = useState(false);
-
-    // ✅ Only track the idea currently being deleted
+    
+    // ⬅️ New State for Editing
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedIdea, setSelectedIdea] = useState(null); 
+    
     const [deletingId, setDeletingId] = useState(null);
 
     const limit = 20;
 
-    // Fetch ideas
-    const fetchIdeas = async () => {
+    // ➡️ Get current filter values from URL
+    const currentPage = parseInt(searchParams.get("page") || "1");
+    const searchTerm = searchParams.get("search") || "";
+    const selectedCategory = searchParams.get("category") || "";
+
+    // ➡️ Centralized function to update URL
+    const createQueryString = useCallback(
+        (name, value) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (value === "" || value === 1 || value === "all") {
+                params.delete(name);
+            } else {
+                params.set(name, value.toString());
+            }
+            // Always reset page to 1 when search or category changes
+            if (name === "search" || name === "category") {
+                params.delete("page");
+            }
+            return params.toString();
+        },
+        [searchParams]
+    );
+
+    // ➡️ Fetch ideas: Now dependent on URL params
+    const fetchIdeas = useCallback(async () => {
         setLoading(true);
         try {
             const result = await getAllIdeasAction({
@@ -76,16 +106,38 @@ export default function IdeasTable({ categories = [] }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, searchTerm, selectedCategory, limit]);
 
+    // ➡️ Trigger fetch when URL parameters change
     useEffect(() => {
         fetchIdeas();
-    }, [currentPage, searchTerm, selectedCategory]);
+    }, [fetchIdeas]);
 
-    const handleCategoryChange = (value) => {
-        setSelectedCategory(value === "all" ? "" : value);
-        setCurrentPage(1);
-    };
+    // ----------------------------------------------------------------------
+    // Handlers to update URL
+    // ----------------------------------------------------------------------
+
+    // ... (URL handlers remain the same)
+
+    // ➡️ Debounce for Search Input
+    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+    // Sync local state with URL state on initial load/navigation
+    useEffect(() => {
+        setLocalSearchTerm(searchTerm);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            // Only push update if local term differs from URL term
+            if (localSearchTerm !== searchTerm) {
+                 const url = pathname + '?' + createQueryString('search', localSearchTerm);
+                 router.push(url);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [localSearchTerm, searchTerm, pathname, router, createQueryString]);
+
 
     const handleDeleteIdea = async (id) => {
         try {
@@ -97,7 +149,7 @@ export default function IdeasTable({ categories = [] }) {
 
             if (res.success) {
                 toast.success(res.message || "Idea deleted successfully.");
-                fetchIdeas();
+                fetchIdeas(); // Refetch data
             } else {
                 toast.error(res.message || "Failed to delete idea.");
             }
@@ -109,23 +161,31 @@ export default function IdeasTable({ categories = [] }) {
         }
     };
 
-    // Search debounce
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setCurrentPage(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    const goToPage = (page) => {
-        if (page >= 1 && page <= (pagination?.totalPages || 1)) {
-            setCurrentPage(page);
-        }
-    };
-
     const handleRefresh = () => {
         fetchIdeas();
     };
+
+    // ⬅️ New handler to open Edit Modal
+    const handleEditIdea = (idea) => {
+        setSelectedIdea(idea);
+        setEditModalOpen(true);
+    };
+
+    // ⬅️ New handler to close Edit Modal
+    const handleEditModalClose = (newOpenState) => {
+        if (!newOpenState) {
+            setSelectedIdea(null);
+        }
+        setEditModalOpen(newOpenState);
+    };
+
+    const handleCategoryChange = (value) => {
+        const newCategory = value === "all" ? "" : value;
+        const url = pathname + '?' + createQueryString('category', newCategory);
+        router.push(url);
+    };
+
+    // ----------------------------------------------------------------------
 
     return (
         <div className="space-y-6 mt-3">
@@ -137,13 +197,15 @@ export default function IdeasTable({ categories = [] }) {
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
                             placeholder="Search ideas..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            // ➡️ Use local state for controlled input, URL state for filtering logic
+                            value={localSearchTerm} 
+                            onChange={(e) => setLocalSearchTerm(e.target.value)}
                             className="pl-10"
                         />
                     </div>
 
                     {/* Category Filter */}
+                    {/* ➡️ Use URL state for Select component */}
                     <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
                         <SelectTrigger className="w-full md:w-[200px]">
                             <SelectValue placeholder="All Categories" />
@@ -166,7 +228,7 @@ export default function IdeasTable({ categories = [] }) {
                 </Button>
             </div>
 
-            {/* Cards */}
+            {/* Cards (Display remains the same) */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
@@ -184,12 +246,13 @@ export default function IdeasTable({ categories = [] }) {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                     {ideas.map((idea) => (
                         <IdeaCard
                             key={idea._id}
                             idea={idea}
                             onDelete={handleDeleteIdea}
+                            onEdit={handleEditIdea} // ⬅️ Pass the new handler
                             deletingId={deletingId}
                         />
                     ))}
@@ -235,15 +298,26 @@ export default function IdeasTable({ categories = [] }) {
                 categories={categories}
                 onSuccess={handleRefresh}
             />
+
+            {/* ⬅️ Edit Idea Modal */}
+            {selectedIdea && ( // Only render the modal if an idea is selected
+                <EditIdeaModal
+                    open={editModalOpen}
+                    onOpenChange={handleEditModalClose} // Use the new close handler
+                    categories={categories}
+                    idea={selectedIdea} // Pass the selected idea
+                    onSuccess={handleRefresh}
+                />
+            )}
         </div>
     );
 }
 
-/* =======================================================
-   ✅ Card UI
-======================================================= */
+// ----------------------------------------------------------------------
+// IDEA CARD Component
+// ----------------------------------------------------------------------
 
-const IdeaCard = ({ idea, onDelete, deletingId }) => {
+const IdeaCard = ({ idea, onDelete, onEdit, deletingId }) => { // ⬅️ Receive onEdit prop
     const lightGalleryRef = useRef(null);
 
     const images = useMemo(
@@ -305,24 +379,26 @@ const IdeaCard = ({ idea, onDelete, deletingId }) => {
             {/* Content */}
             <div className="p-4 flex flex-col flex-grow justify-between">
                 <div>
-                    <div className="flex-between">
+                    <div className="flex justify-between items-center">
                         <Badge className="bg-indigo-300 text-white">
                             {idea.category?.name}
                         </Badge>
-                        <div className="flex items-center !text-xs">
-                            <Calendar className="w-3 h-3 mb-0.5" />
+                        <div className="flex items-center text-xs text-gray-500">
+                            <Calendar className="w-3 h-3 mb-0.5 mr-1" />
                             {format(new Date(idea.createdAt), "dd-MM-yyyy")}
                         </div>
                     </div>
-                    <h3 className="!text-xl font-bold mt-4 mb-2 line-clamp-2">{idea.title}</h3>
-                    <p className="!text-sm text-gray-600 line-clamp-4">{idea.description}</p>
+                    <h3 className="text-xl font-bold mt-4 mb-2 line-clamp-2">{idea.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-4">{idea.description}</p>
                 </div>
 
-                <div className="flex gap-3 mt-4 border-t border-t-gray-300 pt-4">
-                    <Button asChild variant="outline">
-                        <Link href={`/admin/content-moderation/ideas/edit?id=${idea._id}`}>
-                            <SquarePen className="w-4 h-4 mr-2" /> Edit
-                        </Link>
+                <div className="flex justify-end gap-3 mt-4 border-t border-t-gray-300 pt-4">
+                    {/* ⬅️ Updated Edit Button to open modal */}
+                    <Button 
+                        variant="outline" 
+                        onClick={() => onEdit(idea)}
+                    >
+                        <SquarePen className="w-4 h-4 mr-2" /> Edit
                     </Button>
 
                     {/* ✅ Only disable button of this idea */}

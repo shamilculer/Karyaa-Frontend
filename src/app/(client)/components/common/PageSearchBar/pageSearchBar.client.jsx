@@ -76,7 +76,7 @@ export default function PageSearchBarClient({ locations }) {
           </SelectTrigger>
           <SelectContent>
             {locations.map((loc) => (
-              <SelectItem key={loc.value} value={loc.value}>
+              <SelectItem className="text-primary" key={loc.value} value={loc.value}>
                 {loc.label}
               </SelectItem>
             ))}

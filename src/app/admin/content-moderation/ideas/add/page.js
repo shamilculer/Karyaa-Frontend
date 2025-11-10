@@ -30,6 +30,7 @@ import { Loader2, X } from "lucide-react";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 import { createIdeaAction } from "@/app/actions/admin/ideas";
+import Image from "next/image";
 
 const allowedCategories = [
   "Engagement & Proposal Events",
@@ -185,8 +186,10 @@ export default function AddIdeaPage() {
                     key={idx}
                     className="relative w-28 h-28 border rounded-lg overflow-hidden group"
                   >
-                    <img
+                    <Image
                       src={img}
+                      width={112}
+                      height={112}
                       alt={`Idea Image ${idx + 1}`}
                       className="object-cover w-full h-full"
                     />

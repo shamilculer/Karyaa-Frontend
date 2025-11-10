@@ -5,10 +5,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-// --- Server Actions ---
-import { getBrandDetailsAction, updateBrandDetailsAction } from "@/app/actions/admin/brand";
+import { updateBrandDetailsAction } from "@/app/actions/admin/brand";
+import { getBrandDetailsAction } from "@/app/actions/brand";
 
-// --- Shadcn UI ---
 import {
   Card,
   CardHeader,
@@ -71,7 +70,7 @@ export default function ContactManagementPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await getBrandDetailsAction();
+      const res = await getBrandDetailsAction("admin");
 
       if (res?.error) {
         toast.error(res.error);

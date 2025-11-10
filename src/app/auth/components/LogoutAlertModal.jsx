@@ -13,12 +13,13 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { logoutUser } from '@/app/actions/user/user';
 import { useClientStore } from '@/store/clientStore';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 
-const LogoutAlertModal = () => {
+const LogoutAlertModal = ({ isMobile = false }) => {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const logout = useClientStore((state) => state.logout);
     const router = useRouter();
@@ -39,9 +40,19 @@ const LogoutAlertModal = () => {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                   <LogOut className='w-4 h-4' /> Logout
-                </DropdownMenuItem>
+                {isMobile ? (
+                    // For mobile sheet - use a Button
+                    <Button variant="destructive" size="sm" className="w-auto">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                    </Button>
+                ) : (
+                    // For desktop dropdown - use DropdownMenuItem
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <LogOut className='w-4 h-4 mr-2' /> 
+                        Logout
+                    </DropdownMenuItem>
+                )}
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

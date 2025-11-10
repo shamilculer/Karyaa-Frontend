@@ -49,6 +49,8 @@ import {
     ChevronRight,
     Loader2,
     PackageCheck,
+    Globe,
+    MapPin,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -78,6 +80,16 @@ const VendorDetails = ({ vendor }) => (
                 <Mail className="w-4 h-4 text-gray-500" />
                 <span className="text-blue-600 hover:underline">{vendor.email}</span>
             </div>
+            <div className="flex items-center space-x-2 text-sm">
+                <MapPin className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-700">{vendor.city}, {vendor.country}</span>
+            </div>
+            {vendor.isInternational && (
+                <div className="flex items-center space-x-2 text-sm">
+                    <Globe className="w-4 h-4 text-blue-500" />
+                    <span className="text-blue-600 font-semibold">International Vendor</span>
+                </div>
+            )}
             <div className="flex items-center space-x-2 text-sm">
                 <PackageCheck className="w-4 h-4 text-gray-500" />
                 <span className="text-gray-700 font-semibold">{vendor.bundleName} - AED {vendor.bundlePrice}</span>
@@ -172,11 +184,10 @@ export default function VendorsTable({ controls = true }) {
     const [globalFilter, setGlobalFilter] = useState('')
 
     const [filterVendorStatus, setFilterVendorStatus] = useState('')
-    const [filterSubscriptionStatus, setFilterSubscriptionStatus] = useState('')
     const [filterCity, setFilterCity] = useState('')
+    const [filterIsInternational, setFilterIsInternational] = useState('')
 
-    const uniqueVendorStatuses = ['approved', 'pending', 'rejected']
-    const uniqueSubscriptionStatuses = ['active', 'pending', 'expired']
+    const uniqueVendorStatuses = ['pending', 'approved', 'rejected', 'expired']
 
     const fetchData = useCallback(async () => {
         setIsLoading(true)
@@ -189,8 +200,8 @@ export default function VendorsTable({ controls = true }) {
                 limit: pageSize,
                 search: globalFilter,
                 vendorStatus: filterVendorStatus,
-                subscriptionStatus: filterSubscriptionStatus,
                 city: filterCity,
+                isInternational: filterIsInternational,
             })
 
             if (result.success) {
@@ -210,7 +221,7 @@ export default function VendorsTable({ controls = true }) {
         } finally {
             setIsLoading(false)
         }
-    }, [pageIndex, pageSize, globalFilter, filterVendorStatus, filterSubscriptionStatus, filterCity])
+    }, [pageIndex, pageSize, globalFilter, filterVendorStatus, filterCity, filterIsInternational])
 
     useEffect(() => {
         const delay = setTimeout(() => {
@@ -292,23 +303,22 @@ export default function VendorsTable({ controls = true }) {
         "Business Name",
         "Categories",
         "Owner",
-        "City",
+        "Location",
         "Rating",
-        "Vendor Status",
-        "Subscription",
+        "Status",
         "Actions"
     ]
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'approved': 
-            case 'active':
+            case 'approved':
                 return 'bg-green-100 text-green-800'
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800'
             case 'rejected':
-            case 'expired':
                 return 'bg-red-100 text-red-800'
+            case 'expired':
+                return 'bg-orange-100 text-orange-800'
             default:
                 return 'bg-gray-100 text-gray-800'
         }
@@ -355,12 +365,12 @@ export default function VendorsTable({ controls = true }) {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Vendor Status: {filterVendorStatus || "All"}
+                                    Status: {filterVendorStatus || "All"}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
-                                <DropdownMenuLabel>Filter by Vendor Status</DropdownMenuLabel>
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => { setFilterVendorStatus(''); setPageIndex(0) }}>
                                     Show All
@@ -384,29 +394,35 @@ export default function VendorsTable({ controls = true }) {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Subscription: {filterSubscriptionStatus || "All"}
+                                    Type: {filterIsInternational === "true" ? "International" : filterIsInternational === "false" ? "Local" : "All"}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
-                                <DropdownMenuLabel>Filter by Subscription</DropdownMenuLabel>
+                                <DropdownMenuLabel>Filter by Vendor Type</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setFilterSubscriptionStatus(''); setPageIndex(0) }}>
+                                <DropdownMenuItem onClick={() => { setFilterIsInternational(''); setPageIndex(0) }}>
                                     Show All
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                {uniqueSubscriptionStatuses.map(status => (
-                                    <DropdownMenuCheckboxItem
-                                        key={status}
-                                        checked={filterSubscriptionStatus === status}
-                                        onCheckedChange={() => {
-                                            setFilterSubscriptionStatus(status)
-                                            setPageIndex(0)
-                                        }}
-                                    >
-                                        {status}
-                                    </DropdownMenuCheckboxItem>
-                                ))}
+                                <DropdownMenuCheckboxItem
+                                    checked={filterIsInternational === "false"}
+                                    onCheckedChange={() => {
+                                        setFilterIsInternational("false")
+                                        setPageIndex(0)
+                                    }}
+                                >
+                                    Local (UAE)
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={filterIsInternational === "true"}
+                                    onCheckedChange={() => {
+                                        setFilterIsInternational("true")
+                                        setPageIndex(0)
+                                    }}
+                                >
+                                    International
+                                </DropdownMenuCheckboxItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -421,7 +437,7 @@ export default function VendorsTable({ controls = true }) {
                                 <TableHead className="w-12">
                                     <Checkbox
                                         checked={isAllSelected}
-                                        indeterminate={isSomeSelected}
+                                        indeterminate={isSomeSelected || undefined}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -451,7 +467,6 @@ export default function VendorsTable({ controls = true }) {
 
                             {!isLoading && !apiError && data.map((row, index) => (
                                 <TableRow key={row._id} className="hover:bg-gray-50">
-                                    {console.log(row)}
                                     <TableCell>
                                         <Checkbox
                                             checked={isRowSelected(row._id)}
@@ -464,15 +479,22 @@ export default function VendorsTable({ controls = true }) {
                                             <HoverCardTrigger asChild>
                                                 <div className="flex items-center gap-2 cursor-pointer">
                                                     <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={row.businessLogo} alt={row.ownerName} />
-                                                        <AvatarFallback>{getInitials(row.ownerName)}</AvatarFallback>
+                                                        <AvatarImage src={row.businessLogo} alt={row.businessName} />
+                                                        <AvatarFallback>{getInitials(row.businessName)}</AvatarFallback>
                                                     </Avatar>
-                                                    <Link
-                                                        href={`/admin/vendor-management/${row._id}`}
-                                                        className="hover:underline hover:text-blue-600 font-medium"
-                                                    >
-                                                        {row.businessName}
-                                                    </Link>
+                                                    <div className="flex flex-col">
+                                                        <Link
+                                                            href={`/admin/vendor-management/${row._id}`}
+                                                            className="hover:underline hover:text-blue-600 font-medium"
+                                                        >
+                                                            {row.businessName}
+                                                        </Link>
+                                                        {row.isInternational && (
+                                                            <span className="text-xs text-blue-600 flex items-center gap-1">
+                                                                <Globe className="w-3 h-3" /> International
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </HoverCardTrigger>
                                             <HoverCardContent className="w-80 bg-white shadow-lg border p-3">
@@ -482,16 +504,16 @@ export default function VendorsTable({ controls = true }) {
                                     </TableCell>
                                     <TableCell className="text-sm truncate max-w-[200px]">{row.mainCategories}</TableCell>
                                     <TableCell>{row.ownerName}</TableCell>
-                                    <TableCell>{row.city}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col text-sm">
+                                            <span className="font-medium">{row.city}</span>
+                                            <span className="text-gray-500 text-xs">{row.country}</span>
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{row.rating.toFixed(1)}</TableCell>
                                     <TableCell>
                                         <Badge className={getStatusColor(row.vendorStatus)}>
                                             {row.vendorStatus}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge className={getStatusColor(row.subscriptionStatus)}>
-                                            {row.subscriptionStatus}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -508,6 +530,11 @@ export default function VendorsTable({ controls = true }) {
                                                 {row.vendorStatus === 'pending' && (
                                                     <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'approved')}>
                                                         Approve Vendor
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {row.vendorStatus === 'approved' && (
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'expired')}>
+                                                        Mark as Expired
                                                     </DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuSeparator />

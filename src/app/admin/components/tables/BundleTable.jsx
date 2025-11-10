@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { getAllBundlesAction, deleteBundleAction, toggleBundleStatusAction } from "@/app/actions/admin/bundle"
 
@@ -38,7 +39,6 @@ import {
     Loader2,
     Zap,
 } from "lucide-react"
-import Link from "next/link"
 import { toast } from "sonner"
 import CreateBundleModal from "../CreateBundelModal"
 import EditBundleModal from "../EditBundleModal"
@@ -59,7 +59,7 @@ const formatDuration = (duration) => {
     return `${value} ${formattedUnit}`
 }
 
-// --- Pagination ---
+// --- Pagination (Modified to use props directly for URL updates) ---
 const TablePagination = ({
     pageIndex,
     pageCount,
@@ -79,7 +79,6 @@ const TablePagination = ({
                     value={String(pageSize)}
                     onValueChange={(value) => {
                         setPageSize(Number(value))
-                        setPageIndex(0)
                     }}
                 >
                     <SelectTrigger className="h-8 w-[70px]">
@@ -108,7 +107,8 @@ const TablePagination = ({
                 <Button
                     variant="outline"
                     className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
+                    // Decrement page index (0-indexed)
+                    onClick={() => setPageIndex(pageIndex - 1)}
                     disabled={pageIndex === 0}
                 >
                     <ChevronLeft />
@@ -117,7 +117,8 @@ const TablePagination = ({
                 <Button
                     variant="outline"
                     className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => prev + 1)}
+                    // Increment page index (0-indexed)
+                    onClick={() => setPageIndex(pageIndex + 1)}
                     disabled={pageIndex >= pageCount - 1 || pageCount === 0}
                 >
                     <ChevronRight />
@@ -132,36 +133,58 @@ const TablePagination = ({
 // -----------------------------
 const BundlesTable = ({ controls = true }) => {
 
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
+    // --- URL-Derived State ---
+    // Page is 1-indexed in URL for user readability, 0-indexed in code.
+    const urlPageIndex = Number(searchParams.get("page")) - 1 || 0 
+    const urlPageSize = Number(searchParams.get("limit")) || 15
+    const urlGlobalFilter = searchParams.get("search") || ""
+    const urlStatusFilter = searchParams.get("status") || ""
+
     const [data, setData] = useState(initialBundleData)
     const [isLoading, setIsLoading] = useState(true)
     const [totalBundles, setTotalBundles] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [apiError, setApiError] = useState(null)
-
-    const [globalFilter, setGlobalFilter] = useState("")
-    const [statusFilter, setStatusFilter] = useState("")
-    const [pageIndex, setPageIndex] = useState(0)
-    const [pageSize, setPageSize] = useState(15)
-
     const [rowSelection, setRowSelection] = useState({})
-
     const [selectedBundle, setSelectedBundle] = useState(null);
     const [editOpen, setEditOpen] = useState(false);
 
-
     const uniqueStatuses = ["active", "inactive"]
+
+    // --- Core function to update the URL ---
+    const updateUrl = useCallback((newParams) => {
+        const params = new URLSearchParams(searchParams.toString())
+        
+        Object.keys(newParams).forEach(key => {
+            const value = newParams[key]
+            if (value === null || value === undefined || value === "" || (key === 'page' && value === 1)) {
+                // Remove param if value is empty/null or if page is being reset to 1
+                params.delete(key)
+            } else {
+                params.set(key, String(value))
+            }
+        })
+
+        // Use router.replace to avoid clogging up the history stack
+        router.replace(`?${params.toString()}`, { scroll: false })
+    }, [router, searchParams])
+
 
     const fetchData = useCallback(async () => {
         setIsLoading(true)
         setApiError(null)
-        setRowSelection({})
+        setRowSelection({}) // Clear selection on data refresh
 
         try {
             const result = await getAllBundlesAction({
-                page: pageIndex + 1,
-                limit: pageSize,
-                search: globalFilter,
-                status: statusFilter,
+                // Use URL-derived values for API call
+                page: urlPageIndex + 1, // API expects 1-indexed
+                limit: urlPageSize,
+                search: urlGlobalFilter,
+                status: urlStatusFilter,
             })
 
             if (result.success) {
@@ -181,16 +204,103 @@ const BundlesTable = ({ controls = true }) => {
         } finally {
             setIsLoading(false)
         }
-    }, [pageIndex, pageSize, globalFilter, statusFilter])
+    }, [urlPageIndex, urlPageSize, urlGlobalFilter, urlStatusFilter]) // Dependencies are now URL-derived values
 
     useEffect(() => {
         const delay = setTimeout(() => {
             fetchData()
-        }, 300)
+        }, 300) // Debounce API call for search input
         return () => clearTimeout(delay)
     }, [fetchData])
 
-    // --- Selection Logic ---
+    // --- Action Handlers (Modal Closure Fix) ---
+
+    const handleStatusChange = (status) => {
+        // Toggle: if the same status is clicked, clear it; otherwise, set it.
+        const newStatus = status === urlStatusFilter ? "" : status
+        updateUrl({ status: newStatus, page: 1 }) // Reset to page 1 on new filter
+    }
+
+    const handleGlobalFilterChange = (value) => {
+        updateUrl({ search: value, page: 1 }) // Reset to page 1 on new search
+    }
+    
+    // Function to refetch data after modal closure/action
+    const refetchBundles = () => {
+        fetchData();
+    };
+
+    // ➡️ NEW FUNCTION: Handles closing the modal and cleaning up the selected bundle state
+    const handleModalClose = (isOpen) => {
+        setEditOpen(isOpen);
+        // CRUCIAL FIX: If the modal is closing (isOpen is false), clear the selected bundle
+        // This ensures the modal component unmounts and releases any focus/layering effects.
+        if (!isOpen) {
+            setSelectedBundle(null); 
+        }
+    };
+
+
+    // --- Other action handlers (Delete/Toggle) remain similar but call fetchData/refetchBundles ---
+    const handleBundleDelete = async (id) => {
+        if (!confirm("Delete this bundle?")) return
+
+        try {
+            const res = await deleteBundleAction(id)
+            if (!res || !res.success) {
+                toast.error(res?.message || "Failed to delete bundle.")
+                return
+            }
+            toast.success(res.message)
+            fetchData() // Refetch data
+        } catch (error) {
+            console.error("Delete bundle error:", error)
+            toast.error(error?.message || "Unexpected error during delete.")
+        }
+    }
+
+    const handleBulkDelete = async () => {
+        const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id])
+
+        if (selectedIds.length === 0) {
+            toast.error("No bundles selected.")
+            return
+        }
+
+        if (!confirm(`Delete ${selectedIds.length} bundle(s)?`)) return
+
+        let successCount = 0
+        for (const id of selectedIds) {
+            try {
+                const res = await deleteBundleAction(id)
+                if (res.success) successCount++
+            } catch (error) {
+                console.error(`Failed to delete ${id}:`, error)
+            }
+        }
+
+        toast.success(`Deleted ${successCount} bundle(s)`)
+        setRowSelection({})
+        fetchData() // Refetch data
+    }
+
+    const handleToggle = async (id) => {
+        try {
+            const res = await toggleBundleStatusAction(id)
+
+            if (res.success) {
+                toast.success(res.message)
+                fetchData() // Refetch data
+            } else {
+                toast.error(res.message)
+            }
+        } catch (error) {
+            toast.error("Failed to toggle status")
+        }
+    }
+
+
+    // --- Selection Logic (remains client-side) ---
     const toggleRowSelected = (id) => {
         setRowSelection(prev => ({
             ...prev,
@@ -223,78 +333,6 @@ const BundlesTable = ({ controls = true }) => {
 
     const selectedRowCount = data.filter(row => rowSelection[row._id]).length
 
-    const handleStatusChange = (value) => {
-        setStatusFilter(value === statusFilter ? "" : value)
-        setPageIndex(0)
-    }
-
-    const handleGlobalFilterChange = (value) => {
-        setGlobalFilter(value)
-        setPageIndex(0)
-    }
-
-    // --- Action Handlers ---
-    const handleBundleDelete = async (id) => {
-        if (!confirm("Delete this bundle?")) return
-
-        try {
-            const res = await deleteBundleAction(id)
-
-            if (!res || !res.success) {
-                toast.error(res?.message || "Failed to delete bundle.")
-                return
-            }
-
-            toast.success(res.message)
-            fetchData()
-
-        } catch (error) {
-            console.error("Delete bundle error:", error)
-            toast.error(error?.message || "Unexpected error during delete.")
-        }
-    }
-
-    const handleBulkDelete = async () => {
-        const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id])
-
-        if (selectedIds.length === 0) {
-            toast.error("No bundles selected.")
-            return
-        }
-
-        if (!confirm(`Delete ${selectedIds.length} bundle(s)?`)) return
-
-        // Delete one by one since your API doesn't support bulk delete
-        let successCount = 0
-        for (const id of selectedIds) {
-            try {
-                const res = await deleteBundleAction(id)
-                if (res.success) successCount++
-            } catch (error) {
-                console.error(`Failed to delete ${id}:`, error)
-            }
-        }
-
-        toast.success(`Deleted ${successCount} bundle(s)`)
-        setRowSelection({})
-        fetchData()
-    }
-
-    const handleToggle = async (id) => {
-        try {
-            const res = await toggleBundleStatusAction(id)
-
-            if (res.success) {
-                toast.success(res.message)
-                fetchData()
-            } else {
-                toast.error(res.message)
-            }
-        } catch (error) {
-            toast.error("Failed to toggle status")
-        }
-    }
-
     // --- Headers ---
     const headers = [
         "Name",
@@ -302,7 +340,7 @@ const BundlesTable = ({ controls = true }) => {
         "Duration",
         "Subscribers",
         "Popular",
-        "Recommended",
+        "Karyaa Recommendation",
         "Status",
         "Actions"
     ]
@@ -315,7 +353,9 @@ const BundlesTable = ({ controls = true }) => {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by name or description..."
-                            value={globalFilter}
+                            // Use URL-derived value for Input
+                            value={urlGlobalFilter}
+                            // Call URL update handler
                             onChange={(e) => handleGlobalFilterChange(e.target.value)}
                             disabled={isLoading}
                             className="pl-10 h-10"
@@ -345,13 +385,15 @@ const BundlesTable = ({ controls = true }) => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Status: {statusFilter || "All"}
+                                    {/* Use URL-derived value for display */}
+                                    Status: {urlStatusFilter || "All"}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                {/* Reset filter to "" which clears 'status' from URL */}
                                 <DropdownMenuItem onClick={() => handleStatusChange("")}>
                                     Show All
                                 </DropdownMenuItem>
@@ -359,7 +401,9 @@ const BundlesTable = ({ controls = true }) => {
                                 {uniqueStatuses.map(status => (
                                     <DropdownMenuCheckboxItem
                                         key={status}
-                                        checked={statusFilter === status}
+                                        // Check URL-derived value
+                                        checked={urlStatusFilter === status}
+                                        // Call URL update handler
                                         onCheckedChange={() => handleStatusChange(status)}
                                     >
                                         {status}
@@ -380,9 +424,11 @@ const BundlesTable = ({ controls = true }) => {
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>
                                 <TableHead className="w-12">
+                                    {/* 🐞 FIX: Ensure indeterminate prop is correctly set */}
                                     <Checkbox
                                         checked={isAllSelected}
-                                        indeterminate={isSomeSelected}
+                                        // Pass undefined when false to avoid DOM warning (Received 'false' for non-boolean attribute 'indeterminate')
+                                        indeterminate={isSomeSelected ? true : undefined} 
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -393,6 +439,7 @@ const BundlesTable = ({ controls = true }) => {
                         </TableHeader>
 
                         <TableBody>
+                            {/* Loading, Error, and No Bundles states remain the same */}
                             {isLoading && (
                                 <TableRow>
                                     <TableCell colSpan={headers.length + 1} className="text-center">
@@ -425,19 +472,15 @@ const BundlesTable = ({ controls = true }) => {
                                         </TableCell>
 
                                         <TableCell className="font-medium truncate max-w-[250px]">{row.name}</TableCell>
-
                                         <TableCell>
                                             <span className="font-semibold text-primary">
                                                 {formatPrice(row.price)}
                                             </span>
                                         </TableCell>
-
                                         <TableCell className="text-muted-foreground">
                                             {formatDuration(row.duration)}
                                         </TableCell>
-
                                         <TableCell className="font-mono text-sm">{row.subscribersCount || 0}</TableCell>
-
                                         <TableCell>
                                             {isPopular ? (
                                                 <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200">
@@ -481,9 +524,15 @@ const BundlesTable = ({ controls = true }) => {
                                                     >
                                                         Edit Bundle
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleToggle(row._id)}>
-                                                        Toggle Status
-                                                    </DropdownMenuItem>
+                                                    {row.status === "active" ? (
+                                                        <DropdownMenuItem onClick={() => handleToggle(row._id)}>
+                                                            Deactivate Bundle
+                                                        </DropdownMenuItem>
+                                                    ) : (
+                                                        <DropdownMenuItem onClick={() => handleToggle(row._id)}>
+                                                            Activate Bundle
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem onClick={() => handleBundleDelete(row._id)} className="text-red-600">
                                                         Delete
@@ -507,13 +556,16 @@ const BundlesTable = ({ controls = true }) => {
                 </div>
             </div>
 
+            {/* Pagination (Props updated to use URL state) */}
             {!isLoading && totalBundles > 0 && controls && (
                 <TablePagination
-                    pageIndex={pageIndex}
+                    // Pass URL-derived values
+                    pageIndex={urlPageIndex}
                     pageCount={totalPages}
-                    pageSize={pageSize}
-                    setPageIndex={setPageIndex}
-                    setPageSize={setPageSize}
+                    pageSize={urlPageSize}
+                    // Handlers update the URL
+                    setPageIndex={(newIndex) => updateUrl({ page: newIndex + 1 })}
+                    setPageSize={(newSize) => updateUrl({ limit: newSize, page: 1 })}
                     selectedRowCount={selectedRowCount}
                     filteredBundlesCount={data.length}
                     totalBundles={totalBundles}
@@ -523,12 +575,11 @@ const BundlesTable = ({ controls = true }) => {
             {selectedBundle && (
                 <EditBundleModal
                     open={editOpen}
-                    setOpen={setEditOpen}
+                    setOpen={handleModalClose}
                     bundle={selectedBundle}
                     onSuccess={() => {
-                        // Optional: refetch your bundles list after update
-                        fetchBundles();
-                        setSelectedBundle(null);
+                        refetchBundles();
+                        handleModalClose(false); 
                     }}
                 />
             )}

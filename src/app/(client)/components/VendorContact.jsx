@@ -61,7 +61,6 @@ const VendorContactComponent = ({ vendorInfo, setIsOpen }) => {
             </div>
 
             <div>
-                {/* PASS vendorInfo AND setIsOpen (if present) to the VendorForm for context */}
                 <VendorForm vendorInfo={vendorInfo} setIsOpen={setIsOpen} /> 
             </div>
         </div>

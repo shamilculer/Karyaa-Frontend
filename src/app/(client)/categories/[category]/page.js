@@ -2,7 +2,7 @@ import { SubCategoryCarouselWrapper } from "../../components/common/SubCategorie
 import PageSearchBar from "../../components/common/PageSearchBar/PageSearchBar";
 import Image from "next/image";
 import { getCategoryDetails } from "@/app/actions/categories";
-import VendorsList from "../../components/common/VendorsList";
+import VendorsListWrapper from "../../components/common/vendorsList/VendorListWrapper";
 import CategoryList from "../../components/common/CategoriesList/CategoriesList";
 
 const CategoryPage = async ({ params, searchParams }) => {
@@ -52,7 +52,7 @@ const CategoryPage = async ({ params, searchParams }) => {
             </h2>
           </div>
 
-          <VendorsList showControls={true} filters={{ mainCategory: category, ...filters }} />
+          <VendorsListWrapper showControls={true} filters={{ mainCategory: category, ...filters }} />
 
         </div>
       </section>

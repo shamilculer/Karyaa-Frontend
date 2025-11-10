@@ -2,27 +2,35 @@
 
 import { apiFetch } from "@/lib/api"
 
-// --- 1. GET ALL BUNDLES (Admin - Paginated/Filtered) ---
 export const getAllBundlesAction = async ({ 
     page = 1, 
     limit = 15, 
     search = "", 
     status = "",
+    isAvailableForInternational = "",
     sortBy = "displayOrder",
     sortOrder = "asc"
 } = {}) => {
     
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Number(limit) || 15);
+    
     const queryParams = new URLSearchParams();
-    queryParams.append('page', String(page));
-    queryParams.append('limit', String(limit));
+    
+    // Use safePage and safeLimit for the API call
+    queryParams.append('page', String(safePage));
+    queryParams.append('limit', String(safeLimit));
+    
     if (search) queryParams.append('search', search);
     if (status) queryParams.append('status', status);
+    if (isAvailableForInternational !== "") queryParams.append('isAvailableForInternational', isAvailableForInternational);
     queryParams.append('sortBy', sortBy);
     queryParams.append('sortOrder', sortOrder);
 
     const endpoint = `/admin/bundles/all?${queryParams.toString()}`;
 
     try {
+        // Assuming apiFetch is your wrapper around fetch
         const response = await apiFetch(endpoint, {
             role: "admin",
             auth: true
@@ -52,7 +60,6 @@ export const getAllBundlesAction = async ({
     }
 };
 
-// --- 2. GET BUNDLE BY ID (Detail View) ---
 export const getBundleByIdAction = async (id) => {
     if (!id) {
         return { success: false, message: "Bundle ID is required." };
@@ -89,10 +96,37 @@ export const getBundleByIdAction = async (id) => {
     }
 };
 
-// --- 3. CREATE BUNDLE ---
 export const createBundleAction = async (formData) => {
-    if (!formData.name || !formData.price || !formData.duration) {
-        return { success: false, message: "Name, price, and duration are required." };
+    if (!formData || typeof formData !== "object") {
+        return { success: false, message: "Invalid bundle payload." };
+    }
+
+    // Validate required fields
+    if (!formData.name) {
+        return { success: false, message: "Bundle name is required." };
+    }
+    if (!formData.duration || !formData.duration.value || !formData.duration.unit) {
+        return { success: false, message: "Duration must include both value and unit." };
+    }
+    if (formData.price === undefined || formData.price === null) {
+        return { success: false, message: "Bundle price is required." };
+    }
+
+    // Validate duration unit
+    if (!["days", "months", "years"].includes(formData.duration.unit)) {
+        return { success: false, message: "Duration unit must be 'days', 'months', or 'years'." };
+    }
+
+    // Validate bonus period
+    if (formData.bonusPeriod && formData.bonusPeriod.value) {
+        if (!["days", "months", "years"].includes(formData.bonusPeriod.unit)) {
+            return { success: false, message: "Bonus period unit must be 'days', 'months', or 'years'." };
+        }
+    }
+
+    // Validate max vendors
+    if (formData.maxVendors !== undefined && formData.maxVendors !== null && formData.maxVendors < 1) {
+        return { success: false, message: "maxVendors must be at least 1 or null for unlimited." };
     }
 
     const endpoint = `/admin/bundles/new`;
@@ -109,7 +143,7 @@ export const createBundleAction = async (formData) => {
             return {
                 success: true,
                 message: response.message || "Bundle created successfully.",
-                data: response.data
+                data: response.data,
             };
         } else {
             return {
@@ -119,7 +153,7 @@ export const createBundleAction = async (formData) => {
         }
 
     } catch (error) {
-        console.error("Error creating bundle:", error);
+        console.error(`Error creating bundle:`, error);
         return {
             success: false,
             message: error.message || "An unexpected network error occurred.",
@@ -127,10 +161,31 @@ export const createBundleAction = async (formData) => {
     }
 };
 
-// --- 4. UPDATE BUNDLE ---
 export const updateBundleAction = async (id, formData) => {
     if (!id) {
         return { success: false, message: "Bundle ID is required for update." };
+    }
+
+    // Validate duration if being updated
+    if (formData.duration) {
+        if (!formData.duration.value || !formData.duration.unit) {
+            return { success: false, message: "Duration must include both value and unit." };
+        }
+        if (!["days", "months", "years"].includes(formData.duration.unit)) {
+            return { success: false, message: "Duration unit must be 'days', 'months', or 'years'." };
+        }
+    }
+
+    // Validate bonusPeriod if being updated
+    if (formData.bonusPeriod && formData.bonusPeriod.value) {
+        if (!["days", "months", "years"].includes(formData.bonusPeriod.unit)) {
+            return { success: false, message: "Bonus period unit must be 'days', 'months', or 'years'." };
+        }
+    }
+
+    // Validate maxVendors if being updated
+    if (formData.maxVendors !== undefined && formData.maxVendors !== null && formData.maxVendors < 1) {
+        return { success: false, message: "maxVendors must be at least 1 or null for unlimited." };
     }
 
     const endpoint = `/admin/bundles/${id}`;
@@ -165,7 +220,6 @@ export const updateBundleAction = async (id, formData) => {
     }
 };
 
-// --- 5. DELETE BUNDLE ---
 export const deleteBundleAction = async (id) => {
     if (!id) {
         return { success: false, message: "Bundle ID is required for deletion." };
@@ -201,7 +255,6 @@ export const deleteBundleAction = async (id) => {
     }
 };
 
-// --- 6. TOGGLE BUNDLE STATUS ---
 export const toggleBundleStatusAction = async (id) => {
     if (!id) {
         return { success: false, message: "Bundle ID is required." };
@@ -231,6 +284,42 @@ export const toggleBundleStatusAction = async (id) => {
 
     } catch (error) {
         console.error(`Error toggling bundle status ${id}:`, error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred.",
+        };
+    }
+};
+
+export const toggleBundleInternationalAvailabilityAction = async (id) => {
+    if (!id) {
+        return { success: false, message: "Bundle ID is required." };
+    }
+
+    const endpoint = `/admin/bundles/${id}/toggle-international`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            method: "PATCH",
+            role: "admin",
+            auth: true,
+        });
+
+        if (response.success) {
+            return {
+                success: true,
+                message: response.message || "Bundle international availability updated successfully.",
+                data: response.data
+            };
+        } else {
+            return {
+                success: false,
+                message: response.message || "Failed to toggle international availability.",
+            };
+        }
+
+    } catch (error) {
+        console.error(`Error toggling bundle international availability ${id}:`, error);
         return {
             success: false,
             message: error.message || "An unexpected network error occurred.",

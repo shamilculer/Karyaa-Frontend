@@ -29,13 +29,13 @@ const formSchema = z.object({
         message: "Category name must be at least 2 characters.",
     }).max(50),
     // Add validation for the cover image (expecting a Cloudinary URL string)
-    coverImage: z.string().url({
+    coverImage: z.url({
         message: "A cover image is required.",
     }),
 })
 
 // --- Define constants for file upload ---
-const CATEGORY_IMAGE_MIME_TYPES = "image/jpeg,image/png,image/webp";
+const CATEGORY_IMAGE_MIME_TYPES = ["image/jpeg","image/png", "image/webp"];
 const CLOUDINARY_FOLDER_PATH = "category-images";
 
 
@@ -94,7 +94,7 @@ export function AddCategoryModal({ onOpenChange, open }) {
                         <Label htmlFor="name">Category Name</Label>
                         <Input
                             id="name"
-                            placeholder="e.g., Electronics"
+                            placeholder="e.g., Transportation"
                             {...register("name")}
                             disabled={isSubmitting}
                         />

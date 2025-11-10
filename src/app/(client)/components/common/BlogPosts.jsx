@@ -6,35 +6,47 @@ import { GlobalPagination } from "@/components/common/GlobalPagination";
 import { getPublishedBlogPosts } from "../../../actions/blog";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// --- Async Server Component (suspends while fetching) ---
-async function BlogPostsContent({ searchParams, showPagination = true }) {
-  const page = parseInt(searchParams.page) || 1;
-  const limit = parseInt(searchParams.limit) || 15;
+async function BlogPostsContent({ searchParams, showPagination = true, exclude }) {
+  const page = Number(searchParams.page ?? 1);
+  const limit = Number(searchParams.limit ?? 15);
 
-  const postResponse = await getPublishedBlogPosts({ limit, page });
-  const { blogs, totalPages, currentPage, success } = postResponse;
+  // Pass exclude slug/id to backend
+  const postResponse = await getPublishedBlogPosts({ limit, page, exclude });
 
-  // Handle fetch error
+  const { blogs, totalPages, currentPage, success, message } = postResponse;
+
+  // ❌ Fetch Error
   if (!success) {
     return (
-      <div className="text-center p-8 text-lg text-red-500">
-        Error loading posts. Please refresh the page.
+      <div className="text-center p-8 text-red-500 text-lg font-medium">
+        Failed to load blog posts.
+        <br />
+        <span className="text-sm opacity-70">{message || "Please try again later."}</span>
       </div>
     );
   }
 
-  const hasBlogs = blogs?.length > 0;
+  // ✅ Safety-net exclude (in case backend didn't filter)
+  const filteredBlogs = exclude
+    ? blogs.filter((b) => b._id !== exclude && b.slug !== exclude)
+    : blogs;
+
+  // Zero State
+  if (success && filteredBlogs.length === 0) {
+    return (
+      <div className="text-center p-12 text-gray-500">
+        <h3 className="text-xl font-medium mb-2">No blog posts available</h3>
+        <p className="text-sm opacity-80">Check back later for new articles.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
-        {hasBlogs
-          ? blogs.map((blog) => (
-              <BlogCard key={blog.slug || blog._id} blog={blog} />
-            ))
-          : Array.from({ length: limit }).map((_, i) => (
-              <BlogCardSkeleton key={i} />
-            ))}
+        {filteredBlogs.map((blog) => (
+          <BlogCard key={blog.slug || blog._id} blog={blog} />
+        ))}
       </div>
 
       {showPagination && (
@@ -48,7 +60,6 @@ async function BlogPostsContent({ searchParams, showPagination = true }) {
   );
 }
 
-// --- Main Exported Component with Suspense Boundary ---
 export default function BlogPosts(props) {
   return (
     <Suspense fallback={<BlogPostsFallback />}>
@@ -57,7 +68,6 @@ export default function BlogPosts(props) {
   );
 }
 
-// --- Suspense Fallback Skeleton ---
 function BlogPostsFallback() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
@@ -72,7 +82,7 @@ function BlogPostsFallback() {
 export const BlogCard = ({ blog }) => {
   const authorName =
     typeof blog.author === "object" && blog.author !== null
-      ? blog.author.username
+      ? blog.author.fullName
       : blog.author;
 
   const displayDate = new Date(
@@ -107,7 +117,6 @@ export const BlogCard = ({ blog }) => {
   );
 };
 
-// --- Blog Card Skeleton Component ---
 export const BlogCardSkeleton = () => (
   <div className="rounded-lg space-y-5">
     <Skeleton className="w-full h-60 md:h-72 rounded-lg" />

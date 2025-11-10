@@ -12,15 +12,24 @@ import { decodeJWT } from "@/utils/decodeJWT";
  */
 export async function registerUser(data) {
     try {
-        // Public endpoint - no auth required
         const response = await apiFetch('/user/auth/create', {
             method: 'POST',
-            body: data, // Auto-stringified by apiFetch
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
 
-        const { user, accessToken, refreshToken } = response;
+        const { success, user, accessToken, refreshToken, message } = response;
 
-        // Set httpOnly cookies
+        // If backend explicitly returned failure
+        if (success === false) {
+            return {
+                success: false,
+                error: message || "Registration failed",
+            };
+        }
+
         const cookieStore = await cookies();
         const isProduction = process.env.NODE_ENV === 'production';
 
@@ -28,7 +37,7 @@ export async function registerUser(data) {
             httpOnly: true,
             secure: isProduction,
             sameSite: 'lax',
-            maxAge: 15 * 60, // 15 minutes
+            maxAge: 15 * 60,
             path: '/',
         });
 
@@ -36,16 +45,17 @@ export async function registerUser(data) {
             httpOnly: true,
             secure: isProduction,
             sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60, // 30 days
+            maxAge: 30 * 24 * 60 * 60,
             path: '/',
         });
 
         return { success: true, user };
     } catch (error) {
         console.error('Registration failed:', error.message);
+
         return {
             success: false,
-            error: error.message || 'Registration failed'
+            error: error.message || 'Registration failed',
         };
     }
 }

@@ -57,7 +57,7 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                 type: "manual",
                 message: authErrorMessage,
             });
-            return; 
+            return;
         }
 
         if (errors.root?.authError) {
@@ -69,7 +69,6 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
             ...data,
         };
 
-        console.log(submissionData)
 
         try {
             const response = await postLead(submissionData);
@@ -88,11 +87,11 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
 
             } else {
                 // SUCCESS HANDLER
-                toast.success(response.message || "Your inquiry has been sent!", {
+                toast.success("Your inquiry has been sent successfuly!", {
                     position: "top-center"
                 });
-                form.reset(); 
-                
+                form.reset();
+
                 // 👈 NEW: Close the modal on successful submission 
                 if (setIsOpen) {
                     setIsOpen(false);
@@ -118,45 +117,46 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                     onSubmit={form.handleSubmit(onFormSubmit)}
                     className="space-y-4"
                 >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="fullName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Your Full Name*"
+                                            className="rounded-none border-gray-400 lg:h-10"
+                                            disabled={isSubmitting}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    {/* Full Name Field (Required) */}
-                    <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Your Full Name*"
-                                        className="rounded-none border-gray-400 lg:h-10"
-                                        disabled={isSubmitting}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                        {/* Phone Number (Required based on schema) */}
+                        <FormField
+                            control={form.control}
+                            name="phoneNumber"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            type="tel"
+                                            placeholder="Phone number*"
+                                            className="rounded-none border-gray-400 lg:h-10"
+                                            disabled={isSubmitting}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    {/* Phone Number (Required based on schema) */}
-                    <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        type="tel"
-                                        placeholder="Phone number*"
-                                        className="rounded-none border-gray-400 lg:h-10"
-                                        disabled={isSubmitting}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    </div>
 
                     {/* Email (Optional) */}
                     <FormField
@@ -186,7 +186,7 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                             <FormItem>
                                 <FormControl>
                                     <Input
-                                        placeholder="Event Location (e.g., Dubai Marina)*"
+                                        placeholder="Event Location (Optional)*"
                                         className="rounded-none border-gray-400 lg:h-10"
                                         disabled={isSubmitting}
                                         {...field}
@@ -206,7 +206,7 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting} >
                                     <FormControl>
                                         <SelectTrigger className="rounded-none border-gray-400 lg:h-10 w-full">
-                                            <SelectValue placeholder="Event Type*" />
+                                            <SelectValue placeholder="Event Type (Optional)" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="z-100">
@@ -228,54 +228,51 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                         )}
                     />
 
-                    {/* Event Date & Guests Row (Mandatory) */}
-                    <div className="grid grid-cols-2 gap-2">
-                        <FormField
-                            control={form.control}
-                            name="eventDate"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input
-                                            type="date"
-                                            placeholder="Event date*"
-                                            className="rounded-none border-gray-400 lg:h-10 max-lg:!text-xs"
-                                            disabled={isSubmitting}
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <FormField
+                        control={form.control}
+                        name="eventDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input
+                                        type="date"
+                                        placeholder="Event date (Optional)"
+                                        className="rounded-none border-gray-400 lg:h-10 max-lg:!text-xs"
+                                        disabled={isSubmitting}
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        <FormField
-                            control={form.control}
-                            name="numberOfGuests"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                        <FormControl>
-                                            <SelectTrigger className="rounded-none border-gray-400 h-10 w-full max-lg:!text-xs">
-                                                <SelectValue placeholder="Expected guests*" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent className="z-100">
-                                            <SelectGroup>
-                                                <SelectItem value="1-25">1-25 guests</SelectItem>
-                                                <SelectItem value="26-50">26-50 guests</SelectItem>
-                                                <SelectItem value="51-100">51-100 guests</SelectItem>
-                                                <SelectItem value="101-200">101-200 guests</SelectItem>
-                                                <SelectItem value="201-300">201-300 guests</SelectItem>
-                                                <SelectItem value="300+">300+ guests</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                    <FormField
+                        control={form.control}
+                        name="numberOfGuests"
+                        render={({ field }) => (
+                            <FormItem>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                    <FormControl>
+                                        <SelectTrigger className="rounded-none border-gray-400 h-10 w-full max-lg:!text-xs">
+                                            <SelectValue placeholder="Expected guests (Optional)" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="z-100">
+                                        <SelectGroup>
+                                            <SelectItem value="1-25">1-25 guests</SelectItem>
+                                            <SelectItem value="26-50">26-50 guests</SelectItem>
+                                            <SelectItem value="51-100">51-100 guests</SelectItem>
+                                            <SelectItem value="101-200">101-200 guests</SelectItem>
+                                            <SelectItem value="201-300">201-300 guests</SelectItem>
+                                            <SelectItem value="300+">300+ guests</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     {/* Message Textarea (Optional) */}
                     <FormField
@@ -295,7 +292,7 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
                             </FormItem>
                         )}
                     />
-                    
+
                     {/* 🌟 DISPLAY GLOBAL FORM ERROR (Auth or Server) 🌟 */}
                     {(errors.root?.authError || errors.root?.serverError || errors.root?.critical) && (
                         <div className=" block!text-sm font-medium text-red-600">

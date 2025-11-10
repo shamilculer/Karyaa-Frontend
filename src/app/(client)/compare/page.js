@@ -1,9 +1,10 @@
 // app/compare/page.js
-
 import { Suspense } from "react";
 import CompareTable from "../components/CompareTable";
-import { getVendorsBySlugs, getAllVendorOptions } from "@/app/actions/vendors";
+import { getVendorsBySlugs } from "@/app/actions/vendors";
 import { Skeleton } from "@/components/ui/skeleton";
+import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
+import CategoryList from "../components/common/CategoriesList/CategoriesList";
 
 // --- Loading & Error Components ---
 const CompareLoadingSkeleton = () => (
@@ -22,36 +23,27 @@ const ErrorState = ({ message }) => (
 
 // --- Main Server Component ---
 const ComparePage = async ({ searchParams }) => {
-
     // 1. READ SLUGS from URL
     const urlSlugs = searchParams.vendors || searchParams.vendor; 
-
     let vendorSlugs = [];
+    
     if (urlSlugs) {
         vendorSlugs = Array.isArray(urlSlugs)
             ? urlSlugs
             : urlSlugs.split(',').filter(slug => slug.trim() !== '');
     }
-
-
+    
     vendorSlugs = [...new Set(vendorSlugs)].slice(0, 3); // Limit to 3
 
-
-    // 2. FETCH DATA IN PARALLEL
-    const [initialCompareResult, allVendorOptionsResult] = await Promise.all([
-        getVendorsBySlugs(vendorSlugs),
-        getAllVendorOptions(),
-    ]);
+    // 2. FETCH INITIAL VENDOR DATA
+    const initialCompareResult = await getVendorsBySlugs(vendorSlugs);
 
     // 3. HANDLE ERRORS
-    if (initialCompareResult.error || allVendorOptionsResult.error) {
-        const errorMessage = initialCompareResult.error || allVendorOptionsResult.error;
-        return <ErrorState message={errorMessage} />;
+    if (initialCompareResult.error) {
+        return <ErrorState message={initialCompareResult.error} />;
     }
 
     const initialVendors = initialCompareResult.data || [];
-    const vendorOptions = allVendorOptionsResult.data || [];
-
 
     return (
         <div className='min-h-screen'>
@@ -64,13 +56,18 @@ const ComparePage = async ({ searchParams }) => {
                 </div>
             </section>
 
+            <section className="container">
+                <PageSearchBar />
+            </section>
+
+            <section className="container">
+                <CategoryList />
+            </section>
+
             <Suspense fallback={<CompareLoadingSkeleton />}>
                 <section className='container py-12'>
-                    {/* 4. Pass fetched data to the Client Component */}
-                    <CompareTable
-                        initialVendors={initialVendors}
-                        vendorOptions={vendorOptions}
-                    />
+                    {/* VendorSelectField will handle fetching options internally */}
+                    <CompareTable initialVendors={initialVendors} />
                 </section>
             </Suspense>
         </div>

@@ -7,9 +7,13 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 import ContactForm from "../components/ContactForm"
+import { getBrandDetailsAction } from "@/app/actions/brand"
 
 
-const ContactPage = () => {
+const ContactPage = async () => {
+    const details = await getBrandDetailsAction()
+    const contactInfo = details?.data
+
     return (
         <div className="min-h-screen">
 
@@ -29,17 +33,22 @@ const ContactPage = () => {
                         <div className="space-y-8">
                             <Link href="" className="flex items-center gap-4">
                                 <PhoneCall size={25} />
-                                <span className="font-medium text-xl">+14 5464 8272</span>
+                                <span className="font-medium text-xl">{contactInfo.primaryPhone}</span>
                             </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <Mail size={25} />
-                                <span className="font-medium text-xl">hello@karyaa.com</span>
+                                <span className="font-medium text-xl">{contactInfo.mainEmail}</span>
+                            </Link>
+
+                            <Link href="" className="flex items-center gap-4">
+                                <Mail size={25} />
+                                <span className="font-medium text-xl">{contactInfo.supportEmail}</span>
                             </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <MapPin size={25} />
-                                <span className="font-medium text-xl">Lazyy Tower 192,Burn Swiss </span>
+                                <span className="font-medium text-xl">{contactInfo.location}</span>
                             </Link>
                         </div>
                     </div>

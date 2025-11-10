@@ -7,11 +7,11 @@ import CategoryList from "./components/common/CategoriesList/CategoriesList";
 
 import BlogPosts from "./components/common/BlogPosts";
 import { Button } from "@/components/ui/button";
-import Adbanner from "./components/Adbanner";
 import Testimonials from "./components/Testimonials";
 
 import { initialBlogParams } from "@/utils";
 import VendorsCarousel from "./components/common/VendorsCarousel";
+import AdbannerWrapper from "./components/adBanner/AdBannerWrapper";
 
 
 export default function LandingPage() {
@@ -22,7 +22,7 @@ export default function LandingPage() {
           <Hero />
         </section>
 
-        <section className="container !mt-10">
+        <section className="container !mt-0 md:!mt-10">
           <PageSearchBar />
         </section>
 
@@ -44,7 +44,7 @@ export default function LandingPage() {
                 variant="ghost"
                 className="text-gray-700 font-medium text-base hover:underline"
               >
-                <Link href="/vendors">View All</Link>
+                <Link href="/categories">View All</Link>
               </Button>
             </div>
             <VendorsCarousel filter={{isRecommended: true}} />
@@ -59,7 +59,7 @@ export default function LandingPage() {
                 alt=""
                 width={500}
                 height={500}
-                className="w-full h-80 lg:h-[30rem] object-cover rounded-lg"
+                className="w-full h-72 lg:h-[30rem] object-cover rounded-lg"
               />
             </div>
             <div className="w-full lg:w-[45%] flex flex-col items-start gap-4 lg:gap-5">
@@ -79,7 +79,7 @@ export default function LandingPage() {
                 grow while making event planning simple, fast, and stress-free.
               </p>
               <Button asChild>
-                <Link href="/vendors">Find Your Vendor</Link>
+                <Link href="/categories">Find Your Vendor</Link>
               </Button>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function LandingPage() {
                 alt=""
                 width={500}
                 height={500}
-                className="w-full h-80 lg:h-[30rem] object-cover rounded-lg"
+                className="w-full h-72 lg:h-[30rem] object-cover rounded-lg"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function LandingPage() {
 
         <section>
           <div className="w-full">
-            <Adbanner />
+            <AdbannerWrapper />
           </div>
         </section>
 
@@ -128,7 +128,7 @@ export default function LandingPage() {
               variant="ghost"
               className="text-gray-700 font-medium text-base hover:underline max-md:hidden"
             >
-              <Link href="/vendors">View All</Link>
+              <Link href="/blog">View All</Link>
             </Button>
           </div>
 

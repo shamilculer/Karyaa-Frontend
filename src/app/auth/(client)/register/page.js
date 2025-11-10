@@ -5,9 +5,18 @@ import Link from 'next/link'
 
 const CreateAccountPage = () => {
   return (
-    <section className='flex !my-0'>
-        <div className='w-1/3 min-h-screen flex flex-col justify-center px-10'>
-        <div>
+    <section className='flex !my-0 relative'>
+        <div className='w-full bg-body xl:w-1/3 min-h-screen flex flex-col justify-center px-5 sm:px-10 max-xl:z-10'>
+        <div className='max-xl:flex flex-col items-center justify-center'>
+            <div className='xl:hidden'>
+                <Image
+                    src="../logo.svg"
+                    alt='Karyaa'
+                    height={30}
+                    width={144}
+                    className='w-28 mb-10'
+                />
+            </div>
             <h1 className='!text-xl !capitalize !font-semibold mb-2'>Create An Account</h1>
             <UserCreateForm />
         </div>
@@ -26,7 +35,7 @@ const CreateAccountPage = () => {
             
         </div>
 
-        <div className='w-2/3 min-h-screen bg-secondary relative'>
+        <div className='w-2/3 min-h-screen bg-secondary relative  max-xl:hidden'>
             <Image 
                 fill
                 alt='Create Account in Karyaa'

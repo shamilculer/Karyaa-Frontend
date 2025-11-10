@@ -33,7 +33,7 @@ const Hero = () => {
   return (
     <div className='h-auto md:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
       <div className='w-full flex-center flex-col text-center px-4'>
-        <h1 className='text-center max-md:!text-3xl w-full lg:w-3xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
+        <h1 className='text-center max-md:!text-[28px] w-full lg:w-3xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
         <p className="max-md:mt-2 max-md:text-xs">Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.</p>
       </div>
 

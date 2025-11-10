@@ -15,7 +15,8 @@ import { getInitials } from "@/utils";
 const VendorPopupHeader = ({
     vendorData,
     showHeader = false,
-    hasPackages
+    hasPackages,
+    whatsappLink
 }) => {
     // Helper to get initials (similar to the main page)
 
@@ -39,13 +40,11 @@ const VendorPopupHeader = ({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Button className="h-10 text-xs sm:text-sm px-2 sm:px-4 max-sm:gap-0 max-sm:!text-[0px] max-sm:w-10">
-                            <Image width={16} height={16} src="/whatsapp.svg" alt="whatsapp" className="sm:mr-1 " />
-                            Whatsapp
-                        </Button>
-                        <Button className="!h-8 sm:!h-10 text-xs sm:text-sm px-2 sm:px-4 hidden md:flex">
-                            <Send className="w-4 sm:w-5 mr-1" />
-                            Message
+                        <Button asChild className="h-10 text-xs sm:text-sm px-2 sm:px-4 max-sm:gap-0 max-sm:!text-[0px] max-sm:w-10">
+                            <Link href={whatsappLink} target="_blank">
+                                <Image width={16} height={16} src="/whatsapp.svg" alt="whatsapp" className="sm:mr-1 " />
+                                Whatsapp
+                            </Link>
                         </Button>
                     </div>
                 </div>

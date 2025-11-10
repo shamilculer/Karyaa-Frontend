@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { useState, useEffect, useCallback } from "react"
+// ➡️ Import navigation hooks from next/navigation
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
 import { getAllBlogPosts, deleteBlogPosts, toggleBlogStatusAction } from "@/app/actions/admin/blog"
 
@@ -47,7 +49,7 @@ export const description = "Blog Management Table"
 
 const initialBlogData = []
 
-// --- Pagination ---
+// --- Pagination (Assuming no changes needed here) ---
 const TablePagination = ({
     pageIndex,
     pageCount,
@@ -67,7 +69,7 @@ const TablePagination = ({
                     value={String(pageSize)}
                     onValueChange={(value) => {
                         setPageSize(Number(value))
-                        setPageIndex(0)
+                        setPageIndex(0) // Reset to page 1 on size change
                     }}
                 >
                     <SelectTrigger className="h-8 w-[70px]">
@@ -120,32 +122,86 @@ const TablePagination = ({
 // -----------------------------
 const BlogsTable = ({ controls = true }) => {
 
+    // ➡️ Hooks for URL state management
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+
+    // ➡️ Derive state from URL params, use defaults if not present
+    const urlPageIndex = Number(searchParams.get("page") || 1) - 1 // URL page is 1-based
+    const urlPageSize = Number(searchParams.get("limit") || 15)
+    const urlGlobalFilter = searchParams.get("search") || ""
+    const urlStatusFilter = searchParams.get("status") || ""
+
+    // ❌ REMOVE: state for filters and pagination
+    // const [globalFilter, setGlobalFilter] = useState("")
+    // const [statusFilter, setStatusFilter] = useState("")
+    // const [pageIndex, setPageIndex] = useState(0)
+    // const [pageSize, setPageSize] = useState(15)
+
+    // ✅ Keep state for data, loading, error, and row selection
     const [data, setData] = useState(initialBlogData)
     const [isLoading, setIsLoading] = useState(true)
     const [totalBlogs, setTotalBlogs] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [apiError, setApiError] = useState(null)
 
-    const [globalFilter, setGlobalFilter] = useState("")
-    const [statusFilter, setStatusFilter] = useState("")
-    const [pageIndex, setPageIndex] = useState(0)
-    const [pageSize, setPageSize] = useState(15)
-
     const [rowSelection, setRowSelection] = useState({})
 
     const uniqueStatuses = ["draft", "published"]
 
+    // ➡️ Helper function to create new URL search params string
+    const createQueryString = useCallback(
+        (name, value) => {
+            const params = new URLSearchParams(searchParams.toString())
+            if (value === "" || value === 0) {
+                params.delete(name)
+            } else {
+                params.set(name, value)
+            }
+            // Reset page index on filter/size change, unless we're just changing the page
+            if (name !== 'page' && name !== 'limit') {
+                params.delete('page');
+            }
+            return params.toString()
+        },
+        [searchParams]
+    )
+
+    // ➡️ Functions to update URL parameters
+    const handleSetPageIndex = useCallback((newIndex) => {
+        // newIndex is 0-based, URL page is 1-based
+        const targetPage = typeof newIndex === 'function' ? newIndex(urlPageIndex) : newIndex;
+        router.push(pathname + '?' + createQueryString('page', targetPage + 1))
+    }, [createQueryString, pathname, router, urlPageIndex]);
+
+    const handleSetPageSize = useCallback((newSize) => {
+        router.push(pathname + '?' + createQueryString('limit', newSize))
+    }, [createQueryString, pathname, router]);
+
+    const handleStatusChange = useCallback((status) => {
+        const value = status === urlStatusFilter ? "" : status;
+        router.push(pathname + '?' + createQueryString('status', value))
+    }, [createQueryString, pathname, router, urlStatusFilter]);
+
+    const handleGlobalFilterChange = useCallback((value) => {
+        router.push(pathname + '?' + createQueryString('search', value))
+    }, [createQueryString, pathname, router]);
+
+
+    // ➡️ Re-use fetchData, but now it depends on URL state (urlPageIndex, urlPageSize, etc.)
     const fetchData = useCallback(async () => {
         setIsLoading(true)
         setApiError(null)
-        setRowSelection({})
+        setRowSelection({}) // Clear selection on new data load
 
         try {
             const result = await getAllBlogPosts({
-                page: pageIndex + 1,
-                limit: pageSize,
-                search: globalFilter,
-                status: statusFilter,
+                // Pass URL derived values
+                page: urlPageIndex + 1, // API page is 1-based
+                limit: urlPageSize,
+                search: urlGlobalFilter,
+                status: urlStatusFilter,
             })
 
             if (result.success) {
@@ -165,16 +221,19 @@ const BlogsTable = ({ controls = true }) => {
         } finally {
             setIsLoading(false)
         }
-    }, [pageIndex, pageSize, globalFilter, statusFilter])
+    }, [urlPageIndex, urlPageSize, urlGlobalFilter, urlStatusFilter]) // ➡️ Dependencies are the URL-derived values
 
     useEffect(() => {
+        // Debounce for search input (globalFilter)
         const delay = setTimeout(() => {
             fetchData()
         }, 300)
         return () => clearTimeout(delay)
-    }, [fetchData])
+    }, [fetchData]) // ➡️ Re-run when URL state changes (via fetchData dependency)
 
-    // ✅ Selection Logic
+    // ... (rest of the component logic remains the same, only using url* variables)
+
+    // ✅ Selection Logic (unchanged)
     const toggleRowSelected = (id) => {
         setRowSelection(prev => ({
             ...prev,
@@ -206,19 +265,11 @@ const BlogsTable = ({ controls = true }) => {
         })
     }
 
-    // ✅ FIX: Only count current visible rows
+    // ✅ FIX: Only count current visible rows (unchanged)
     const selectedRowCount = data.filter(row => rowSelection[row._id]).length
 
-    const handleStatusChange = (value) => {
-        setStatusFilter(value === statusFilter ? "" : value)
-        setPageIndex(0)
-    }
 
-    const handleGlobalFilterChange = (value) => {
-        setGlobalFilter(value)
-        setPageIndex(0)
-    }
-
+    // ... (handleBlogDelete, handleBulkDelete, handleToggle, handleBulkToggle remain the same)
     const handleBlogDelete = async (ids) => {
         try {
             const idArray = Array.isArray(ids) ? ids : [ids];
@@ -283,6 +334,7 @@ const BlogsTable = ({ controls = true }) => {
             toast.error(res.message);
         }
     };
+    // ...
 
     const headers = [
         "Title",
@@ -302,7 +354,9 @@ const BlogsTable = ({ controls = true }) => {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by title, author, slug..."
-                            value={globalFilter}
+                            // ➡️ Use URL-derived value
+                            value={urlGlobalFilter}
+                            // ➡️ Use URL updater function
                             onChange={(e) => handleGlobalFilterChange(e.target.value)}
                             disabled={isLoading}
                             className="pl-10 h-10"
@@ -335,13 +389,15 @@ const BlogsTable = ({ controls = true }) => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Status: {statusFilter || "All"}
+                                    {/* ➡️ Use URL-derived value */}
+                                    Status: {urlStatusFilter || "All"}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                {/* ➡️ Use URL updater function */}
                                 <DropdownMenuItem onClick={() => handleStatusChange("")}>
                                     Show All
                                 </DropdownMenuItem>
@@ -349,8 +405,10 @@ const BlogsTable = ({ controls = true }) => {
                                 {uniqueStatuses.map(status => (
                                     <DropdownMenuCheckboxItem
                                         key={status}
-                                        checked={statusFilter === status}
-                                        onCheckedChange={(checked) => handleStatusChange(status)}
+                                        // ➡️ Compare against URL-derived value
+                                        checked={urlStatusFilter === status}
+                                        // ➡️ Use URL updater function
+                                        onCheckedChange={() => handleStatusChange(status)}
                                     >
                                         {status}
                                     </DropdownMenuCheckboxItem>
@@ -377,7 +435,7 @@ const BlogsTable = ({ controls = true }) => {
                                 <TableHead className="w-12">
                                     <Checkbox
                                         checked={isAllSelected}
-                                        indeterminate={isSomeSelected}
+                                        indeterminate={isSomeSelected || undefined}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -388,6 +446,7 @@ const BlogsTable = ({ controls = true }) => {
                         </TableHeader>
 
                         <TableBody>
+                            {/* ... (Loading/Error states unchanged) ... */}
                             {isLoading && (
                                 <TableRow>
                                     <TableCell colSpan={headers.length + 1} className="text-center">
@@ -404,7 +463,7 @@ const BlogsTable = ({ controls = true }) => {
                                     </TableCell>
                                 </TableRow>
                             )}
-
+                            
                             {!isLoading && !apiError && data.map((row) => {
                                 const isPublished = row.status === "published"
                                 return (
@@ -486,11 +545,12 @@ const BlogsTable = ({ controls = true }) => {
 
             {!isLoading && totalBlogs > 0 && controls && (
                 <TablePagination
-                    pageIndex={pageIndex}
+                    // ➡️ Pass URL-derived values and setter functions
+                    pageIndex={urlPageIndex}
                     pageCount={totalPages}
-                    pageSize={pageSize}
-                    setPageIndex={setPageIndex}
-                    setPageSize={setPageSize}
+                    pageSize={urlPageSize}
+                    setPageIndex={handleSetPageIndex}
+                    setPageSize={handleSetPageSize}
                     selectedRowCount={selectedRowCount}
                     filteredArticlesCount={data.length}
                     totalArticles={totalBlogs}

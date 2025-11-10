@@ -2,13 +2,14 @@
 
 import { apiFetch } from "@/lib/api";
 
-export const getPublishedBlogPosts = async ({ limit = 15, page = 1 }) => { 
+export const getPublishedBlogPosts = async ({ limit = 15, page = 1, exclude }) => { 
     try {
         const params = new URLSearchParams();
         
         params.append('limit', limit);
-        
-        params.append('page', page); 
+        params.append('page', page);
+
+        if (exclude) params.append('exclude', exclude);
 
         const url = `/blog/published?${params.toString()}`;
 

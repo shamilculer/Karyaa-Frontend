@@ -10,16 +10,12 @@ import { Step2Schema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; 
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { getCategories as fetchCategoriesAction } from "@/app/actions/categories";
 import { getBundleOptions } from "@/app/actions/vendor/bundles";
 
-// =================================================================
-// 🌟 NEW: OCCASION OPTIONS DATA 🌟
-// These correspond to the slugs in the Mongoose Model and Zod Schema
-// =================================================================
 const OCCASION_OPTIONS = [
     { slug: 'baby-showers-gender-reveals', name: 'Baby Showers & Gender Reveals' },
     { slug: 'birthdays-anniversaries', name: 'Birthdays & Anniversaries' },
@@ -31,9 +27,7 @@ const OCCASION_OPTIONS = [
     { slug: 'product-launches-brand-events', name: 'Product Launches & Brand Events' },
 ];
 
-// =================================================================
-// Helper Component: Renders a standard text input field
-// =================================================================
+// helper to render text fields
 const renderInputField = ({ control, name, label, placeholder, type = "text" }) => (
     <FormField
         control={control}
@@ -60,10 +54,6 @@ const renderInputField = ({ control, name, label, placeholder, type = "text" }) 
     />
 );
 
-// =================================================================
-// Generalized Multi-Select Component (Used for Categories and now Occasions)
-// The logic uses 'slug' for occasions and '_id' for categories/subcategories.
-// =================================================================
 const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, valueKey = '_id' }) => {
     const toggleSelection = (optionValue) => {
         if (disabled) return;
@@ -108,11 +98,10 @@ const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, 
     );
 };
 
-// =================================================================
-// Step 2 Component
-// =================================================================
 export default function Step02_BusinessInfo() {
     const { formData, updateFields, nextStep, prevStep } = useVendorFormStore();
+
+    const isInternational = formData.isInternational;
 
     const [categories, setCategories] = useState([]);
     const [bundles, setBundles] = useState([]);
@@ -124,25 +113,25 @@ export default function Step02_BusinessInfo() {
     const tempUploadToken = formData.tempUploadToken;
     const FOLDER_PATH = `temp_vendors/${tempUploadToken}`;
 
-    // Initialize form with Step 2 fields from the schema
     const form = useForm({
         resolver: zodResolver(Step2Schema),
         defaultValues: {
             businessName: formData.businessName || "",
             businessLogo: formData.businessLogo || "",
             tagline: formData.tagline || "",
-            businessDescription: formData.businessDescription || "", 
-            whatsAppNumber: formData.whatsAppNumber || "", 
+            businessDescription: formData.businessDescription || "",
+            whatsAppNumber: formData.whatsAppNumber || "",
             pricingStartingFrom: formData.pricingStartingFrom || "",
             mainCategory: formData.mainCategory || [],
             subCategories: formData.subCategories || [],
-            occasionsServed: formData.occasionsServed || [], // 🌟 Initialise new field 🌟
+            occasionsServed: formData.occasionsServed || [],
             selectedBundle: formData.selectedBundle || "",
-            address: { 
+            address: {
                 street: formData.address?.street || "",
                 area: formData.address?.area || "",
                 city: formData.address?.city || "",
                 state: formData.address?.state || "",
+                country: formData.address?.country || (isInternational ? "" : "United Arab Emirates"),
                 zipCode: formData.address?.zipCode || "",
                 googleMapLink: formData.address?.googleMapLink || "",
                 coordinates: {
@@ -150,12 +139,12 @@ export default function Step02_BusinessInfo() {
                     longitude: formData.address?.coordinates?.longitude,
                 },
             },
-            websiteLink: formData.websiteLink || "", 
-            facebookLink: formData.facebookLink || "", 
-            instagramLink: formData.instagramLink || "", 
-            twitterLink: formData.twitterLink || "", 
+            websiteLink: formData.websiteLink || "",
+            facebookLink: formData.facebookLink || "",
+            instagramLink: formData.instagramLink || "",
+            twitterLink: formData.twitterLink || "",
         },
-        mode: "onBlur", 
+        mode: "onBlur",
         reValidateMode: "onChange",
         criteriaMode: "all",
     });
@@ -171,12 +160,10 @@ export default function Step02_BusinessInfo() {
 
     const isMainCategorySelected = selectedMainCategoryIds.length > 0;
 
-    // --- Data Fetching Effect (Categories & Bundles) ---
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                // Fetch categories
-                const categoryResponse = await fetchCategoriesAction(); 
+                const categoryResponse = await fetchCategoriesAction();
                 if (categoryResponse.success) {
                     setCategories(categoryResponse.categories || []);
                     setCategoryError(null);
@@ -184,11 +171,9 @@ export default function Step02_BusinessInfo() {
                     setCategoryError(categoryResponse.message || "Failed to load categories.");
                 }
 
-                // Fetch bundles
                 const bundleResponse = await getBundleOptions();
                 if (!bundleResponse.error) {
                     setBundles(bundleResponse.bundles || []);
-                    // Set first bundle as default if none selected
                     if (!formData.selectedBundle && bundleResponse.bundles.length > 0) {
                         form.setValue('selectedBundle', bundleResponse.bundles[0]._id);
                     }
@@ -209,7 +194,6 @@ export default function Step02_BusinessInfo() {
         loadInitialData();
     }, []);
 
-    // Effect to clear subcategories if main categories are unselected
     useEffect(() => {
         if (!isMainCategorySelected) {
             form.setValue('subCategories', [], { shouldValidate: true });
@@ -217,13 +201,14 @@ export default function Step02_BusinessInfo() {
     }, [isMainCategorySelected, form]);
 
     const handleNext = (data) => {
+        console.log("SUCCESS: handleNext function was CALLED.");
+        // We know it's already valid if it reaches here, so no need for Step2Schema.parse(data) again.
         updateFields(data);
         nextStep();
     };
 
     const handleBack = () => {
-        const currentData = form.getValues();
-        updateFields(currentData);
+        updateFields(form.getValues());
         prevStep();
     };
 
@@ -266,7 +251,7 @@ export default function Step02_BusinessInfo() {
                         <FormItem>
                             <FormLabel className="text-xs leading-0 font-medium">Business Description</FormLabel>
                             <FormControl>
-                                <Textarea 
+                                <Textarea
                                     placeholder="Describe your business, services, and unique selling points (min 50 chars, max 1000 chars)"
                                     {...field}
                                     rows={5}
@@ -278,19 +263,18 @@ export default function Step02_BusinessInfo() {
                     )}
                 />
 
-                {renderInputField({ control: form.control, name: "whatsAppNumber", label: "WhatsApp Number", placeholder: "Enter WhatsApp number for customer contact (e.g., 97150xxxxxxx)" })}
+                {renderInputField({ control: form.control, name: "whatsAppNumber", label: "WhatsApp Number", placeholder: "e.g., 97150xxxxxxx" })}
 
                 <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Business Offerings</h5>
 
-                {renderInputField({ 
-                    control: form.control, 
-                    name: "pricingStartingFrom", 
-                    label: "Pricing Starting From (AED)", 
-                    placeholder: "e.g., 1500 (enter a number)",
+                {renderInputField({
+                    control: form.control,
+                    name: "pricingStartingFrom",
+                    label: "Pricing Starting From (AED)",
+                    placeholder: "e.g., 1500",
                     type: "number"
                 })}
 
-                {/* Main Categories */}
                 <FormField
                     control={form.control}
                     name="mainCategory"
@@ -304,7 +288,7 @@ export default function Step02_BusinessInfo() {
                                     onChange={field.onChange}
                                     valueKey="_id"
                                     disabled={isLoadingCategories || !!categoryError}
-                                    placeholder={isLoadingCategories ? "Loading categories..." : categoryError ? "Error loading categories" : "Select one or more main categories"}
+                                    placeholder={isLoadingCategories ? "Loading..." : categoryError ? "Error" : "Select categories"}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -312,7 +296,6 @@ export default function Step02_BusinessInfo() {
                     )}
                 />
 
-                {/* Sub Categories (Conditional) */}
                 {isMainCategorySelected && (
                     <FormField
                         control={form.control}
@@ -327,10 +310,7 @@ export default function Step02_BusinessInfo() {
                                         onChange={field.onChange}
                                         valueKey="_id"
                                         disabled={isLoadingCategories}
-                                        placeholder={
-                                            isLoadingCategories ? "Loading subcategories..." :
-                                                (allSubCategories.length === 0 ? `No subcategories found for your selection.` : "Select one or more subcategories")
-                                        }
+                                        placeholder="Select subcategories"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -338,51 +318,43 @@ export default function Step02_BusinessInfo() {
                         )}
                     />
                 )}
-                
-                {/* 🌟 NEW: OCCASIONS SERVED FIELD 🌟 */}
+
+                {/* Occasions */}
                 <FormField
                     control={form.control}
                     name="occasionsServed"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs leading-0 font-medium">Occasions Served (Select multiple)</FormLabel>
+                            <FormLabel className="text-xs leading-0 font-medium">Occasions Served</FormLabel>
                             <FormControl>
                                 <CategoryMultiSelect
-                                    options={OCCASION_OPTIONS} // Use the local array of occasion objects
+                                    options={OCCASION_OPTIONS}
                                     value={field.value}
                                     onChange={field.onChange}
-                                    valueKey="slug" // Use 'slug' since the Mongoose model stores slugs
+                                    valueKey="slug"
                                     disabled={false}
-                                    placeholder="Select all the types of events you cater to"
+                                    placeholder="Select all event types"
                                 />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                {/* ------------------------------------ */}
-                
-                {/* Updated Bundle Select with Dynamic Data */}
+
                 <FormField
                     control={form.control}
                     name="selectedBundle"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs leading-0 font-medium">Launch Bundle (Select one)</FormLabel>
-                            <Select 
-                                onValueChange={field.onChange} 
+                            <FormLabel className="text-xs leading-0 font-medium">Select a Package</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
                                 value={field.value}
                                 disabled={isLoadingBundles || !!bundleError}
                             >
                                 <FormControl>
-                                    <SelectTrigger 
-                                        className="p-4 bg-[#f0f0f0] w-full h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0"
-                                    >
-                                        <SelectValue placeholder={
-                                            isLoadingBundles ? "Loading bundles..." : 
-                                            bundleError ? "Error loading bundles" :
-                                            "Select a launch bundle for your subscription"
-                                            } />
+                                    <SelectTrigger className="p-4 bg-[#f0f0f0] h-11 border-none focus-visible:ring-1 focus-visible:ring-offset-0">
+                                        <SelectValue placeholder="Select a Package" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -400,19 +372,30 @@ export default function Step02_BusinessInfo() {
 
                 <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Location Details</h5>
 
-                {renderInputField({ control: form.control, name: "address.city", label: "City (Required)", placeholder: "Enter your primary operating city (e.g., Dubai, Abu Dhabi)" })}
-                {renderInputField({ control: form.control, name: "address.street", label: "Street Address (Optional)", placeholder: "Street name or building name" })}
-                {renderInputField({ control: form.control, name: "address.area", label: "Area/District (Optional)", placeholder: "Area or neighborhood (e.g., Downtown, JLT)" })}
+                {renderInputField({ control: form.control, name: "address.city", label: "City (Required)", placeholder: "e.g., Dubai, Abu Dhabi" })}
+                {renderInputField({ control: form.control, name: "address.street", label: "Street Address (Optional)", placeholder: "Street or building name" })}
+                {renderInputField({ control: form.control, name: "address.area", label: "Area/District (Optional)", placeholder: "Area or neighborhood" })}
                 {renderInputField({ control: form.control, name: "address.state", label: "Emirate/State (Optional)", placeholder: "e.g., Dubai" })}
-                {renderInputField({ control: form.control, name: "address.zipCode", label: "Zip Code (Optional)", placeholder: "e.g., 00000" })}
-                {renderInputField({ control: form.control, name: "address.googleMapLink", label: "Google Maps Link (Optional)", placeholder: "Paste a link to your location on Google Maps. This is required to show you on the map view." })}
-                
-                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Online Presence (All Optional)</h5>
 
-                {renderInputField({ control: form.control, name: "websiteLink", label: "Website Link", placeholder: "e.g., https://yourbusiness.com" })}
-                {renderInputField({ control: form.control, name: "instagramLink", label: "Instagram Link", placeholder: "e.g., https://instagram.com/yourhandle" })}
-                {renderInputField({ control: form.control, name: "facebookLink", label: "Facebook Link", placeholder: "e.g., https://facebook.com/yourpage" })}
-                {renderInputField({ control: form.control, name: "twitterLink", label: "Twitter/X Link", placeholder: "e.g., https://twitter.com/yourhandle" })}
+                {/* ✅ COUNTRY FIELD (Conditional) */}
+                {isInternational && (
+                    renderInputField({
+                        control: form.control,
+                        name: "address.country",
+                        label: "Country (Required for international vendors)",
+                        placeholder: "e.g., India, UK, KSA"
+                    })
+                )}
+
+                {renderInputField({ control: form.control, name: "address.zipCode", label: "Zip Code (Optional)", placeholder: "00000" })}
+                {renderInputField({ control: form.control, name: "address.googleMapLink", label: "Google Maps Link (Optional)", placeholder: "Paste a Google Maps location link" })}
+
+                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Online Presence (Optional)</h5>
+
+                {renderInputField({ control: form.control, name: "websiteLink", label: "Website Link", placeholder: "https://yourbusiness.com" })}
+                {renderInputField({ control: form.control, name: "instagramLink", label: "Instagram Link", placeholder: "https://instagram.com/yourhandle" })}
+                {renderInputField({ control: form.control, name: "facebookLink", label: "Facebook Link", placeholder: "https://facebook.com/yourpage" })}
+                {renderInputField({ control: form.control, name: "twitterLink", label: "Twitter/X Link", placeholder: "https://twitter.com/yourhandle" })}
 
                 <div className="flex justify-between pt-4">
                     <Button
@@ -426,7 +409,7 @@ export default function Step02_BusinessInfo() {
                     <Button
                         type="submit"
                         className="w-40 text-base"
-                        disabled={form.formState.isSubmitting || isLoadingCategories || isLoadingBundles} 
+                        disabled={form.formState.isSubmitting || isLoadingCategories || isLoadingBundles}
                     >
                         Next Step →
                     </Button>

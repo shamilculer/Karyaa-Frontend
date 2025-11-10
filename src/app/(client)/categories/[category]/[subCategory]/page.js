@@ -1,6 +1,6 @@
 import CategoryList from "@/app/(client)/components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar/PageSearchBar";
-import VendorsList from "@/app/(client)/components/common/VendorsList";
+import VendorsListWrapper from "@/app/(client)/components/common/vendorsList/VendorListWrapper";
 import { getSubcategoryDetails } from "@/app/actions/categories";
 import Image from "next/image";
 
@@ -41,7 +41,7 @@ const SubCategoryPage = async ({ params, searchParams }) => {
               Karyaa Recommends
             </h2>
           </div>
-          <VendorsList showControls={true} isSubPage={true} filters={{subCategory : subCategory, ...filters }} />
+          <VendorsListWrapper showControls={true} isSubPage={true} filters={{subCategory : subCategory, ...filters }} />
         </div>
       </section>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import VendorPopupHeader from "./VendorPopupHeader";
 
-const ScrollHeaderWrapper = ({ vendorData, hasPackages }) => {
+const ScrollHeaderWrapper = ({ vendorData, hasPackages, whatsappLink }) => {
     const [showPopupHeader, setShowPopupHeader] = useState(false);
 
     useEffect(() => {
@@ -31,6 +31,7 @@ const ScrollHeaderWrapper = ({ vendorData, hasPackages }) => {
         <VendorPopupHeader
             vendorData={vendorData}
             hasPackages={hasPackages}
+            whatsappLink={whatsappLink}
             showHeader={showPopupHeader}
         />
     );

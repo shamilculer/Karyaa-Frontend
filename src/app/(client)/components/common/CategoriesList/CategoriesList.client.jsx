@@ -1,23 +1,18 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 const CategoriesListClient = ({ initialCategories }) => {
   const categories = initialCategories;
-
-
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (paused || categories?.length === 0) return; 
-
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % categories?.length);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [paused, categories?.length]);
 
@@ -59,9 +54,8 @@ export default CategoriesListClient;
 
 // Mobile Category Card Component
 export const MobileCategoryCard = ({ category }) => {
-  // Use category.coverImage from the schema output
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
-
+  
   return (
     <Link
       href={`/categories/${category.slug}`}
@@ -74,12 +68,12 @@ export const MobileCategoryCard = ({ category }) => {
         className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
       <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10">
-        <span className="text-white text-2xl font-medium font-script text-center px-2 leading-tight">
-          {category.name} {/* Display category name */}
+        <span className="text-white text-lg md:text-2xl font-medium font-body text-center px-2 leading-tight">
+          {category.name}
         </span>
       </div>
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black opacity-40 group-hover:bg-opacity-50 transition-all duration-300"></div>
+      <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-50 transition-all duration-300"></div>
     </Link>
   );
 };
@@ -92,7 +86,6 @@ export const CategoryCard = ({
   setActiveIndex,
   setPaused,
 }) => {
-  // Use category.coverImage from the schema output
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
     
   return (
@@ -118,7 +111,7 @@ export const CategoryCard = ({
             activeIndex === idx ? "opacity-100" : "opacity-0"
           }`}
         >
-          {category.name} {/* Display category name */}
+          {category.name}
         </span>
       </div>
       {/* Overlay */}

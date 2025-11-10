@@ -38,17 +38,19 @@ const UserCreateForm = () => {
         },
     });
 
-    // Updated onSubmit
+    // ✅ Updated onSubmit
     async function onSubmit(data) {
         setErrorMessage("");
-        try {
-            const user = await registerUser(data);
-            setUser(user);
-            router.push("/");
-        } catch (err) {
-            console.error("Registration failed:", err.message);
-            setErrorMessage("Registration failed. Please try again.");
+
+        const result = await registerUser(data);
+
+        if (!result.success) {
+            setErrorMessage(result.error || "Registration failed. Please try again.");
+            return;
         }
+
+        setUser(result.user);
+        router.push("/");
     }
 
     const togglePasswordVisibility = () => {
@@ -171,10 +173,9 @@ const UserCreateForm = () => {
                         )}
                     />
 
-                    {/* Error Message */}
+                    {/* ✅ Backend Error Message */}
                     {errorMessage && <p className="text-red-500 !text-sm">{errorMessage}</p>}
 
-                    {/* Submit Button */}
                     <Button
                         type="submit"
                         className="w-full text-base"

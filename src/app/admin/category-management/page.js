@@ -1,12 +1,11 @@
 "use client"
 
 import { Suspense, useState, useMemo, useEffect } from "react"
-import OverViewStats from "../components/common/OverviewStatsAdmin"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Eye, SquarePen, Trash, Search, Plus, AlertCircle, RefreshCw } from "lucide-react"
+import { Eye, Search, Plus, AlertCircle, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { getCategoryDetails } from "@/app/actions/admin/categories"
@@ -14,8 +13,7 @@ import { AddCategoryModal } from "../components/AddCategoryModal"
 
 const CategoryManagementPage = () => {
     return (
-        <div className="h-full dashboard-container space-y-8">
-            <OverViewStats />
+        <div className="dashboard-container space-y-8">
             <Suspense fallback={<CategoriesLoadingSkeleton />}>
                 <CategoriesContent />
             </Suspense>

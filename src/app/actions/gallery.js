@@ -131,3 +131,36 @@ export const addVendorGalleryItems = async (vendorId, items = []) => {
       return { error: "Unexpected error" };
     }
   };
+
+
+  export const getAllGalleryItems = async (page = 1, limit = 30) => {
+  try {
+    const response = await apiFetch(
+      `/gallery/?page=${page}&limit=${limit}`
+    );
+
+    if (!response || response.error) {
+      return {
+        items: [],
+        count: 0,
+        pagination: null,
+        error: response?.message || "Failed to fetch gallery items.",
+      };
+    }
+
+    return {
+      items: response.items || [],
+      count: response.pagination?.totalItems || 0,
+      pagination: response.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching gallery items:", error);
+
+    return {
+      items: [],
+      count: 0,
+      pagination: null,
+      error: "An unexpected server error occurred.",
+    };
+  }
+};

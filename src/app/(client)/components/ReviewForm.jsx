@@ -56,7 +56,7 @@ const ReviewForm = ({ vendorId, closeModal }) => {
       });
 
       if (response.error) {
-        toast.error(response.error);
+        toast.error(response.error.message);
       } else {
         toast.success(response.message || "Your review has been submitted!");
         form.reset(); 
@@ -65,8 +65,7 @@ const ReviewForm = ({ vendorId, closeModal }) => {
         router.refresh(); 
       }
     } catch (error) {
-      console.error("Failed to submit review:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error(error.error || "An unexpected error occurred. Please try again.");
     }
   };
 

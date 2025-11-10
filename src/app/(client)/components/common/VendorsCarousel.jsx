@@ -1,4 +1,4 @@
-import { VendorsCard } from "./VendorsList";
+import { VendorsCard } from "./vendorsList/VendorsList";
 import { Carousel } from "@/components/ui/carousel";
 import { getActiveVendors } from "@/app/actions/vendors";
 import { checkAuthStatus } from "@/app/actions/user/user";

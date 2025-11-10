@@ -7,6 +7,7 @@ import "swiper/css/autoplay";
 import { Navigation, Autoplay } from "swiper/modules";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const testimonialsData = [
   {
@@ -31,7 +32,7 @@ const testimonialsData = [
 
 const Testimonials = () => {
   return (
-    <div className="relative w-full flex flex-col items-center">
+    <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
       <Swiper
         modules={[Navigation, Autoplay]}
         spaceBetween={20}
@@ -47,25 +48,25 @@ const Testimonials = () => {
         }}
         breakpoints={{
           320: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
-          640: { slidesPerView: 1.5, spaceBetween: 20, centeredSlides: true },
-          768: { slidesPerView: 2, spaceBetween: 20 },
-          1024: { slidesPerView: 3, spaceBetween: 30 },
+          1024: { slidesPerView: 2, spaceBetween: 20 },
         }}
         className="w-full pb-8"
       >
         {testimonialsData.map((t) => (
           <SwiperSlide key={t.id}>
             <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
-              <img
-                className="w-full md:w-40 h-56 md:h-72 object-cover rounded-lg"
+              <Image
+                width={240}
+                height={240}
+                className="w-full md:w-60 h-72 object-cover rounded-lg"
                 src={t.img}
                 alt={t.name}
               />
-              <div className="flex flex-col justify-center p-5 h-56 md:h-72">
+              <div className="flex flex-col h-full justify-center p-5">
                 <div>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={18} fill="#FFD700" stroke="0" />
+                      <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
                     ))}
                   </div>
                   <p className="text-gray-500 mt-4">{t.text}</p>

@@ -25,22 +25,22 @@ import {
     FileText,
     Loader2,
     MoreVertical,
-    PlusCircle // Added for adding features
+    PlusCircle,
+    Timer,
 } from 'lucide-react';
 
 import {
     updateVendorStatusAction,
     toggleVendorRecommendedAction,
-    activateVendorSubscriptionAction,
-    updateVendorFeaturesAction // Imported the new action
+    updateVendorFeaturesAction,
+    updateVendorDurationAction
 } from '@/app/actions/admin/vendors';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-// --- DROP-DOWN PLACEHOLDERS (Replace with your actual components) ---
-// Assuming you have components like those from shadcn/ui
+// --- DROP-DOWN PLACEHOLDERS ---
 const DropdownMenu = ({ children }) => <div className="relative inline-block text-left">{children}</div>;
 const DropdownMenuTrigger = ({ children }) => <div className="cursor-pointer">{children}</div>;
 const DropdownMenuContent = ({ children }) => (
@@ -57,10 +57,9 @@ const DropdownMenuItem = ({ onClick, children, disabled, className }) => (
 );
 const DropdownMenuSeparator = () => <div className="my-1 h-px bg-gray-200" />;
 
-// Assuming Input and Form components for the new feature field
-const Input = ({ value, onChange, placeholder, className, disabled }) => (
+const Input = ({ value, onChange, placeholder, className, disabled, type = "text" }) => (
     <input
-        type="text"
+        type={type}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
@@ -68,28 +67,45 @@ const Input = ({ value, onChange, placeholder, className, disabled }) => (
         className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 ${className}`}
     />
 );
-// --------------------------------------------------------------------
+
+const Select = ({ value, onChange, children, disabled, className }) => (
+    <select
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 ${className}`}
+    >
+        {children}
+    </select>
+);
 
 const VendorDetailsClient = ({ vendorData }) => {
     const [vendor, setVendor] = useState(vendorData);
     const [isUpdating, setIsUpdating] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // To manage the dropdown state
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [newCustomFeature, setNewCustomFeature] = useState('');
     const [isFeatureSubmitting, setIsFeatureSubmitting] = useState(false);
-
+    
+    // Custom duration states
+    const [showDurationForm, setShowDurationForm] = useState(false);
+    const [customDuration, setCustomDuration] = useState({
+        value: vendor.customDuration?.value || '',
+        unit: vendor.customDuration?.unit || 'months',
+        bonusPeriod: {
+            value: vendor.customDuration?.bonusPeriod?.value || '',
+            unit: vendor.customDuration?.bonusPeriod?.unit || 'months'
+        }
+    });
+    const [isDurationSubmitting, setIsDurationSubmitting] = useState(false);
 
     const handleStatusChange = async (newStatus) => {
         setIsDropdownOpen(false);
         setIsUpdating(true);
 
-        // 1. Call the server action
         const result = await updateVendorStatusAction(vendor._id, newStatus);
 
         if (result.success) {
-            // ✅ FIX: Use the full updated 'vendor' object from result.data
-            // This object contains BOTH the new vendorStatus and the new subscriptionStatus
             setVendor(result.data);
-
             toast.success(result.message);
         } else {
             toast.error(result.message);
@@ -98,12 +114,11 @@ const VendorDetailsClient = ({ vendorData }) => {
     };
 
     const handleToggleRecommended = async () => {
-        setIsDropdownOpen(false); // Close dropdown on action
+        setIsDropdownOpen(false);
         setIsUpdating(true);
         const result = await toggleVendorRecommendedAction(vendor._id);
 
         if (result.success) {
-            // Assuming result.data contains the updated vendor object with the toggled status
             setVendor(result.data);
             toast.success(result.message);
         } else {
@@ -112,22 +127,6 @@ const VendorDetailsClient = ({ vendorData }) => {
         setIsUpdating(false);
     };
 
-    const handleActivateSubscription = async () => {
-        setIsDropdownOpen(false); // Close dropdown on action
-        setIsUpdating(true);
-        const result = await activateVendorSubscriptionAction(vendor._id);
-
-        if (result.success) {
-            // Assuming result.data contains the updated vendor object with the new subscription status
-            setVendor(result.data);
-            toast.success(result.message);
-        } else {
-            toast.error(result.message);
-        }
-        setIsUpdating(false);
-    };
-
-    // Handler for adding a new custom feature
     const handleAddCustomFeature = async (e) => {
         e.preventDefault();
         const feature = newCustomFeature.trim();
@@ -138,14 +137,13 @@ const VendorDetailsClient = ({ vendorData }) => {
 
         setIsFeatureSubmitting(true);
 
-        // Combine existing custom features with the new one
         const updatedCustomFeatures = [...(vendor.customFeatures || []), feature];
 
         const result = await updateVendorFeaturesAction(vendor._id, updatedCustomFeatures);
 
         if (result.success) {
             setVendor({ ...vendor, customFeatures: updatedCustomFeatures });
-            setNewCustomFeature(''); // Clear the input field
+            setNewCustomFeature('');
             toast.success(result.message);
         } else {
             toast.error(result.message);
@@ -154,16 +152,48 @@ const VendorDetailsClient = ({ vendorData }) => {
         setIsFeatureSubmitting(false);
     };
 
+    const handleUpdateDuration = async (e) => {
+        e.preventDefault();
+        
+        if (!customDuration.value || customDuration.value <= 0) {
+            toast.error("Duration value must be greater than 0");
+            return;
+        }
+
+        setIsDurationSubmitting(true);
+
+        const durationData = {
+            value: parseInt(customDuration.value),
+            unit: customDuration.unit,
+            bonusPeriod: customDuration.bonusPeriod.value ? {
+                value: parseInt(customDuration.bonusPeriod.value),
+                unit: customDuration.bonusPeriod.unit
+            } : { value: 0, unit: 'months' }
+        };
+
+        const result = await updateVendorDurationAction(vendor._id, durationData);
+
+        if (result.success) {
+            setVendor(result.data);
+            setShowDurationForm(false);
+            toast.success(result.message);
+        } else {
+            toast.error(result.message);
+        }
+
+        setIsDurationSubmitting(false);
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'approved':
-            case 'active':
                 return 'bg-green-100 text-green-800 border-green-200';
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800 border-yellow-200';
             case 'rejected':
-            case 'expired':
                 return 'bg-red-100 text-red-800 border-red-200';
+            case 'expired':
+                return 'bg-orange-100 text-orange-800 border-orange-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -176,6 +206,20 @@ const VendorDetailsClient = ({ vendorData }) => {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    const getDurationDisplay = () => {
+        if (vendor.subscriptionDuration) {
+            const base = vendor.subscriptionDuration.base;
+            const bonus = vendor.subscriptionDuration.bonus;
+            
+            let display = `${base.value} ${base.unit}`;
+            if (bonus && bonus.value > 0) {
+                display += ` + ${bonus.value} ${bonus.unit} bonus`;
+            }
+            return display;
+        }
+        return 'N/A';
     };
 
     return (
@@ -208,6 +252,12 @@ const VendorDetailsClient = ({ vendorData }) => {
                                         <h1 className="!text-[28px] font-bold text-gray-900">{vendor.businessName}</h1>
                                         {vendor.tagline && <p className="text-gray-600 !text-sm italic mb-1">{vendor.tagline}</p>}
                                         <div className="flex flex-wrap gap-2 mb-3">
+                                            {vendor.isInternational && (
+                                                <Badge className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-1">
+                                                    <Globe className="w-3 h-3" />
+                                                    International Vendor
+                                                </Badge>
+                                            )}
                                             {vendor.mainCategory?.map((cat, i) => (
                                                 <Badge key={i} className="px-2 py-.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
                                                     {cat.name}
@@ -236,10 +286,8 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                 {vendor.vendorStatus === 'approved' && <CheckCircle2 className="w-4 h-4 inline mr-2" />}
                                                 {vendor.vendorStatus === 'pending' && <Clock className="w-4 h-4 inline mr-2" />}
                                                 {vendor.vendorStatus === 'rejected' && <XCircle className="w-4 h-4 inline mr-2" />}
+                                                {vendor.vendorStatus === 'expired' && <Timer className="w-4 h-4 inline mr-2" />}
                                                 {vendor.vendorStatus?.toUpperCase()}
-                                            </span>
-                                            <span className={`px-4 py-2 rounded-lg text-sm font-semibold border text-center ${getStatusColor(vendor.subscriptionStatus)}`}>
-                                                Subscription: {vendor.subscriptionStatus?.toUpperCase()}
                                             </span>
 
                                             {vendor.createdAt && (
@@ -264,12 +312,11 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                 </Button>
                                             </DropdownMenuTrigger>
 
-                                            {isDropdownOpen && ( // Conditionally render the content
+                                            {isDropdownOpen && (
                                                 <DropdownMenuContent>
                                                     <div className="p-2 space-y-1">
                                                         <p className="text-xs font-semibold text-gray-500 uppercase px-2 mb-1">Vendor Status</p>
 
-                                                        {/* Approve */}
                                                         <DropdownMenuItem
                                                             onClick={() => handleStatusChange('approved')}
                                                             disabled={isUpdating || vendor.vendorStatus === 'approved'}
@@ -279,7 +326,6 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                             <span>{vendor.vendorStatus === 'approved' ? 'Approved ✓' : 'Approve'}</span>
                                                         </DropdownMenuItem>
 
-                                                        {/* Set Pending */}
                                                         <DropdownMenuItem
                                                             onClick={() => handleStatusChange('pending')}
                                                             disabled={isUpdating || vendor.vendorStatus === 'pending'}
@@ -289,7 +335,15 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                             <span>{vendor.vendorStatus === 'pending' ? 'Pending ✓' : 'Set Pending'}</span>
                                                         </DropdownMenuItem>
 
-                                                        {/* Reject */}
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleStatusChange('expired')}
+                                                            disabled={isUpdating || vendor.vendorStatus === 'expired'}
+                                                            className={vendor.vendorStatus === 'expired' ? 'bg-orange-100 text-orange-700' : ''}
+                                                        >
+                                                            <Timer className="mr-2 h-4 w-4" />
+                                                            <span>{vendor.vendorStatus === 'expired' ? 'Expired ✓' : 'Mark Expired'}</span>
+                                                        </DropdownMenuItem>
+
                                                         <DropdownMenuItem
                                                             onClick={() => handleStatusChange('rejected')}
                                                             disabled={isUpdating || vendor.vendorStatus === 'rejected'}
@@ -301,7 +355,6 @@ const VendorDetailsClient = ({ vendorData }) => {
 
                                                         <DropdownMenuSeparator />
 
-                                                        {/* Toggle Recommended */}
                                                         <DropdownMenuItem
                                                             onClick={handleToggleRecommended}
                                                             disabled={isUpdating}
@@ -310,18 +363,6 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                             <Award className="mr-2 h-4 w-4" />
                                                             <span>{vendor.isRecommended ? 'Recommended ✓' : 'Add Recommended'}</span>
                                                         </DropdownMenuItem>
-
-                                                        {/* Activate Subscription - Show only if approved and pending subscription */}
-                                                        {vendor.vendorStatus === 'approved' && vendor.subscriptionStatus === 'pending' && (
-                                                            <DropdownMenuItem
-                                                                onClick={handleActivateSubscription}
-                                                                disabled={isUpdating}
-                                                                className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-                                                            >
-                                                                <Package className="mr-2 h-4 w-4" />
-                                                                <span>Activate Subscription</span>
-                                                            </DropdownMenuItem>
-                                                        )}
                                                     </div>
                                                 </DropdownMenuContent>
                                             )}
@@ -348,14 +389,13 @@ const VendorDetailsClient = ({ vendorData }) => {
                                 </h2>
 
                                 <div className='my-5 flex flex-wrap items-center gap-3'>
-                                    {vendor.subCategories.length > 0 && vendor.subCategories.map(sub => (
+                                    {vendor.subCategories?.length > 0 && vendor.subCategories.map(sub => (
                                         <Badge key={sub._id} className="bg-gray-100 text-gray-800 !px-3 !py-1 rounded-3xl !text-sm border border-gray-300">{sub.name}</Badge>
                                     ))}
                                 </div>
                                 <p className="text-gray-700 leading-relaxed">{vendor.businessDescription}</p>
                             </div>
                         )}
-
 
                         {/* Subscription Details */}
                         {vendor.selectedBundle && (
@@ -368,14 +408,32 @@ const VendorDetailsClient = ({ vendorData }) => {
                                     <div>
                                         <p className="text-sm text-gray-600 mb-1">Bundle</p>
                                         <p className="text-lg font-bold text-indigo-600">{vendor.selectedBundle.name}</p>
-                                        <p className="text-sm text-gray-500">AED {vendor.selectedBundle.price} / {vendor.selectedBundle.duration?.value} {vendor.selectedBundle.duration?.unit}</p>
+                                        <p className="text-sm text-gray-500">AED {vendor.selectedBundle.price}</p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Total Duration</p>
+                                        <p className="text-lg font-bold text-gray-900">{getDurationDisplay()}</p>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setShowDurationForm(!showDurationForm)}
+                                            className="text-indigo-600 hover:text-indigo-700 p-0 h-auto mt-1"
+                                        >
+                                            {showDurationForm ? 'Cancel' : 'Customize Duration'}
+                                        </Button>
                                     </div>
 
                                     <div>
                                         <p className="text-sm text-gray-600 mb-1">Status</p>
-                                        <span className={`inline-block px-3 py-1 rounded-lg text-sm font-semibold ${getStatusColor(vendor.subscriptionStatus)}`}>
-                                            {vendor.subscriptionStatus?.toUpperCase()}
+                                        <span className={`inline-block px-3 py-1 rounded-lg text-sm font-semibold ${getStatusColor(vendor.vendorStatus)}`}>
+                                            {vendor.vendorStatus?.toUpperCase()}
                                         </span>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Location</p>
+                                        <p className="font-medium text-gray-900">{vendor.address?.city}, {vendor.address?.country}</p>
                                     </div>
 
                                     {vendor.subscriptionStartDate && (
@@ -398,6 +456,79 @@ const VendorDetailsClient = ({ vendorData }) => {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Custom Duration Form */}
+                                {showDurationForm && (
+                                    <form onSubmit={handleUpdateDuration} className="mt-6 p-4 bg-white rounded-lg border border-indigo-300">
+                                        <h3 className="font-semibold text-gray-800 mb-4">Set Custom Duration</h3>
+                                        
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label className="text-sm text-gray-600 mb-1 block">Base Duration Value</label>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    value={customDuration.value}
+                                                    onChange={(e) => setCustomDuration(prev => ({ ...prev, value: e.target.value }))}
+                                                    placeholder="e.g., 1"
+                                                    disabled={isDurationSubmitting}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-sm text-gray-600 mb-1 block">Base Duration Unit</label>
+                                                <Select
+                                                    value={customDuration.unit}
+                                                    onChange={(e) => setCustomDuration(prev => ({ ...prev, unit: e.target.value }))}
+                                                    disabled={isDurationSubmitting}
+                                                >
+                                                    <option value="days">Days</option>
+                                                    <option value="months">Months</option>
+                                                    <option value="years">Years</option>
+                                                </Select>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label className="text-sm text-gray-600 mb-1 block">Bonus Period Value</label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    value={customDuration.bonusPeriod.value}
+                                                    onChange={(e) => setCustomDuration(prev => ({
+                                                        ...prev,
+                                                        bonusPeriod: { ...prev.bonusPeriod, value: e.target.value }
+                                                    }))}
+                                                    placeholder="e.g., 3"
+                                                    disabled={isDurationSubmitting}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-sm text-gray-600 mb-1 block">Bonus Period Unit</label>
+                                                <Select
+                                                    value={customDuration.bonusPeriod.unit}
+                                                    onChange={(e) => setCustomDuration(prev => ({
+                                                        ...prev,
+                                                        bonusPeriod: { ...prev.bonusPeriod, unit: e.target.value }
+                                                    }))}
+                                                    disabled={isDurationSubmitting}
+                                                >
+                                                    <option value="days">Days</option>
+                                                    <option value="months">Months</option>
+                                                    <option value="years">Years</option>
+                                                </Select>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={isDurationSubmitting || !customDuration.value}
+                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        >
+                                            {isDurationSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update Duration'}
+                                        </Button>
+                                    </form>
+                                )}
                             </div>
                         )}
 
@@ -409,9 +540,7 @@ const VendorDetailsClient = ({ vendorData }) => {
                                     Features & Benefits
                                 </h2>
 
-
-                                {/* All Base Features */}
-                                <h3 className="font-semibold text-gray-700 !text-base mb-3">All Base Features</h3>
+                                <h3 className="font-semibold text-gray-700 !text-base mb-3">Bundle Features</h3>
                                 <div className="grid md:grid-cols-2 gap-3">
                                     {vendor.allFeatures.map((feature, i) => (
                                         <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
@@ -421,11 +550,10 @@ const VendorDetailsClient = ({ vendorData }) => {
                                     ))}
                                 </div>
 
-                                {/* Existing Custom Features */}
                                 {vendor.customFeatures && vendor.customFeatures.length > 0 && (
                                     <div className="mt-6">
                                         <h3 className="font-semibold text-gray-700 !text-base mb-3">
-                                            Existing Custom Features
+                                            Custom Features
                                         </h3>
                                         <div className="grid md:grid-cols-2 gap-3">
                                             {vendor.customFeatures.map((feature, i) => (
@@ -438,7 +566,6 @@ const VendorDetailsClient = ({ vendorData }) => {
                                     </div>
                                 )}
 
-                                {/* Add New Custom Feature Form */}
                                 <form onSubmit={handleAddCustomFeature} className="my-6 p-4 border border-indigo-100 bg-indigo-50 rounded-lg">
                                     <h3 className="font-semibold text-gray-700 !text-base mb-3 flex items-center gap-2">
                                         <PlusCircle className="w-4 h-4 text-indigo-600" />
@@ -460,57 +587,61 @@ const VendorDetailsClient = ({ vendorData }) => {
                                         </Button>
                                     </div>
                                 </form>
-
                             </div>
                         )}
 
-                        {/* Documents */}
-                        <div className="bg-white rounded p-6 border border-gray-100">
-                            <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-indigo-600" />
-                                Verification Documents
-                            </h2>
-                            <div className="space-y-4">
-                                <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Trade License</p>
-                                            <p className="text-sm text-gray-500">{vendor.tradeLicenseNumber}</p>
+                        {/* Documents - Only show for non-international vendors */}
+                        {!vendor.isInternational && (
+                            <div className="bg-white rounded p-6 border border-gray-100">
+                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-indigo-600" />
+                                    Verification Documents
+                                </h2>
+                                <div className="space-y-4">
+                                    {vendor.tradeLicenseCopy && (
+                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">Trade License</p>
+                                                    <p className="text-sm text-gray-500">{vendor.tradeLicenseNumber}</p>
+                                                </div>
+                                                <a
+                                                    href={vendor.tradeLicenseCopy}
+                                                    download
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    Download
+                                                </a>
+                                            </div>
                                         </div>
-                                        <a
-                                            href={vendor.tradeLicenseCopy}
-                                            download
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                            Download
-                                        </a>
-                                    </div>
-                                </div>
+                                    )}
 
-                                <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Emirates ID</p>
-                                            <p className="text-sm text-gray-500">{vendor.personalEmiratesIdNumber}</p>
+                                    {vendor.emiratesIdCopy && (
+                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">Emirates ID</p>
+                                                    <p className="text-sm text-gray-500">{vendor.personalEmiratesIdNumber}</p>
+                                                </div>
+                                                <a
+                                                    href={vendor.emiratesIdCopy}
+                                                    download
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    Download
+                                                </a>
+                                            </div>
                                         </div>
-                                        <a
-                                            href={vendor.emiratesIdCopy}
-                                            download
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                            Download
-                                        </a>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
-                        </div>
-
+                        )}
                     </div>
 
                     {/* Left Column - Contact & Location */}
@@ -527,11 +658,11 @@ const VendorDetailsClient = ({ vendorData }) => {
                                 <div className="flex items-center gap-3">
                                     <Avatar className="w-20 h-20 rounded-full overflow-hidden bg-white">
                                         <AvatarImage className="size-full object-cover" src={vendor.ownerProfileImage || vendor.businessLogo} />
-                                        <AvatarFallback>{getInitials(vendor?.businessName)}</AvatarFallback>
+                                        <AvatarFallback>{getInitials(vendor?.ownerName)}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <p className="font-medium font-heading text-gray-900">{vendor.ownerName}</p>
-                                        <p className="!text-sm text-gray-500">Owner Name</p>
+                                        <p className="!text-sm text-gray-500">Owner</p>
                                     </div>
                                 </div>
 
@@ -578,7 +709,7 @@ const VendorDetailsClient = ({ vendorData }) => {
                             <div className="space-y-0">
                                 {vendor.address?.street && <p className="text-gray-900 !text-sm">{vendor.address.street}</p>}
                                 {vendor.address?.area && <p className="text-gray-600 !text-sm">{vendor.address.area}, {vendor.address.city}</p>}
-                                <p className="text-gray-600">{vendor.address?.state}, {vendor.address?.country} {vendor.address?.zipCode}</p>
+                                <p className="text-gray-600">{vendor.address?.state && `${vendor.address.state}, `}{vendor.address?.country} {vendor.address?.zipCode}</p>
                                 {vendor.address?.googleMapLink && (
                                     <a
                                         href={vendor.address.googleMapLink}
@@ -629,7 +760,6 @@ const VendorDetailsClient = ({ vendorData }) => {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
         </div>

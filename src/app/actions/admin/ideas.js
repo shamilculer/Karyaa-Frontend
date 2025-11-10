@@ -112,3 +112,88 @@ export const deleteIdeaAction = async (id) => {
     };
   }
 }
+
+export const updateIdeaCategoryAction = async ({ id, name, coverImage }) => {
+  if (!id || !name) {
+    return {
+      success: false,
+      message: "Category ID and name are required for update.",
+    };
+  }
+
+  const endpoint = `/admin/ideas/category/${id}/update`;
+
+  try {
+    const response = await apiFetch(endpoint, {
+      method: "PUT",
+      body: JSON.stringify({ name, coverImage }),
+      role: "admin", 
+      auth: true
+    });
+
+    if (response.success) {
+      return {
+        success: true,
+        data: response.data,
+        message: response.message || "Category updated successfully.",
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || "Failed to update category.",
+      };
+    }
+  } catch (error) {
+    console.error("Error updating idea category:", error);
+    return {
+      success: false,
+      message:
+        error.message ||
+        "An unexpected network error occurred during category update.",
+    };
+  }
+};
+
+export const createIdeaCategoryAction = async ({ name, coverImage }) => {
+    if (!name) {
+        return { success: false, message: "Category name is required." };
+    }
+
+    // API Endpoint: Assuming POST to /api/ideas/categories
+    const endpoint = `/admin/ideas/category/new`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                name: name.trim(), 
+                coverImage: coverImage ? coverImage.trim() : "" 
+            }),
+            role: "admin",
+            auth: true
+        });
+
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data,
+                message: response.message || "Category created successfully.",
+            };
+        } else {
+            // Handle specific errors like duplicate name/slug (status code 409)
+            if (response.status === 409) {
+                return { success: false, message: "A category with this name already exists." };
+            }
+            return {
+                success: false,
+                message: response.message || "Failed to create category.",
+            };
+        }
+    } catch (error) {
+        console.error("Error creating idea category:", error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred.",
+        };
+    }
+};

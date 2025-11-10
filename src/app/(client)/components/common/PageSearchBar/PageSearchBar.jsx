@@ -9,6 +9,7 @@ export default function PageSearchBar() {
     { value: "umm-al-quwain", label: "Umm Al Quwain" },
     { value: "ras-al-khaimah", label: "Ras Al Khaimah" },
     { value: "fujairah", label: "Fujairah" },
+    { value: "International", label: "international" },
 ];
 
   return (

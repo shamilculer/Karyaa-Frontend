@@ -76,13 +76,12 @@ export default function Step03_Review({ isLastStep }) {
         { label: "Business Name", value: displayData.businessName },
         { label: "Email", value: displayData.email },
         { label: "Phone Number", value: displayData.phoneNumber },
-        { label: "Trade License No.", value: displayData.tradeLicenseNumber },
         { label: "Pricing Starts From", value: `AED ${displayData.pricingStartingFrom}` },
     ];
 
     return (
         <div className="space-y-6">
-            <h4 className="!text-2xl font-bold text-primary mb-6">Step 4: Review & Finalize</h4>
+            <h4 className="!text-2xl font-bold text-primary mb-6">Step 3: Review & Finalize</h4>
 
             <div className="bg-[#f0f0f0] p-6 rounded-lg space-y-3">
                 <h4 className="!text-lg border-b pb-2 text-gray-800">Your Registration Summary</h4>

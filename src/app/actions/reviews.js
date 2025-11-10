@@ -178,7 +178,7 @@ export const createReview = async (vendorId, reviewData) => {
         const response = await apiFetch(`/reviews/new/${vendorId}`, {
             method: "POST",
             body: JSON.stringify(reviewData),
-            credentials: "include"
+            auth: true
         });
 
         if (response.error || response.status >= 400) {
@@ -193,16 +193,15 @@ export const createReview = async (vendorId, reviewData) => {
         // 4. Return the successful response from the backend
         return {
             review: response.review,
-            message: response.message || "Review submitted successfully and vendor statistics updated."
+            message: response.message || "Review submitted successfully."
         };
 
     } catch (error) {
-        // 5. Handle unexpected network errors or other exceptions
-        console.error(`Error in createReview Server Action for vendor ${vendorId}:`, error);
+
+        console.log(error)
 
         return {
-            error: "An unexpected error occurred while submitting your review.",
-            message: "An unexpected error occurred. Please check your connection."
+            error: error || "An unexpected error occurred while submitting your review.",
         };
     }
 };

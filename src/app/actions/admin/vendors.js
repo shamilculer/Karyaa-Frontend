@@ -8,8 +8,8 @@ export const getAllVendorsAction = async ({
     limit = 15, 
     search = "", 
     vendorStatus = "",
-    subscriptionStatus = "",
     city = "",
+    isInternational = "",
     sortBy = "createdAt",
     sortOrder = "desc"
 } = {}) => {
@@ -19,8 +19,8 @@ export const getAllVendorsAction = async ({
     queryParams.append('limit', String(limit));
     if (search) queryParams.append('search', search);
     if (vendorStatus) queryParams.append('vendorStatus', vendorStatus);
-    if (subscriptionStatus) queryParams.append('subscriptionStatus', subscriptionStatus);
     if (city) queryParams.append('city', city);
+    if (isInternational !== "") queryParams.append('isInternational', isInternational);
     queryParams.append('sortBy', sortBy);
     queryParams.append('sortOrder', sortOrder);
 
@@ -99,10 +99,10 @@ export const updateVendorStatusAction = async (id, vendorStatus) => {
         return { success: false, message: "Vendor ID is required." };
     }
 
-    if (!['approved', 'pending', 'rejected'].includes(vendorStatus)) {
+    if (!['approved', 'pending', 'rejected', 'expired'].includes(vendorStatus)) {
         return { 
             success: false, 
-            message: "Invalid status. Must be 'approved', 'pending', or 'rejected'" 
+            message: "Invalid status. Must be 'approved', 'pending', 'rejected', or 'expired'" 
         };
     }
 
@@ -138,17 +138,44 @@ export const updateVendorStatusAction = async (id, vendorStatus) => {
     }
 };
 
-// --- 4. ACTIVATE VENDOR SUBSCRIPTION ---
-export const activateVendorSubscriptionAction = async (id, customDuration = null) => {
+// --- 4. UPDATE VENDOR CUSTOM DURATION ---
+export const updateVendorDurationAction = async (id, customDuration) => {
     if (!id) {
         return { success: false, message: "Vendor ID is required." };
     }
 
-    const endpoint = `/admin/vendors/${id}/subscription`;
+    // Validate customDuration structure
+    if (customDuration) {
+        if (!customDuration.value || !customDuration.unit) {
+            return { 
+                success: false, 
+                message: "customDuration must include 'value' and 'unit'" 
+            };
+        }
+
+        if (!['days', 'months', 'years'].includes(customDuration.unit)) {
+            return { 
+                success: false, 
+                message: "unit must be 'days', 'months', or 'years'" 
+            };
+        }
+
+        // Validate bonusPeriod if provided
+        if (customDuration.bonusPeriod && customDuration.bonusPeriod.unit) {
+            if (!['days', 'months', 'years'].includes(customDuration.bonusPeriod.unit)) {
+                return { 
+                    success: false, 
+                    message: "bonusPeriod unit must be 'days', 'months', or 'years'" 
+                };
+            }
+        }
+    }
+
+    const endpoint = `/admin/vendors/${id}/duration`;
 
     try {
         const response = await apiFetch(endpoint, {
-            method: "PUT",
+            method: "PATCH",
             role: "admin",
             auth: true,
             body: JSON.stringify({ customDuration }),
@@ -157,18 +184,18 @@ export const activateVendorSubscriptionAction = async (id, customDuration = null
         if (response.success) {
             return {
                 success: true,
-                message: response.message || "Vendor subscription activated successfully.",
+                message: response.message || "Custom duration updated successfully.",
                 data: response.data
             };
         } else {
             return {
                 success: false,
-                message: response.message || "Failed to activate subscription.",
+                message: response.message || "Failed to update custom duration.",
             };
         }
 
     } catch (error) {
-        console.error(`Error activating subscription for vendor ${id}:`, error);
+        console.error(`Error updating custom duration for vendor ${id}:`, error);
         return {
             success: false,
             message: error.message || "An unexpected network error occurred.",

@@ -126,9 +126,10 @@ export async function getVendorsBySlugs(slugs) {
 /**
  * @desc Fetches minimal data for all vendors to populate the Combobox dropdowns.
  */
-export async function getAllVendorOptions() {
+export async function getAllVendorOptions({ query = '', limit = 50 } = {}) {
     try {
-        const responseData = await apiFetch(`/vendors/options`);
+        // Update API endpoint to include search query and limit
+        const responseData = await apiFetch(`/vendors/options?q=${encodeURIComponent(query)}&limit=${limit}`);
 
         if (responseData.success) {
             return { success: true, data: responseData.data || [], error: null };

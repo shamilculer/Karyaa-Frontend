@@ -4,7 +4,6 @@ import * as React from "react"
 import { useState } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import { toast } from "sonner"
 import { FileText, Loader2, PlusCircle, Trash2 } from "lucide-react"
 
@@ -34,51 +33,39 @@ import {
 } from "@/components/ui/form"
 import { Separator } from "@/components/ui/separator"
 
-// --- Import Server Action ---
 import { createBundleAction } from "@/app/actions/admin/bundle"
-
-// --- Zod Schema for Bundle (Updated to match simplified schema) ---
-const formSchema = z.object({
-    // General Fields
-    name: z.string().min(3, { message: "Name must be at least 3 characters." }),
-    description: z.string().optional(),
-
-    // Pricing & Duration
-    price: z.number().min(0, { message: "Price must be non-negative." }),
-    durationValue: z.number().min(1, { message: "Duration value must be at least 1." }),
-    durationUnit: z.enum(["days", "months", "years"]),
-    
-    // Configuration
-    status: z.enum(["active", "inactive"]),
-    isPopular: z.boolean().default(false).optional(),
-    includesRecommended: z.boolean().default(false).optional(),
-    displayOrder: z.number().min(0, "Display order cannot be negative.").default(0),
-
-    // Features Array (Simplified to just strings)
-    features: z.array(z.string().min(1, "Feature cannot be empty")).optional(),
-});
+import { bundleFormSchema } from "@/lib/schema"
 
 
 const CreateBundleModal = ({ onSuccess }) => {
     const [open, setOpen] = useState(false);
     
+    // Convert 0 or null to undefined for maxVendors input to show placeholder
+    const handleMaxVendorsChange = (e, field) => {
+        const value = e.target.value === "" ? null : Number(e.target.value);
+        field.onChange(value);
+    };
+
     const form = useForm({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(bundleFormSchema),
         defaultValues: {
             name: "",
             description: "",
             price: 0,
             durationValue: 1,
             durationUnit: "months",
+            bonusPeriodValue: 0, 
+            bonusPeriodUnit: "months",
             status: "active",
             isPopular: false,
             includesRecommended: false,
+            isAvailableForInternational: true, // Default set to true
             displayOrder: 0,
+            maxVendors: null, // Default to null for unlimited
             features: [],
         },
     });
 
-    // Hook for managing dynamic array fields
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: "features",
@@ -87,7 +74,6 @@ const CreateBundleModal = ({ onSuccess }) => {
     const isSubmitting = form.formState.isSubmitting;
 
     const onSubmit = async (values) => {
-        // Construct the final data structure matching the Mongoose schema
         const bundleData = {
             name: values.name,
             description: values.description,
@@ -96,10 +82,16 @@ const CreateBundleModal = ({ onSuccess }) => {
                 value: values.durationValue,
                 unit: values.durationUnit,
             },
+            bonusPeriod: {
+                value: values.bonusPeriodValue || 0,
+                unit: values.bonusPeriodUnit,
+            },
             status: values.status,
             isPopular: values.isPopular,
             includesRecommended: values.includesRecommended,
+            isAvailableForInternational: values.isAvailableForInternational,
             displayOrder: values.displayOrder,
+            maxVendors: values.maxVendors,
             features: values.features || [],
         };
 
@@ -126,20 +118,20 @@ const CreateBundleModal = ({ onSuccess }) => {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create New Bundle</DialogTitle>
                     <DialogDescription>
-                        Define the details for a new subscription bundle or pricing plan.
+                        Define the details, pricing, and configuration for a new subscription plan.
                     </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="grid gap-4 py-4">
+                        <div className="grid gap-6 py-4">
                             
-                            {/* --- General Details --- */}
-                            <h4 className="font-semibold text-base">General Details</h4>
+                            {/* --- SECTION 1: GENERAL DETAILS --- */}
+                            <h4 className="font-semibold text-lg border-b pb-2">General Details</h4>
 
                             {/* Name Field */}
                             <FormField
@@ -171,33 +163,34 @@ const CreateBundleModal = ({ onSuccess }) => {
                                 )}
                             />
 
-                            <Separator className="my-4" />
-                            <h4 className="font-semibold text-base">Pricing & Duration</h4>
+                            <Separator />
+                            
+                            {/* --- SECTION 2: PRICING & DURATION --- */}
+                            <h4 className="font-semibold text-lg border-b pb-2">Pricing & Duration</h4>
 
-                            {/* Price */}
-                            <FormField
-                                control={form.control}
-                                name="price"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Price (AED)</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                type="number" 
-                                                step="0.01" 
-                                                min="0"
-                                                placeholder="1500.00" 
-                                                {...field} 
-                                                onChange={(e) => field.onChange(Number(e.target.value))}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {/* Price */}
+                                <FormField
+                                    control={form.control}
+                                    name="price"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Price (AED)</FormLabel>
+                                            <FormControl>
+                                                <Input 
+                                                    type="number" 
+                                                    step="0.01" 
+                                                    min="0"
+                                                    placeholder="1500.00" 
+                                                    {...field} 
+                                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                            {/* Duration Group (Value and Unit) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Duration Value */}
                                 <FormField
                                     control={form.control}
@@ -218,6 +211,7 @@ const CreateBundleModal = ({ onSuccess }) => {
                                         </FormItem>
                                     )}
                                 />
+                                
                                 {/* Duration Unit */}
                                 <FormField
                                     control={form.control}
@@ -243,11 +237,63 @@ const CreateBundleModal = ({ onSuccess }) => {
                                 />
                             </div>
 
-                            <Separator className="my-4" />
-                            <h4 className="font-semibold text-base">Configuration</h4>
+                            <Separator className="my-2" />
 
-                            {/* Status and Display Order */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* --- Bonus Period --- */}
+                            <h4 className="font-semibold text-base">Bonus Period (Optional)</h4>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {/* Bonus Period Value */}
+                                <FormField
+                                    control={form.control}
+                                    name="bonusPeriodValue"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Bonus Value (0 for none)</FormLabel>
+                                            <FormControl>
+                                                <Input 
+                                                    type="number" 
+                                                    min="0"
+                                                    placeholder="0" 
+                                                    value={field.value === 0 ? "" : field.value}
+                                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>Extra period added to the subscription.</FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* Bonus Period Unit */}
+                                <FormField
+                                    control={form.control}
+                                    name="bonusPeriodUnit"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Bonus Unit</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select unit" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="days">Days</SelectItem>
+                                                    <SelectItem value="months">Months</SelectItem>
+                                                    <SelectItem value="years">Years</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <Separator />
+
+                            {/* --- SECTION 3: CONFIGURATION --- */}
+                            <h4 className="font-semibold text-lg border-b pb-2">Configuration</h4>
+
+                            <div className="grid md:grid-cols-2 gap-4">
                                 {/* Status */}
                                 <FormField
                                     control={form.control}
@@ -286,20 +332,45 @@ const CreateBundleModal = ({ onSuccess }) => {
                                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                                 />
                                             </FormControl>
+                                            <FormDescription>Lower numbers appear first on the frontend.</FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
+                            
+                            {/* Max Vendors */}
+                            <FormField
+                                control={form.control}
+                                name="maxVendors"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Maximum Vendors</FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                type="number" 
+                                                min="1"
+                                                placeholder="Leave blank or 0 for unlimited" 
+                                                // Ensure the input field value is handled correctly for null/0
+                                                value={field.value === null || field.value === 0 ? "" : field.value} 
+                                                onChange={(e) => handleMaxVendorsChange(e, field)}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>Limits the number of subscriptions to this bundle. Use 0 or leave blank for unlimited.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                            {/* Checkboxes */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            {/* Checkboxes Group */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                                 {/* Is Popular */}
                                 <FormField
                                     control={form.control}
                                     name="isPopular"
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 border rounded-md">
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 border rounded-md bg-slate-50">
                                             <FormControl>
                                                 <Checkbox
                                                     checked={field.value}
@@ -307,12 +378,8 @@ const CreateBundleModal = ({ onSuccess }) => {
                                                 />
                                             </FormControl>
                                             <div className="space-y-1 leading-none">
-                                                <FormLabel className="cursor-pointer">
-                                                    Mark as Popular
-                                                </FormLabel>
-                                                <FormDescription className="!text-xs">
-                                                    Highlights this on the bundles page.
-                                                </FormDescription>
+                                                <FormLabel className="cursor-pointer">Mark as Popular</FormLabel>
+                                                <FormDescription className="!text-xs">Highlights this on the bundles page.</FormDescription>
                                             </div>
                                         </FormItem>
                                     )}
@@ -322,7 +389,7 @@ const CreateBundleModal = ({ onSuccess }) => {
                                     control={form.control}
                                     name="includesRecommended"
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 border rounded-md">
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 border rounded-md bg-slate-50">
                                             <FormControl>
                                                 <Checkbox
                                                     checked={field.value}
@@ -330,20 +397,37 @@ const CreateBundleModal = ({ onSuccess }) => {
                                                 />
                                             </FormControl>
                                             <div className="space-y-1 leading-none">
-                                                <FormLabel className="cursor-pointer">
-                                                    Includes Recommended
-                                                </FormLabel>
-                                                <FormDescription className="!text-xs">
-                                                    Vendors get recommended listing feature.
-                                                </FormDescription>
+                                                <FormLabel className="cursor-pointer">Includes Recommended</FormLabel>
+                                                <FormDescription className="!text-xs">Grants recommended listing feature to vendors.</FormDescription>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* Is Available For International */}
+                                <FormField
+                                    control={form.control}
+                                    name="isAvailableForInternational"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 border rounded-md bg-slate-50">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel className="cursor-pointer">Available Internationally</FormLabel>
+                                                <FormDescription className="!text-xs">Allow purchase by vendors outside the primary region.</FormDescription>
                                             </div>
                                         </FormItem>
                                     )}
                                 />
                             </div>
 
-                            <Separator className="my-4" />
-                            <h4 className="font-semibold text-base flex justify-between items-center">
+                            <Separator />
+
+                            {/* --- SECTION 4: FEATURES --- */}
+                            <h4 className="font-semibold text-lg border-b pb-2 flex justify-between items-center">
                                 Features 
                                 <Button 
                                     type="button" 
@@ -358,7 +442,7 @@ const CreateBundleModal = ({ onSuccess }) => {
                                 Define the benefits included in this bundle as simple text descriptions.
                             </FormDescription>
 
-                            {/* Dynamic Features Array (Simplified) */}
+                            {/* Dynamic Features Array */}
                             <div className="space-y-3">
                                 {fields.map((field, index) => (
                                     <div key={field.id} className="flex items-center gap-2">
@@ -368,7 +452,7 @@ const CreateBundleModal = ({ onSuccess }) => {
                                             render={({ field }) => (
                                                 <FormItem className="flex-1">
                                                     <FormControl>
-                                                        <Input placeholder="e.g., Max 5 listings per month" {...field} />
+                                                        <Input placeholder={`Feature #${index + 1}: e.g., Max 5 listings per month`} {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -379,12 +463,17 @@ const CreateBundleModal = ({ onSuccess }) => {
                                             variant="destructive" 
                                             size="icon"
                                             onClick={() => remove(index)}
-                                            className="h-10 w-10"
+                                            className="h-10 w-10 shrink-0"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 ))}
+                                {form.formState.errors.features && (
+                                    <p className="text-sm font-medium text-destructive mt-1">
+                                        {form.formState.errors.features.message}
+                                    </p>
+                                )}
                             </div>
                         </div>
 

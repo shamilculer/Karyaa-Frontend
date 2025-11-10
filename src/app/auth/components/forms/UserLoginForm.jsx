@@ -62,7 +62,7 @@ const UserLoginForm = () => {
     };
 
     return (
-            <div className="w-full max-w-md mx-auto space-y-8 mt-10">
+            <div className="w-full max-xl:min-w-80 xl:max-w-md mx-auto space-y-8 mt-10">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
