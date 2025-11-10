@@ -33,22 +33,22 @@ const ContactPage = async () => {
                         <div className="space-y-8">
                             <Link href="" className="flex items-center gap-4">
                                 <PhoneCall size={25} />
-                                <span className="font-medium text-xl">{contactInfo.primaryPhone}</span>
+                                <span className="font-medium text-xl">{contactInfo?.primaryPhone}</span>
                             </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <Mail size={25} />
-                                <span className="font-medium text-xl">{contactInfo.mainEmail}</span>
+                                <span className="font-medium text-xl">{contactInfo?.mainEmail}</span>
                             </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <Mail size={25} />
-                                <span className="font-medium text-xl">{contactInfo.supportEmail}</span>
+                                <span className="font-medium text-xl">{contactInfo?.supportEmail}</span>
                             </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <MapPin size={25} />
-                                <span className="font-medium text-xl">{contactInfo.location}</span>
+                                <span className="font-medium text-xl">{contactInfo?.location}</span>
                             </Link>
                         </div>
                     </div>
