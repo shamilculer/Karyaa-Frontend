@@ -95,3 +95,88 @@ export const logoutVendor = async () => {
   // Redirect to vendor login page
   redirect('/auth/vendor/login');
 };
+
+export const getVendorProfile = async () => {
+    try {
+        const url = `/vendors/profile`; 
+        const responseData = await apiFetch(url, {
+            auth: true,
+            role: "vendor",
+        }); 
+
+        if (responseData.success) {
+            return {
+                success: true,
+                data: responseData.data,
+                message: responseData.message || "Vendor profile data fetched successfully."
+            };
+        } else {
+            return {
+                success: false,
+                data: null,
+                error: responseData.message || "Failed to fetch vendor profile for editing."
+            };
+        }
+        
+    } catch (error) {
+        console.error("Server Action: Error fetching vendor profile for edit:", error);
+
+        return {
+            success: false,
+            data: null,
+            error: error.message || "An unexpected error occurred while fetching profile data.",
+        };
+    }
+}
+
+
+export const updateVendorProfile = async (vendorId, updateData) => {
+    if (!vendorId) {
+        return {
+            success: false,
+            error: "Vendor ID is required.",
+            data: null,
+        };
+    }
+
+    if (!updateData || Object.keys(updateData).length === 0) {
+        return {
+            success: false,
+            error: "No update data provided.",
+            data: null,
+        };
+    }
+
+    try {
+        const url = `/vendors/${vendorId}`;
+
+        const responseData = await apiFetch(url, {
+            method: "PUT",
+            body: JSON.stringify(updateData),
+            role: "vendor",
+            auth: true,
+        });
+
+        if (responseData.success) {
+            return {
+                success: true,
+                data: responseData.data,
+                message: responseData.message || "Vendor profile updated successfully.",
+            };
+        } else {
+            return {
+                success: false,
+                data: null,
+                error: responseData.message || "Failed to update vendor profile.",
+            };
+        }
+    } catch (error) {
+        console.error(`Server Action: Error updating vendor ${vendorId}:`, error);
+
+        return {
+            success: false,
+            data: null,
+            error: error.message || "Failed to update vendor profile.",
+        };
+    }
+};

@@ -5,6 +5,7 @@ import { getAllIdeasAction } from "@/app/actions/ideas";
 import IdeaGallery from "./IdeaGallery";
 import { Loader2 } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { Carousel } from "@/components/ui/carousel";
 
 function IdeasContainer({ categories }) {
   const searchParams = useSearchParams();
@@ -57,11 +58,11 @@ function IdeasContainer({ categories }) {
   }, [selected]);
 
   return (
-    <section className="w-full px-5">
+    <section className="w-full px-1">
       <h2 className="uppercase font-semibold text-xl">Popular Categories</h2>
 
       {/* Category Tabs */}
-      <div className="mt-6 w-full grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4">
+      <div className="mt-6 w-full hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">
         {categoryOptions.map((cat) => {
           const isSelected = selected === cat.name;
           return (
@@ -92,6 +93,56 @@ function IdeasContainer({ categories }) {
         })}
       </div>
 
+      <div className="xl:hidden mt-6 w-full px-4">
+        <Carousel
+          withNavigation
+          withPagination
+          slidesPerView={2.5}
+          spaceBetween={20}
+          // ----------------------------------------------------
+          breakpoints={{
+            625: {
+              slidesPerView: 2.5,
+              spaceBetween: 30,
+            },
+            1025: {
+              slidesPerView: 4,
+              spaceBetween: 30
+            },
+          }}
+          className="!pb-10"
+        >
+          {categoryOptions.map((cat) => {
+            const isSelected = selected === cat.name;
+            return (
+              <div
+                key={cat._id}
+                onClick={() => handleSelect(cat.name)}
+                className={`
+                flex flex-col justify-start gap-2 cursor-pointer transition-all duration-200 flex-shrink-0
+                ${isSelected ? "text-indigo-600 font-semibold" : "text-gray-700"}
+              `}
+              >
+                <div
+                  className={`
+                  mx-auto rounded-full overflow-hidden border-2
+                  ${isSelected ? "border-indigo-600 p-0.5" : "border-gray-200"}
+                `}
+                >
+                  <img
+                    src={cat?.coverImage}
+                    alt={cat.name}
+                    className="object-cover w-full h-full rounded-full aspect-square"
+                  />
+                </div>
+
+                <h5 className="text-center !text-sm">{cat.name}</h5>
+              </div>
+            );
+          })}
+        </Carousel>
+      </div>
+
       {/* Ideas List */}
       <div className="mt-8 container mx-auto">
         {/* Loading */}
@@ -118,7 +169,7 @@ function IdeasContainer({ categories }) {
 
         {/* Data */}
         {!loading && !error && ideas.length > 0 && (
-          <div className="flex flex-col gap-16 mt-20">
+          <div className="flex flex-col gap-16 mt-10 xl:mt-20">
             {ideas.map((idea, idx) => {
               const isEven = idx % 2 === 0;
 

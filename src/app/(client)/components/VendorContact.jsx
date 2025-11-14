@@ -14,17 +14,17 @@ import { getInitials } from "@/utils"
 // ----------------------------------------------------------------------
 // 1. The Main Export Component (Handles Visibility)
 // ----------------------------------------------------------------------
-const VendorContact = ({ vendorInfo }) => {
+const VendorContact = ({ vendorInfo, user }) => {
     return (
         <>
             {/* Desktop View: Static Contact Form (Hidden on small screens) */}
             <div className="max-lg:hidden">
-                <VendorContactComponent vendorInfo={vendorInfo} />
+                <VendorContactComponent vendorInfo={vendorInfo} user={user} />
             </div>
 
             {/* Mobile/Tablet View: Floating Button to open Modal (Hidden on large screens) */}
             <div className="lg:hidden z-9999">
-                <MobileVendorContact vendorInfo={vendorInfo} />
+                <MobileVendorContact vendorInfo={vendorInfo} user={user} />
             </div>
         </>
     )
@@ -34,7 +34,7 @@ const VendorContact = ({ vendorInfo }) => {
 // 2. The Core Contact/Form Layout (REVISED to accept optional setIsOpen)
 // ----------------------------------------------------------------------
 // Now accepts setIsOpen as a prop, which is used to close the modal after submission.
-const VendorContactComponent = ({ vendorInfo, setIsOpen }) => { 
+const VendorContactComponent = ({ vendorInfo, user, setIsOpen }) => { 
     const ownerInitials = getInitials(vendorInfo.ownerName)
     return (
         <div className="w-full p-6 bg-white border border-[#CACCD0] space-y-7">
@@ -61,7 +61,7 @@ const VendorContactComponent = ({ vendorInfo, setIsOpen }) => {
             </div>
 
             <div>
-                <VendorForm vendorInfo={vendorInfo} setIsOpen={setIsOpen} /> 
+                <VendorForm vendorInfo={vendorInfo} user={user} setIsOpen={setIsOpen} /> 
             </div>
         </div>
     )
@@ -70,7 +70,7 @@ const VendorContactComponent = ({ vendorInfo, setIsOpen }) => {
 // ----------------------------------------------------------------------
 // 3. Mobile/Tablet Floating Button and Modal (REVISED to manage state)
 // ----------------------------------------------------------------------
-const MobileVendorContact = ({ vendorInfo }) => {
+const MobileVendorContact = ({ vendorInfo, user }) => {
     const [isOpen, setIsOpen] = useState(false); 
 
     const ownerInitials = getInitials(vendorInfo.ownerName)
@@ -101,7 +101,7 @@ const MobileVendorContact = ({ vendorInfo }) => {
             <DialogContent className="p-0 max-w-[90vw] md:max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="sr-only">Contact Us</DialogTitle>
                 {/* 👈 3. Pass the state setter down */}
-                <VendorContactComponent vendorInfo={vendorInfo} setIsOpen={setIsOpen} /> 
+                <VendorContactComponent vendorInfo={vendorInfo} user={user} setIsOpen={setIsOpen} /> 
             </DialogContent>
         </Dialog>
     )

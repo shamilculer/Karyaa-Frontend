@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import EnquiryOverTime from '../components/charts/EnquiryOverTime'
 import InquiriesByEventType from '../components/charts/InquiriesByEventType'
 import InquiriesByLocation from '../components/charts/InquiriesByLocation'
@@ -41,7 +42,9 @@ const VendorAnalyticsPage = () => {
                     <h4 className="uppercase !text-sidebar-foreground !font-medium !tracking-widest">
                         Latest Enquiries
                     </h4>
-                    <LeadsTable controls={false} />
+                    <Suspense fallback={<div>Loading leads...</div>}>
+                      <LeadsTable controls={false} />
+                    </Suspense>
                 </div>
 
                 <div className="flex max-lg:flex-col gap-6">

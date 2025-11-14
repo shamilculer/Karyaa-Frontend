@@ -1,6 +1,16 @@
 "use client"
 import { usePathname } from "next/navigation"
-import { SquareMenu, ChartPie, Image as ImageIcon, BriefcaseBusiness, Star, ChartNoAxesCombined, Users, Settings, CircleQuestionMark } from "lucide-react"
+import {
+    SquareMenu,
+    ChartPie,
+    Image as ImageIcon,
+    BriefcaseBusiness,
+    Star,
+    ChartNoAxesCombined,
+    Settings,
+    CircleQuestionMark,
+    SquareStack
+} from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
@@ -57,6 +67,11 @@ const items = [
         icon: Star,
     },
     {
+        title: "Bundles",
+        url: "/vendor/bundles",
+        icon: SquareStack,
+    },
+    {
         title: "Settings",
         url: "/vendor/settings",
         icon: Settings,
@@ -78,6 +93,16 @@ function VendorSideBar() {
         setOpenMobile(false);
     };
 
+    // Check if the current path matches or is a sub-route of the menu item
+    const isActiveRoute = (url) => {
+        // Exact match
+        if (pathname === url) return true;
+
+        // Check if pathname starts with the menu url (for sub-routes)
+        // For example: /vendor/packages/new should match /vendor/packages
+        return pathname.startsWith(url + '/');
+    };
+
     return (
         <Sidebar>
             <SidebarHeader className="py-7 px-4">
@@ -95,7 +120,7 @@ function VendorSideBar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                const isActive = pathname === item.url
+                                const isActive = isActiveRoute(item.url)
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton

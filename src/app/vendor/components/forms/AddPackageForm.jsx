@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { packageSchema } from "@/lib/schema";
 import { createPackage } from "@/app/actions/vendor/packages";
@@ -19,12 +19,88 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { useVendorStore } from "@/store/vendorStore";
-import { getSubcategories } from "@/app/actions/categories";
-import { Skeleton } from "@/components/ui/skeleton";
+
+// --- 🟢 FIXED TagsInput Component ---
+const TagsInput = ({ name, placeholder, errors, getValues, setValue, trigger }) => {
+    // Local state for the current input value
+    const [inputValue, setInputValue] = useState("");
+
+    const handleAddTag = useCallback(
+        (e) => {
+            e.preventDefault();
+            const value = inputValue.trim();
+            const currentTags = getValues(name) || [];
+
+            if (value && !currentTags.includes(value)) {
+                setValue(name, [...currentTags, value]);
+                trigger(name); // Re-validate the services field
+                setInputValue(""); // Clear input after adding
+            } else if (value && currentTags.includes(value)) {
+                toast.info("This service has already been added.");
+                setInputValue("");
+            }
+        },
+        [inputValue, getValues, setValue, trigger, name]
+    );
+
+    const handleRemoveTag = (tagToRemove) => {
+        const currentTags = getValues(name) || [];
+        setValue(
+            name,
+            currentTags.filter((tag) => tag !== tagToRemove)
+        );
+        trigger(name); // Re-validate the services field
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            handleAddTag(e);
+        }
+    };
+
+    // Use getValues to retrieve the current array of tags
+    const tags = getValues(name) || [];
+
+    return (
+        <div className="space-y-3">
+            <div className="flex space-x-2">
+                <Input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className={errors?.[name] ? "border-red-500" : ""}
+                />
+                <Button type="button" onClick={handleAddTag}>
+                    Add
+                </Button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 pt-2">
+                {tags.map((tag, index) => (
+                    <Badge
+                        key={index}
+                        variant="secondary"
+                        className="flex items-center gap-1.5 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors"
+                        onClick={() => handleRemoveTag(tag)}
+                    >
+                        {tag}
+                        <span className="text-gray-500 hover:text-gray-700 font-bold ml-1">
+                            &times;
+                        </span>
+                    </Badge>
+                ))}
+            </div>
+        </div>
+    );
+};
+// --- END: TagsInput Component ---
 
 const AddPackageForm = () => {
     const router = useRouter();
@@ -35,6 +111,7 @@ const AddPackageForm = () => {
         defaultValues: {
             name: "",
             subheading: "",
+            priceStartingFrom: 0,
             description: "",
             services: [],
             includes: [""],
@@ -47,56 +124,30 @@ const AddPackageForm = () => {
         name: "includes",
     });
 
-    const [subCategories, setSubCategories] = useState([]);
-    const [isLoadingSubcategories, setIsLoadingSubcategories] = useState(true);
-
-    // ✅ Fetch ALL subcategories on mount
-    useEffect(() => {
-        const fetchSubs = async () => {
-            setIsLoadingSubcategories(true);
-
-            try {
-                const data = await getSubcategories({});
-                setSubCategories(data?.subcategories || []);
-            } catch (err) {
-                console.error("Failed loading subcategories", err);
-                setSubCategories([]);
-            } finally {
-                setIsLoadingSubcategories(false);
-            }
-        };
-
-        fetchSubs();
-    }, []);
-
-    // ✅ Multi-select toggler
-    const toggleSubCategory = (slug) => {
-        const current = form.getValues("services");
-
-        if (current.includes(slug)) {
-            form.setValue(
-                "services",
-                current.filter((s) => s !== slug)
-            );
-        } else {
-            form.setValue("services", [...current, slug]);
-        }
-    };
-
     async function onSubmit(values) {
+        const submissionValues = {
+            ...values,
+            priceStartingFrom: Number(values.priceStartingFrom),
+            includes: values.includes.filter(item => item.trim() !== ""),
+        };
+        
         try {
-          const res = await createPackage(values);
+            const res = await createPackage(submissionValues);
     
-          toast.success(res.message || "Package created successfully!");
+            form.reset(); 
+            toast.success(res.message || "Package created successfully!");
     
-          // Redirect AFTER toast
-          setTimeout(() => router.push("/vendor/packages"), 500);
+            setTimeout(() => router.push("/vendor/packages"), 500);
     
         } catch (err) {
-          console.error(err);
-          toast.error(err.message || "Something went wrong");
+            console.error(err);
+            toast.error(err.message || "Something went wrong");
+            form.reset({ 
+                ...submissionValues, 
+                priceStartingFrom: submissionValues.priceStartingFrom || 0 
+            }); 
         }
-      }
+    }
 
     return (
         <div className="w-full max-w-4xl space-y-6">
@@ -127,6 +178,27 @@ const AddPackageForm = () => {
                                 <FormLabel>Subheading</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Premium all-in-one bundle" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    {/* Price Field */}
+                    <FormField
+                        control={form.control}
+                        name="priceStartingFrom"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Starting Price (AED)</FormLabel>
+                                <FormControl>
+                                    <Input 
+                                        type="number" 
+                                        placeholder="5000" 
+                                        {...field} 
+                                        onChange={(e) => field.onChange(e.target.valueAsNumber || e.target.value)}
+                                        value={field.value === 0 ? "" : field.value} 
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -170,62 +242,22 @@ const AddPackageForm = () => {
                         )}
                     />
 
-                    {/* 🟢 Subcategory Multi-Select */}
+                    {/* Tags Input for Services */}
                     <FormField
                         control={form.control}
                         name="services"
-                        render={({ field }) => (
+                        render={() => (
                             <FormItem>
-                                <FormLabel>Services</FormLabel>
+                                <FormLabel>Services (Type Name and press Enter or Add)</FormLabel>
                                 <FormControl>
-                                    <div className="flex flex-wrap gap-2 mt-3">
-
-                                        {isLoadingSubcategories ? (
-                                            <>
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                                <Skeleton className="h-8 w-20 rounded-full" />
-                                            </>
-                                        ) : subCategories?.length > 0 ? (
-                                            subCategories.map((sub) => (
-                                                <Button
-                                                    key={sub._id}
-                                                    type="button"
-                                                    variant={field.value.includes(sub._id) ? "default" : "outline"}
-                                                    className={`rounded-full border text-xs md:text-sm font-medium px-2 md:px-4 py-0.5 md:py-1 transition-all ${field.value.includes(sub._id)
-                                                        ? "bg-primary text-white border-primary"
-                                                        : "hover:bg-gray-100 hover:text-primary"
-                                                        }`}
-                                                    onClick={() => toggleSubCategory(sub._id)}
-                                                >
-                                                    {sub.name}
-                                                </Button>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-gray-500">No services available.</p>
-                                        )}
-                                    </div>
+                                    <TagsInput 
+                                        name="services"
+                                        placeholder="E.g., 'Wedding Photography'"
+                                        errors={form.formState.errors}
+                                        getValues={form.getValues}
+                                        setValue={form.setValue}
+                                        trigger={form.trigger}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -237,7 +269,21 @@ const AddPackageForm = () => {
                         <FormLabel className="mb-4">Features Included In The Package</FormLabel>
                         {fields.map((f, i) => (
                             <div key={f.id} className="flex gap-2 items-center">
-                                <Input {...form.register(`includes.${i}`)} placeholder={`Item ${i + 1}`} />
+                                <FormField
+                                    control={form.control}
+                                    name={`includes.${i}`}
+                                    render={({ field }) => (
+                                        <FormItem className="flex-grow">
+                                            <FormControl>
+                                                <Input 
+                                                    {...field} 
+                                                    placeholder={`Item ${i + 1}`}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <Button type="button" variant="ghost" onClick={() => remove(i)}>
                                     ❌
                                 </Button>

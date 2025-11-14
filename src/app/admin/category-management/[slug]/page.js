@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -44,7 +44,7 @@ const SingleCategoryManage = () => {
 
   const coverImageValue = watch("coverImage")
 
-  const fetchCategoryData = async () => {
+  const fetchCategoryData = useCallback(async () => {
     if (!slug) return
     
     try {
@@ -68,13 +68,13 @@ const SingleCategoryManage = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [slug, reset])
 
   useEffect(() => {
     if (slug) {
       fetchCategoryData()
     }
-  }, [slug])
+  }, [slug, fetchCategoryData])
 
   const onSubmit = async (data) => {
     try {

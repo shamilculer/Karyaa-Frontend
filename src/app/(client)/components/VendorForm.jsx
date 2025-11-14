@@ -23,12 +23,13 @@ import {
 } from "@/components/ui/select";
 import { vendorFormSchema } from "@/lib/schema";
 import { postLead } from "@/app/actions/leads";
-import { toast } from "sonner"; // Using 'sonner' for toast
+import { toast } from "sonner";
+import { useClientStore } from "@/store/clientStore";
 
 // ----------------------------------------------------------------------
 // 2. Vendor Form Component (REVISED to accept setIsOpen)
 // ----------------------------------------------------------------------
-const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen prop
+const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
     const form = useForm({
         resolver: zodResolver(vendorFormSchema),
         defaultValues: {
@@ -46,23 +47,6 @@ const VendorForm = ({ vendorInfo, setIsOpen }) => { // 👈 Accept setIsOpen pro
     const { setError, formState: { errors } } = form;
 
     async function onFormSubmit(data) {
-        const authErrorMessage = "You must be logged in to submit an inquiry.";
-
-        if (!vendorInfo.isUserAuthenticated) {
-            toast.error(authErrorMessage, {
-                position: 'top-center',
-            });
-
-            setError("root.authError", {
-                type: "manual",
-                message: authErrorMessage,
-            });
-            return;
-        }
-
-        if (errors.root?.authError) {
-            setError("root.authError", null);
-        }
 
         const submissionData = {
             vendorId: vendorInfo.vendorId,

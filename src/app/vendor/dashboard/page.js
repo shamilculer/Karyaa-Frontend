@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import EnquiryOverTime from "../components/charts/EnquiryOverTime"
 import LeadSource from "../components/charts/LeadSource"
 import ReviewInsights from "../components/ReviewInsights"
@@ -41,10 +42,12 @@ const VendorDashboardPage = () => {
           </div>
 
           <Button asChild variant="outline" className="max-md:!px-3 max-md:py-1 max-md:h-auto" >
-            <Link href="/vendor/manage-gallery">Manage Leads</Link>
+            <Link href="/vendor/leads">Manage Leads</Link>
           </Button>
         </div>
-        <LeadsTable />
+        <Suspense fallback={<div>Loading leads...</div>}>
+          <LeadsTable />
+        </Suspense>
       </div>
 
       <div className="w-full space-y-5">

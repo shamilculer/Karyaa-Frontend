@@ -389,8 +389,8 @@ const VendorPage = async ({ params }) => {
                 ownerName: vendorData.ownerName,
                 ownerLogo: vendorData.ownerProfileImage,
                 vendorId: vendorData._id,
-                isUserAuthenticated: authResult.isAuthenticated,
               }}
+              user={authResult}
             />
           </div>
         </div>
@@ -423,7 +423,7 @@ const VendorPage = async ({ params }) => {
                     <div className="flex flex-wrap gap-2">
                       {pkg.services?.slice(0, 3).map((service) => (
                         <Badge
-                          key={service._id}
+                          key={service}
                           className="text-xs rounded-full bg-gray-200 text-gray-600"
                         >
                           {service.name}

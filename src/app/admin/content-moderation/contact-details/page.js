@@ -133,7 +133,9 @@ export default function ContactManagementPage() {
     <div className="dashboard-container space-y-5 mb-14">
 
       <div className="flex-between gap-16">
-        <h3 className="uppercase text-primary/40 !tracking-wider">Contact Details</h3>
+        <span className='text-sidebar-foreground font-semibold text-2xl uppercase tracking-widest'>
+                Contact Details
+            </span>
 
         <Button
           className="flex items-center gap-2"

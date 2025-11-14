@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { vendors } from "@/utils"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 const ReviewInsights = () => {
     return (
@@ -154,7 +155,9 @@ const ReviewInsights = () => {
                 </div>
             </CardContent>
             <CardFooter className="flex flex-wrap gap-4 text-sm">
-                <Button variant="outline" className="rounded-lg p-4 hover:bg-secondary hover:text-white">Know More</Button>
+                <Button asChild variant="outline" className="rounded-lg p-4 hover:bg-secondary hover:text-white">
+                    <Link href="/vendor/reviews">Know More</Link>
+                </Button>
             </CardFooter>
         </Card>
     )

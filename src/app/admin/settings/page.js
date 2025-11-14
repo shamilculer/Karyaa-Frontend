@@ -3,6 +3,8 @@ import { getAdminFromToken } from '../utils/getAdminFromToken'
 import { getInitials } from '@/utils'
 import LogoutAlertModal from '../components/LogoutAlertModal'
 
+export const dynamic = 'force-dynamic'
+
 const AdminSettingsPage = async () => {
 
     const { admin } = await getAdminFromToken();

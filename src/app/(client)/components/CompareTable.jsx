@@ -34,6 +34,7 @@ const EMPTY_SLOT = {
     mainCategory: null,
     subCategory: null,
     tagline: null,
+    isRecommended: false, 
 };
 
 // Helper to create empty slots
@@ -61,7 +62,7 @@ const CompareTable = ({ initialVendors }) => {
         const validVendors = initialVendors.filter(v => v && v.slug);
         for (let i = 0; i < MAX_COMPARISON_SLOTS; i++) {
             if (i < validVendors.length) {
-                initialList.push(validVendors[i]);
+                initialList.push({ ...EMPTY_SLOT, ...validVendors[i] }); 
             } else {
                 initialList.push(createEmptySlot(i));
             }
@@ -150,7 +151,7 @@ const CompareTable = ({ initialVendors }) => {
             }
         });
         return () => subscription.unsubscribe();
-    }, [methods.watch]);
+    }, [methods.watch, methods]);
 
     // Async handler for vendor selection
     const handleVendorSelection = async (newVendorSlug, slotIndex) => {
@@ -191,7 +192,8 @@ const CompareTable = ({ initialVendors }) => {
                 const newVendor = fetchResult.data[0];
                 setCompareList(prevList => {
                     const newList = [...prevList];
-                    newList[slotIndex] = newVendor;
+                    // Merge new data with EMPTY_SLOT defaults to ensure all fields exist
+                    newList[slotIndex] = { ...EMPTY_SLOT, ...newVendor };
                     return newList;
                 });
             } else {
@@ -225,17 +227,20 @@ const CompareTable = ({ initialVendors }) => {
     return (
         <FormProvider {...methods}>
             <div className="comparison-table-wrapper overflow-x-auto rounded-lg">
-                <Table className="min-w-[700px] table-fixed">
+                <Table className="min-w-[1080px] table-fixed"> {/* Updated min-width for 180px + 3*300px */}
                     <TableHeader className="bg-gray-50">
                         <TableRow className="hover:bg-gray-50/90">
                             <TableHead className="font-bold w-[180px] text-left text-base bg-gray-100">
                                 Comparison Metrics
                             </TableHead>
                             {compareList.map((vendor, index) => (
-                                <TableHead key={`header-${index}`} className="w-auto text-center border-l border-l-gray-300 bg-gray-100 p-4">
+                                <TableHead 
+                                    key={`header-${index}`} 
+                                    className="min-w-[230px] text-center border-l border-l-gray-300 bg-gray-100 p-4"
+                                >
                                     <VendorSelectField
                                         name={`vendor${index}`}
-                                        placeholder="Search and select a vendor..."
+                                        placeholder="Search Vendor"
                                         valueKey="slug"
                                         required={false}
                                         initialVendor={vendor.slug !== 'empty' ? vendor : null}
@@ -245,11 +250,38 @@ const CompareTable = ({ initialVendors }) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {/* Row 1: Gallery/Cover Images */}
+                        
+                        {/* NEW ROW: Vendor Name */}
+                        <TableRow className="bg-gray-50/50">
+                            <TableCell className="font-bold p-4 w-[180px]">Vendor Name</TableCell>
+                            {compareList.map((vendor, index) => (
+                                <TableCell 
+                                    key={`name-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
+                                    {loadingSlots[index] ? (
+                                        <div className="h-6 bg-gray-200 animate-pulse rounded w-2/3 mx-auto"></div>
+                                    ) : vendor.slug !== 'empty' ? (
+                                        <span className="font-semibold text-gray-800 text-base">
+                                            {vendor.businessName}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400">
+                                            —
+                                        </span>
+                                    )}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+
+                        {/* Row: Gallery/Cover Images */}
                         <TableRow className="h-40">
                             <TableCell className="font-medium p-4 bg-gray-50 align-top w-[180px]">Gallery/Cover Images</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`gallery-${index}`} className="p-4 border-l border-l-gray-300 text-center align-top w-auto">
+                                <TableCell 
+                                    key={`gallery-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center align-top min-w-[230px]"
+                                >
                                     {loadingSlots[index] || loadingGallery[index] ? (
                                         <div className="w-full h-32 bg-gray-200 animate-pulse rounded"></div>
                                     ) : vendor.slug !== 'empty' && galleryItems[index] && galleryItems[index].length > 0 ? (
@@ -265,7 +297,7 @@ const CompareTable = ({ initialVendors }) => {
                                                     height={300}
                                                     src={item.url}
                                                     alt={item.title || `Gallery image for ${vendor.businessName}`}
-                                                    className="w-full h-72 object-cover rounded mx-auto"
+                                                    className="w-full h-[230px] xl:h-72 object-cover rounded mx-auto min-w-[230px]"
                                                 />
                                             ))}
                                         </Carousel>
@@ -278,11 +310,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 2: Average Rating */}
+                        {/* Row: Average Rating */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Average Rating</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`rating-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`rating-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
                                     ) : vendor.averageRating && vendor.slug !== 'empty' ? (
@@ -294,11 +329,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 3: Starting Price */}
+                        {/* Row: Starting Price */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Starting Price</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`price-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`price-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
                                     ) : vendor.pricingStartingFrom && vendor.slug !== 'empty' ? (
@@ -310,11 +348,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 4: City */}
+                        {/* Row: City */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">City</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`city-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`city-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-16 mx-auto"></div>
                                     ) : vendor.address?.city && vendor.slug !== 'empty' ? vendor.address.city : '—'}
@@ -322,11 +363,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 5: Featured Status */}
+                        {/* Row: Featured Status */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Karyaa Recommended</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`featured-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`featured-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
                                     ) : vendor.slug !== 'empty' ? (
@@ -336,11 +380,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 6: Main Category */}
+                        {/* Row: Main Category */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Category</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`category-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`category-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
                                     ) : vendor.slug !== 'empty' && Array.isArray(vendor.mainCategory) && vendor.mainCategory.length > 0 ? (
@@ -366,11 +413,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 7: Subcategories */}
+                        {/* Row: Subcategories */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Subcategories</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`subcategory-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`subcategory-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-32 mx-auto"></div>
                                     ) : vendor.slug !== 'empty' && Array.isArray(vendor.subCategories) && vendor.subCategories.length > 0 ? (
@@ -396,11 +446,14 @@ const CompareTable = ({ initialVendors }) => {
                             ))}
                         </TableRow>
 
-                        {/* Row 8: View Vendor Button */}
+                        {/* Row: View Vendor Button */}
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">View Vendor</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell key={`view-${index}`} className="p-4 border-l border-l-gray-300 text-center w-auto">
+                                <TableCell 
+                                    key={`view-${index}`} 
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                >
                                     {loadingSlots[index] ? (
                                         <div className="h-10 bg-gray-200 animate-pulse rounded w-32 mx-auto"></div>
                                     ) : vendor.slug !== 'empty' ? (

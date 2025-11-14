@@ -1,16 +1,11 @@
 "use client"
-
 import * as React from "react"
-import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
     useReactTable,
-    getPaginationRowModel,
-    getFilteredRowModel,
 } from "@tanstack/react-table"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -21,7 +16,19 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
     Table,
     TableBody,
@@ -34,201 +41,320 @@ import {
     EllipsisVertical,
     Search,
     ChevronDown,
+    Loader2,
 } from "lucide-react"
-
 import {
     IconCircleFilled,
     IconChevronLeft,
     IconChevronRight,
 } from "@tabler/icons-react"
+import { getVendorLeads, updateLeadStatus, deleteLead } from "@/app/actions/vendor/leads"
+import { toast } from "sonner"
+import LeadDetailsModal from "../LeadDetailsModal"
 
-
-const sampleData = [
-    {
-        id: 546,
-        clientName: "Ayman Malik",
-        contactNumber: "+971 5993 00 0934",
-        eventType: "Wedding",
-        eventDate: "15/OCT/2025",
-        eventLocation: "Ajman, UAE",
-        status: "Open",
-    },
-    {
-        id: 272,
-        clientName: "Sana Khan",
-        contactNumber: "+971 5567 89 0123",
-        eventType: "Birthday Party",
-        eventDate: "20/NOV/2025",
-        eventLocation: "Dubai, UAE",
-        status: "In Progress",
-    },
-    {
-        id: 903,
-        clientName: "Omar Hassan",
-        contactNumber: "+971 5012 34 5678",
-        eventType: "Corporate Event",
-        eventDate: "05/DEC/2025",
-        eventLocation: "Abu Dhabi, UAE",
-        status: "Closed",
-    },
-    {
-        id: 174,
-        clientName: "Fatima Al-Mansoori",
-        contactNumber: "+971 5023 45 6789",
-        eventType: "Anniversary Celebration",
-        eventDate: "10/JAN/2026",
-        eventLocation: "Sharjah, UAE",
-        status: "Open",
-    },
-    {
-        id: 875,
-        clientName: "Khalid bin Rashid",
-        contactNumber: "+971 5678 90 1234",
-        eventType: "Gala Dinner",
-        eventDate: "25/FEB/2026",
-        eventLocation: "Dubai, UAE",
-        status: "Open",
-    },
-    {
-        id: 236,
-        clientName: "Amira Said",
-        contactNumber: "+971 5534 56 7890",
-        eventType: "Product Launch",
-        eventDate: "12/MAR/2026",
-        eventLocation: "Ras Al Khaimah, UAE",
-        status: "In Progress",
-    },
-    {
-        id: 107,
-        clientName: "Youssef Ibrahim",
-        contactNumber: "+971 5098 76 5432",
-        eventType: "Team Building",
-        eventDate: "01/APR/2026",
-        eventLocation: "Fujairah, UAE",
-        status: "Closed",
-    },
-    {
-        id: 878,
-        clientName: "Layla Abdullah",
-        contactNumber: "+971 5876 54 3210",
-        eventType: "Charity Auction",
-        eventDate: "08/MAY/2026",
-        eventLocation: "Umm Al Quwain, UAE",
-        status: "In Progress",
-    },
-    {
-        id: 679,
-        clientName: "Hamad Al Fares",
-        contactNumber: "+971 5611 22 3344",
-        eventType: "Exhibition",
-        eventDate: "15/JUN/2026",
-        eventLocation: "Ajman, UAE",
-        status: "Open",
-    },
-    {
-        id: 110,
-        clientName: "Noora Ahmed",
-        contactNumber: "+971 5044 33 2211",
-        eventType: "Art Gallery Opening",
-        eventDate: "22/JUL/2026",
-        eventLocation: "Sharjah, UAE",
-        status: "In Progress",
-    },
-];
-
-const baseColumns = [
-    {
-        accessorKey: "id",
-        header: "Id",
-    },
-    {
-        accessorKey: "clientName",
-        header: "Client Name",
-        cell: ({ row }) => (
-            <Link href={`/leads/${row.original.id}`} className="hover:underline hover:text-blue-600">
-                {row.original.clientName}
-            </Link>
-        ),
-    },
-    {
-        accessorKey: "contactNumber",
-        header: "Contact Number",
-    },
-    {
-        accessorKey: "eventType",
-        header: "Event Type",
-    },
-    {
-        accessorKey: "eventDate",
-        header: "Event Date",
-    },
-    {
-        accessorKey: "eventLocation",
-        header: "Event Location",
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const status = row.original.status;
-            let statusColor;
-            if (status === "Open") {
-                statusColor = "bg-green-100 text-green-800";
-            } else if (status === "In Progress") {
-                statusColor = "bg-blue-100 text-blue-800";
-            } else {
-                statusColor = "bg-red-100 text-red-800";
-            }
-            return (
-                <Badge
-                    variant="outline"
-                    className={`inline-flex items-center border-0 gap-1.5 rounded-full px-2 !py-1 text-xs font-medium leading-0 ${statusColor}`}
-                >
-                    <IconCircleFilled className="size-2 fill-current" />
-                    <span className="mt-1">{status}</span>
-                </Badge>
-            );
-        },
-    },
-    {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="data-[state=open]:bg-muted flex size-8 border border-gray-400 !outline-0"
-                        size="icon"
-                    >
-                        <EllipsisVertical className="w-5 text-gray-600" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32 bg-white">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Make a copy</DropdownMenuItem>
-                    <DropdownMenuItem>Favorite</DropdownMenuItem>
-                    <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+// Available status options from your schema
+const STATUS_OPTIONS = ["New", "Contacted", "Closed - Won", "Closed - Lost"];
 
 export default function LeadsTable({ controls = true }) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
     const [rowSelection, setRowSelection] = React.useState({});
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 8,
-    });
-    const [globalFilter, setGlobalFilter] = React.useState('');
+    const [data, setData] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(8);
+    const [totalPages, setTotalPages] = React.useState(0);
+    const [totalItems, setTotalItems] = React.useState(0);
+    const [updatingStatus, setUpdatingStatus] = React.useState(false);
+    const [deletingLeads, setDeletingLeads] = React.useState(false);
+
+    // Lead details modal state
+    const [selectedLead, setSelectedLead] = React.useState(null);
+    const [detailsModalOpen, setDetailsModalOpen] = React.useState(false);
+
+    // Alert Dialog states for bulk delete
+    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+    // Get status filter from URL
+    const urlStatusFilter = searchParams.get('status') || '';
+
+    // Debounce search
+    const [debouncedSearch, setDebouncedSearch] = React.useState('');
+
+    React.useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setCurrentPage(1);
+        }, 500);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
+
+    // Handle status filter change
+    const handleStatusChange = (status) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (status) {
+            params.set('status', status);
+        } else {
+            params.delete('status');
+        }
+
+        params.delete('page');
+        setCurrentPage(1);
+
+        router.push(`?${params.toString()}`);
+    };
+
+    // Handle bulk status update
+    const handleBulkStatusUpdate = async (newStatus) => {
+        const selectedIds = Object.keys(rowSelection)
+            .filter(key => rowSelection[key])
+            .map(index => data[parseInt(index)]._id);
+
+        if (selectedIds.length === 0) {
+            toast.error("No leads selected");
+            return;
+        }
+
+        setUpdatingStatus(true);
+
+        try {
+            const result = await updateLeadStatus(selectedIds, newStatus);
+
+            if (result.success) {
+                toast.success(result.message);
+                setRowSelection({});
+                fetchLeads();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            toast.error("Failed to update lead status");
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
+
+    // Open lead details modal
+    const openLeadDetails = (lead) => {
+        setSelectedLead(lead);
+        setDetailsModalOpen(true);
+    };
+
+    // Open bulk delete dialog
+    const openBulkDeleteDialog = () => {
+        const selectedIds = Object.keys(rowSelection)
+            .filter(key => rowSelection[key])
+            .map(index => data[parseInt(index)]._id);
+
+        if (selectedIds.length === 0) {
+            toast.error("No leads selected");
+            return;
+        }
+
+        setDeleteDialogOpen(true);
+    };
+
+    // Confirm bulk delete
+    const confirmBulkDelete = async () => {
+        const selectedIds = Object.keys(rowSelection)
+            .filter(key => rowSelection[key])
+            .map(index => data[parseInt(index)]._id);
+
+        setDeletingLeads(true);
+
+        try {
+            const result = await deleteLead(selectedIds);
+
+            if (result.success) {
+                toast.success(result.message);
+                setRowSelection({});
+                fetchLeads();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            toast.error("Failed to delete lead(s)");
+        } finally {
+            setDeletingLeads(false);
+            setDeleteDialogOpen(false);
+        }
+    };
+
+    // Fetch data
+    const fetchLeads = React.useCallback(async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const params = {
+                page: currentPage,
+                limit: pageSize,
+            };
+
+            if (debouncedSearch) {
+                params.search = debouncedSearch;
+            }
+
+            if (urlStatusFilter) {
+                params.status = urlStatusFilter;
+            }
+
+            const response = await getVendorLeads(params);
+
+            if (response.success) {
+                setData(response.data || []);
+                setTotalPages(response.pagination?.totalPages || 0);
+                setTotalItems(response.pagination?.totalItems || 0);
+            } else {
+                setError(response.message || 'Failed to fetch leads');
+                setData([]);
+            }
+        } catch (err) {
+            setError(err.message || 'An error occurred while fetching leads');
+            setData([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentPage, pageSize, debouncedSearch, urlStatusFilter]);
+
+    React.useEffect(() => {
+        fetchLeads();
+    }, [fetchLeads]);
+
+    const baseColumns = [
+        {
+            accessorKey: "referenceId",
+            header: "Id",
+        },
+        {
+            accessorKey: "fullName",
+            header: "Client Name",
+            cell: ({ row }) => (
+                <button
+                    onClick={() => openLeadDetails(row.original)}
+                    className="hover:underline hover:text-blue-600 text-left font-medium"
+                >
+                    {row.original.fullName}
+                </button>
+            ),
+        },
+        {
+            accessorKey: "phoneNumber",
+            header: "Contact Number",
+        },
+        {
+            accessorKey: "eventType",
+            header: "Event Type",
+            cell: ({ row }) => row.original.eventType || "-",
+        },
+        {
+            accessorKey: "eventDate",
+            header: "Event Date",
+            cell: ({ row }) => {
+                if (!row.original.eventDate) return "-";
+                const date = new Date(row.original.eventDate);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                }).toUpperCase();
+            },
+        },
+        {
+            accessorKey: "location",
+            header: "Event Location",
+            cell: ({ row }) => row.original.location || "-",
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => {
+                const status = row.original.status;
+                let statusColor;
+                if (status === "New") {
+                    statusColor = "bg-blue-100 text-blue-800";
+                } else if (status === "Contacted") {
+                    statusColor = "bg-yellow-100 text-yellow-800";
+                } else if (status === "Closed - Won") {
+                    statusColor = "bg-emerald-100 text-emerald-800";
+                } else if (status === "Closed - Lost") {
+                    statusColor = "bg-red-100 text-red-800";
+                } else {
+                    statusColor = "bg-gray-100 text-gray-800";
+                }
+                return (
+                    <Badge
+                        variant="outline"
+                        className={`inline-flex items-center border-0 gap-1.5 rounded-full px-2 !py-1 text-xs font-medium leading-0 ${statusColor}`}
+                    >
+                        <IconCircleFilled className="size-2 fill-current" />
+                        <span className="mt-1">{status}</span>
+                    </Badge>
+                );
+            },
+        },
+        {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className="data-[state=open]:bg-muted flex size-8 border border-gray-400 !outline-0"
+                            size="icon"
+                            disabled={updatingStatus || deletingLeads}
+                        >
+                            <EllipsisVertical className="w-5 text-gray-600" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-white">
+                        <DropdownMenuItem onClick={() => openLeadDetails(row.original)}>
+                            View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                        {STATUS_OPTIONS.map(status => (
+                            <DropdownMenuItem
+                                key={status}
+                                onClick={async () => {
+                                    setUpdatingStatus(true);
+                                    try {
+                                        const result = await updateLeadStatus(row.original._id, status);
+                                        if (result.success) {
+                                            toast.success(result.message);
+                                            fetchLeads();
+                                        } else {
+                                            toast.error(result.message);
+                                        }
+                                    } catch (error) {
+                                        toast.error("Failed to update lead status");
+                                    } finally {
+                                        setUpdatingStatus(false);
+                                    }
+                                }}
+                                disabled={row.original.status === status || updatingStatus || deletingLeads}
+                            >
+                                {status}
+                                {row.original.status === status && " ✓"}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
 
     // Conditionally add the checkbox column
     const columns = React.useMemo(() => {
         if (!controls) {
             return baseColumns;
         }
-
         const checkboxColumn = {
             id: "select",
             header: ({ table }) => (
@@ -242,9 +368,8 @@ export default function LeadsTable({ controls = true }) {
                     <span className="ml-2 font-medium text-[#727272]">No.</span>
                 </div>
             ),
-            cell: ({ row, table }) => {
-                const { pageSize, pageIndex } = table.getState().pagination;
-                const rowNumber = pageSize * pageIndex + row.index + 1;
+            cell: ({ row }) => {
+                const rowNumber = (currentPage - 1) * pageSize + row.index + 1;
                 return (
                     <div className="flex items-center justify-center space-x-2">
                         <Checkbox
@@ -259,41 +384,28 @@ export default function LeadsTable({ controls = true }) {
             enableSorting: false,
             enableHiding: false,
         };
-
         return [checkboxColumn, ...baseColumns];
-    }, [controls]);
+    }, [controls, currentPage, pageSize, updatingStatus, deletingLeads]);
 
     const table = useReactTable({
-        data: sampleData,
+        data,
         columns,
         state: {
             rowSelection,
-            pagination,
-            globalFilter,
         },
         enableRowSelection: !!controls,
         onRowSelectionChange: setRowSelection,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
+        manualPagination: true,
+        pageCount: totalPages,
     });
 
-    const filteredData = React.useMemo(() => {
-        if (!globalFilter) {
-            return sampleData;
-        }
-        const lowerCaseFilter = globalFilter.toLowerCase();
-        return sampleData.filter(row =>
-            Object.values(row).some(value =>
-                String(value).toLowerCase().includes(lowerCaseFilter)
-            )
-        );
-    }, [globalFilter, sampleData]);
-
-    table.options.data = filteredData;
-
     const selectedRowCount = Object.keys(rowSelection).length;
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+        setRowSelection({});
+    };
 
     return (
         <div className="w-full">
@@ -303,109 +415,237 @@ export default function LeadsTable({ controls = true }) {
                         {selectedRowCount > 0 && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="flex items-center gap-2">
-                                        <span>Bulk Actions</span>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center gap-2"
+                                        disabled={updatingStatus || deletingLeads}
+                                    >
+                                        <span>Bulk Actions ({selectedRowCount})</span>
                                         <ChevronDown className="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="bg-white">
-                                    <DropdownMenuItem onClick={() => {}}>
-                                        Move
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => {}}>
-                                        Archive
-                                    </DropdownMenuItem>
+                                    <DropdownMenuLabel>Change Status To</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {STATUS_OPTIONS.map(status => (
+                                        <DropdownMenuItem
+                                            key={status}
+                                            onClick={() => handleBulkStatusUpdate(status)}
+                                            disabled={updatingStatus || deletingLeads}
+                                        >
+                                            {status}
+                                        </DropdownMenuItem>
+                                    ))}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={() => {}}
+                                        onClick={openBulkDeleteDialog}
                                         className="text-red-600"
+                                        disabled={updatingStatus || deletingLeads}
                                     >
-                                        Delete
+                                        Delete Selected
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
                     </div>
-                    <div className="relative w-3/4 md:w-1/2 lg:w-2/5">
-                        <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4" />
-                        <Input
-                            placeholder="Search by client name, event type, or location..."
-                            value={globalFilter ?? ""}
-                            onChange={(event) => setGlobalFilter(event.target.value)}
-                            className="w-full bg-white border-gray-300 h-11 pl-10"
-                        />
+                    <div className="flex items-center gap-3 w-full md:w-1/2 lg:w-2/5">
+                        <div className="relative flex-1">
+                            <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4" />
+                            <Input
+                                placeholder="Search by client name, phone, email..."
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                className="w-full bg-white border-gray-300 h-11 pl-10"
+                            />
+                        </div>
+
+                        {/* Status Filter Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300 whitespace-nowrap">
+                                    Status: {urlStatusFilter || "All"}
+                                    <ChevronDown className="w-4 h-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-48 bg-white">
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleStatusChange("")}>
+                                    Show All
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {STATUS_OPTIONS.map(status => (
+                                    <DropdownMenuCheckboxItem
+                                        key={status}
+                                        checked={urlStatusFilter === status}
+                                        onCheckedChange={() => handleStatusChange(status)}
+                                    >
+                                        {status}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             )}
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden">
-                    <Table className="border-0 w-full">
-                        <TableHeader className="sticky top-0 z-10">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id} className="font-medium text-[#727272]">
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="bg-white">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+                        <span className="ml-2 text-gray-600">Loading leads...</span>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="text-center">
+                            <p className="text-red-600 font-medium">{error}</p>
+                            <Button
+                                onClick={fetchLeads}
+                                variant="outline"
+                                className="mt-4"
+                            >
+                                Try Again
+                            </Button>
+                        </div>
+                    </div>
+                ) : data.length === 0 ? (
+                    <div className="flex items-center justify-center py-20">
+                        <p className="text-gray-500">No leads found</p>
+                    </div>
+                ) : (
+                    <div className="overflow-hidden">
+                        <Table className="border-0 w-full">
+                            <TableHeader className="sticky top-0 z-10">
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead key={header.id} className="font-medium text-[#727272]">
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id} className="bg-white">
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )}
             </div>
-            {controls && (
+
+            {controls && !loading && !error && data.length > 0 && (
                 <div className="mt-4 flex items-center justify-between">
                     <div className="flex-1 text-sm text-muted-foreground">
-                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                        {table.getFilteredRowModel().rows.length} row(s) selected.
+                        {selectedRowCount > 0
+                            ? `${selectedRowCount} of ${data.length} row(s) selected.`
+                            : `Showing ${((currentPage - 1) * pageSize) + 1} to ${Math.min(currentPage * pageSize, totalItems)} of ${totalItems} leads`
+                        }
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
                         >
                             <IconChevronLeft className="size-4" />
                         </Button>
-                        {Array.from({ length: table.getPageCount() }, (_, i) => (
-                            <Button
-                                key={i}
-                                variant={i === table.getState().pagination.pageIndex ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => table.setPageIndex(i)}
-                            >
-                                {i + 1}
-                            </Button>
-                        ))}
+
+                        {(() => {
+                            const maxVisible = 5;
+                            const pages = [];
+
+                            if (totalPages <= maxVisible) {
+                                for (let i = 1; i <= totalPages; i++) {
+                                    pages.push(i);
+                                }
+                            } else {
+                                if (currentPage <= 3) {
+                                    pages.push(1, 2, 3, 4, '...', totalPages);
+                                } else if (currentPage >= totalPages - 2) {
+                                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                                } else {
+                                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                                }
+                            }
+
+                            return pages.map((page, idx) =>
+                                page === '...' ? (
+                                    <span key={`ellipsis-${idx}`} className="px-2">...</span>
+                                ) : (
+                                    <Button
+                                        key={page}
+                                        variant={page === currentPage ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => handlePageChange(page)}
+                                    >
+                                        {page}
+                                    </Button>
+                                )
+                            );
+                        })()}
+
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
                         >
                             <IconChevronRight className="size-4" />
                         </Button>
                     </div>
                 </div>
             )}
+
+            {/* Lead Details Modal */}
+            <LeadDetailsModal
+                lead={selectedLead}
+                open={detailsModalOpen}
+                onOpenChange={setDetailsModalOpen}
+                onUpdate={fetchLeads}
+            />
+
+            {/* Bulk Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Multiple Leads</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete {selectedRowCount} lead(s)? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deletingLeads}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmBulkDelete}
+                            disabled={deletingLeads}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {deletingLeads ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                "Delete"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

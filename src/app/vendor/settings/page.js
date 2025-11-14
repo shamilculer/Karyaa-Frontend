@@ -8,6 +8,7 @@ import { Eye, UserPen } from 'lucide-react'
 import LogoutAlertModal from '../components/LogoutAlertModal'
 import { getVendorFromToken } from '../utils/getVendor'
 import { getInitials } from '@/utils'
+import SubscriptionStatus from '../components/SubscriptionStatus';
 
 const VendorSettingsPage = async () => {
 
@@ -34,6 +35,8 @@ const VendorSettingsPage = async () => {
                         <Button asChild><Link href="settings/edit-profile"><UserPen className='w-5' /> Edit Profile</Link></Button>
                     </div>
                 </div>
+
+                <SubscriptionStatus />
 
                 <div className='w-full flex-between max-lg:flex-col max-lg:!items-start gap-5 lg:p-6'>
                     <div>

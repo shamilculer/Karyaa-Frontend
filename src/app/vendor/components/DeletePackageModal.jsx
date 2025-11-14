@@ -1,105 +1,112 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation"; // 🟢 REMOVED: Not needed if we use the callback
 import { Trash, Loader2 } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { deletePackage } from "@/app/actions/vendor/packages";
 
+// 🟢 UPDATED: Accepts onDelete callback
 export default function DeletePackageModal({
-  packageId,
-  packageName,
+    packageId,
+    packageName,
+    onDelete,
 }) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [open, setOpen] = useState(false);
+    // const router = useRouter(); // 🟢 REMOVED: Not needed
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
+    const handleDelete = async () => {
+        setIsDeleting(true);
 
-    try {
-      const res = await deletePackage(packageId);
+        try {
+            const res = await deletePackage(packageId);
 
-      if (!res.success) {
-        toast.error(res.message || "Failed to delete package");
-        setIsDeleting(false);
-        return;
-      }
+            if (!res.success) {
+                toast.error(res.message || "Failed to delete package");
+                setIsDeleting(false);
+                return;
+            }
 
-      // Success toast with undo fallback (soft reverse)
-      toast.success(`${packageName} deleted`);
+            // Success toast
+            toast.success(`${packageName} deleted successfully.`);
 
-      // Close modal
-      setOpen(false);
+            // 🟢 EXECUTE onDelete callback
+            if (onDelete) {
+                onDelete();
+            }
 
-      // Refresh UI
-      router.refresh();
+            // Close modal
+            setOpen(false);
 
-    } catch (error) {
-      console.error("Error deleting package:", error);
-      toast.error(error.message || "Something went wrong");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+            // ❌ REMOVED: router.refresh() is replaced by the onDelete callback
+            // router.refresh(); 
 
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="p-0 h-auto hover:text-red-500 transition"
-          disabled={isDeleting}
-        >
-          <Trash className="w-4" /> Delete
-        </Button>
-      </AlertDialogTrigger>
+        } catch (error) {
+            console.error("Error deleting package:", error);
+            toast.error(error.message || "Something went wrong");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete
-            {packageName && (
-              <span className="font-semibold"> "{packageName}"</span>
-            )}
-            {" "}and remove all associated data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+                <Button
+                    variant="ghost"
+                    className="p-0 h-auto hover:text-red-500 transition"
+                    disabled={isDeleting}
+                >
+                    <Trash className="w-4" /> Delete
+                </Button>
+            </AlertDialogTrigger>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>
-            Cancel
-          </AlertDialogCancel>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete
+                        {packageName && (
+                            <span className="font-semibold"> "{packageName}"</span>
+                        )}
+                        {" "}and remove all associated data from our servers.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
 
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="bg-destructive text-white hover:bg-destructive/90"
-          >
-            {isDeleting ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Deleting...
-              </span>
-            ) : (
-              "Delete"
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting}>
+                        Cancel
+                    </AlertDialogCancel>
+
+                    <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="bg-destructive text-white hover:bg-destructive/90"
+                    >
+                        {isDeleting ? (
+                            <span className="flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Deleting...
+                            </span>
+                        ) : (
+                            "Delete"
+                        )}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
 }

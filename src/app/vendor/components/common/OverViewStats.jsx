@@ -3,7 +3,7 @@ import Image from "next/image"
 
 const OverViewStats = () => {
     return (
-        <div className="w-full flex overflow-x-scroll max-lg:w-screen gap-8">
+        <div className="w-full flex max-xl::overflow-x-scroll max-lg:w-screen gap-8">
             <div className="bg-[#FAFAFB] p-5 w-1/4 min-w-[283px] rounded-2xl border border-gray-200 flex-between">
                 <div>
                     <span className="uppercase text-sidebar-foreground text-[11px]">Total Enquiries This MOnth</span>
