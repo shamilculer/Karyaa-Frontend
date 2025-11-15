@@ -11,9 +11,7 @@ import {
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Removed: Sheet, Accordion, Menu imports
 
-import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
 import UserMenu from "../UserDropDownMenu"; // This is your client component
 import { checkAuthStatus } from "../../../actions/user/user";
 import { getCategories } from "@/app/actions/categories";
@@ -61,7 +59,7 @@ const Header = async () => {
                                                 </Link>
 
                                                 {cat.subCategories && cat.subCategories.length > 0 && (
-                                                    <div className="absolute left-full top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible bg-white border border-gray-200 shadow-lg min-w-[230px] p-4 transition-all duration-200 ease-in-out">
+                                                    <div className="absolute left-full top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible bg-white border border-gray-200 shadow-lg min-w-[530px] p-4 transition-all duration-200 ease-in-out">
                                                         <ul className="space-y-1">
                                                             {cat.subCategories.map((subCat, idx) => (
                                                                 <li key={idx}>

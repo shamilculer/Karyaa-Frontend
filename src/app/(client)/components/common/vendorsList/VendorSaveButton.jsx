@@ -91,17 +91,17 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
     } else {
         // Default Style for Card/List View
         buttonClassName = `
-            w-8 h-8 p-2 bg-white text-primary rounded-full flex items-center justify-center 
-            absolute top-3 right-3 z-10 transition-colors duration-200
+            w-8 h-8 !p-0 bg-transparent text-white border-0 rounded-full flex items-center justify-center 
+            absolute top-3 right-3 z-10 transition-colors duration-200 
             ${isSaved 
-                ? 'bg-red-600 text-white hover:bg-red-700' 
-                : 'hover:bg-red-700 hover:text-white hover:border-red-700'
+                ? 'text-red-500' 
+                : 'hover:text-red-500 hover:border-red-700'
             }
         `;
     }
     
     // Determine the icon size based on the page
-    const iconSize = isVendorPage ? 20 : 18;
+    const iconSize = isVendorPage ? 20 : 25;
 
     // Use isSaved to determine the fill color. If !isAuthenticated, the fill is red 
     // only if it was initially saved (to match server state), but the click redirects.
@@ -114,9 +114,10 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
             disabled={isPending} 
             aria-label={isSaved ? "Unsave Vendor" : "Save Vendor"}
             type="button" 
+            variant="ghost"
         >
             {/* Conditional fill for the Heart icon */}
-            <Heart fill={isSaved ? 'white' : 'none'} size={iconSize} />
+            <Heart fill={isSaved ? 'red' : 'none'} size={iconSize} />
         </Button>
     );
 }

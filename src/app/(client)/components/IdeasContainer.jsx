@@ -58,11 +58,11 @@ function IdeasContainer({ categories }) {
   }, [selected]);
 
   return (
-    <section className="w-full px-1">
+    <section className="w-full max-w-[1500px] mx-auto px-1">
       <h2 className="uppercase font-semibold text-xl">Popular Categories</h2>
 
       {/* Category Tabs */}
-      <div className="mt-6 w-full hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">
+      <div className="mt-6 w-full  hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">
         {categoryOptions.map((cat) => {
           const isSelected = selected === cat.name;
           return (
@@ -102,7 +102,7 @@ function IdeasContainer({ categories }) {
           // ----------------------------------------------------
           breakpoints={{
             625: {
-              slidesPerView: 2.5,
+              slidesPerView: 4.5,
               spaceBetween: 30,
             },
             1025: {

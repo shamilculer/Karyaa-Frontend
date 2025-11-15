@@ -55,6 +55,7 @@ const items = [
         isGroup: true,
         accessKey: "contentModeration",
         children: [
+            { title: "Content", url: "/admin/content-moderation/content" },
             { title: "Blog", url: "/admin/content-moderation/blog" },
             { title: "Ideas", url: "/admin/content-moderation/ideas" },
             { title: "Contact Details", url: "/admin/content-moderation/contact-details" },

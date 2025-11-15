@@ -6,7 +6,11 @@ import PageSearchBar from "../../components/common/PageSearchBar/PageSearchBar";
 import Image from "next/image";
 import { getCategoryDetails } from "@/app/actions/categories";
 import VendorsListWrapper from "../../components/common/vendorsList/VendorListWrapper";
-import CategoryList from "../../components/common/CategoriesList/CategoriesList";
+import PageTitle from "../../components/common/PageTitle";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import BlogPosts from "../../components/common/BlogPosts";
+import { initialBlogParams } from "@/utils";
 
 const CategoryPage = async ({ params, searchParams }) => {
   const { category } = await params;
@@ -15,24 +19,17 @@ const CategoryPage = async ({ params, searchParams }) => {
   const categoryData = await getCategoryDetails(category);
   return (
     <div>
-      <section
-        className="!m-0 bg-cover bg-center h-72 md:h-96 flex-center relative px-4"
-        style={{ backgroundImage: `url(${categoryData.coverImage})` }}
-      >
-        <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-        <div className="relative z-10 text-white text-center">
-          <h1 className="!text-white !text-4xl lg:!text-7xl">
-            {categoryData.name}
-          </h1>
-          {/* <p className="mt-2 max-md:text-xs">Explore our diverse range of categories</p> */}
-        </div>
-      </section>
+
+      <PageTitle
+        imgUrl={categoryData?.coverImage}
+        title={categoryData?.name}
+      />
 
       <section className="container">
         <PageSearchBar />
       </section>
 
-      <section className="container">
+      <section className="container !mb-0">
         <div className="relative space-y-8">
           <div className="flex items-center">
             <h2 className="max-md:!text-[26px] font-semibold uppercase">
@@ -47,7 +44,7 @@ const CategoryPage = async ({ params, searchParams }) => {
         </div>
       </section>
 
-      <section className="container">
+      <section className="container !mt-5">
         <div className="relative">
           <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
             <h2 className=" font-semibold uppercase">
@@ -55,10 +52,34 @@ const CategoryPage = async ({ params, searchParams }) => {
             </h2>
           </div>
 
-          <VendorsListWrapper showControls={true} filters={{ mainCategory: category, ...filters }} />
+          <VendorsListWrapper showControls={false} filters={{ mainCategory: category, isRecommended: true, ...filters }} />
 
         </div>
       </section>
+
+              <section className="container divide-y divide-gray-300">
+          <div className="w-full flex-between !items-end pb-5">
+            <div>
+              <h6 className="uppercase max-lg:!text-sm !font-medium">Blog</h6>
+              <h2 className="uppercase">What to read next</h2>
+            </div>
+
+            <Button
+              asChild
+              variant="ghost"
+              className="text-gray-700 font-medium text-base hover:underline max-md:hidden"
+            >
+              <Link href="/blog">View All</Link>
+            </Button>
+          </div>
+
+          <div className="pt-5">
+            <BlogPosts
+              searchParams={initialBlogParams}
+              showPagination={false}
+            />
+          </div>
+        </section>
 
       <section className="container flex-center flex-col gap-8">
         <h2 className="texxt-center">

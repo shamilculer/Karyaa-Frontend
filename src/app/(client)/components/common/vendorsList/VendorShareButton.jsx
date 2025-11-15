@@ -3,7 +3,7 @@
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const VendorShareButton = ({ businessName, slug }) => {
+const VendorShareButton = ({ businessName, slug, isVendorPage }) => {
     
     const handleShare = () => {
         // ✅ CORRECTED: Construct the URL inside the client-side event handler.
@@ -28,10 +28,20 @@ const VendorShareButton = ({ businessName, slug }) => {
         }
     };
 
+    let buttonClassName ;
+
+    if (isVendorPage) {
+        // Style for the main Vendor Page (as requested)
+        buttonClassName = "size-10 p-3 rounded-full border border-gray-400 bg-transparent flex items-center justify-center text-primary transition-colors"
+    } else {
+        // Default Style for Card/List View
+        buttonClassName = "w-8 h-8 p-2 bg-white text-primary rounded-full flex items-center justify-center absolute -top-7 right-0 z-10 transition-colors duration-200"
+    }
+
     return (
         <Button 
             variant="ghost" 
-            className="w-8 h-8 p-0 rounded-full hover:bg-gray-100" 
+            className={`${buttonClassName} hover:bg-gray-100`} 
             onClick={handleShare}
             aria-label={`Share ${businessName}`}
         >

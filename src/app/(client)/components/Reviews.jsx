@@ -42,7 +42,6 @@ const StarRating = ({ rating }) => {
                         }`}
                 />
             ))}
-            <span className="ml-2 text-sm font-semibold text-gray-700">{rating}.0</span>
         </div>
     );
 };
@@ -62,13 +61,13 @@ const ReviewCard = ({ review }) => {
     const bgColor = getBgColor(user.username);
 
     return (
-        <div className="p-6 border border-gray-300 rounded-xl">
+        <div>
 
             {/* 1. Header: User Info and Rating */}
-            <div className="flex justify-between items-start mb-4 border-b border-b-gray-300 pb-7">
+            <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-3">
 
-                    <Avatar className="w-12 h-12 rounded-full">
+                    <Avatar className="size-16 rounded-full">
                         <AvatarImage
                             src={user.profileImage}
                             alt={user.username}
@@ -92,8 +91,8 @@ const ReviewCard = ({ review }) => {
 
             {/* 2. Review Comment */}
             <div>
-                <p className="text-gray-700 italic leading-relaxed">
-                    "{comment}"
+                <p className="text-gray-700 leading-relaxed">
+                    {comment}
                 </p>
             </div>
         </div>

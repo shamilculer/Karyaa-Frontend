@@ -2,10 +2,7 @@ import Link from "next/link";
 import {
   BadgeCheckIcon,
   Plus,
-  Star,
-  MapPin,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -15,22 +12,21 @@ import { getActiveVendors } from "@/app/actions/vendors";
 
 // Sorters
 import {
-  VendorPriceSorter,
-  VendorOccasionSorter,
-  VendorRatingSorter,
+  VendorSortBy,
+  VendorOccasionFilter,
+  VendorLocationFilter,
 } from "./VendorSorter";
 
 import VendorShareButton from "./VendorShareButton";
 import VendorSaveButton from "./VendorSaveButton";
 import { checkAuthStatus } from "@/app/actions/user/user";
-import { getInitials } from "@/utils";
 import { GlobalPagination } from "@/components/common/GlobalPagination";
 import VendorsMapView from "./VendorMapView";
 import ViewToggle from "./ViewToggle";
+import StarRating from "../../StarRating";
+import { VendorsMapViewWrapper } from "./VendorsMapViewClient";
 
-// ------------------------------------------
-// Helper: generate consistent avatar BG color
-// ------------------------------------------
+// Helper function
 function getBgColor(name) {
   const colors = [
     "bg-red-500",
@@ -48,16 +44,13 @@ function getBgColor(name) {
   return colors[hash % colors.length];
 }
 
-// ------------------------------------------
-// Skeleton (Suspense Fallback)
-// ------------------------------------------
+// Skeleton
 export const VendorListSkeleton = ({ count = 6 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
       {[...Array(count)].map((_, index) => (
         <div key={index} className="rounded overflow-hidden space-y-4">
           <Skeleton className="w-full h-60 rounded-xl" />
-
           <div className="flex items-center gap-4">
             <Skeleton className="w-14 h-14 rounded-full" />
             <div className="flex-1 space-y-2">
@@ -65,12 +58,10 @@ export const VendorListSkeleton = ({ count = 6 }) => {
               <Skeleton className="h-3 w-1/2" />
             </div>
           </div>
-
           <div className="space-y-2">
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-5/6" />
           </div>
-
           <div className="flex justify-between mt-4">
             <Skeleton className="h-10 w-24" />
             <Skeleton className="h-10 w-24" />
@@ -81,9 +72,7 @@ export const VendorListSkeleton = ({ count = 6 }) => {
   );
 };
 
-// ------------------------------------------
-// Improved Empty State
-// ------------------------------------------
+// Empty State
 const VendorEmptyState = () => (
   <div className="flex flex-col items-center justify-center p-10 min-h-[400px] text-center">
     <h2 className="text-2xl font-semibold text-gray-800 mb-2">
@@ -95,10 +84,7 @@ const VendorEmptyState = () => (
   </div>
 );
 
-// ------------------------------------------
 // 📌 MAIN SERVER COMPONENT
-// (Suspense-Compatible)
-// ------------------------------------------
 const VendorsList = async ({ showControls, filters }) => {
   const authResult = await checkAuthStatus();
   const savedVendorIds = authResult.user?.savedVendors || [];
@@ -114,13 +100,12 @@ const VendorsList = async ({ showControls, filters }) => {
     location: filters?.location,
     serviceArea: filters?.serviceArea,
     hasPackages: filters?.hasPackages,
-    isSponsored: filters?.isSponsored,
+    isRecommended: filters?.isRecommended,
     rating: filters?.rating,
     sort: filters?.sort,
     occasion: filters?.occasion,
   };
 
-  // ✅ if server throws, ErrorBoundary catches it
   const vendorResult = await getActiveVendors(requestFilters);
 
   if (vendorResult.error) {
@@ -130,42 +115,32 @@ const VendorsList = async ({ showControls, filters }) => {
   const vendors = vendorResult.data || [];
   const totalPages = vendorResult.totalPages || 1;
   const currentPage = Number(requestFilters.page) || 1;
-  const viewMode = filters?.view || 'list'; // 'list' or 'map'
+  const viewMode = filters?.view || 'list';
 
   return (
     <div className="w-full relative">
       {showControls && (
-        <div className="w-full flex justify-end items-center mt-3 gap-4 md:absolute -top-[84px] right-0 max-md:mb-5 flex-wrap">
-          <VendorPriceSorter />
-          <VendorRatingSorter />
-          <VendorOccasionSorter />
+        <div className="w-full flex justify-end items-center mt-3 gap-4 md:absolute -top-16 xl:-top-[84px] right-0 max-md:mb-5 flex-wrap">
+          <VendorSortBy />
+          <VendorLocationFilter />
+          <VendorOccasionFilter />
           <ViewToggle currentView={viewMode} />
         </div>
       )}
 
-      {/* ✅ Zero State */}
       {vendors.length === 0 ? (
         <VendorEmptyState />
       ) : (
         <>
           {viewMode === 'map' ? (
-            <div className="space-y-6">
-              <VendorsMapView 
-                vendors={vendors} 
-                isAuthenticated={authResult.isAuthenticated}
-                savedVendorIds={savedVendorIds}
-              />
-              {totalPages > 1 && (
-                <GlobalPagination
-                  totalPages={totalPages}
-                  currentPage={currentPage}
-                  pageQueryKey="page"
-                />
-              )}
-            </div>
+            <VendorsMapViewWrapper
+              vendors={vendors}
+              isAuthenticated={authResult.isAuthenticated}
+              savedVendorIds={savedVendorIds}
+            />
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
                 {vendors.map((vendor) => (
                   <VendorsCard
                     key={vendor._id}
@@ -191,19 +166,103 @@ const VendorsList = async ({ showControls, filters }) => {
   );
 };
 
-// ------------------------------------------
-// Card (unchanged)
-// ------------------------------------------
-export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
-  const initials = getInitials(vendor.businessName);
-  const bgColor = getBgColor(vendor.businessName);
+// 📌 CARD COMPONENT
+export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact = false }) => {
   const vendorId = vendor._id || vendor.id;
 
+  if (compact) {
+    return (
+      <div className="rounded overflow-hidden">
+        <div className="relative group">
+          {vendor.isRecommended && (
+            <Badge className="absolute top-3 left-3 z-10 bg-white p-0.5 rounded-2xl text-primary font-semibold !text-xs flex items-center gap-1">
+              <BadgeCheckIcon className="w-5 h-5" />
+              Recommended
+            </Badge>
+          )}
+
+          <VendorSaveButton
+            vendorId={vendorId}
+            isInitialSaved={isInitialSaved}
+          />
+
+          {vendor?.gallery?.length > 0 ? (
+            <Carousel
+              spaceBetween={10}
+              loop
+              slidesPerView={1}
+              className="w-full h-48"
+              navigationInside
+              withPagination={false}
+              navigationStyles="size-7 p-0 opacity-50"
+            >
+              {vendor.gallery.map((img, idx) => (
+                <Link key={idx} href={`/vendors/${vendor.slug}`}>
+                  <Image
+                    fill
+                    src={img.url}
+                    alt={`${vendor.businessName} cover ${idx + 1}`}
+                    className="w-full h-48 object-cover rounded-3xl"
+                  />
+                </Link>
+              ))}
+            </Carousel>
+          ) : (
+            <Link href={`/vendors/${vendor.slug}`}>
+              <Image
+                height={198}
+                width={300}
+                src="/new-banner-2.jpg"
+                alt={vendor.businessName}
+                className="w-full blur-xs h-48 object-cover rounded-3xl"
+              />
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-6 px-0.5 space-y-2 w-full">
+          <StarRating rating={vendor.averageRating} />
+          <p className="font-medium mt-2 text-primary !text-xs">
+            Price Starting from{" "}
+            <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
+          </p>
+          <div className="w-full relative">
+            <Link href={`/vendors/${vendor.slug}`} className="!text-lg text-[#232536] font-heading !font-medium truncate">
+              {vendor.businessName}
+            </Link>
+            <div>
+              <VendorShareButton
+                businessName={vendor.businessName}
+                slug={vendor.slug}
+              />
+            </div>
+          </div>
+
+          <p className="line-clamp-1 !text-xs">{vendor.tagline || vendor.businessDescription}</p>
+
+          <div className="w-full flex-between mt-3">
+            <Button asChild>
+              <Link href={`/vendors/${vendor.slug}`}>Know More</Link>
+            </Button>
+
+            <Link
+              className="!font-semibold flex-center gap-1 text-sm"
+              href={`/compare?vendors=${vendor.slug}`}
+            >
+              Compare <Plus className="size-5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default card layout
   return (
     <div className="rounded overflow-hidden">
       <div className="relative group">
         {vendor.isRecommended && (
-          <Badge className="absolute top-3 left-3 z-10 bg-white text-primary font-semibold text-sm flex items-center gap-1">
+          <Badge className="absolute top-3 left-3 z-10 bg-white p-1.5 rounded-2xl text-primary font-semibold text-sm flex items-center gap-1">
             <BadgeCheckIcon className="w-5 h-5" />
             Recommended
           </Badge>
@@ -216,7 +275,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
 
         {vendor?.gallery?.length > 0 ? (
           <Carousel
-            spaceBetween={0}
+            spaceBetween={10}
             loop
             slidesPerView={1}
             className="w-full h-60"
@@ -225,76 +284,50 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
             navigationStyles="size-7 p-0 opacity-50"
           >
             {vendor.gallery.map((img, idx) => (
-              <Image
-                key={idx}
-                fill
-                src={img.url}
-                alt={`${vendor.businessName} cover ${idx + 1}`}
-                className="w-full h-60 object-cover rounded-xl"
-              />
+              <Link key={idx} href={`/vendors/${vendor.slug}`}>
+                <Image
+                  fill
+                  src={img.url}
+                  alt={`${vendor.businessName} cover ${idx + 1}`}
+                  className="w-full h-60 object-cover rounded-3xl"
+                />
+              </Link>
             ))}
           </Carousel>
         ) : (
-          <Image
-            height={240}
-            width={300}
-            src="/new-banner-2.jpg"
-            alt={vendor.businessName}
-            className="w-full blur-xs h-60 object-cover rounded-xl"
-          />
+          <Link href={`/vendors/${vendor.slug}`}>
+            <Image
+              height={240}
+              width={300}
+              src="/new-banner-2.jpg"
+              alt={vendor.businessName}
+              className="w-full blur-xs h-60 object-cover rounded-3xl"
+            />
+          </Link>
         )}
       </div>
 
-      <div className="mt-4 px-2 space-y-4 w-full">
-        <div className="flex justify-between items-center gap-2 w-full">
-          <div className="flex items-center w-full">
-            <Avatar className="w-14 h-14 rounded-full border mr-3 border-gray-300">
-              <AvatarImage
-                className="object-cover rounded-full"
-                src={vendor.businessLogo}
-                alt={vendor.businessName}
-              />
-              <AvatarFallback
-                className={`${bgColor} text-white font-bold flex items-center justify-center`}
-              >
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="w-full">
-              <h3 className="!text-xl max-md:!text-lg text-[#232536] !font-medium truncate">
-                {vendor.businessName}
-              </h3>
-              <div className="w-full flex-between">
-                <span className="mt-1.5 rounded-lg px-1 py-0.5 bg-gray-100 text-sm flex items-center gap-2 w-fit">
-                  <MapPin className="w-4 h-4 mb-1" /> {vendor.address.city}, UAE
-                </span>
-
-                <VendorShareButton
-                  businessName={vendor.businessName}
-                  slug={vendor.slug}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div className="mt-6 px-2 space-y-2 w-full">
+        <StarRating rating={vendor.averageRating} />
         <p className="font-medium md:mt-2 text-primary !text-xs">
           Price Starting from{" "}
           <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
         </p>
-
-        <p className="line-clamp-2 text-sm">{vendor.businessDescription}</p>
-
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <div className="flex items-center">
-            <Star className="text-yellow-300 fill-yellow-300 w-5 h-5" />
-            <p className="ms-2 text-xs md:text-sm font-bold text-gray-900">
-              {vendor.averageRating}/5
-            </p>
+        <div className="w-full relative">
+          <Link href={`/vendors/${vendor.slug}`} className="!text-2xl max-md:!text-lg text-[#232536] font-heading !font-medium truncate">
+            {vendor.businessName}
+          </Link>
+          <div>
+            <VendorShareButton
+              businessName={vendor.businessName}
+              slug={vendor.slug}
+            />
           </div>
         </div>
 
-        <div className="w-full flex-between">
+        <p className="line-clamp-1 text-sm">{vendor.tagline || vendor.businessDescription}</p>
+
+        <div className="w-full flex-between mt-6">
           <Button asChild>
             <Link href={`/vendors/${vendor.slug}`}>Know More</Link>
           </Button>

@@ -8,6 +8,7 @@ import { getVendorsBySlugs } from "@/app/actions/vendors";
 import { Skeleton } from "@/components/ui/skeleton";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
+import PageTitle from "../components/common/PageTitle";
 
 // --- Loading & Error Components ---
 const CompareLoadingSkeleton = () => (
@@ -50,22 +51,13 @@ const ComparePage = async ({ searchParams }) => {
 
     return (
         <div className='min-h-screen'>
-            {/* Header Section */}
-            <section className="!m-0 bg-[url('/new-banner-2.jpg')] bg-cover bg-center h-72 md:h-96 flex-center relative">
-                <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-                <div className="relative z-10 text-white text-center">
-                    <h1 className="!text-white !text-4xl lg:!text-7xl">Compare Vendors</h1>
-                    <p className="mt-2 max-md:text-xs">Side-by-side comparison for informed decisions.</p>
-                </div>
-            </section>
+            <PageTitle imgUrl="/new-banner-2.jpg" title="Compare Vendors" tagline="Side-by-side comparison for informed decisions." />
 
             <section className="container">
                 <PageSearchBar />
             </section>
 
-            <section className="container">
                 <CategoryList />
-            </section>
 
             <Suspense fallback={<CompareLoadingSkeleton />}>
                 <section className='container py-12'>

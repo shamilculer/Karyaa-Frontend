@@ -1,5 +1,6 @@
 // app/ideas/page.jsx
 
+import PageTitle from "../components/common/PageTitle";
 import IdeasContainer from "../components/IdeasContainer";
 import { getAllIdeaCategoriesAction } from "@/app/actions/ideas";
 
@@ -25,15 +26,7 @@ export default async function IdeasPage() {
 
   return (
     <div className='min-h-screen'>
-      <section className="!m-0 bg-[url('/new-banner-2.jpg')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
-        <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-        <div className="relative z-10 text-white text-center">
-          <h1 className="!text-white !text-5xl lg:!text-7xl">Ideas</h1>
-          <p className="mt-2 max-md:text-xs">
-            Ideas, Inspiration & Expert Tips for Every Event
-          </p>
-        </div>
-      </section>
+      <PageTitle imgUrl="/new-banner-2.jpg" title="Ideas" tagline="Ideas, Inspiration & Expert Tips for Every Event" />
 
       {!categories.length && !error && (
         <div className="flex justify-center py-16">

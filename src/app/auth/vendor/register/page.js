@@ -3,16 +3,9 @@ import VendorMultiStepForm from "../../components/forms/vendor/VendorMultiStepFo
 
 const CreateAccountPage = () => {
   return (
-    <section className="flex h-screen overflow-hidden !my-0">
-      {/* Left section (Form) */}
-      <div className="w-full xl:w-2/5 h-screen overflow-y-auto px-4 xl:px-10 py-12">
-        <div>
-          <VendorMultiStepForm />
-        </div>
-      </div>
-
+    <section className="flex h-screen w-screen overflow-hidden !m-0 p-0 fixed inset-0">
       {/* Right section (Image) */}
-      <div className="w-3/5 h-screen bg-secondary relative max-xl:hidden">
+      <div className="w-3/5 h-full bg-secondary relative max-xl:hidden flex-shrink-0">
         <Image
           fill
           alt="Create Account in Karyaa"
@@ -20,6 +13,13 @@ const CreateAccountPage = () => {
           className="object-cover"
           priority
         />
+      </div>
+
+      {/* Left section (Form) - This is the ONLY scrollable area */}
+      <div className="w-full xl:w-2/5 h-full overflow-y-auto flex-shrink-0">
+        <div className="px-4 xl:px-10 py-6">
+           <VendorMultiStepForm />
+        </div>
       </div>
     </section>
   );

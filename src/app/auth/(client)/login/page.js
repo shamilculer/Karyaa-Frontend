@@ -1,4 +1,3 @@
-// auth/UserLoginPage.jsx
 
 import Image from "next/image";
 import UserLoginForm from "../../components/forms/UserLoginForm";

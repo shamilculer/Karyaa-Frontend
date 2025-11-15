@@ -1,6 +1,6 @@
 // Landing page uses components that may call server helpers which read cookies (auth/data). Force dynamic rendering
 // to prevent build-time prerender errors caused by cookie usage.
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +17,6 @@ import { initialBlogParams } from "@/utils";
 import VendorsCarousel from "./components/common/VendorsCarousel";
 import AdbannerWrapper from "./components/adBanner/AdBannerWrapper";
 
-
 export default function LandingPage() {
   return (
     <div>
@@ -30,28 +29,14 @@ export default function LandingPage() {
           <PageSearchBar />
         </section>
 
-        <section className="container">
-          <div className="relative">
-            <div className="flex justify-between items-center mb-6 md:mb-8">
-              <h2 className="uppercase">Popular Categories</h2>
-            </div>
-            <CategoryList />
-          </div>
-        </section>
+        <CategoryList />
 
         <section className="container">
           <div className="relative">
             <div className="flex justify-between items-center max-lg:items-end mb-6 md:mb-8">
               <h2 className="uppercase">KARYAA Recommends</h2>
-              <Button
-                asChild
-                variant="ghost"
-                className="text-gray-700 font-medium text-base hover:underline"
-              >
-                <Link href="/categories">View All</Link>
-              </Button>
             </div>
-            <VendorsCarousel filter={{isRecommended: true}} />
+            <VendorsCarousel filter={{ isRecommended: true }} />
           </div>
         </section>
 
@@ -63,7 +48,7 @@ export default function LandingPage() {
                 alt=""
                 width={500}
                 height={500}
-                className="w-full h-72 lg:h-[30rem] object-cover rounded-lg"
+                className="w-full h-72 lg:h-[30rem] object-cover rounded-2xl"
               />
             </div>
             <div className="w-full lg:w-[45%] flex flex-col items-start gap-4 lg:gap-5">
@@ -108,7 +93,7 @@ export default function LandingPage() {
                 alt=""
                 width={500}
                 height={500}
-                className="w-full h-72 lg:h-[30rem] object-cover rounded-lg"
+                className="w-full h-72 lg:h-[30rem] object-cover rounded-2xl"
               />
             </div>
           </div>
@@ -137,7 +122,10 @@ export default function LandingPage() {
           </div>
 
           <div className="pt-5">
-            <BlogPosts searchParams={initialBlogParams} showPagination={false} />
+            <BlogPosts
+              searchParams={initialBlogParams}
+              showPagination={false}
+            />
           </div>
         </section>
 

@@ -1,58 +1,45 @@
-// File: components/StarRating.jsx (New File)
+import { Star } from 'lucide-react';
 
-import React from 'react';
-import { Star } from 'lucide-react'; // Using Lucide icon for better integration, but the SVG logic works too
-
-// Function to determine if a star should be full, half, or empty
-const getStarType = (rating, starIndex) => {
-    // starIndex runs from 1 to 5
-    if (rating >= starIndex) {
-        return 'full';
-    } else if (rating > starIndex - 1 && rating < starIndex) {
-        return 'half';
-    } else {
-        return 'empty';
-    }
-};
-
-const StarRating = ({ rating = 0, size = 5, totalStars = 5 }) => {
-    // Ensure rating is clamped between 0 and totalStars
-    const safeRating = Math.max(0, Math.min(totalStars, rating));
-    
-    // Array to iterate over (1, 2, 3, 4, 5)
-    const starArray = Array.from({ length: totalStars }, (_, i) => i + 1);
-
+const StarRating = ({ rating }) => {
+  // If no rating or rating is 0, show 5 gray filled stars
+  if (!rating || rating === 0) {
     return (
-        <div className="flex items-center">
-            {starArray.map((starIndex) => {
-                const type = getStarType(safeRating, starIndex);
-                
-                // You can swap the Lucide <Star /> component for your original SVG if preferred
-                return (
-                    <span key={starIndex} className="relative inline-flex items-center">
-                        {/* 1. Full/Empty/Half Star Base */}
-                        <Star 
-                            className={`w-${size} h-${size} me-1 ${type === 'empty' ? 'text-gray-300' : 'text-yellow-400'} fill-current`} 
-                            aria-hidden="true" 
-                        />
-                        
-                        {/* 2. Overlay the Half Star logic if needed */}
-                        {type === 'half' && (
-                            <div 
-                                className="absolute top-0 left-0 overflow-hidden" 
-                                style={{ width: `${(safeRating - (starIndex - 1)) * 100}%` }}
-                            >
-                                <Star 
-                                    className={`w-${size} h-${size} me-1 text-yellow-400 fill-current`} 
-                                    aria-hidden="true" 
-                                />
-                            </div>
-                        )}
-                    </span>
-                );
-            })}
-        </div>
+      <div className="flex items-center gap-1">
+        {[...Array(5)].map((_, i) => (
+          <Star key={`gray-${i}`} className="text-gray-300 fill-gray-300 w-5 h-5" />
+        ))}
+      </div>
     );
+  }
+
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <div className="flex items-center gap-1">
+      {/* Full stars */}
+      {[...Array(fullStars)].map((_, i) => (
+        <Star key={`full-${i}`} className="text-yellow-300 fill-yellow-300 w-5 h-5" />
+      ))}
+      
+      {/* Half star */}
+      {hasHalfStar && (
+        <div className="relative w-5 h-5">
+          <Star className="text-yellow-300 w-5 h-5 absolute" />
+          <div className="overflow-hidden w-1/2 absolute">
+            <Star className="text-yellow-300 fill-yellow-300 w-5 h-5" />
+          </div>
+        </div>
+      )}
+      
+      {/* Empty stars */}
+      {[...Array(emptyStars)].map((_, i) => (
+        <Star key={`empty-${i}`} className="text-gray-300 fill-gray-300 w-5 h-5" />
+      ))}
+    </div>
+  );
 };
 
-export default StarRating;
+
+export default StarRating

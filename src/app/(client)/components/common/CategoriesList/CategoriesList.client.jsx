@@ -29,7 +29,7 @@ const CategoriesListClient = ({ initialCategories }) => {
       {/* Mobile/Small Tablet Grid Layout */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:hidden gap-3">
         {categories.map((cat) => (
-          <MobileCategoryCard key={cat.slug || cat._id} category={cat} /> 
+          <CategoryMobileCard key={cat.slug || cat._id} category={cat} /> 
         ))}
       </div>
 
@@ -53,7 +53,7 @@ const CategoriesListClient = ({ initialCategories }) => {
 export default CategoriesListClient;
 
 // Mobile Category Card Component
-export const MobileCategoryCard = ({ category }) => {
+export const CategoryMobileCard = ({ category }) => {
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
   
   return (
@@ -107,7 +107,7 @@ export const CategoryCard = ({
       />
       <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10">
         <span
-          className={`text-white text-2xl lg:text-[32px] font-heading delay-200 duration-200 transition-opacity ${
+          className={`text-white text-2xl font-medium lg:text-[32px] font-heading delay-200 duration-200 transition-opacity ${
             activeIndex === idx ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -117,9 +117,46 @@ export const CategoryCard = ({
       {/* Overlay */}
       <div
         className={`absolute inset-0 bg-black transition-all duration-300 ${
-          activeIndex === idx ? "opacity-60" : "opacity-30"
+          activeIndex === idx ? "opacity-55" : "opacity-25"
         }`}
       ></div>
     </Link>
   );
 };
+
+
+export const CategoryGridCard = ({ category }) => {
+  const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
+  
+  return (
+    <Link
+      href={`/categories/${category.slug}`}
+      className="relative h-72 md:h-[350px] bg-gray-200 rounded-4xl overflow-hidden cursor-pointer group"
+    >
+      <Image
+        src={imgSrc} 
+        alt={category.name}
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+      <div className="absolute left-4 bottom-6 z-10">
+        <span className="text-white text-xl font-medium font-heading text-center px-2 leading-tight">
+          {category.name}
+        </span>
+      </div>
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 to-transparent rounded-xl"></div>
+    </Link>
+  );
+};
+
+export const CategoryGridClient = ({ initialCategories }) => {
+  const categories = initialCategories;
+  return (
+    <div className="w-[90%] max-w-6xl mx-auto grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        {categories.map((cat) => (
+          <CategoryGridCard key={cat.slug || cat._id} category={cat} /> 
+        ))}
+    </div>
+  )
+}

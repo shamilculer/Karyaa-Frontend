@@ -219,13 +219,6 @@ const SingleCategoryManage = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-center gap-2 text-blue-600 mb-1">
-                      <Users className="w-5 h-5" />
-                      <span className="text-sm font-medium">Total Vendors</span>
-                    </div>
-                    <p className="!text-5xl font-bold leading-[1.25em] text-blue-700">{category.vendorCount || 0}</p>
-                  </div>
                   <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
                     <div className="flex items-center gap-2 text-purple-600 mb-1">
                       <Star className="w-5 h-5" />

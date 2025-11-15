@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion"
 import ContactForm from "../components/ContactForm"
 import { getBrandDetailsAction } from "@/app/actions/brand"
+import PageTitle from "../components/common/PageTitle";
 
 
 const ContactPage = async () => {
@@ -19,14 +20,7 @@ const ContactPage = async () => {
 
     return (
         <div className="min-h-screen">
-
-            <section className="!m-0 bg-[url('/banner-1.avif')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
-                <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-                <div className="relative z-10 text-white text-center">
-                    <h1 className="!text-white !text-5xl lg:!text-7xl">Contact Us</h1>
-                    <p className="mt-2 max-md:text-xs max-md:mx-6">Have a question, need support, or want to partner with us? Let’s talk.</p>
-                </div>
-            </section>
+            <PageTitle imgUrl="/banner-1.avif" title="Contact Us" tagline="Have a question, need support, or want to partner with us? Let’s talk." />
 
             <section className="container">
                 <div className="w-full flex-center max-md:flex-col gap-20">
@@ -44,10 +38,6 @@ const ContactPage = async () => {
                                 <span className="font-medium text-xl">{contactInfo?.mainEmail}</span>
                             </Link>
 
-                            <Link href="" className="flex items-center gap-4">
-                                <Mail size={25} />
-                                <span className="font-medium text-xl">{contactInfo?.supportEmail}</span>
-                            </Link>
 
                             <Link href="" className="flex items-center gap-4">
                                 <MapPin size={25} />
@@ -62,9 +52,8 @@ const ContactPage = async () => {
                 </div>
             </section>
 
-            <div className="container border-t border-gray-400"></div>
 
-            <section className="container">
+            {/* <section className="container">
                 <div className="text-center">
                     <h6 className="uppercase !font-medium">FAQ</h6>
                     <h2 className="uppercase">Everything You Need to know</h2>
@@ -109,7 +98,7 @@ const ContactPage = async () => {
                         </AccordionItem>
                     </Accordion>
                 </div>
-            </section>
+            </section> */}
         </div>
     )
 }

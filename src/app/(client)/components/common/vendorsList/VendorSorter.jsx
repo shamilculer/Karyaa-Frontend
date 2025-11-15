@@ -9,105 +9,114 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-// --- Price Sorter (Original Component) ---
-
-export const VendorPriceSorter = () => {
+// --- Unified Sort By Dropdown ---
+export const VendorSortBy = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Uses 'sort' query parameter
-  const currentSort = searchParams.get("sort") || "none";
+  const currentSort = searchParams.get("sort") || "";
+  const isRecommended = searchParams.get("isRecommended");
+
+  // Determine current value based on both sort and isRecommended
+  const getCurrentValue = () => {
+    if (isRecommended === "true") return "recommended";
+    return currentSort;
+  };
 
   const handleSortChange = (value) => {
     const params = new URLSearchParams(searchParams);
-    if (value === "none") {
+    
+    if (value === "recommended") {
       params.delete("sort");
+      params.set("isRecommended", "true");
     } else {
       params.set("sort", value);
+      params.delete("isRecommended");
     }
-
-    // Navigates to the new URL with the updated 'sort' parameter
+    
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <Select
-      onValueChange={handleSortChange}
-      // Pass the current price sort value, or undefined if no price sort is active
-      value={
-        (currentSort === "price-low" || currentSort === "price-high")
-          ? currentSort
-          : undefined
-      }
-    >
+    <Select onValueChange={handleSortChange} value={getCurrentValue()}>
       <SelectTrigger
-        id="sort-price"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
+        id="sort-by"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs min-w-24 xl:min-w-[180px]"
       >
-        <SelectValue placeholder="Sort by Price" />
+        <SelectValue placeholder="Sort by" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="none">Default (Latest)</SelectItem>
-        <SelectItem value="price-low">Price: Low to High</SelectItem>
-        <SelectItem value="price-high">Price: High to Low</SelectItem>
+        <SelectItem value="price-low">Price – Low to High</SelectItem>
+        <SelectItem value="price-high">Price – High to Low</SelectItem>
+        <SelectItem value="rating">Rating</SelectItem>
+        <SelectItem value="recommended">Recommended</SelectItem>
       </SelectContent>
     </Select>
   );
 };
 
-// --- Rating Sorter (New Component) ---
-
-export const VendorRatingSorter = () => {
+// --- Location Dropdown ---
+export const VendorLocationFilter = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Uses 'rating' query parameter
-  const currentRating = searchParams.get("rating") || "none";
+  const currentLocation = searchParams.get("location") || "all";
 
-  const handleSortChange = (value) => {
+  // UAE Cities
+  const uaeCities = [
+    "Abu Dhabi",
+    "Dubai",
+    "Sharjah",
+    "Ajman",
+    "Umm Al Quwain",
+    "Ras Al Khaimah",
+    "Fujairah",
+    "Al Ain",
+  ];
+
+  const handleLocationChange = (value) => {
     const params = new URLSearchParams(searchParams);
-    if (value === "none") {
-      params.delete("rating");
+    
+    if (value === "all") {
+      params.delete("location");
     } else {
-      params.set("rating", value);
+      params.set("location", value);
     }
 
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <Select
-      onValueChange={handleSortChange}
-      // Value is the current rating sort, defaulting to 'none'
-      value={currentRating}
-    >
+    <Select onValueChange={handleLocationChange} value={currentLocation}>
       <SelectTrigger
-        id="sort-rating"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
+        id="location-filter"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs min-w-24 xl:min-w-[180px]"
       >
-        <SelectValue placeholder="Sort by Rating" />
+        <SelectValue placeholder="Location" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="none">Default (Latest)</SelectItem>
-        <SelectItem value="rating-high">Rating: High to Low</SelectItem>
-        <SelectItem value="rating-low">Rating: Low to High</SelectItem>
+        <SelectItem value="all">All Locations</SelectItem>
+        {uaeCities.map((city) => (
+          <SelectItem key={city} value={city.toLowerCase().replace(/\s+/g, "-")}>
+            {city}
+          </SelectItem>
+        ))}
+        <SelectItem value="international">International</SelectItem>
       </SelectContent>
     </Select>
   );
 };
 
-// --- Occasion Sorter (New Component) ---
-
-export const VendorOccasionSorter = () => {
+// --- Occasion Filter (Keep if needed) ---
+export const VendorOccasionFilter = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const currentOccasion = searchParams.get("occasion") || "";
+  const currentOccasion = searchParams.get("occasion") || "all";
 
-  // Your enum values
   const occasions = [
     "baby-showers-gender-reveals",
     "birthdays-anniversaries",
@@ -119,17 +128,16 @@ export const VendorOccasionSorter = () => {
     "product-launches-brand-events",
   ];
 
-  // Format for UI: "baby-showers-gender-reveals" -> "Baby Showers Gender Reveals"
   const capitalizeDisplay = (str) =>
     str
       .split("-")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
 
-  const handleSortChange = (value) => {
+  const handleOccasionChange = (value) => {
     const params = new URLSearchParams(searchParams);
 
-    if (value === "") {
+    if (value === "all") {
       params.delete("occasion");
     } else {
       params.set("occasion", value);
@@ -139,10 +147,10 @@ export const VendorOccasionSorter = () => {
   };
 
   return (
-    <Select onValueChange={handleSortChange} value={currentOccasion}>
+    <Select onValueChange={handleOccasionChange} value={currentOccasion}>
       <SelectTrigger
-        id="sort-occasion"
-        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs"
+        id="occasion-filter"
+        className="bg-[#F2F4FF] border rounded-4xl border-gray-300 text-primary hover:bg-gray-300 px-4 font-semibold max-md:!text-xs min-w-24 xl:min-w-[180px]"
       >
         <SelectValue placeholder="Occasion" />
       </SelectTrigger>

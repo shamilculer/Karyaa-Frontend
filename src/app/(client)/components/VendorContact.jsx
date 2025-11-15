@@ -11,14 +11,11 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import VendorForm from "./VendorForm"
 import { getInitials } from "@/utils"
 
-// ----------------------------------------------------------------------
-// 1. The Main Export Component (Handles Visibility)
-// ----------------------------------------------------------------------
 const VendorContact = ({ vendorInfo, user }) => {
     return (
         <>
             {/* Desktop View: Static Contact Form (Hidden on small screens) */}
-            <div className="max-lg:hidden">
+            <div className="max-lg:hidden max-h-[650px] overflow-y-scroll">
                 <VendorContactComponent vendorInfo={vendorInfo} user={user} />
             </div>
 
@@ -30,10 +27,6 @@ const VendorContact = ({ vendorInfo, user }) => {
     )
 }
 
-// ----------------------------------------------------------------------
-// 2. The Core Contact/Form Layout (REVISED to accept optional setIsOpen)
-// ----------------------------------------------------------------------
-// Now accepts setIsOpen as a prop, which is used to close the modal after submission.
 const VendorContactComponent = ({ vendorInfo, user, setIsOpen }) => { 
     const ownerInitials = getInitials(vendorInfo.ownerName)
     return (
@@ -67,20 +60,15 @@ const VendorContactComponent = ({ vendorInfo, user, setIsOpen }) => {
     )
 }
 
-// ----------------------------------------------------------------------
-// 3. Mobile/Tablet Floating Button and Modal (REVISED to manage state)
-// ----------------------------------------------------------------------
 const MobileVendorContact = ({ vendorInfo, user }) => {
     const [isOpen, setIsOpen] = useState(false); 
 
     const ownerInitials = getInitials(vendorInfo.ownerName)
     return (
-        // 👈 2. Bind dialog state to local state
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            {/* The Floating Button (Bottom Right) */}
             <DialogTrigger asChild>
                 <Button
-                    className="fixed bottom-4 right-4 bg-white flex items-center justify-start border border-gray-300 px-1 h-12 shadow rounded-3xl"
+                    className="fixed bottom-4 right-4 bg-white flex items-center justify-start border border-gray-300 px-1 h-12 shadow rounded-3xl z-50"
                     aria-label={`Contact ${vendorInfo.businessName}`}
                 >
                     <Avatar className="size-9 rounded-full overflow-hidden border border-gray-200">
@@ -97,10 +85,8 @@ const MobileVendorContact = ({ vendorInfo, user }) => {
                 </Button>
             </DialogTrigger>
 
-            {/* The Modal Content */}
             <DialogContent className="p-0 max-w-[90vw] md:max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="sr-only">Contact Us</DialogTitle>
-                {/* 👈 3. Pass the state setter down */}
                 <VendorContactComponent vendorInfo={vendorInfo} user={user} setIsOpen={setIsOpen} /> 
             </DialogContent>
         </Dialog>

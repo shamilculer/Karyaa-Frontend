@@ -8,9 +8,10 @@ import { useClientStore } from "@/store/clientStore"
 import { getBrandDetailsAction } from "@/app/actions/brand";
 import { useEffect, useState } from "react";
 import ReferModal from "../ReferModal";
+import NewsletterField from "../NewsLetterField";
+import { IconBrandFacebook, IconBrandLinkedin, IconBrandWhatsapp, IconBrandX, IconPhone } from "@tabler/icons-react";
 
 const Footer = () => {
-  // Get user from your store
   const user = useClientStore((state) => state.user);
   const isLoggedIn = !!user;
 
@@ -42,6 +43,10 @@ const Footer = () => {
       text: "Ideas",
       href: "/ideas"
     },
+    {
+      text: "Gallery",
+      href: "/gallery"
+    },
   ]
 
   const karyaacare = [
@@ -54,14 +59,17 @@ const Footer = () => {
       href: "/privacy-policy"
     },
     {
-      text: "Compare a Vendor",
-      href: "/compare"
+      text: "Cookie Policy",
+      href: "/cookie-policy"
+    },
+    {
+      text: "FAQ",
+      href: "/faq"
     },
   ]
 
   return (
-    <footer className={`w-full py-5 px-4 bg-[#f5f5f5] flex-center flex-col ${!isLoggedIn ? "mt-32 lg:mt-36" : "mt-20 lg:mt-16"}`}>
-      {/* Only show CTA section if user is NOT logged in */}
+    <footer className={`w-full py-5 px-4 bg-primary flex-center flex-col ${!isLoggedIn ? "mt-32 lg:mt-24" : "mt-8 lg:mt-10"}`}>
       {!isLoggedIn && (
         <section className="container !m-0 !p-0 !-mt-20 bg-white flex flex-col lg:flex-row items-center gap-0 h-auto lg:h-72 rounded-xl border border-gray-200 overflow-hidden max-lg:gap-8">
           <div className="h-60 lg:h-full w-full lg:w-1/2 bg-[url('/cta-1.webp')] bg-cover lg:bg-[length:120%] bg-center lg:bg-top rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none flex items-center justify-center relative overflow-hidden clippath-left">
@@ -92,23 +100,23 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="space-y-2">
-            <Image height={50} width={130} src="/logo.svg" alt="Karyaa" className="w-44" />
-            <p className="text-primary font-bold leading-relaxed">
+            <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-44" />
+            <p className="text-secondary font-bold leading-relaxed">
               Plan. Connect. Celebrate.
             </p>
           </div>
 
           {/* About Karyaa */}
           <div className="space-y-3">
-            <h5 className="font-semibold text-gray-900 uppercase !tracking-widest">
+            <h5 className="font-semibold !text-white uppercase !tracking-widest">
               About Karyaa
             </h5>
-            <ul className="space-y-3">
+            <ul className="space-y-5">
               {aboutKaryaaLink.map((item, i) => (
                 <li key={i}>
                   <Link
                     href={item.href}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
+                    className="text-white hover:text-secondary transition-colors text-sm"
                   >
                     {item.text}
                   </Link>
@@ -119,15 +127,15 @@ const Footer = () => {
 
           {/* Karyaa Care */}
           <div className="space-y-3">
-            <h5 className="font-semibold text-gray-900 uppercase !tracking-widest">
+            <h5 className="font-semibold !text-white uppercase !tracking-widest">
               Karyaa Care
             </h5>
-            <ul className="space-y-3">
+            <ul className="space-y-5">
               {karyaacare.map((item, i) => (
                 <li key={i}>
                   <Link
                     href={item.href}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
+                    className="text-white hover:text-secondary transition-colors text-sm"
                   >
                     {item.text}
                   </Link>
@@ -137,75 +145,56 @@ const Footer = () => {
           </div>
 
           {/* Newsletter & Social */}
-          <div className="space-y-6">
+          <div className="space-y-12">
             <div className="space-y-4">
-              <h5 className="font-semibold text-gray-900 uppercase !tracking-widest">
-                Connect with Us
+              <div>
+                <h5 className="font-semibold !text-white uppercase !tracking-widest mb-5">
+                  Subscribe to newsletter
+                </h5>
+                <p className="text-white !text-xs">Get event planning tips and special offers.</p>
+
+                {/* ✅ Newsletter Subscription Component */}
+                <NewsletterField />
+              </div>
+            </div>
+
+            <div>
+              <h5 className="font-semibold !text-white uppercase !tracking-widest mb-5">
+                Connect With Us
               </h5>
-              <ul className="space-y-3">
-                <li>
-                  <Link
-                    href={`tel:${contactDetails.primaryPhone}`}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
-                  >
-                    {contactDetails.primaryPhone}
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href={`mailto:${contactDetails.mainEmail}`}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
-                  >
-                    {contactDetails.mainEmail}
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href={`mailto:${contactDetails.supportEmail}`}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
-                  >
-                    {contactDetails.supportEmail}
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href={`#`}
-                    className="text-[#18181B] hover:text-primary transition-colors text-sm"
-                  >
-                    {contactDetails.location}
-                  </Link>
-                </li>
-              </ul>
               <div className="flex items-center gap-4">
                 <Link
                   href="#"
-                  className="hover:text-primary transition-colors"
+                  className="text-secondary hover:text-secondary transition-colors"
                 >
-                  <Facebook />
+                  <IconBrandWhatsapp />
                 </Link>
 
                 <Link
                   href="#"
-                  className="hover:text-primary transition-colors"
+                  className="text-secondary hover:text-secondary transition-colors"
                 >
-                  <Instagram />
+                  <IconPhone />
                 </Link>
 
                 <Link
                   href="#"
-                  className="hover:text-primary transition-colors"
+                  className="text-secondary hover:text-secondary transition-colors"
                 >
-                  <Twitter />
+                  <IconBrandFacebook />
                 </Link>
 
                 <Link
                   href="#"
-                  className="hover:text-primary transition-colors"
+                  className="text-secondary hover:text-secondary transition-colors"
                 >
-                  <Linkedin />
+                  <IconBrandX />
+                </Link>
+                <Link
+                  href="#"
+                  className="text-secondary hover:text-secondary transition-colors"
+                >
+                  <IconBrandLinkedin />
                 </Link>
               </div>
             </div>
@@ -213,8 +202,15 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-center text-gray-500 text-sm">
+        <div className="mt-12 pt-8 border-t flex justify-between items-center border-gray-200">
+
+          <p className="text-white !text-sm mb-4 max-w-2xl leading-relaxed">
+            This website serves solely as a marketplace platform.
+            All financial and contractual transactions occur directly between customers and vendors.
+            We are not liable for any transaction-related disputes, losses, or claims.
+          </p>
+
+          <p className="text-center text-gray-400 text-sm">
             © Copyright {new Date().getFullYear()}. All Rights Reserved
           </p>
         </div>

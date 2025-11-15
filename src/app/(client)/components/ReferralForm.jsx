@@ -33,7 +33,7 @@ const referralSchema = z.object({
     // Referrer Details
     referrerFullname: z.string().min(1, "Referrer name is required."),
     referrerEmail: z.string().email("Invalid email address.").min(1, "Referrer email is required."),
-    referrerPhone: z.string().optional(),
+    referrerPhone: z.string().min(1, "Phone number is required."), // ✅ NOW MANDATORY
 
     // Vendor Details (Array of vendors)
     vendors: z.array(vendorSchema).min(1, "At least one Vendor is required."),
@@ -95,7 +95,7 @@ const VendorFields = ({ control, index, onRemove, isMultiple }) => {
                     name={`vendors.${index}.phone`}
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
+                            <FormLabel>Phone Number (Optional)</FormLabel>
                             <FormControl>
                                 <Input type="tel" className="!bg-white border-gray-200" placeholder="+1 (555) 000-0000" {...field} />
                             </FormControl>
@@ -212,7 +212,7 @@ const ReferralForm = ({ onSuccess }) => { // Accept onSuccess prop
                                 name="referrerPhone"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Phone Number (Optional)</FormLabel>
+                                        <FormLabel>Phone Number</FormLabel>
                                         <FormControl>
                                             <Input type="tel" className="bg-white border-gray-300" placeholder="+1 (555) 000-0000" {...field} />
                                         </FormControl>

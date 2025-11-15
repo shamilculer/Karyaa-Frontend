@@ -32,7 +32,7 @@ const CategoriesContent = () => {
             setIsLoading(true)
             setError(null)
             const response = await getCategoryDetails()
-            
+            console.log(response)
             if (response.success) {
                 setCategories(response.categories)
             } else {
@@ -236,9 +236,6 @@ const CategoryCard = ({ category }) => {
                             </li>
                         )}
                     </ul>
-                    <p className="!text-xs font-heading font-medium text-gray-500 mt-2">
-                        Total vendors: {category.vendorCount || 0}
-                    </p>
                 </div>
             </CardContent>
 

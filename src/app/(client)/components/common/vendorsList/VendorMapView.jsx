@@ -11,6 +11,7 @@ import Image from "next/image";
 import VendorShareButton from "./VendorShareButton";
 import VendorSaveButton from "./VendorSaveButton";
 import { getInitials } from "@/utils";
+import StarRating from '../../StarRating';
 
 // Dynamically import react-leaflet components with no SSR
 const MapContainer = dynamic(
@@ -55,7 +56,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
     const vendorId = vendor._id || vendor.id;
 
     return (
-        <div className="w-[320px] rounded overflow-hidden bg-white">
+        <div className="w-[240px] xl:w-[320px] rounded overflow-hidden bg-white">
             <div className="relative group">
                 {vendor.isRecommended && (
                     <Badge className="absolute top-3 left-3 z-10 bg-white text-primary font-semibold text-sm flex items-center gap-1">
@@ -70,30 +71,11 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                 />
 
                 <div className='h-8'></div>
-
-                {/* {vendor?.gallery?.length > 0 ? (
-                    <div className="relative w-full h-48">
-                        <Image
-                            fill
-                            src={vendor.gallery[0].url}
-                            alt={vendor.businessName}
-                            className="w-full h-48 object-cover rounded-t-xl"
-                        />
-                    </div>
-                ) : (
-                    <Image
-                        height={192}
-                        width={320}
-                        src="/new-banner-2.jpg"
-                        alt={vendor.businessName}
-                        className="w-full blur-xs h-48 object-cover rounded-t-xl"
-                    />
-                )} */}
             </div>
 
             <div className="p-4 space-y-3">
                 <div className="flex items-start gap-3">
-                    <Avatar className="w-12 h-12 rounded-full border border-gray-300 flex-shrink-0">
+                    <Avatar className="size-9 xl:size-12 rounded-full border border-gray-300 flex-shrink-0">
                         <AvatarImage
                             className="object-cover rounded-full"
                             src={vendor.businessLogo}
@@ -107,7 +89,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
-                        <h3 className="!text-base sm:!text-lg font-semibold text-[#232536] font-heading truncate">
+                        <h3 className="!text-sm sm:!text-lg font-semibold text-[#232536] font-heading truncate">
                             {vendor.businessName}
                         </h3>
                         <div className="flex items-center gap-1 mt-1">
@@ -125,21 +107,12 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                        <Star className="text-yellow-400 fill-yellow-400 w-4 h-4" />
-                        <span className="!text-sm font-bold text-gray-900">
-                            {vendor.averageRating}/5
-                        </span>
-                    </div>
+                    <StarRating rating={vendor.averageRating} />
 
                     <p className="!text-xs font-medium text-primary !m-0">
                         From <span className="font-bold">AED {vendor.pricingStartingFrom}</span>
                     </p>
                 </div>
-
-                <p className="line-clamp-2 !text-xs text-gray-600">
-                    {vendor.businessDescription}
-                </p>
 
                 <div className="flex gap-2 pt-2">
                     <Button asChild className="flex-1" size="sm">
@@ -196,8 +169,34 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
             }
         };
 
+        // Handle hover events from vendor cards
+        const handleOpenMapPopup = (e) => {
+            const vendorId = e.detail;
+            if (markersRef.current[vendorId] && clickedMarker !== vendorId) {
+                markersRef.current[vendorId].openPopup();
+                setHoveredMarker(vendorId);
+            }
+        };
+
+        const handleCloseMapPopup = () => {
+            // Close all hovered popups (but not clicked ones)
+            Object.keys(markersRef.current).forEach(vendorId => {
+                if (markersRef.current[vendorId] && clickedMarker !== vendorId) {
+                    markersRef.current[vendorId].closePopup();
+                }
+            });
+            setHoveredMarker(null);
+        };
+
         window.addEventListener('closeHoveredPopup', handleClosePopup);
-        return () => window.removeEventListener('closeHoveredPopup', handleClosePopup);
+        window.addEventListener('openMapPopup', handleOpenMapPopup);
+        window.addEventListener('closeMapPopup', handleCloseMapPopup);
+        
+        return () => {
+            window.removeEventListener('closeHoveredPopup', handleClosePopup);
+            window.removeEventListener('openMapPopup', handleOpenMapPopup);
+            window.removeEventListener('closeMapPopup', handleCloseMapPopup);
+        };
     }, [clickedMarker, mounted]);
 
     const createCustomIcon = (vendor) => {
@@ -362,7 +361,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
 
     if (!mounted || !L) {
         return (
-            <div className="w-full h-[600px] bg-gray-100 rounded-xl flex items-center justify-center">
+            <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center">
                 <p className="text-gray-500">Loading map...</p>
             </div>
         );
@@ -370,7 +369,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
 
     if (vendorsWithCoords.length === 0) {
         return (
-            <div className="w-full h-[600px] bg-gray-50 rounded-xl flex flex-col items-center justify-center">
+            <div className="w-full h-full bg-gray-50 rounded-xl flex flex-col items-center justify-center">
                 <MapPin className="w-16 h-16 text-gray-400 mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">
                     No Vendors with Location Data
@@ -383,7 +382,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
     }
 
     return (
-        <div className="w-full h-[600px] rounded-xl overflow-hidden border border-gray-200">
+        <div className="w-full h-full rounded-xl overflow-hidden border border-gray-200">
             <MapContainer
                 center={getMapCenter()}
                 zoom={11}
@@ -391,7 +390,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                 scrollWheelZoom={true}
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://api.maptiler.com/maps/outdoor/{z}/{x}/{y}.png?key=4AimfOIlvkYoDLhuWsb9"
                     subdomains="abcd"
                     maxZoom={20}

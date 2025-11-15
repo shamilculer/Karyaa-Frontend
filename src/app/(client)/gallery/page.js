@@ -1,3 +1,4 @@
+// app/gallery/page.jsx
 // Gallery may use server helpers that access cookies; mark dynamic to prevent static prerender errors.
 export const dynamic = 'force-dynamic';
 
@@ -5,28 +6,22 @@ import { Suspense } from "react";
 import GalleryContent from "../components/galleryContent/GalleryContent";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
+import PageTitle from "../components/common/PageTitle";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GalleryPage = () => {
   return (
     <div className="min-h-screen">
-      <section className="!m-0 bg-[url('/new-banner-7.jpg')] bg-cover bg-center h-72 md:h-96 flex-center relative px-4">
-        <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-        <div className="relative z-10 text-white text-center">
-          <h1 className="!text-white !text-5xl lg:!text-7xl">Gallery</h1>
-        </div>
-      </section>
-
+      <PageTitle imgUrl="/new-banner-7.jpg" title="Gallery" />
+      
       <section className="container !mb-14">
         <PageSearchBar />
       </section>
-
-      <section className="container">
-        <CategoryList />
-      </section>
-
+      
+      <CategoryList />
+      
       <section className="container flex-center flex-col gap-5">
         <h2 className="uppercase">A Visual Showcase</h2>
-
         <Suspense fallback={<GallerySkeleton />}>
           <GalleryContent />
         </Suspense>
@@ -37,28 +32,30 @@ const GalleryPage = () => {
 
 export default GalleryPage;
 
-
-import { Skeleton } from "@/components/ui/skeleton";
-
+// Masonry Skeleton Loader
 function GallerySkeleton() {
   return (
-    <div className="max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-9 w-full">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div
-          key={i}
-          className="rounded-xl overflow-hidden shadow-md space-y-3"
-        >
-          <Skeleton className="w-full h-72 rounded-xl" />
-
-          <div className="flex items-center gap-3 px-2 pb-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-3 w-2/3" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className="flex gap-6 max-w-[1400px] w-full">
+      {/* Column 1 */}
+      <div className="flex-1 flex flex-col gap-6">
+        <Skeleton className="w-full h-96 rounded-xl" />
+        <Skeleton className="w-full h-72 rounded-xl" />
+        <Skeleton className="w-full h-80 rounded-xl" />
+      </div>
+      
+      {/* Column 2 - Hidden on mobile */}
+      <div className="hidden sm:flex flex-1 flex-col gap-6">
+        <Skeleton className="w-full h-80 rounded-xl" />
+        <Skeleton className="w-full h-96 rounded-xl" />
+        <Skeleton className="w-full h-64 rounded-xl" />
+      </div>
+      
+      {/* Column 3 - Hidden on mobile and tablet */}
+      <div className="hidden lg:flex flex-1 flex-col gap-6">
+        <Skeleton className="w-full h-72 rounded-xl" />
+        <Skeleton className="w-full h-88 rounded-xl" />
+        <Skeleton className="w-full h-80 rounded-xl" />
+      </div>
     </div>
   );
 }

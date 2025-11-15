@@ -10,6 +10,7 @@ import { VendorsCard } from "../components/common/vendorsList/VendorsList";
 import { getSavedVendors } from "@/app/actions/user/user";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
+import PageTitle from "../components/common/PageTitle";
 
 // ===============================================
 // SAVED VENDORS CONTENT (Server Component)
@@ -78,22 +79,14 @@ function SavedVendorsSkeleton() {
 export default function SavedVendorsPage() {
   return (
     <div>
-      {/* Hero Banner */}
-      <section className="!m-0 bg-cover bg-center h-72 md:h-96 flex-center relative px-4 bg-[url('/new-banner-3.jpg')]">
-        <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-        <div className="relative z-10 text-white text-center">
-          <h1 className="!text-white !text-5xl lg:!text-7xl">Saved Vendors</h1>
-        </div>
-      </section>
+      <PageTitle imgUrl="/new-banner-3.jpg" title="Saved Vendors" />
 
       <section className="container">
         <PageSearchBar />
       </section>
 
-      <section className="container">
         <CategoryList />
-      </section>
-
+        
       {/* Suspense Wrapper for Vendor Data */}
       <Suspense fallback={<SavedVendorsSkeleton />}>
         <SavedVendorsContent />
