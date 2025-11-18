@@ -23,6 +23,7 @@ const VendorsCarousel = async ({ filter = {}, currentVendor }) => {
             autoplay={true}
             withNavigation={true}
             withPagination={true}
+            navigationPosition="top-right"
             breakpoints={{
                 640: { // Example breakpoint for small screens
                     slidesPerView: 2,
@@ -31,7 +32,7 @@ const VendorsCarousel = async ({ filter = {}, currentVendor }) => {
                     slidesPerView: 3,
                 }
             }}
-            className="!pb-10" // Add some padding for the navigation/pagination
+            className="!pb-10 max-md:!mt-10" // Add some padding for the navigation/pagination
         >
             {vendors.map((vendor) => (
                 <VendorsCard key={vendor._id}

@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import UserLoginForm from "../../components/forms/UserLoginForm";
 import { Button } from "@/components/ui/button";
@@ -7,9 +6,15 @@ import Link from "next/link";
 const UserLoginPage = () => {
   return (
     <section className="flex !my-0 relative">
-      {/* Form Container - Takes 100% width on mobile, 1/3 on xl+ */}
+      <div className="w-2/3 min-h-screen bg-secondary relative max-xl:hidden">
+        <Image
+          fill
+          alt="Login to Karyaa"
+          src="/new-banner-10.jpg"
+          className="h-full object-cover"
+        />
+      </div>
       <div className="w-full bg-body xl:w-1/3 min-h-screen flex flex-col justify-center px-5 sm:px-10 max-xl:z-10">
-        {/* Wrapper for mobile centering */}
         <div className="max-xl:flex flex-col items-center justify-center">
           <div>
             {/* Mobile Logo */}
@@ -43,15 +48,6 @@ const UserLoginPage = () => {
             </Button>
           </div>
         </div>
-      </div>
-      {/* Image Container - Hidden on mobile, takes 2/3 on xl+ */}
-      <div className="w-2/3 min-h-screen bg-secondary relative max-xl:hidden">
-        <Image
-          fill
-          alt="Login to Karyaa"
-          src="/new-banner-10.jpg"
-          className="h-full object-cover"
-        />
       </div>
     </section>
   );

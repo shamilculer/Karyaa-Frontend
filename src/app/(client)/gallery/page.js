@@ -1,5 +1,3 @@
-// app/gallery/page.jsx
-// Gallery may use server helpers that access cookies; mark dynamic to prevent static prerender errors.
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from "react";
@@ -9,7 +7,11 @@ import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "../components/common/PageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const GalleryPage = () => {
+const GalleryPage = async ({ searchParams }) => {
+  const params = await searchParams;
+  const pageNumber = params?.page || '1'
+  const page = parseInt(pageNumber);
+
   return (
     <div className="min-h-screen">
       <PageTitle imgUrl="/new-banner-7.jpg" title="Gallery" />
@@ -22,8 +24,8 @@ const GalleryPage = () => {
       
       <section className="container flex-center flex-col gap-5">
         <h2 className="uppercase">A Visual Showcase</h2>
-        <Suspense fallback={<GallerySkeleton />}>
-          <GalleryContent />
+        <Suspense fallback={<GallerySkeleton />} key={page}>
+          <GalleryContent page={page} />
         </Suspense>
       </section>
     </div>
@@ -32,7 +34,6 @@ const GalleryPage = () => {
 
 export default GalleryPage;
 
-// Masonry Skeleton Loader
 function GallerySkeleton() {
   return (
     <div className="flex gap-6 max-w-[1400px] w-full">

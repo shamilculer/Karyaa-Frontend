@@ -65,10 +65,10 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                     </Badge>
                 )}
 
-                <VendorSaveButton
+                {/* <VendorSaveButton
                     vendorId={vendorId}
                     isInitialSaved={isInitialSaved}
-                />
+                /> */}
 
                 <div className='h-8'></div>
             </div>
@@ -100,10 +100,10 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                         </div>
                     </div>
 
-                    <VendorShareButton
+                    {/* <VendorShareButton
                         businessName={vendor.businessName}
                         slug={vendor.slug}
-                    />
+                    /> */}
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -132,8 +132,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
 
 const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
     const [mounted, setMounted] = useState(false);
-    const [clickedMarker, setClickedMarker] = useState(null);
-    const [hoveredMarker, setHoveredMarker] = useState(null);
+    const [activePopup, setActivePopup] = useState(null); // Track only one active popup
     const [L, setL] = useState(null);
     const popupTimeoutRef = useRef(null);
     const markersRef = useRef({});
@@ -159,45 +158,55 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
         });
     }, []);
 
+    // Close all popups except the active one
+    const closeAllPopupsExcept = (vendorId) => {
+        Object.keys(markersRef.current).forEach(id => {
+            if (id !== vendorId && markersRef.current[id]) {
+                markersRef.current[id].closePopup();
+            }
+        });
+    };
+
     useEffect(() => {
         if (!mounted) return;
-        
-        const handleClosePopup = (e) => {
-            const vendorId = e.detail;
-            if (markersRef.current[vendorId] && clickedMarker !== vendorId) {
-                markersRef.current[vendorId].closePopup();
-            }
-        };
 
         // Handle hover events from vendor cards
         const handleOpenMapPopup = (e) => {
             const vendorId = e.detail;
-            if (markersRef.current[vendorId] && clickedMarker !== vendorId) {
+            
+            // Clear any pending timeout
+            if (popupTimeoutRef.current) {
+                clearTimeout(popupTimeoutRef.current);
+            }
+
+            // Close all other popups
+            closeAllPopupsExcept(vendorId);
+            
+            // Open the new popup
+            if (markersRef.current[vendorId]) {
                 markersRef.current[vendorId].openPopup();
-                setHoveredMarker(vendorId);
+                setActivePopup(vendorId);
             }
         };
 
         const handleCloseMapPopup = () => {
-            // Close all hovered popups (but not clicked ones)
+            // Close all popups
             Object.keys(markersRef.current).forEach(vendorId => {
-                if (markersRef.current[vendorId] && clickedMarker !== vendorId) {
+                if (markersRef.current[vendorId]) {
                     markersRef.current[vendorId].closePopup();
                 }
             });
-            setHoveredMarker(null);
+            setActivePopup(null);
         };
 
-        window.addEventListener('closeHoveredPopup', handleClosePopup);
         window.addEventListener('openMapPopup', handleOpenMapPopup);
         window.addEventListener('closeMapPopup', handleCloseMapPopup);
         
         return () => {
-            window.removeEventListener('closeHoveredPopup', handleClosePopup);
             window.removeEventListener('openMapPopup', handleOpenMapPopup);
             window.removeEventListener('closeMapPopup', handleCloseMapPopup);
         };
-    }, [clickedMarker, mounted]);
+    }, [mounted]);
 
     const createCustomIcon = (vendor) => {
         if (!L) return null;
@@ -288,21 +297,22 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
         if (popupTimeoutRef.current) {
             clearTimeout(popupTimeoutRef.current);
         }
-        if (clickedMarker !== vendorId) {
-            setHoveredMarker(vendorId);
-            marker.openPopup();
-        }
+        
+        // Close all other popups
+        closeAllPopupsExcept(vendorId);
+        
+        // Open this popup
+        setActivePopup(vendorId);
+        marker.openPopup();
     };
 
     const handleMarkerMouseOut = (vendorId, marker) => {
-        if (clickedMarker !== vendorId) {
-            popupTimeoutRef.current = setTimeout(() => {
-                if (hoveredMarker === vendorId && clickedMarker !== vendorId) {
-                    setHoveredMarker(null);
-                    marker.closePopup();
-                }
-            }, 200);
-        }
+        popupTimeoutRef.current = setTimeout(() => {
+            if (activePopup === vendorId) {
+                setActivePopup(null);
+                marker.closePopup();
+            }
+        }, 200);
     };
 
     const handlePopupMouseOver = (vendorId) => {
@@ -312,21 +322,25 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
     };
 
     const handlePopupMouseOut = (vendorId) => {
-        if (clickedMarker !== vendorId) {
-            popupTimeoutRef.current = setTimeout(() => {
-                setHoveredMarker(null);
-                const event = new CustomEvent('closeHoveredPopup', { detail: vendorId });
-                window.dispatchEvent(event);
-            }, 200);
-        }
+        popupTimeoutRef.current = setTimeout(() => {
+            if (activePopup === vendorId) {
+                setActivePopup(null);
+                if (markersRef.current[vendorId]) {
+                    markersRef.current[vendorId].closePopup();
+                }
+            }
+        }, 200);
     };
 
     const handleMarkerClick = (vendorId, marker) => {
-        if (clickedMarker === vendorId) {
-            setClickedMarker(null);
+        if (activePopup === vendorId) {
+            setActivePopup(null);
             marker.closePopup();
         } else {
-            setClickedMarker(vendorId);
+            // Close all other popups
+            closeAllPopupsExcept(vendorId);
+            
+            setActivePopup(vendorId);
             marker.openPopup();
         }
     };
@@ -424,8 +438,8 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                                 maxWidth={340}
                                 minWidth={340}
                                 onClose={() => {
-                                    if (clickedMarker === vendor._id) {
-                                        setClickedMarker(null);
+                                    if (activePopup === vendor._id) {
+                                        setActivePopup(null);
                                     }
                                 }}
                             >

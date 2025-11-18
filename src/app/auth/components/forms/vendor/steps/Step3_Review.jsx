@@ -38,12 +38,17 @@ export default function Step03_Review({ isLastStep }) {
                 duration: 3000,
             });
             
-            // 2. Client-Side Redirect
-            resetForm(); // Optional: Clear Zustand store state
-            setTimeout(() => {
-                // Navigate to the desired success page
-                router.push('/auth/vendor/register/success'); 
-            }, 500); // Wait 500ms for the user to see the toast pop up
+                // 2. Client-Side Redirect (include vendorId in query if available)
+                resetForm(); // Optional: Clear Zustand store state
+                const vendorId = response?.data?.vendor?._id;
+                setTimeout(() => {
+                    // Navigate to the desired success page, passing vendorId when available
+                    if (vendorId) {
+                        router.push(`/auth/vendor/register/success?vendorId=${vendorId}`);
+                    } else {
+                        router.push('/auth/vendor/register/success');
+                    }
+                }, 500); // Wait 500ms for the user to see the toast pop up
             
         } else if (response && !response.success) {
             // FAILURE SCENARIO

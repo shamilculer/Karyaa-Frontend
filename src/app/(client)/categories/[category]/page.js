@@ -33,7 +33,7 @@ const CategoryPage = async ({ params, searchParams }) => {
         <div className="relative space-y-8">
           <div className="flex items-center">
             <h2 className="max-md:!text-[26px] font-semibold uppercase">
-              Popular Sub-Categories
+              Sub-Categories
             </h2>
           </div>
           <div>

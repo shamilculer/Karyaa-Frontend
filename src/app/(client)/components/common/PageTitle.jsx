@@ -7,9 +7,9 @@ function PageTitle({ imgUrl, title, tagline }) {
         >
             <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
             <div className="relative z-10 text-white text-center">
-                <h1 className="!text-white !text-4xl lg:!text-[65px]">{title}</h1>
+                <h1 className="!text-white !text-4xl lg:!text-[55px]">{title}</h1>
                 {tagline && (
-                    <p className="mt-2 max-md:text-xs">{tagline}</p>
+                    <p className="mt-2 !text-sm max-md:text-xs">{tagline}</p>
                 )}
             </div>
         </section>

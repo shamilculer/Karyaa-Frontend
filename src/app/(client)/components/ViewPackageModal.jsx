@@ -114,7 +114,7 @@ export default function ViewPackageModal({ packageData }) {
 
                 {/* FOOTER (not scrollable) */}
                 <div className="px-6 py-4 border-t flex items-center justify-between border-gray-300">
-                    <div className="mt-4 text-xs">Starting From <span className="!text-2xl font-medium font-heading">AED {Number(packageData.priceStartingFrom).toLocaleString()}</span></div>
+                    <div className="mt-4 text-xs">Starting From <span className="!text-base font-medium font-heading">AED {Number(packageData.priceStartingFrom).toLocaleString()}</span></div>
                     <Button
                         variant="outline"
                         onClick={() => setOpen(false)}

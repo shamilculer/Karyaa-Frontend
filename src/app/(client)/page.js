@@ -40,7 +40,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-lg:px-4 lg:max-w-7xl">
+        <section className="mx-auto w-full px-6 max-w-7xl">
           <div className="w-full flex max-lg:flex-col justify-center items-center gap-8 lg:gap-16">
             <div className="w-full lg:w-[55%]">
               <Image
@@ -74,7 +74,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-lg:px-4 lg:max-w-7xl">
+        <section className="mx-auto w-full px-6 max-w-7xl">
           <div className="w-full flex max-lg:flex-col-reverse justify-center items-center gap-8 lg:gap-16">
             <div className="w-full lg:w-[45%] flex flex-col justify-center gap-5">
               <h6 className="uppercase max-lg:!text-sm !font-medium">

@@ -31,21 +31,25 @@ const Hero = () => {
   ];
 
   return (
-    <div className='h-auto md:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
+    <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
       <div className='w-full flex-center flex-col text-center px-4'>
-        <h1 className='text-center uppercase max-md:!text-[22px] !text-[34px] w-full lg:w-2xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
+        <h1 className='text-center uppercase max-md:!text-[22px] !text-[30px] w-full sm:w-md md:w-xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
         <p className="max-md:mt-2 max-md:!text-xs">Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.</p>
       </div>
 
       <div className="w-full max-w-[1600px] relative">
+        {/* Gradient overlays - moved outside and positioned relative to the container */}
+        <div className="pointer-events-none absolute top-0 left-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-r from-white/85 to-transparent z-10"></div>
+        <div className="pointer-events-none absolute top-0 right-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-l from-white/85 to-transparent z-10"></div>
+
         <Swiper
           modules={[Navigation, Autoplay, Pagination, EffectCoverflow]}
           effect={'coverflow'}
           grabCursor={true}
           autoplay={{
             delay: 2000,
-            disableOnInteraction: false, // Keeps autoplay running after user interaction
-            pauseOnMouseEnter: true, // Optional: pause when hovering
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
           }}
           centeredSlides={true}
           loop={true}
@@ -57,27 +61,43 @@ const Hero = () => {
             modifier: 2.5,
           }}
           breakpoints={{
-            // Mobile devices (320px and up)
             320: {
               coverflowEffect: {
                 rotate: 0,
-                stretch: 100, // Reduced for mobile
+                stretch: 100,
                 depth: 80,
                 modifier: 1.8,
               },
               slidesPerView: "auto",
             },
-            // Tablets (768px and up)
             768: {
               coverflowEffect: {
                 rotate: 0,
-                stretch: 200,
-                depth: 5,
+                stretch: 100,
+                depth: 75,
                 modifier: 1.5,
               },
               slidesPerView: "auto",
             },
             1024: {
+              coverflowEffect: {
+                rotate: 0,
+                stretch: 170,
+                depth: 100,
+                modifier: 2.5,
+              },
+              slidesPerView: "auto",
+            },
+            1119: {
+              coverflowEffect: {
+                rotate: 0,
+                stretch: 200,
+                depth: 100,
+                modifier: 2.2,
+              },
+              slidesPerView: "auto",
+            },
+            1280: {
               coverflowEffect: {
                 rotate: 0,
                 stretch: 280,
@@ -98,7 +118,7 @@ const Hero = () => {
           className="hero-swiper relative"
         >
           {images.map((src, idx) => (
-            <SwiperSlide key={idx} className="!w-64 sm:!w-80 md:!w-96 lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
+            <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
               <img
                 src={src}
                 alt={`slide-${idx}`}
@@ -109,19 +129,16 @@ const Hero = () => {
         </Swiper>
 
         <div className="w-full flex-center gap-2 md:gap-4 mt-4">
-          <Button className="hero_slider-prev bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
-            <ChevronLeft className="text-gray-700" />
+          <Button className="hero_slider-prev bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-secondary">
+            <ChevronLeft className="text-secondary" />
           </Button>
 
           {/* pagination dots */}
           <div className="hero_slider-pagination !w-fit hidden md:flex gap-2" style={{ transform: "translateX(0%) !important" }}></div>
 
-          <Button className="hero_slider-next bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-gray-300">
-            <ChevronRight className="text-gray-700" />
+          <Button className="hero_slider-next bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-secondary">
+            <ChevronRight className="text-secondary" />
           </Button>
-
-          <div className="pointer-events-none absolute top-0 left-0 h-full w-28 md:w-52 bg-gradient-to-r from-white/85 to-transparent z-10"></div>
-          <div className="pointer-events-none absolute top-0 right-0 h-full w-28 md:w-52 bg-gradient-to-l from-white/85 to-transparent z-10"></div>
         </div>
       </div>
     </div >

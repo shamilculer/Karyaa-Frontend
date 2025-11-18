@@ -5,13 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useVendorFormStore } from '@/store/vendorFormStore';
 import { Step1Schema } from '@/lib/schema';
-import { EyeIcon, EyeOff, Globe, MapPin } from "lucide-react"; // Added Globe and MapPin
+import { EyeIcon, EyeOff, Globe } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription, // Added FormDescription for better UX
     FormField,
     FormItem,
     FormLabel,
@@ -25,7 +24,7 @@ import {
 
 import ControlledFileUpload from '@/components/common/ControlledFileUploads';
 
-// Reusable Input Field Renderer (No Change)
+// Reusable Input Field Renderer
 const renderInputField = (form, name, label, placeholder, type = "text") => (
     <FormField
         key={name}
@@ -63,12 +62,16 @@ export default function Step01_BasicInfo() {
             phoneNumber: formData.phoneNumber || '',
             password: formData.password || '',
             
-            // Initializing conditional fields
+            // UAE-specific fields
             ownerProfileImage: formData.ownerProfileImage || '',
             tradeLicenseNumber: formData.tradeLicenseNumber || '',
             personalEmiratesIdNumber: formData.personalEmiratesIdNumber || '',
             emiratesIdCopy: formData.emiratesIdCopy || '',
             tradeLicenseCopy: formData.tradeLicenseCopy || '',
+            
+            // International-specific fields
+            businessLicenseCopy: formData.businessLicenseCopy || '',
+            passportOrIdCopy: formData.passportOrIdCopy || '',
             
             isInternational: formData.isInternational ?? false,
         },
@@ -86,21 +89,25 @@ export default function Step01_BasicInfo() {
 
     const isInternational = form.watch("isInternational");
 
-    // Auto-clear UAE fields when switching to international
+    // Auto-clear fields when switching between UAE and International
     useEffect(() => {
         if (isInternational) {
-            // Set to empty string '' to correctly trigger Zod's .optional().or(z.literal(''))
+            // Clear UAE-specific fields
             form.setValue("tradeLicenseNumber", "");
             form.setValue("personalEmiratesIdNumber", "");
             form.setValue("emiratesIdCopy", "");
             form.setValue("tradeLicenseCopy", "");
+        } else {
+            // Clear international-specific fields
+            form.setValue("businessLicenseCopy", "");
+            form.setValue("passportOrIdCopy", "");
         }
     }, [isInternational, form]);
 
     return (
         <>
             <div className='mb-8 space-y-5'>
-                <h1 className="text-primary !capitalize leading-[1.2em]">Welcome to the UAE’s premier events vendor platform.</h1>
+                <h1 className="text-primary !capitalize leading-[1.2em]">Welcome to the UAE's premier events vendor platform.</h1>
                 <p>Whether you offer catering, photography, décor, entertainment, or any other event service – this is where your business gets discovered!</p>
                 <p>Our simple, 3-step registration ensures only verified and trusted vendors join our network.</p>
             </div>
@@ -147,7 +154,7 @@ export default function Step01_BasicInfo() {
                         )}
                     />
                     
-                    {/* --- UAE or International Selection (MOVED HERE) --- */}
+                    {/* UAE or International Selection */}
                     <div className="border border-primary/20 p-3 rounded-lg bg-primary/5 space-y-1">
                         <FormField
                             control={form.control}
@@ -178,13 +185,11 @@ export default function Step01_BasicInfo() {
                             )}
                         />
                     </div>
-                    {/* --- End Location Selection --- */}
-
 
                     {/* Phone always visible */}
                     {renderInputField(form, "phoneNumber", "Phone Number", "971501234567")}
 
-                    {/* ✅ UAE-Only Conditional Fields */}
+                    {/* UAE-Only Conditional Fields */}
                     {!isInternational && (
                         <>                            
                             {renderInputField(form, "tradeLicenseNumber", "Trade License Number", "Enter trade license number")}
@@ -231,6 +236,63 @@ export default function Step01_BasicInfo() {
                                                 folderPath={FOLDER_PATH}
                                             />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
+
+                    {/* International-Only Conditional Fields */}
+                    {isInternational && (
+                        <>
+                            <FormField
+                                control={form.control}
+                                name="businessLicenseCopy"
+                                render={() => (
+                                    <FormItem>
+                                        <FormLabel className="text-xs leading-0 font-medium">
+                                            Business License Copy
+                                        </FormLabel>
+                                        <FormControl>
+                                            <ControlledFileUpload
+                                                control={form.control}
+                                                name="businessLicenseCopy"
+                                                label="Upload Business License"
+                                                errors={form.formState.errors}
+                                                allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                folderPath={FOLDER_PATH}
+                                            />
+                                        </FormControl>
+                                        <p className="!text-[12px] text-gray-500 mt-1">
+                                            Upload your valid business registration or license document.
+                                        </p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="passportOrIdCopy"
+                                render={() => (
+                                    <FormItem>
+                                        <FormLabel className="text-xs leading-0 font-medium">
+                                            Passport or ID Card Copy
+                                        </FormLabel>
+                                        <FormControl>
+                                            <ControlledFileUpload
+                                                control={form.control}
+                                                name="passportOrIdCopy"
+                                                label="Upload Passport or ID"
+                                                errors={form.formState.errors}
+                                                allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                folderPath={FOLDER_PATH}
+                                            />
+                                        </FormControl>
+                                        <p className="!text-[12px] text-gray-500 mt-1">
+                                            Upload a clear copy of your passport or national ID card.
+                                        </p>
                                         <FormMessage />
                                     </FormItem>
                                 )}

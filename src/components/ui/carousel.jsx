@@ -7,7 +7,6 @@ import { ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Import Swiper styles - make sure these are also in your main CSS file
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -27,60 +26,86 @@ export function Carousel({
   disableOnInteraction = true,
   loop = false,
   speed = 300,
-  effect = "slide", // "slide", "fade", "cube", "coverflow", "flip"
+  effect = "slide",
   centeredSlides = false,
   className = "",
   navigationInside = false,
-  navigationStyles = ""
+  navigationStyles = "",
+  navigationPosition = "center", // "center" | "top-right" | "top-right-mobile"
+  onSlideChange = null,
+  onSwiper = null,
 }) {
-  // Generate unique ID for this carousel instance
   const carouselId = React.useId().replace(/:/g, '');
   const prevBtnClass = `prev-btn-${carouselId}`;
   const nextBtnClass = `next-btn-${carouselId}`;
 
-  // Build modules array based on props
   const modules = [Navigation, Pagination];
   if (autoplay) modules.push(Autoplay);
   if (effect === "fade") modules.push(EffectFade);
 
+  const swiperProps = {
+    modules,
+    slidesPerView,
+    spaceBetween,
+    breakpoints,
+    navigation: withNavigation
+      ? {
+          prevEl: `.${prevBtnClass}`,
+          nextEl: `.${nextBtnClass}`,
+          enabled: true
+        }
+      : false,
+    pagination: withPagination ? {
+      clickable: true,
+      enabled: true,
+      dynamicBullets: true,
+    } : false,
+    autoplay: autoplay ? {
+      delay: autoplayDelay,
+      disableOnInteraction,
+      pauseOnMouseEnter,
+    } : false,
+    loop,
+    speed,
+    effect,
+    centeredSlides,
+    className: `${className}`,
+    ...(onSlideChange && { onSlideChange }),
+    ...(onSwiper && { onSwiper }),
+  };
+
+  // Get navigation positioning classes
+  const getNavPosition = (type) => {
+    const isTopRight = navigationPosition === "top-right";
+    const isTopRightMobile = navigationPosition === "top-right-mobile";
+    
+    if (isTopRight) {
+      // Top right for all screens
+      return type === "prev"
+        ? "-top-10 md:-top-14 right-10 md:right-12"
+        : "-top-10 md:-top-14 right-0";
+    }
+    
+    if (isTopRightMobile) {
+      // Top right for mobile, center for desktop
+      return type === "prev"
+        ? "top-4 right-14 md:top-1/2 md:-translate-y-1/2 md:right-auto md:left-3"
+        : "top-4 right-4 md:top-1/2 md:-translate-y-1/2 md:right-3 md:left-auto";
+    }
+    
+    // Default center position
+    return type === "prev"
+      ? `top-1/2 -translate-y-1/2 ${navigationInside ? "left-3" : "-left-4 md:-left-8"}`
+      : `top-1/2 -translate-y-1/2 ${navigationInside ? "right-3" : "-right-4 md:-right-8"}`;
+  };
+
   return (
     <div className="w-full relative group">
-      <Swiper
-        modules={modules}
-        slidesPerView={slidesPerView}
-        spaceBetween={spaceBetween}
-        breakpoints={breakpoints}
-        navigation={
-          withNavigation
-            ? {
-              prevEl: `.${prevBtnClass}`,
-              nextEl: `.${nextBtnClass}`,
-              enabled: true
-            }
-            : false
-        }
-        pagination={withPagination ? {
-          clickable: true,
-          enabled: true,
-          dynamicBullets: true,
-        } : false}
-        autoplay={autoplay ? {
-          delay: autoplayDelay,
-          disableOnInteraction,
-          pauseOnMouseEnter,
-        } : false}
-        loop={loop}
-        speed={speed}
-        effect={effect}
-        centeredSlides={centeredSlides}
-        className={`${className}`}
-      >
+      <Swiper {...swiperProps}>
         {React.Children.map(children, (child, index) => {
-          // If child is already a CarouselItem/SwiperSlide, return as is
           if (child?.type === CarouselItem || child?.type?.name === 'SwiperSlide') {
             return child;
           }
-          // Otherwise wrap it in SwiperSlide
           return <SwiperSlide key={index}>{child}</SwiperSlide>;
         })}
       </Swiper>
@@ -92,17 +117,17 @@ export function Carousel({
           <div
             className={cn(
               prevBtnClass,
-              "absolute top-1/2 -translate-y-1/2 z-20",
-              navigationInside ? "left-3" : "-left-4 md:-left-8"
+              "absolute z-20",
+              getNavPosition("prev")
             )}
           >
             <Button
               className={cn(
-                "bg-white size-8 md:size-8 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
+                "bg-white size-8 md:size-10 border border-secondary rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
                 navigationStyles
               )}
             >
-              <ChevronLeft className="text-gray-700 h-4 w-4" />
+              <ChevronLeft className="text-secondary h-6 w-6 md:h-7 md:w-7" />
             </Button>
           </div>
 
@@ -110,17 +135,17 @@ export function Carousel({
           <div
             className={cn(
               nextBtnClass,
-              "absolute top-1/2 -translate-y-1/2 z-20",
-              navigationInside ? "right-3" : "-right-4 md:-right-8"
+              "absolute z-20",
+              getNavPosition("next")
             )}
           >
             <Button
               className={cn(
-                "bg-white size-8 md:size-8 border border-gray-300 rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
+                "bg-white size-8 md:size-10 border border-secondary rounded-full shadow-md hover:bg-gray-100 transition-all duration-200 p-0",
                 navigationStyles
               )}
             >
-              <ChevronRight className="text-gray-700 h-4 w-4" />
+              <ChevronRight className="text-secondary h-6 w-6 md:h-7 md:w-7" />
             </Button>
           </div>
         </>

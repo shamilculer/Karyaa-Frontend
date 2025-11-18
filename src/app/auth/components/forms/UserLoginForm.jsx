@@ -47,8 +47,12 @@ const UserLoginForm = () => {
     async function onSubmit(data) {
         setErrorMessage("");
         try {
-            const user = await loginUser(data);
-            setUser(user);
+            const response = await loginUser(data);
+            if(!response.success){
+                setErrorMessage(response.message || response.error || "Login Failed. Please try again.")
+                return
+            }
+            setUser(response.user);
             router.push("/");
         } catch (err) {
             console.error("Login failed:", err.message);

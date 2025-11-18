@@ -137,7 +137,7 @@ const Header = async () => {
 
                         {/* Login/Profile - Using UserMenu client component */}
                         {isAuthenticated ? (
-                            <UserMenu user={user} />
+                            <UserMenu />
                         ) : (
                             <Button asChild>
                                 <Link href="/auth/register">Login/Signup</Link>

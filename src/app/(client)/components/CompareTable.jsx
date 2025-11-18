@@ -34,7 +34,7 @@ const EMPTY_SLOT = {
     mainCategory: null,
     subCategory: null,
     tagline: null,
-    isRecommended: false, 
+    isRecommended: false,
 };
 
 // Helper to create empty slots
@@ -46,7 +46,7 @@ const createEmptySlot = (index) => ({
 // --- Main Client Component ---
 const CompareTable = ({ initialVendors }) => {
     const router = useRouter();
-    
+
     // Initialize form with react-hook-form
     const methods = useForm({
         defaultValues: {
@@ -62,7 +62,7 @@ const CompareTable = ({ initialVendors }) => {
         const validVendors = initialVendors.filter(v => v && v.slug);
         for (let i = 0; i < MAX_COMPARISON_SLOTS; i++) {
             if (i < validVendors.length) {
-                initialList.push({ ...EMPTY_SLOT, ...validVendors[i] }); 
+                initialList.push({ ...EMPTY_SLOT, ...validVendors[i] });
             } else {
                 initialList.push(createEmptySlot(i));
             }
@@ -72,7 +72,7 @@ const CompareTable = ({ initialVendors }) => {
 
     // Track loading state for individual slots
     const [loadingSlots, setLoadingSlots] = useState([false, false, false]);
-    
+
     // Track gallery items for each vendor
     const [galleryItems, setGalleryItems] = useState([[], [], []]);
     const [loadingGallery, setLoadingGallery] = useState([false, false, false]);
@@ -93,10 +93,10 @@ const CompareTable = ({ initialVendors }) => {
 
                 try {
                     const result = await getVendorGalleryItems(vendor._id);
-                    
-                    return { 
-                        index, 
-                        items: result.items.slice(0,10) || [] 
+
+                    return {
+                        index,
+                        items: result.items.slice(0, 10) || []
                     };
                 } catch (error) {
                     console.error(`Error fetching gallery for vendor ${vendor._id}:`, error);
@@ -111,7 +111,7 @@ const CompareTable = ({ initialVendors }) => {
             });
 
             const results = await Promise.all(galleryPromises);
-            
+
             setGalleryItems(prev => {
                 const newGallery = [...prev];
                 results.forEach(({ index, items }) => {
@@ -169,7 +169,7 @@ const CompareTable = ({ initialVendors }) => {
         const isDuplicate = compareList.some((v, idx) =>
             v.slug === newVendorSlug && idx !== slotIndex && v.slug !== 'empty'
         );
-        
+
         if (isDuplicate) {
             alert('This vendor is already selected in another slot.');
             // Reset the form field to previous value
@@ -187,7 +187,7 @@ const CompareTable = ({ initialVendors }) => {
         try {
             // Fetch the full data for the selected vendor
             const fetchResult = await getVendorsBySlugs([newVendorSlug]);
-            
+
             if (fetchResult.success && fetchResult.data && fetchResult.data.length > 0) {
                 const newVendor = fetchResult.data[0];
                 setCompareList(prevList => {
@@ -234,8 +234,8 @@ const CompareTable = ({ initialVendors }) => {
                                 Comparison Metrics
                             </TableHead>
                             {compareList.map((vendor, index) => (
-                                <TableHead 
-                                    key={`header-${index}`} 
+                                <TableHead
+                                    key={`header-${index}`}
                                     className="min-w-[230px] text-center border-l border-l-gray-300 bg-gray-100 p-4"
                                 >
                                     <VendorSelectField
@@ -250,13 +250,13 @@ const CompareTable = ({ initialVendors }) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        
+
                         {/* NEW ROW: Vendor Name */}
                         <TableRow className="bg-gray-50/50">
                             <TableCell className="font-bold p-4 w-[180px]">Vendor Name</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`name-${index}`} 
+                                <TableCell
+                                    key={`name-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -278,8 +278,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow className="h-40">
                             <TableCell className="font-medium p-4 bg-gray-50 align-top w-[180px]">Gallery/Cover Images</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`gallery-${index}`} 
+                                <TableCell
+                                    key={`gallery-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center align-top min-w-[230px]"
                                 >
                                     {loadingSlots[index] || loadingGallery[index] ? (
@@ -314,8 +314,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Average Rating</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`rating-${index}`} 
+                                <TableCell
+                                    key={`rating-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -333,8 +333,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Starting Price</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`price-${index}`} 
+                                <TableCell
+                                    key={`price-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -352,8 +352,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">City</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`city-${index}`} 
+                                <TableCell
+                                    key={`city-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -365,17 +365,38 @@ const CompareTable = ({ initialVendors }) => {
 
                         {/* Row: Featured Status */}
                         <TableRow>
-                            <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Karyaa Recommended</TableCell>
+                            <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Occasions Served</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`featured-${index}`} 
+                                <TableCell
+                                    key={`occasions-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
-                                        <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
-                                    ) : vendor.slug !== 'empty' ? (
-                                        vendor.isRecommended === true ? 'Yes' : 'No'
-                                    ) : '—'}
+                                        <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
+                                    ) : vendor.slug !== "empty" &&
+                                        Array.isArray(vendor.occasionsServed) &&
+                                        vendor.occasionsServed.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {vendor.occasionsServed.slice(0, 8).map((occasion, occIndex) => (
+                                                <span
+                                                    key={occIndex}
+                                                    className="px-2 py-1 text-xs border border-gray-300 rounded bg-transparent"
+                                                >
+                                                    {occasion
+                                                        .replace(/-/g, " ")
+                                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                                                </span>
+                                            ))}
+
+                                            {vendor.occasionsServed.length > 8 && (
+                                                <span className="px-2 py-1 text-xs border border-gray-300 rounded bg-transparent text-gray-600">
+                                                    +{vendor.occasionsServed.length - 8} more
+                                                </span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span>—</span>
+                                    )}
                                 </TableCell>
                             ))}
                         </TableRow>
@@ -384,8 +405,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Category</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`category-${index}`} 
+                                <TableCell
+                                    key={`category-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -393,7 +414,7 @@ const CompareTable = ({ initialVendors }) => {
                                     ) : vendor.slug !== 'empty' && Array.isArray(vendor.mainCategory) && vendor.mainCategory.length > 0 ? (
                                         <div className="flex flex-wrap gap-2 justify-center">
                                             {vendor.mainCategory.slice(0, 8).map((category, catIndex) => (
-                                                <span 
+                                                <span
                                                     key={catIndex}
                                                     className="px-2 py-1 text-xs border border-gray-300 rounded bg-transparent"
                                                 >
@@ -417,8 +438,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">Subcategories</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`subcategory-${index}`} 
+                                <TableCell
+                                    key={`subcategory-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (
@@ -426,7 +447,7 @@ const CompareTable = ({ initialVendors }) => {
                                     ) : vendor.slug !== 'empty' && Array.isArray(vendor.subCategories) && vendor.subCategories.length > 0 ? (
                                         <div className="flex flex-wrap gap-2 justify-center">
                                             {vendor.subCategories.slice(0, 8).map((sub, subIndex) => (
-                                                <span 
+                                                <span
                                                     key={subIndex}
                                                     className="px-2 py-1 text-xs border border-gray-300 rounded bg-transparent"
                                                 >
@@ -450,8 +471,8 @@ const CompareTable = ({ initialVendors }) => {
                         <TableRow>
                             <TableCell className="font-medium p-4 bg-gray-50 w-[180px]">View Vendor</TableCell>
                             {compareList.map((vendor, index) => (
-                                <TableCell 
-                                    key={`view-${index}`} 
+                                <TableCell
+                                    key={`view-${index}`}
                                     className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
                                 >
                                     {loadingSlots[index] ? (

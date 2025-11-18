@@ -5,11 +5,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryGridClient } from "./CategoriesList.client";
 
 // --- Async Server Component ---
-async function CategoryListContent() {
+async function CategoryListContent({isSavedPage}) {
   try {
     const response = await getCategories();
     return (
-      <CategoriesListClient initialCategories={response.categories || []} />
+      <CategoriesListClient isSavedPage={isSavedPage} initialCategories={response.categories || []} />
     );
   } catch (error) {
     console.error("Failed to load categories:", error);
@@ -38,7 +38,7 @@ async function CategoryGridContent() {
 }
 
 // --- Suspense Wrapper (Main Export) ---
-export default function CategoryList() {
+export default function CategoryList({ isSavedPage }) {
   return (
     <section className="container">
       <div className="relative">
@@ -46,7 +46,7 @@ export default function CategoryList() {
           <h2 className="uppercase">Categories</h2>
         </div>
         <Suspense fallback={<CategoryListFallback />}>
-          <CategoryListContent />
+          <CategoryListContent isSavedPage={isSavedPage} />
         </Suspense>
       </div>
     </section>
@@ -70,7 +70,7 @@ export const CategoryGrid = async () => {
 }
 
 // --- Suspense Fallback with Responsive Skeletons ---
-function CategoryListFallback() {
+export function CategoryListFallback() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex gap-3 lg:gap-4 w-full">
       {Array.from({ length: 8 }).map((_, i) => (

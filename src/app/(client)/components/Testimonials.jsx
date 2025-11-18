@@ -80,11 +80,11 @@ const Testimonials = () => {
 
       {/* Navigation Buttons - BELOW Swiper */}
       <div className="flex gap-4 mt-4">
-        <Button className="testimonials-prev bg-white h-10 w-10 text-2xl rounded-full border border-gray-300 hover:bg-gray-100 transition p-0">
-          <ChevronLeft className="text-gray-700" />
+        <Button className="testimonials-prev bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
+          <ChevronLeft className="text-secondary" />
         </Button>
-        <Button className="testimonials-next bg-white h-10 w-10 text-2xl rounded-full border border-gray-300 hover:bg-gray-100 transition p-0">
-          <ChevronRight className="text-gray-700" />
+        <Button className="testimonials-next bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
+          <ChevronRight className="text-secondary" />
         </Button>
       </div>
     </div>

@@ -36,6 +36,7 @@ import {
   IconBrandX,
   IconClockFilled,
   IconMapPinFilled,
+  IconPhone,
 } from "@tabler/icons-react";
 
 const VendorPage = async ({ params }) => {
@@ -184,7 +185,7 @@ const VendorPage = async ({ params }) => {
 
       {/* ✅ MAIN CONTENT SECTION WITH STICKY SIDEBAR */}
       <section className="container !mt-0 md:!mt-8 !mb-10 !px-4 sm:!px-6 md:!px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-16">
           {/* Left Column - Main Content (8 columns on large screens) */}
           <div className="lg:col-span-8 order-2 lg:order-1">
             <div
@@ -232,6 +233,13 @@ const VendorPage = async ({ params }) => {
                   <h2 className="uppercase text-2xl font-bold">About</h2>
 
                   <div className="flex items-center gap-4">
+
+                    <Button asChild variant="ghost" className="p-0">
+                        <Link href={`tel:${vendorData.phoneNumber}`} target="_blank">
+                          <IconPhone className="text-primary" />
+                        </Link>
+                      </Button>
+
                     {vendorData?.websiteLink && (
                       <Button asChild variant="ghost" className="p-0">
                         <Link href={vendorData.websiteLink} target="_blank">
@@ -301,7 +309,7 @@ const VendorPage = async ({ params }) => {
                 <div className="flex items-end">
                   <div className="uppercase">
                     Pricing Starting from
-                    <span className="font-bold !text-xl sm::!text-2xl"> AED <span className="text-2xl sm:text-4xl"> {Number(vendorData.pricingStartingFrom).toLocaleString()} /-</span>
+                    <span className="font-bold !text-lg"> AED  {Number(vendorData.pricingStartingFrom).toLocaleString()} /-
                     </span>
                   </div>
                 </div>
@@ -378,7 +386,7 @@ const VendorPage = async ({ params }) => {
 
           {/* ✅ Right Column - STICKY SIDEBAR (4 columns on large screens) */}
           <aside 
-            className="lg:col-span-4 order-1 lg:order-2" 
+            className="lg:col-span-4 order-1 lg:order-2 z-60" 
             style={{ 
               position: 'sticky', 
               top: '80px', 
@@ -441,7 +449,7 @@ const VendorPage = async ({ params }) => {
                     <h3 className="!text-[20px] mt-5 leading-5 line-clamp-1">
                       {pkg.name}
                     </h3>
-                    <span className="leading-0 !text-sm">{pkg.subheading}</span>
+                    {/* <span className="leading-0 !text-sm line-clamp-">{pkg.subheading}</span> */}
 
                     <div className="my-3">
                       <p className="!text-sm !font-medium font-heading text-gray-700 mb-2">
@@ -460,7 +468,7 @@ const VendorPage = async ({ params }) => {
                         )}
                       </ul>
 
-                      <div className="mt-4 !text-xs">Starting From <span className="!text-lg font-medium font-heading">AED {Number(pkg.priceStartingFrom).toLocaleString()}</span></div>
+                      <div className="mt-4 ">Starting From <span className="font-medium font-heading">AED {Number(pkg.priceStartingFrom).toLocaleString()}</span></div>
                     </div>
 
                     <div className="w-full">

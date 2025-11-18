@@ -87,6 +87,7 @@ const SubCategoryCarousel = async ({ items, searchParams = {} }) => {
       withPagination
       className="!pb-10"
       autoplay
+      navigationPosition="top-right"
     >
       {subcategories.map((item, index) => (
         <SubCategoryCard item={item} key={index} />

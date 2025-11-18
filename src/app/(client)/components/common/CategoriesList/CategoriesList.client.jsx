@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-const CategoriesListClient = ({ initialCategories }) => {
+const CategoriesListClient = ({ isSavedPage, initialCategories }) => {
   const categories = initialCategories;
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -29,7 +29,7 @@ const CategoriesListClient = ({ initialCategories }) => {
       {/* Mobile/Small Tablet Grid Layout */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:hidden gap-3">
         {categories.map((cat) => (
-          <CategoryMobileCard key={cat.slug || cat._id} category={cat} /> 
+          <CategoryMobileCard key={cat.slug || cat._id} category={cat} isSavedPage={isSavedPage} /> 
         ))}
       </div>
 
@@ -43,6 +43,7 @@ const CategoriesListClient = ({ initialCategories }) => {
             activeIndex={activeIndex}
             setActiveIndex={setActiveIndex}
             setPaused={setPaused}
+            isSavedPage={isSavedPage}
           />
         ))}
       </div>
@@ -53,12 +54,12 @@ const CategoriesListClient = ({ initialCategories }) => {
 export default CategoriesListClient;
 
 // Mobile Category Card Component
-export const CategoryMobileCard = ({ category }) => {
+export const CategoryMobileCard = ({ isSavedPage, category }) => {
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
   
   return (
     <Link
-      href={`/categories/${category.slug}`}
+      href={!isSavedPage ? `/categories/${category.slug}` : `/saved-vendors?category=${category.slug}`}
       className="relative h-32 sm:h-40 bg-gray-200 rounded-lg overflow-hidden cursor-pointer group"
     >
       <Image
@@ -85,12 +86,13 @@ export const CategoryCard = ({
   activeIndex,
   setActiveIndex,
   setPaused,
+  isSavedPage
 }) => {
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
     
   return (
     <Link
-      href={`/categories/${category.slug}`}
+      href={!isSavedPage ? `/categories/${category.slug}` : `/saved-vendors?category=${category.slug}`}
       onMouseEnter={() => {
         setActiveIndex(idx);
         setPaused(true);
@@ -131,7 +133,7 @@ export const CategoryGridCard = ({ category }) => {
   return (
     <Link
       href={`/categories/${category.slug}`}
-      className="relative h-72 md:h-[350px] bg-gray-200 rounded-4xl overflow-hidden cursor-pointer group"
+      className="relative h-56 md:h-[350px] bg-gray-200 rounded-xl xl:rounded-4xl overflow-hidden cursor-pointer group"
     >
       <Image
         src={imgSrc} 
@@ -139,8 +141,8 @@ export const CategoryGridCard = ({ category }) => {
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div className="absolute left-4 bottom-6 z-10">
-        <span className="text-white text-xl font-medium font-heading text-center px-2 leading-tight">
+      <div className="absolute left-3 xl:left-5 bottom-3 xl:bottom-6 z-10">
+        <span className="text-white text-lg xl:text-xl font-medium font-heading text-center xl:px-2 leading-tight">
           {category.name}
         </span>
       </div>
@@ -153,7 +155,7 @@ export const CategoryGridCard = ({ category }) => {
 export const CategoryGridClient = ({ initialCategories }) => {
   const categories = initialCategories;
   return (
-    <div className="w-[90%] max-w-6xl mx-auto grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div className="w-full xl:w-[90%] max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:gap-6">
         {categories.map((cat) => (
           <CategoryGridCard key={cat.slug || cat._id} category={cat} /> 
         ))}

@@ -9,7 +9,7 @@ import { getBrandDetailsAction } from "@/app/actions/brand";
 import { useEffect, useState } from "react";
 import ReferModal from "../ReferModal";
 import NewsletterField from "../NewsLetterField";
-import { IconBrandFacebook, IconBrandLinkedin, IconBrandWhatsapp, IconBrandX, IconPhone } from "@tabler/icons-react";
+import { IconBrandFacebook, IconBrandInstagram, IconBrandLinkedin, IconBrandPinterest, IconBrandTiktok, IconBrandWhatsapp, IconBrandX, IconBrandYoutube, IconPhone } from "@tabler/icons-react";
 
 const Footer = () => {
   const user = useClientStore((state) => state.user);
@@ -52,7 +52,7 @@ const Footer = () => {
   const karyaacare = [
     {
       text: "Terms and Condition",
-      href: "/terms-and-condition"
+      href: "/terms-and-conditions"
     },
     {
       text: "Privacy Policy",
@@ -164,7 +164,7 @@ const Footer = () => {
               </h5>
               <div className="flex items-center gap-4">
                 <Link
-                  href="#"
+                  href="https://wa.me/971508806209?text=Hello%20I%20want%20to%20know%20more%20about%20your%20service"
                   className="text-secondary hover:text-secondary transition-colors"
                 >
                   <IconBrandWhatsapp />
@@ -178,23 +178,45 @@ const Footer = () => {
                 </Link>
 
                 <Link
-                  href="#"
+                  href="https://www.facebook.com/share/1JqhwFJQE4/?mibextid=wwXIfr"
                   className="text-secondary hover:text-secondary transition-colors"
                 >
                   <IconBrandFacebook />
                 </Link>
 
                 <Link
-                  href="#"
+                  href="https://www.instagram.com/karyaa_uae?igsh=MWtrcTB6M2l4dm5uaw%3D%3D&utm_source=qr"
                   className="text-secondary hover:text-secondary transition-colors"
                 >
-                  <IconBrandX />
+                  <IconBrandInstagram />
                 </Link>
+
                 <Link
-                  href="#"
+                  href="https://www.tiktok.com/@karyaa_uae?_t=ZS-8yEf86IaZma&_r=1"
+                  className="text-secondary hover:text-secondary transition-colors"
+                >
+                  <IconBrandTiktok />
+                </Link>
+
+                <Link
+                  href="https://www.linkedin.com/company/107969110"
                   className="text-secondary hover:text-secondary transition-colors"
                 >
                   <IconBrandLinkedin />
+                </Link>
+
+                <Link
+                  href="https://www.youtube.com/@Karyaa_uae"
+                  className="text-secondary hover:text-secondary transition-colors"
+                >
+                  <IconBrandYoutube />
+                </Link>
+
+                <Link
+                  href="ttps://pin.it/2c3v4wKOA"
+                  className="text-secondary hover:text-secondary transition-colors"
+                >
+                  <IconBrandPinterest />
                 </Link>
               </div>
             </div>
@@ -202,9 +224,9 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t flex justify-between items-center border-gray-200">
+        <div className="mt-12 pt-8 border-t flex flex-col gap-4 items-center border-gray-200">
 
-          <p className="text-white !text-sm mb-4 max-w-2xl leading-relaxed">
+          <p className="text-white text-center !text-sm  max-w-3xl leading-relaxed">
             This website serves solely as a marketplace platform.
             All financial and contractual transactions occur directly between customers and vendors.
             We are not liable for any transaction-related disputes, losses, or claims.

@@ -12,7 +12,6 @@ export const postLead = async (data) => {
         const leadResponse = await apiFetch("/leads/new", {
             method: "POST",
             body: data,
-            auth: true
         });
 
         if (leadResponse.success === false) {

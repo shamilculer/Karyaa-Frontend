@@ -17,16 +17,18 @@ import { getCategories as fetchCategoriesAction } from "@/app/actions/categories
 import { getBundleOptions } from "@/app/actions/vendor/bundles";
 
 const OCCASION_OPTIONS = [
-    { slug: 'baby-showers-gender-reveals', name: 'Baby Showers & Gender Reveals' },
-    { slug: 'birthdays-anniversaries', name: 'Birthdays & Anniversaries' },
-    { slug: 'corporate-events', name: 'Corporate Events' },
-    { slug: 'cultural-festival-events', name: 'Cultural & Festival Events' },
-    { slug: 'engagement-proposal-events', name: 'Engagement & Proposal Events' },
-    { slug: 'graduation-celebrations', name: 'Graduation Celebrations' },
-    { slug: 'private-parties', name: 'Private Parties' },
-    { slug: 'product-launches-brand-events', name: 'Product Launches & Brand Events' },
+    { slug: "wedding", name: "Wedding" },
+    { slug: "engagement", name: "Engagement" },
+    { slug: "proposal", name: "Proposal" },
+    { slug: "baby-shower", name: "Baby Shower" },
+    { slug: "gender-reveal", name: "Gender Reveal" },
+    { slug: "birthday", name: "Birthday" },
+    { slug: "graduation", name: "Graduation" },
+    { slug: "corporate-event", name: "Corporate Event" },
+    { slug: "brand-launch", name: "Brand Launch" },
+    { slug: "festivities", name: "Festivities" },
+    { slug: "anniversary", name: "Anniversary" },
 ];
-
 // helper to render text fields
 const renderInputField = ({ control, name, label, placeholder, type = "text" }) => (
     <FormField

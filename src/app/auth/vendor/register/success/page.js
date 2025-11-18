@@ -3,8 +3,9 @@ import { Clock, Mail, Home } from "lucide-react";
 import Link from "next/link";
 // Note: Assuming lucide-react icons are available in your project.
 
-const RegistrationSuccessful = () => {
-  
+const RegistrationSuccessful = ({ searchParams }) => {
+  const vendorId = searchParams?.vendorId || null;
+
   return (
     <main className="min-h-screen flex items-center justify-center p-0 sm:p-6 bg-gray-50 bg-[url('/new-banner-6.jpg')] bg-cover bg-center relative">
       
@@ -12,7 +13,7 @@ const RegistrationSuccessful = () => {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-0" />
 
       {/* ⭐️ UPDATED MIDDLE CONTAINER UI ⭐️ */}
-      <div className="w-11/12 max-w-2xl px-3 py-5 sm:!p-10 bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border-t-4 border-b-4 border-secondary text-center  z-10">
+      <div className="w-11/12 max-w-2xl px-3 py-5 sm:!p-10 bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border-t-4 border-b-4 border-secondary text-center flex flex-col justify-center items-center  z-10">
         
         {/* Icon (Clock/Review State) - Animated and prominent */}
         <div className="mx-auto w-fit p-4 mb-8 bg-yellow-50 rounded-full border-4 border-yellow-300 shadow-inner">
@@ -25,9 +26,20 @@ const RegistrationSuccessful = () => {
         </h1>
 
         {/* Core Message */}
-        <p className="text-gray-600 mb-8 !text-xs ms:!text-sm">
+        <p className="text-gray-600 mb-8 max-w-lg !text-xs ms:!text-sm">
           Thank you for completing your vendor registration. Your application is now officially Under Review by our dedicated team.
         </p>
+
+        {/* Display Vendor ID if available */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">Your reference ID:</span>{' '}
+            <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">{vendorId || 'Not available'}</span>
+          </p>
+          {vendorId && (
+            <p className="text-xs text-gray-500 mt-2">Please keep this ID for reference. We'll also email it to you.</p>
+          )}
+        </div>
 
         {/* --- Next Step Section (Highlight Box) --- */}
         <div className={`p-3 px-4 sm:p-6 ms:px-10 bg-secondary/20 rounded-xl`}>

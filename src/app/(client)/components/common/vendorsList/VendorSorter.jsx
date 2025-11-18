@@ -26,7 +26,7 @@ export const VendorSortBy = () => {
 
   const handleSortChange = (value) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (value === "recommended") {
       params.delete("sort");
       params.set("isRecommended", "true");
@@ -34,7 +34,7 @@ export const VendorSortBy = () => {
       params.set("sort", value);
       params.delete("isRecommended");
     }
-    
+
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -78,7 +78,7 @@ export const VendorLocationFilter = () => {
 
   const handleLocationChange = (value) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (value === "all") {
       params.delete("location");
     } else {
@@ -118,14 +118,17 @@ export const VendorOccasionFilter = () => {
   const currentOccasion = searchParams.get("occasion") || "all";
 
   const occasions = [
-    "baby-showers-gender-reveals",
-    "birthdays-anniversaries",
-    "corporate-events",
-    "cultural-festival-events",
-    "engagement-proposal-events",
-    "graduation-celebrations",
-    "private-parties",
-    "product-launches-brand-events",
+    "wedding",
+    "engagement",
+    "proposal",
+    "baby-shower",
+    "gender-reveal",
+    "birthday",
+    "graduation",
+    "corporate-event",
+    "brand-launch",
+    "festivities",
+    "anniversary",
   ];
 
   const capitalizeDisplay = (str) =>

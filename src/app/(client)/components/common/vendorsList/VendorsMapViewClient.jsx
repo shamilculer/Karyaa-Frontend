@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { VendorsCard } from "./VendorsList";
 import VendorsMapView from "./VendorMapView";
@@ -14,24 +13,26 @@ export const VendorsMapViewWrapper = ({ vendors, isAuthenticated, savedVendorIds
 
   useEffect(() => {
     if (hoveredVendorId) {
-      // Dispatch event to open popup on map
+      // Dispatch event to open popup on map (this will close others automatically)
       const event = new CustomEvent('openMapPopup', { detail: hoveredVendorId });
       window.dispatchEvent(event);
+    } else {
+      // When hovering out, close the popup
+      const event = new CustomEvent('closeMapPopup');
+      window.dispatchEvent(event);
     }
-    // Don't close when hoveredVendorId becomes null - let it stay open
   }, [hoveredVendorId]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-full">
       {/* LEFT SIDE: Scrollable List with 2-column grid */}
-      <div className="xl:w-1/2 overflow-y-auto xl:pr-4">
-        <div className="hidden xl:grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="w-full lg:w-1/2 overflow-y-auto xl:pr-4">
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-6 max-xl:h-[calc(100vh-100px)] overflow-y-auto">
           {vendors.map((vendor) => (
             <div
               key={vendor._id}
               onMouseEnter={() => setHoveredVendorId(vendor._id)}
               onMouseLeave={() => setHoveredVendorId(null)}
-              className="transition-transform hover:scale-[1.02]"
             >
               <VendorsCard
                 vendor={vendor}
@@ -42,7 +43,6 @@ export const VendorsMapViewWrapper = ({ vendors, isAuthenticated, savedVendorIds
             </div>
           ))}
         </div>
-
         {totalPages > 1 && (
           <div className="mt-6">
             <GlobalPagination
@@ -53,9 +53,8 @@ export const VendorsMapViewWrapper = ({ vendors, isAuthenticated, savedVendorIds
           </div>
         )}
       </div>
-
       {/* RIGHT SIDE: Sticky Map */}
-      <div className="xl:w-1/2 xl:sticky xl:top-4 h-[600px] xl:h-[calc(100vh - 100px)]">
+      <div className="w-full lg:w-1/2 xl:sticky lg:top-20 h-[600px] lg:h-[calc(100vh-100px)]">
         <VendorsMapView
           vendors={vendors}
           isAuthenticated={isAuthenticated}

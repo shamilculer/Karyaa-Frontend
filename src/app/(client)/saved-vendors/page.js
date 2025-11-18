@@ -1,11 +1,9 @@
-// Saved vendors list requires user cookies for fetching saved items; force dynamic rendering.
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-
 import { VendorsCard } from "../components/common/vendorsList/VendorsList";
 import { getSavedVendors } from "@/app/actions/user/user";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
@@ -15,18 +13,18 @@ import PageTitle from "../components/common/PageTitle";
 // ===============================================
 // SAVED VENDORS CONTENT (Server Component)
 // ===============================================
-
-async function SavedVendorsContent() {
-  const response = await getSavedVendors();
+async function SavedVendorsContent({ categorySlug }) {
+  const response = await getSavedVendors(categorySlug);
   const savedVendors = response?.data || [];
-
   const isAuthenticated = true;
 
   if (savedVendors.length === 0) {
     return (
       <section className="py-20 text-center space-y-6">
         <h3 className="text-lg text-muted-foreground">
-          You haven’t saved any vendors yet.
+          {categorySlug 
+            ? "No saved vendors found in this category."
+            : "You haven't saved any vendors yet."}
         </h3>
         <Button asChild>
           <Link href="/vendors">Explore Vendors</Link>
@@ -39,7 +37,6 @@ async function SavedVendorsContent() {
     <section className="py-20 container">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap:10 md:gap-12">
         {savedVendors.map((vendor) => (
-          // 2. FIX: Pass the required props to VendorsCard
           <VendorsCard
             key={vendor._id}
             vendor={vendor}
@@ -55,7 +52,6 @@ async function SavedVendorsContent() {
 // ===============================================
 // SKELETON LOADER
 // ===============================================
-
 function SavedVendorsSkeleton() {
   return (
     <section className="py-20 container">
@@ -75,21 +71,22 @@ function SavedVendorsSkeleton() {
 // ===============================================
 // DEFAULT EXPORT (Page Component)
 // ===============================================
+export default async function SavedVendorsPage({ searchParams }) {
+  // Get category slug from URL query params
+  const categoryParam = await searchParams;
+  const categorySlug = categoryParam?.category || null;
 
-export default function SavedVendorsPage() {
   return (
     <div>
       <PageTitle imgUrl="/new-banner-3.jpg" title="Saved Vendors" />
-
       <section className="container">
         <PageSearchBar />
       </section>
-
-        <CategoryList />
-        
+      <CategoryList isSavedPage={true} />
+      
       {/* Suspense Wrapper for Vendor Data */}
-      <Suspense fallback={<SavedVendorsSkeleton />}>
-        <SavedVendorsContent />
+      <Suspense fallback={<SavedVendorsSkeleton />} key={categorySlug}>
+        <SavedVendorsContent categorySlug={categorySlug} />
       </Suspense>
     </div>
   );

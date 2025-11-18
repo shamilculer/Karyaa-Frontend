@@ -62,7 +62,7 @@ function IdeasContainer({ categories }) {
       <h2 className="uppercase font-semibold text-xl">Popular Categories</h2>
 
       {/* Category Tabs */}
-      <div className="mt-6 w-full  hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">
+      {/* <div className="mt-6 w-full  hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">
         {categoryOptions.map((cat) => {
           const isSelected = selected === cat.name;
           return (
@@ -91,26 +91,26 @@ function IdeasContainer({ categories }) {
             </div>
           );
         })}
-      </div>
+      </div> */}
 
-      <div className="xl:hidden mt-6 w-full px-4">
+      <div className=" mt-6 w-full px-5">
         <Carousel
           withNavigation
           withPagination
           slidesPerView={2.5}
           spaceBetween={20}
-          // ----------------------------------------------------
+          navigationPosition="top-right"
           breakpoints={{
             625: {
-              slidesPerView: 4.5,
+              slidesPerView: 8,
               spaceBetween: 30,
             },
             1025: {
-              slidesPerView: 4,
+              slidesPerView: 8,
               spaceBetween: 30
             },
           }}
-          className="!pb-10"
+          className="!pb-10 max-md:mt-12"
         >
           {categoryOptions.map((cat) => {
             const isSelected = selected === cat.name;

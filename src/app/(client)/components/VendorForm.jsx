@@ -142,7 +142,6 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
 
                     </div>
 
-                    {/* Email (Optional) */}
                     <FormField
                         control={form.control}
                         name="email"
@@ -151,7 +150,7 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                                 <FormControl>
                                     <Input
                                         type="email"
-                                        placeholder="Email (Optional)"
+                                        placeholder="Email*"
                                         className="rounded-none border-gray-400 lg:h-10"
                                         disabled={isSubmitting}
                                         {...field}
@@ -258,7 +257,6 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                         )}
                     />
 
-                    {/* Message Textarea (Optional) */}
                     <FormField
                         control={form.control}
                         name="message"
@@ -266,7 +264,7 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                             <FormItem>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="Tell us about your event and what you need (Optional)"
+                                        placeholder="Tell us about your event and what you needI*"
                                         className="rounded-none border-gray-400 text-xs lg:text-sm min-h-[100px]"
                                         disabled={isSubmitting}
                                         {...field}

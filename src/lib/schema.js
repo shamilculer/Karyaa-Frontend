@@ -45,27 +45,31 @@ export const userSchema = z.object({
 export const Step1Schema = z
   .object({
     ownerName: z.string().trim().min(1, "Owner's Full name is required."),
-
     isInternational: z.boolean().default(false),
-
+    
+    // UAE-specific fields
     tradeLicenseNumber: z.string().trim().optional().or(z.literal("")),
-
     personalEmiratesIdNumber: z.string().trim().optional().or(z.literal("")),
-
+    emiratesIdCopy: z.string().optional().or(z.literal("")),
+    tradeLicenseCopy: z.string().optional().or(z.literal("")),
+    
+    // International-specific fields
+    businessLicenseCopy: z.string().optional().or(z.literal("")),
+    passportOrIdCopy: z.string().optional().or(z.literal("")),
+    
+    // Common fields
     email: z
       .string()
       .trim()
       .email({ message: "Invalid email address." })
       .min(1, "Email is required."),
-
     phoneNumber: z
       .string()
       .trim()
       .min(1, "Phone Number is required.")
       .regex(phoneRegex, {
-        message: "Please enter a valid UAE mobile number.",
+        message: "Please enter a valid phone number.",
       }),
-
     password: z
       .string()
       .min(8, "Password must be at least 8 characters.")
@@ -73,16 +77,11 @@ export const Step1Schema = z
         message:
           "Must contain at least 8 characters, one uppercase, one lowercase, and one number.",
       }),
-
-    // These were already fine, keeping them for completeness
-    emiratesIdCopy: z.string().optional().or(z.literal("")),
-    tradeLicenseCopy: z.string().optional().or(z.literal("")),
     ownerProfileImage: z.string().optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
-    // UAE-only extra validations (These checks remain the same)
     if (!data.isInternational) {
-      // These checks will now correctly catch empty strings for UAE vendors
+      // UAE vendor validations
       if (!data.tradeLicenseNumber?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -90,7 +89,6 @@ export const Step1Schema = z
           message: "Trade License Number is required for UAE vendors.",
         });
       }
-
       if (!data.personalEmiratesIdNumber?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -98,7 +96,6 @@ export const Step1Schema = z
           message: "Emirates ID Number is required for UAE vendors.",
         });
       }
-
       if (!data.emiratesIdCopy) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -106,12 +103,27 @@ export const Step1Schema = z
           message: "Emirates ID Copy is required for UAE vendors.",
         });
       }
-
       if (!data.tradeLicenseCopy) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["tradeLicenseCopy"],
           message: "Trade License Copy is required for UAE vendors.",
+        });
+      }
+    } else {
+      // International vendor validations
+      if (!data.businessLicenseCopy) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["businessLicenseCopy"],
+          message: "Business License is required for international vendors.",
+        });
+      }
+      if (!data.passportOrIdCopy) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["passportOrIdCopy"],
+          message: "Passport or ID Card copy is required for international vendors.",
         });
       }
     }
@@ -250,7 +262,7 @@ export const vendorFormSchema = z.object({
   fullName: z.string().min(1, "Your full name is required"),
 
   // Email is optional (allows empty string or valid email)
-  email: z.email("Invalid email address").optional().or(z.literal("")),
+  email: z.email("Invalid email address").min(1, "Your full name is required"),
 
   // NEW REQUIRED FIELD
   location: z.string().optional(),
@@ -261,7 +273,7 @@ export const vendorFormSchema = z.object({
   eventType: z.string().optional(),
 
   // Message is optional
-  message: z.string().optional(),
+  message: z.string().min(1, "Your full name is required"),
 
   phoneNumber: z.string().min(1, "Phone number is required"),
 });

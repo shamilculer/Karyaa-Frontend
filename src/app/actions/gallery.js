@@ -54,7 +54,6 @@ export const getVendorGalleryItems = async (
   }
 };
 
-
 /**
  * Server Action to add gallery items for a vendor
  *
@@ -63,82 +62,75 @@ export const getVendorGalleryItems = async (
  * @returns {Promise<{ success?: string, error?: string }>}
  */
 export const addVendorGalleryItems = async (vendorId, items = []) => {
-    console.log(vendorId)
-    try {
-      if (!vendorId || !Array.isArray(items) || items.length === 0) {
-        return {
-          error: "Missing vendorId or items payload.",
-        };
-      }
-  
-      const response = await apiFetch("/gallery/add", {
-        method: "POST",
-        body: JSON.stringify({
-          vendorId,
-          items,
-        }),
-        role: "vendor",
-        auth: true
-      });
-  
-      if (!response || response.error || response.status >= 400) {
-        return {
-          error:
-            response?.message ||
-            "Failed to add gallery items due to API error.",
-        };
-      }
-  
-      // ✅ Fix syntax error - use parentheses, not backticks
-      revalidatePath("/vendor/gallery");
-  
+  console.log(vendorId);
+  try {
+    if (!vendorId || !Array.isArray(items) || items.length === 0) {
       return {
-        success:
-          response.message || "Gallery items added successfully.",
-        items: response.items || [],
-        count: response.count || 0,
+        error: "Missing vendorId or items payload.",
       };
-    } catch (error) {
-      console.error("Error adding vendor gallery items:", error);
-  
+    }
+
+    const response = await apiFetch("/gallery/add", {
+      method: "POST",
+      body: JSON.stringify({
+        vendorId,
+        items,
+      }),
+      role: "vendor",
+      auth: true,
+    });
+
+    if (!response || response.error || response.status >= 400) {
       return {
         error:
-          "An unexpected error occurred while adding gallery images.",
+          response?.message || "Failed to add gallery items due to API error.",
       };
     }
-  };
 
+    // ✅ Fix syntax error - use parentheses, not backticks
+    revalidatePath("/vendor/gallery");
 
-  export const deleteVendorGalleryItems = async (ids) => {
+    return {
+      success: response.message || "Gallery items added successfully.",
+      items: response.items || [],
+      count: response.count || 0,
+    };
+  } catch (error) {
+    console.error("Error adding vendor gallery items:", error);
 
-    try {
-      const response = await apiFetch(`/gallery`, {
-        method: "DELETE",
-        body: JSON.stringify({ ids }),
-        role: "vendor",
-        auth: true
-      });
+    return {
+      error: "An unexpected error occurred while adding gallery images.",
+    };
+  }
+};
 
-      console.log(response)
-  
-      if (!response || response.error) {
-        return { error: response?.error || "Failed to delete items" };
-      }
-  
-      return { success: true };
-    } catch (err) {
-      console.error(err);
-      return { error: "Unexpected error" };
-    }
-  };
-
-
-  export const getAllGalleryItems = async (page = 1, limit = 30) => {
+export const deleteVendorGalleryItems = async (ids) => {
   try {
-    const response = await apiFetch(
-      `/gallery/?page=${page}&limit=${limit}`
-    );
+    const response = await apiFetch(`/gallery`, {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+      role: "vendor",
+      auth: true,
+    });
 
+    console.log(response);
+
+    if (!response || response.error) {
+      return { error: response?.error || "Failed to delete items" };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error" };
+  }
+};
+
+export const getAllGalleryItems = async ({ page = 1, limit = 30 }) => {
+  try {
+    // FIXED: Corrected the apiFetch call
+    const response = await apiFetch(`/gallery/?page=${page}&limit=${limit}`);
+    
     if (!response || response.error) {
       return {
         items: [],
@@ -147,7 +139,7 @@ export const addVendorGalleryItems = async (vendorId, items = []) => {
         error: response?.message || "Failed to fetch gallery items.",
       };
     }
-
+    
     return {
       items: response.items || [],
       count: response.pagination?.totalItems || 0,
@@ -155,7 +147,6 @@ export const addVendorGalleryItems = async (vendorId, items = []) => {
     };
   } catch (error) {
     console.error("Error fetching gallery items:", error);
-
     return {
       items: [],
       count: 0,
