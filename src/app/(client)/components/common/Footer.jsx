@@ -107,18 +107,17 @@ const Footer = () => {
         </section>
       )}
 
-      <section className={`container max-md:!px-0 !mb-0 ${!isLoggedIn ? '!mt-16 lg:!mt-12' : '!mt-0'}`}>
-        {/* Brand Section - Always Visible */}
-        <div className="mb-8 lg:mb-0">
-          <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-40 sm:w-44" />
-          <p className="text-secondary font-bold leading-relaxed mt-2">
-            Plan. Connect. Celebrate.
-          </p>
-        </div>
+      <section className={`container max-md:!px-0 !mb-0 ${!isLoggedIn ? '!mt-9 lg:!mt-12' : '!mt-0'}`}>
 
         {/* Mobile Accordion */}
-        <div className="block lg:hidden mt-6">
-          <Accordion type="single" collapsible className="w-full space-y-2">
+        <div className="block lg:hidden lg:mt-6">
+          <div className="lg:mb-0">
+            <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-40 sm:w-44" />
+            <p className="text-secondary font-bold leading-relaxed mt-2">
+              Plan. Connect. Celebrate.
+            </p>
+          </div>
+          <Accordion type="single" collapsible className="w-full max-lg:mt-5 space-y-2">
             {/* About Karyaa */}
             <AccordionItem value="about" className="border-gray-600">
               <AccordionTrigger className="text-white hover:text-secondary font-semibold uppercase tracking-widest text-sm py-4">
@@ -191,7 +190,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop Grid - Hidden on Mobile */}
-        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Brand Section */}
           <div className="space-y-2">
             <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-44" />
