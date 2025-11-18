@@ -6,10 +6,11 @@ export default function PageSearchBar() {
     { value: "dubai", label: "Dubai" },
     { value: "sharjah", label: "Sharjah" },
     { value: "ajman", label: "Ajman" },
+    { value: "al-ain", label: "Al Ain" },
     { value: "umm-al-quwain", label: "Umm Al Quwain" },
     { value: "ras-al-khaimah", label: "Ras Al Khaimah" },
     { value: "fujairah", label: "Fujairah" },
-    { value: "International", label: "international" },
+    { value: "international", label: "International" },
 ];
 
   return (
