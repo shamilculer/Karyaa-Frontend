@@ -25,13 +25,15 @@ export default function UserMenu({ isMobile = false }) {
                 <DropdownMenuTrigger asChild>
                     {isMobile ? (
                         <Button variant="ghost" className="p-0">
-                            <Image
-                                src={user?.profileImage || "/default-avatar.png"}
-                                alt="User"
-                                width={32}
-                                height={32}
-                                className="rounded-full size-9 border border-gray-300"
-                            />
+                            <Avatar className="size-8 rounded-full overflow-hidden border border-gray-300">
+                                <AvatarImage
+                                    src={user?.profileImage || "/default-avatar.png"}
+                                    alt={user?.username || "user"}
+                                    width={32}
+                                    height={32}
+                                    className="size-full "
+                                />
+                            </Avatar>
                         </Button>
                     ) : (
                         <Button variant="ghost" className="!border border-gray-300 p-1 pr-1.5 h-10">

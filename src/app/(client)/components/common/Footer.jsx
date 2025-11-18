@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button"
-import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Image from "next/image"
 import Link from "next/link"
 import { useClientStore } from "@/store/clientStore"
@@ -68,6 +68,17 @@ const Footer = () => {
     },
   ]
 
+  const socialLinks = [
+    { href: "https://wa.me/971508806209?text=Hello%20I%20want%20to%20know%20more%20about%20your%20service", icon: <IconBrandWhatsapp />, label: "WhatsApp" },
+    { href: "#", icon: <IconPhone />, label: "Phone" },
+    { href: "https://www.facebook.com/share/1JqhwFJQE4/?mibextid=wwXIfr", icon: <IconBrandFacebook />, label: "Facebook" },
+    { href: "https://www.instagram.com/karyaa_uae?igsh=MWtrcTB6M2l4dm5uaw%3D%3D&utm_source=qr", icon: <IconBrandInstagram />, label: "Instagram" },
+    { href: "https://www.tiktok.com/@karyaa_uae?_t=ZS-8yEf86IaZma&_r=1", icon: <IconBrandTiktok />, label: "TikTok" },
+    { href: "https://www.linkedin.com/company/107969110", icon: <IconBrandLinkedin />, label: "LinkedIn" },
+    { href: "https://www.youtube.com/@Karyaa_uae", icon: <IconBrandYoutube />, label: "YouTube" },
+    { href: "https://pin.it/2c3v4wKOA", icon: <IconBrandPinterest />, label: "Pinterest" },
+  ]
+
   return (
     <footer className={`w-full py-5 px-4 bg-primary flex-center flex-col ${!isLoggedIn ? "mt-32 lg:mt-24" : "mt-8 lg:mt-10"}`}>
       {!isLoggedIn && (
@@ -96,8 +107,91 @@ const Footer = () => {
         </section>
       )}
 
-      <section className={`container !mb-0 ${!isLoggedIn ? '!mt-16 lg:!mt-12' : '!mt-0'}`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      <section className={`container max-md:!px-0 !mb-0 ${!isLoggedIn ? '!mt-16 lg:!mt-12' : '!mt-0'}`}>
+        {/* Brand Section - Always Visible */}
+        <div className="mb-8 lg:mb-0">
+          <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-40 sm:w-44" />
+          <p className="text-secondary font-bold leading-relaxed mt-2">
+            Plan. Connect. Celebrate.
+          </p>
+        </div>
+
+        {/* Mobile Accordion */}
+        <div className="block lg:hidden mt-6">
+          <Accordion type="single" collapsible className="w-full space-y-2">
+            {/* About Karyaa */}
+            <AccordionItem value="about" className="border-gray-600">
+              <AccordionTrigger className="text-white hover:text-secondary font-semibold uppercase tracking-widest text-sm py-4">
+                About Karyaa
+              </AccordionTrigger>
+              <AccordionContent>
+                <ul className="space-y-4 pb-4">
+                  {aboutKaryaaLink.map((item, i) => (
+                    <li key={i}>
+                      <Link
+                        href={item.href}
+                        className="text-white hover:text-secondary transition-colors text-sm block"
+                      >
+                        {item.text}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Karyaa Care */}
+            <AccordionItem value="care" className="border-gray-600">
+              <AccordionTrigger className="text-white hover:text-secondary font-semibold uppercase tracking-widest text-sm py-4">
+                Karyaa Care
+              </AccordionTrigger>
+              <AccordionContent>
+                <ul className="space-y-4 pb-4">
+                  {karyaacare.map((item, i) => (
+                    <li key={i}>
+                      <Link
+                        href={item.href}
+                        className="text-white hover:text-secondary transition-colors text-sm block"
+                      >
+                        {item.text}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          {/* Newsletter - Always Visible on Mobile */}
+          <div className="mt-8 space-y-4">
+            <p className="text-white text-sm leading-relaxed">
+              Get an exclusive offer when you sign up, plus insider access to even more offers, new arrivals, style tips and more
+            </p>
+            <NewsletterField />
+          </div>
+
+          {/* Social Media - Always Visible on Mobile */}
+          <div className="mt-8 flex flex-col items-center justify-center md:block">
+            <h5 className="font-semibold !text-white uppercase tracking-widest text-sm mb-4">
+              Get Connected
+            </h5>
+            <div className="flex items-center gap-4 flex-wrap">
+              {socialLinks.map((social, i) => (
+                <Link
+                  key={i}
+                  href={social.href}
+                  className="text-secondary hover:text-white transition-colors"
+                  aria-label={social.label}
+                >
+                  {social.icon}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Grid - Hidden on Mobile */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="space-y-2">
             <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-44" />
@@ -152,8 +246,6 @@ const Footer = () => {
                   Subscribe to newsletter
                 </h5>
                 <p className="text-white !text-xs">Get event planning tips and special offers.</p>
-
-                {/* ✅ Newsletter Subscription Component */}
                 <NewsletterField />
               </div>
             </div>
@@ -162,71 +254,25 @@ const Footer = () => {
               <h5 className="font-semibold !text-white uppercase !tracking-widest mb-5">
                 Connect With Us
               </h5>
-              <div className="flex items-center gap-4">
-                <Link
-                  href="https://wa.me/971508806209?text=Hello%20I%20want%20to%20know%20more%20about%20your%20service"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandWhatsapp />
-                </Link>
-
-                <Link
-                  href="#"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconPhone />
-                </Link>
-
-                <Link
-                  href="https://www.facebook.com/share/1JqhwFJQE4/?mibextid=wwXIfr"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandFacebook />
-                </Link>
-
-                <Link
-                  href="https://www.instagram.com/karyaa_uae?igsh=MWtrcTB6M2l4dm5uaw%3D%3D&utm_source=qr"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandInstagram />
-                </Link>
-
-                <Link
-                  href="https://www.tiktok.com/@karyaa_uae?_t=ZS-8yEf86IaZma&_r=1"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandTiktok />
-                </Link>
-
-                <Link
-                  href="https://www.linkedin.com/company/107969110"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandLinkedin />
-                </Link>
-
-                <Link
-                  href="https://www.youtube.com/@Karyaa_uae"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandYoutube />
-                </Link>
-
-                <Link
-                  href="ttps://pin.it/2c3v4wKOA"
-                  className="text-secondary hover:text-secondary transition-colors"
-                >
-                  <IconBrandPinterest />
-                </Link>
+              <div className="flex items-center gap-4 flex-wrap">
+                {socialLinks.map((social, i) => (
+                  <Link
+                    key={i}
+                    href={social.href}
+                    className="text-secondary hover:text-white transition-colors"
+                    aria-label={social.label}
+                  >
+                    {social.icon}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t flex flex-col gap-4 items-center border-gray-200">
-
-          <p className="text-white text-center !text-sm  max-w-3xl leading-relaxed">
+        <div className="mt-12 pt-8 border-t flex flex-col gap-4 items-center border-gray-600">
+          <p className="text-white text-center !text-xs md:!text-sm max-w-3xl leading-relaxed">
             This website serves solely as a marketplace platform.
             All financial and contractual transactions occur directly between customers and vendors.
             We are not liable for any transaction-related disputes, losses, or claims.
