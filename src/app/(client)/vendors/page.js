@@ -1,6 +1,7 @@
 // Vendors page relies on server-side helpers (auth, saved vendors) that use cookies; make dynamic.
 export const dynamic = 'force-dynamic';
 
+import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "../components/common/PageTitle";
 import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
@@ -15,6 +16,8 @@ const VendorsPage = async ({ searchParams }) => {
       <section className="container !mb-14">
         <PageSearchBar />
       </section>
+
+      <CategoryList />
 
       <section className="container">
         <div className="relative">
