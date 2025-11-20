@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
-import { useRouter, useSearchParams } from "next/navigation" // <-- New imports
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEditor, EditorContent } from '@tiptap/react'
-// Tiptap Extensions
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -12,19 +11,11 @@ import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
-// UI Components (Ensure these paths are correct for your project)
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { toast } from "sonner"
 import {
     ArrowLeft,
@@ -71,7 +62,7 @@ const EditorToolbar = ({ editor }) => {
     }
 
     return (
-        <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
+        <div className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur-sm p-2 flex flex-wrap gap-1 rounded-t-lg shadow-sm">
             {/* Headings */}
             <Button
                 type="button"
@@ -299,7 +290,6 @@ const EditBlogPage = () => {
         slug: fetchedData?.slug || "",
         coverImage: fetchedData?.coverImage || "",
         content: fetchedData?.content || "",
-        status: fetchedData?.status || "draft",
         ctaText: fetchedData?.ctaText || "Contact Us",
         ctaLink: fetchedData?.ctaLink || "/contact",
         metaTitle: fetchedData?.metaTitle || "",
@@ -346,7 +336,11 @@ const EditBlogPage = () => {
         setIsSubmitting(true)
 
         try {
-            const result = await editBlogPost(postId, data)
+            // Auto-include the current blog status from fetched data
+            const result = await editBlogPost(postId, {
+                ...data,
+                status: fetchedData?.status || "draft"
+            })
 
             if (!result.success) {
                 toast.error(result.message || "Failed to update blog post")
@@ -354,7 +348,6 @@ const EditBlogPage = () => {
             }
 
             toast.success(result.message)
-            router.push("/admin/content-moderation/blog")
         } catch (error) {
             console.error("Error updating blog:", error)
             toast.error("An error occurred while updating the blog post")
@@ -474,29 +467,6 @@ const EditBlogPage = () => {
                                 folderPath="blogs/covers"
                             />
                         </div>
-
-                        {/* Status */}
-                        <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                            <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="published">Published</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
                     </CardContent>
                 </Card>
 
@@ -552,7 +522,7 @@ const EditBlogPage = () => {
                                     // --- FIX END ---
 
                                     return (
-                                        <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
+                                        <div className="rounded-lg border border-gray-300 bg-white overflow-visible">
                                             <EditorToolbar editor={editor} />
                                             <EditorContent
                                                 editor={editor}

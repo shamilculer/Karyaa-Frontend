@@ -27,18 +27,20 @@ import {
     MoreVertical,
     PlusCircle,
     Timer,
+    Edit,
 } from 'lucide-react';
 
 import {
     updateVendorStatusAction,
     toggleVendorRecommendedAction,
     updateVendorFeaturesAction,
-    updateVendorDurationAction
+    updateVendorDurationAction,
 } from '@/app/actions/admin/vendors';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DocumentEditModal } from './DocumentEditModal';
 
 // --- DROP-DOWN PLACEHOLDERS ---
 const DropdownMenu = ({ children }) => <div className="relative inline-block text-left">{children}</div>;
@@ -79,12 +81,14 @@ const Select = ({ value, onChange, children, disabled, className }) => (
     </select>
 );
 
+
 const VendorDetailsClient = ({ vendorData }) => {
     const [vendor, setVendor] = useState(vendorData);
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [newCustomFeature, setNewCustomFeature] = useState('');
     const [isFeatureSubmitting, setIsFeatureSubmitting] = useState(false);
+    const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
     
     // Custom duration states
     const [showDurationForm, setShowDurationForm] = useState(false);
@@ -182,6 +186,20 @@ const VendorDetailsClient = ({ vendorData }) => {
         }
 
         setIsDurationSubmitting(false);
+    };
+
+    const handleDocumentUpdate = (updatedData) => {
+        // Merge the updated document data with existing vendor data
+        setVendor(prev => ({
+            ...prev,
+            ...updatedData.documents,
+            tradeLicenseNumber: updatedData.documents?.tradeLicenseNumber || prev.tradeLicenseNumber,
+            personalEmiratesIdNumber: updatedData.documents?.personalEmiratesIdNumber || prev.personalEmiratesIdNumber,
+            tradeLicenseCopy: updatedData.documents?.tradeLicenseCopy || prev.tradeLicenseCopy,
+            emiratesIdCopy: updatedData.documents?.emiratesIdCopy || prev.emiratesIdCopy,
+            businessLicenseCopy: updatedData.documents?.businessLicenseCopy || prev.businessLicenseCopy,
+            passportOrIdCopy: updatedData.documents?.passportOrIdCopy || prev.passportOrIdCopy,
+        }));
     };
 
     const getStatusColor = (status) => {
@@ -605,16 +623,25 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                     <p className="font-semibold text-gray-900">Trade License</p>
                                                     <p className="text-sm text-gray-500">{vendor.tradeLicenseNumber}</p>
                                                 </div>
-                                                <a
-                                                    href={vendor.tradeLicenseCopy}
-                                                    download
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                >
-                                                    <Download className="w-4 h-4" />
-                                                    Download
-                                                </a>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={vendor.tradeLicenseCopy}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        Download
+                                                    </a>
+                                                    <Button
+                                                        onClick={() => setIsDocumentModalOpen(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Update
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -626,16 +653,94 @@ const VendorDetailsClient = ({ vendorData }) => {
                                                     <p className="font-semibold text-gray-900">Emirates ID</p>
                                                     <p className="text-sm text-gray-500">{vendor.personalEmiratesIdNumber}</p>
                                                 </div>
-                                                <a
-                                                    href={vendor.emiratesIdCopy}
-                                                    download
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                >
-                                                    <Download className="w-4 h-4" />
-                                                    Download
-                                                </a>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={vendor.emiratesIdCopy}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        Download
+                                                    </a>
+                                                    <Button
+                                                        onClick={() => setIsDocumentModalOpen(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Update
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documents - International vendors */}
+                        {vendor.isInternational && (
+                            <div className="bg-white rounded p-6 border border-gray-100">
+                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-indigo-600" />
+                                    Verification Documents
+                                </h2>
+                                <div className="space-y-4">
+                                    {vendor.businessLicenseCopy && (
+                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">Business License</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={vendor.businessLicenseCopy}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        Download
+                                                    </a>
+                                                    <Button
+                                                        onClick={() => setIsDocumentModalOpen(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Update
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {vendor.passportOrIdCopy && (
+                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">Passport/ID Copy</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={vendor.passportOrIdCopy}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        Download
+                                                    </a>
+                                                    <Button
+                                                        onClick={() => setIsDocumentModalOpen(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Update
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -761,6 +866,14 @@ const VendorDetailsClient = ({ vendorData }) => {
                         )}
                     </div>
                 </div>
+
+                {/* Document Edit Modal */}
+                <DocumentEditModal
+                    vendor={vendor}
+                    isOpen={isDocumentModalOpen}
+                    onClose={() => setIsDocumentModalOpen(false)}
+                    onUpdate={handleDocumentUpdate}
+                />
             </div>
         </div>
     );

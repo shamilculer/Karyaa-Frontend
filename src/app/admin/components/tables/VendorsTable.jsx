@@ -182,6 +182,23 @@ export default function VendorsTable({ controls = true }) {
     const [pageIndex, setPageIndex] = useState(0)
     const [pageSize, setPageSize] = useState(15)
     const [globalFilter, setGlobalFilter] = useState('')
+    // Local debounced search state to improve typing UX
+    const [searchQuery, setSearchQuery] = useState(globalFilter);
+
+    // Keep local input synced if globalFilter changes externally
+    useEffect(() => {
+        setSearchQuery(globalFilter);
+    }, [globalFilter]);
+
+    // Debounce local search input and apply to globalFilter
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setGlobalFilter(searchQuery);
+            setPageIndex(0);
+        }, 50);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
 
     const [filterVendorStatus, setFilterVendorStatus] = useState('')
     const [filterCity, setFilterCity] = useState('')
@@ -332,12 +349,9 @@ export default function VendorsTable({ controls = true }) {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search vendors..."
-                            value={globalFilter}
-                            onChange={(e) => {
-                                setGlobalFilter(e.target.value)
-                                setPageIndex(0)
-                            }}
-                            disabled={isLoading}
+                            // Use local state while typing; globalFilter updates after debounce
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -430,7 +444,7 @@ export default function VendorsTable({ controls = true }) {
             )}
 
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden border rounded-lg">
+                <div className="overflow-hidden ">
                     <Table>
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>

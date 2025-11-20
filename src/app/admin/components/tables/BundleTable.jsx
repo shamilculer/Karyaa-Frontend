@@ -209,7 +209,7 @@ const BundlesTable = ({ controls = true }) => {
     useEffect(() => {
         const delay = setTimeout(() => {
             fetchData()
-        }, 300) // Debounce API call for search input
+        }, 50) // Debounce API call for search input
         return () => clearTimeout(delay)
     }, [fetchData])
 
@@ -224,6 +224,23 @@ const BundlesTable = ({ controls = true }) => {
     const handleGlobalFilterChange = (value) => {
         updateUrl({ search: value, page: 1 }) // Reset to page 1 on new search
     }
+
+    // Local debounced search state (mirror of URL `search` param)
+    const [searchQuery, setSearchQuery] = useState(urlGlobalFilter);
+
+    // Keep local input synced when URL search changes (e.g., external navigation)
+    useEffect(() => {
+        setSearchQuery(urlGlobalFilter);
+    }, [urlGlobalFilter]);
+
+    // Debounce local search input and update URL when user stops typing
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            handleGlobalFilterChange(searchQuery || "");
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
     
     // Function to refetch data after modal closure/action
     const refetchBundles = () => {
@@ -339,7 +356,7 @@ const BundlesTable = ({ controls = true }) => {
         "Price",
         "Duration",
         "Subscribers",
-        "Popular",
+        "Add-on",
         "Karyaa Recommendation",
         "Status",
         "Actions"
@@ -353,11 +370,9 @@ const BundlesTable = ({ controls = true }) => {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by name or description..."
-                            // Use URL-derived value for Input
-                            value={urlGlobalFilter}
-                            // Call URL update handler
-                            onChange={(e) => handleGlobalFilterChange(e.target.value)}
-                            disabled={isLoading}
+                            // Use local state while typing; URL is updated after debounce
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -419,7 +434,7 @@ const BundlesTable = ({ controls = true }) => {
 
             {/* Table */}
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden border rounded-lg">
+                <div className="overflow-hidden">
                     <Table>
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>
@@ -459,7 +474,7 @@ const BundlesTable = ({ controls = true }) => {
 
                             {!isLoading && !apiError && data.map((row) => {
                                 const isActive = row.status === "active"
-                                const isPopular = row.isPopular
+                                const isAddon = row.isAddon ?? row.isPopular
                                 const includesRecommended = row.includesRecommended
 
                                 return (
@@ -482,10 +497,10 @@ const BundlesTable = ({ controls = true }) => {
                                         </TableCell>
                                         <TableCell className="font-mono text-sm">{row.subscribersCount || 0}</TableCell>
                                         <TableCell>
-                                            {isPopular ? (
+                                            {isAddon ? (
                                                 <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200">
                                                     <Zap className="w-3 h-3 mr-1" />
-                                                    Popular
+                                                    Add-on
                                                 </Badge>
                                             ) : (
                                                 <span className="text-muted-foreground text-sm">No</span>

@@ -284,3 +284,66 @@ export const toggleVendorRecommendedAction = async (id) => {
         };
     }
 };
+
+export const updateVendorDocumentsAction = async (id, documentData) => {
+    if (!id) {
+        return { success: false, message: "Vendor ID is required." };
+    }
+
+    // Validate that at least one field is provided
+    const {
+        tradeLicenseCopy,
+        emiratesIdCopy,
+        businessLicenseCopy,
+        passportOrIdCopy,
+        tradeLicenseNumber,
+        personalEmiratesIdNumber,
+    } = documentData;
+
+    const hasAnyField = [
+        tradeLicenseCopy,
+        emiratesIdCopy,
+        businessLicenseCopy,
+        passportOrIdCopy,
+        tradeLicenseNumber,
+        personalEmiratesIdNumber,
+    ].some(field => field !== undefined && field !== null);
+
+    if (!hasAnyField) {
+        return { 
+            success: false, 
+            message: "At least one document field must be provided." 
+        };
+    }
+
+    const endpoint = `/admin/vendors/${id}/documents`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            method: "PATCH",
+            role: "admin",
+            auth: true,
+            body: JSON.stringify(documentData),
+        });
+
+        if (response.success) {
+            return {
+                success: true,
+                message: response.message || "Vendor documents updated successfully.",
+                data: response.data
+            };
+        } else {
+            return {
+                success: false,
+                message: response.message || "Failed to update vendor documents.",
+            };
+        }
+
+    } catch (error) {
+        console.error(`Error updating documents for vendor ${id}:`, error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred.",
+        };
+    }
+};

@@ -133,11 +133,6 @@ const BlogsTable = ({ controls = true }) => {
     const urlGlobalFilter = searchParams.get("search") || ""
     const urlStatusFilter = searchParams.get("status") || ""
 
-    // ❌ REMOVE: state for filters and pagination
-    // const [globalFilter, setGlobalFilter] = useState("")
-    // const [statusFilter, setStatusFilter] = useState("")
-    // const [pageIndex, setPageIndex] = useState(0)
-    // const [pageSize, setPageSize] = useState(15)
 
     // ✅ Keep state for data, loading, error, and row selection
     const [data, setData] = useState(initialBlogData)
@@ -187,6 +182,23 @@ const BlogsTable = ({ controls = true }) => {
     const handleGlobalFilterChange = useCallback((value) => {
         router.push(pathname + '?' + createQueryString('search', value))
     }, [createQueryString, pathname, router]);
+
+    // Local debounced search state (mirror of URL `search` param)
+    const [searchQuery, setSearchQuery] = useState(urlGlobalFilter);
+
+    // Keep local input synced when URL search changes (e.g., external navigation)
+    useEffect(() => {
+        setSearchQuery(urlGlobalFilter);
+    }, [urlGlobalFilter]);
+
+    // Debounce local search input and update URL when user stops typing
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            handleGlobalFilterChange(searchQuery || "");
+        }, 50);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery, handleGlobalFilterChange]);
 
 
     // ➡️ Re-use fetchData, but now it depends on URL state (urlPageIndex, urlPageSize, etc.)
@@ -354,11 +366,9 @@ const BlogsTable = ({ controls = true }) => {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by title, author, slug..."
-                            // ➡️ Use URL-derived value
-                            value={urlGlobalFilter}
-                            // ➡️ Use URL updater function
-                            onChange={(e) => handleGlobalFilterChange(e.target.value)}
-                            disabled={isLoading}
+                            // Use local state while typing; URL is updated after debounce
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -428,7 +438,7 @@ const BlogsTable = ({ controls = true }) => {
 
             {/* Table */}
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden border rounded-lg">
+                <div className="overflow-hidden">
                     <Table>
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>

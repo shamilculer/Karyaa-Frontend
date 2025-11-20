@@ -6,7 +6,7 @@ import Link from "next/link";
 const UserLoginPage = () => {
   return (
     <section className="flex !my-0 relative">
-      <div className="w-2/3 min-h-screen bg-secondary relative max-xl:hidden">
+      <div className="w-2/3 min-h-screen bg-secondary relative max-lg:hidden">
         <Image
           fill
           alt="Login to Karyaa"
@@ -14,8 +14,8 @@ const UserLoginPage = () => {
           className="h-full object-cover"
         />
       </div>
-      <div className="w-full bg-body xl:w-1/3 min-h-screen flex flex-col justify-center px-5 sm:px-10 max-xl:z-10">
-        <div className="max-xl:flex flex-col items-center justify-center">
+      <div className="w-full bg-body lg:w-1/3 min-h-screen flex flex-col justify-center px-5 sm:px-10 max-xl:z-10">
+        <div className="max-lg:flex flex-col items-center justify-center">
           <div>
             {/* Mobile Logo */}
 

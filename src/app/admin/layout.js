@@ -21,7 +21,8 @@ export default function AdminLayout({ children }) {
         "/admin/ad-management",
         "/admin/bundle-management",
         "/admin/admin-users",
-        "/admin/settings"
+        "/admin/settings",
+        "/admin/referrals-management"
     ].includes(pathname);
 
     return (

@@ -1,125 +1,128 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useForm } from "react-hook-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  ArrowLeft, 
-  Save, 
-  Edit,
-  Star,
-  Users,
-  RefreshCw
-} from "lucide-react"
-import Image from "next/image"
-import { useParams, useRouter } from "next/navigation"
-import { getSingleCategoryDetails, updateCategory } from "@/app/actions/admin/categories"
-import Link from "next/link"
-import ControlledFileUpload from "@/components/common/ControlledFileUploads"
-import SubcategorySection from "../../components/SubCategoryManage"
-import { toast } from "sonner"
+import { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Save, Edit, Star, Users, RefreshCw } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import {
+  getSingleCategoryDetails,
+  updateCategory,
+} from "@/app/actions/admin/categories";
+import Link from "next/link";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
+import SubcategorySection from "../../components/SubCategoryManage";
+import { toast } from "sonner";
+import { IconBriefcase } from "@tabler/icons-react";
 
 const SingleCategoryManage = () => {
-  const params = useParams()
-  const router = useRouter()
-  const slug = params?.slug
-  
-  const [category, setCategory] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const params = useParams();
+  const router = useRouter();
+  const slug = params?.slug;
 
-  const { control, handleSubmit, formState: { errors }, reset, watch } = useForm({
+  const [category, setCategory] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm({
     defaultValues: {
       name: "",
       slug: "",
       coverImage: "",
-    }
-  })
+    },
+  });
 
-  const coverImageValue = watch("coverImage")
+  const coverImageValue = watch("coverImage");
 
   const fetchCategoryData = useCallback(async () => {
-    if (!slug) return
-    
+    if (!slug) return;
+
     try {
-      setIsLoading(true)
-      setError(null)
-      const response = await getSingleCategoryDetails(slug)
-      
+      setIsLoading(true);
+      setError(null);
+      const response = await getSingleCategoryDetails(slug);
+
       if (response.success) {
-        setCategory(response.category)
+        setCategory(response.category);
         reset({
           name: response.category.name,
           slug: response.category.slug,
           coverImage: response.category.coverImage,
-        })
+        });
       } else {
-        setError(response.message)
+        setError(response.message);
       }
     } catch (err) {
-      setError("Failed to load category. Please try again.")
-      console.error(err)
+      setError("Failed to load category. Please try again.");
+      console.error(err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [slug, reset])
+  }, [slug, reset]);
 
   useEffect(() => {
     if (slug) {
-      fetchCategoryData()
+      fetchCategoryData();
     }
-  }, [slug, fetchCategoryData])
+  }, [slug, fetchCategoryData]);
 
   const onSubmit = async (data) => {
     try {
-      setIsSaving(true)
-      const response = await updateCategory(slug, data)
-      
+      setIsSaving(true);
+      const response = await updateCategory(slug, data);
+
       if (response.success) {
-        toast.success(response.message)
-        setIsEditing(false)
-        router.refresh()
-        fetchCategoryData()
+        toast.success(response.message);
+        setIsEditing(false);
+        router.refresh();
+        fetchCategoryData();
       } else {
-        toast.error(response.message)
+        toast.error(response.message);
       }
     } catch (error) {
-      toast.error("Failed to update category")
-      console.error(error)
+      toast.error("Failed to update category");
+      console.error(error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleCancelEdit = () => {
-    setIsEditing(false)
+    setIsEditing(false);
     reset({
       name: category.name,
       slug: category.slug,
       coverImage: category.coverImage,
-    })
-  }
+    });
+  };
 
   const handleCategoryUpdate = (updatedCategory) => {
-    setCategory(updatedCategory)
-  }
+    setCategory(updatedCategory);
+  };
 
   if (isLoading) {
-    return <LoadingSkeleton />
+    return <LoadingSkeleton />;
   }
 
   if (error) {
-    return <ErrorUI message={error} onRetry={fetchCategoryData} />
+    return <ErrorUI message={error} onRetry={fetchCategoryData} />;
   }
 
   if (!category) {
-    return <ErrorUI message="Category not found" onRetry={fetchCategoryData} />
+    return <ErrorUI message="Category not found" onRetry={fetchCategoryData} />;
   }
 
   return (
@@ -144,7 +147,11 @@ const SingleCategoryManage = () => {
         <div className="flex gap-3">
           {isEditing ? (
             <>
-              <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
+              <Button
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+              >
                 Cancel
               </Button>
               <Button onClick={handleSubmit(onSubmit)} disabled={isSaving}>
@@ -163,11 +170,13 @@ const SingleCategoryManage = () => {
 
       <Card className="bg-white border-gray-300 shadow-none mt-10">
         <CardHeader>
-          <CardTitle className="uppercase tracking-wide text-xl">Category Information</CardTitle>
+          <CardTitle className="uppercase tracking-wide text-xl">
+            Category Information
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
               <div className="space-y-3">
                 <Label>Cover Image</Label>
                 {coverImageValue && (
@@ -186,7 +195,12 @@ const SingleCategoryManage = () => {
                     name="coverImage"
                     label="Upload Cover Image"
                     errors={errors}
-                    allowedMimeType={['image/jpeg', 'image/png', 'image/webp', 'image/jpg']}
+                    allowedMimeType={[
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp",
+                      "image/jpg",
+                    ]}
                     folderPath="categories"
                   />
                 )}
@@ -202,7 +216,9 @@ const SingleCategoryManage = () => {
                     className="text-lg"
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-sm">{errors.name.message}</p>
+                    <p className="text-red-500 text-sm">
+                      {errors.name.message}
+                    </p>
                   )}
                 </div>
 
@@ -214,7 +230,9 @@ const SingleCategoryManage = () => {
                     disabled={!isEditing}
                   />
                   {errors.slug && (
-                    <p className="text-red-500 text-sm">{errors.slug.message}</p>
+                    <p className="text-red-500 text-sm">
+                      {errors.slug.message}
+                    </p>
                   )}
                 </div>
 
@@ -228,6 +246,16 @@ const SingleCategoryManage = () => {
                       {category.subCategories?.length || 0}
                     </p>
                   </div>
+
+                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center gap-2 text-purple-600 mb-1">
+                      <IconBriefcase className="w-5 h-5" />
+                      <span className="text-sm font-medium">Total Vendors</span>
+                    </div>
+                    <p className="!text-5xl font-bold leading-[1.25em] text-purple-700">
+                      {category.vendorCount || 0}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -235,10 +263,14 @@ const SingleCategoryManage = () => {
         </CardContent>
       </Card>
 
-      <SubcategorySection category={category} onUpdate={handleCategoryUpdate} fetchData={fetchCategoryData} />
+      <SubcategorySection
+        category={category}
+        onUpdate={handleCategoryUpdate}
+        fetchData={fetchCategoryData}
+      />
     </div>
-  )
-}
+  );
+};
 
 const LoadingSkeleton = () => {
   return (
@@ -296,8 +328,8 @@ const LoadingSkeleton = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
 const ErrorUI = ({ message, onRetry }) => {
   return (
@@ -320,13 +352,11 @@ const ErrorUI = ({ message, onRetry }) => {
             <h3 className="text-xl font-semibold text-red-900">
               Failed to Load Category
             </h3>
-            <p className="text-red-700 max-w-md">
-              {message}
-            </p>
+            <p className="text-red-700 max-w-md">{message}</p>
           </div>
-          <Button 
+          <Button
             onClick={onRetry}
-            variant="outline" 
+            variant="outline"
             className="flex items-center gap-2 border-red-300 text-red-700 hover:bg-red-100"
           >
             <RefreshCw className="w-4 h-4" />
@@ -335,7 +365,7 @@ const ErrorUI = ({ message, onRetry }) => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default SingleCategoryManage
+export default SingleCategoryManage;

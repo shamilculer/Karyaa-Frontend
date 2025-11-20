@@ -218,7 +218,20 @@ export default function AdminsTable({ controls = true }) {
         router.push(`?${newParams.toString()}`, { scroll: false });
     }, [searchParams, router, pageIndex]);
 
-    // Options based on Admin Model schema
+    const [searchQuery, setSearchQuery] = useState(globalFilter);
+
+    useEffect(() => {
+        setSearchQuery(globalFilter);
+    }, [globalFilter]);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setParamAndRefresh('search', searchQuery || '', true);
+        }, 50);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery, setParamAndRefresh]);
+
     const uniqueAdminLevels = ['admin', 'moderator']
     const uniqueIsActiveOptions = [
         { label: 'Active', value: 'true' },
@@ -231,7 +244,6 @@ export default function AdminsTable({ controls = true }) {
 
         try {
             const result = await getAllAdminsAction({
-                // 💡 Pass URL-derived values
                 page: pageIndex + 1, // API usually expects 1-based page number
                 limit: pageSize,
                 search: globalFilter,
@@ -313,10 +325,9 @@ export default function AdminsTable({ controls = true }) {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by name or email..."
-                            value={globalFilter}
-                            // 💡 Use URL setter for search and reset page to 1
-                            onChange={(e) => setParamAndRefresh('search', e.target.value, true)}
-                            disabled={isLoading}
+                            value={searchQuery}
+                            // Use local state while typing; URL is updated after debounce
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -386,7 +397,7 @@ export default function AdminsTable({ controls = true }) {
             )}
 
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden border rounded-lg">
+                <div className="overflow-hidden">
                     <Table>
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>
@@ -423,7 +434,7 @@ export default function AdminsTable({ controls = true }) {
                                         className={`
                                         hover:bg-gray-50 
                                         ${isCurrentUser
-                                                ? 'bg-blue-50/70 hover:bg-blue-100 border-l-4 border-blue-600' // Highlighted style
+                                                ? 'bg-blue-50/70 hover:bg-blue-100 !border-l-4 border-blue-600' // Highlighted style
                                                 : ''
                                             }
                                     `}

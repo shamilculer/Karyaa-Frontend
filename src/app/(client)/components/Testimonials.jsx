@@ -9,7 +9,7 @@ import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-const testimonialsData = [
+const defaultTestimonials = [
   {
     id: 1,
     img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400",
@@ -30,7 +30,8 @@ const testimonialsData = [
   },
 ];
 
-const Testimonials = () => {
+const Testimonials = ({ testimonials: propTestimonials } = {}) => {
+  const testimonials = Array.isArray(propTestimonials) && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
   return (
     <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
       <Swiper
@@ -52,20 +53,20 @@ const Testimonials = () => {
         }}
         className="w-full pb-8"
       >
-        {testimonialsData.map((t) => (
-          <SwiperSlide key={t.id}>
+        {testimonials.map((t, idx) => (
+          <SwiperSlide key={t.id || idx}>
             <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
               <Image
                 width={240}
                 height={240}
                 className="w-full md:w-60 h-72 object-cover rounded-lg"
-                src={t.img}
+                src={t.image}
                 alt={t.name}
               />
               <div className="flex flex-col h-full justify-center p-5">
                 <div>
                   <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(t.rating || 5)].map((_, i) => (
                       <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
                     ))}
                   </div>

@@ -45,10 +45,22 @@ const EditorToolbar = ({ editor }) => {
   if (!editor) return null;
 
   const addLink = () => {
-    const url = window.prompt("Enter URL:");
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
+    const previousUrl = editor.getAttributes("link").href;
+    const url = window.prompt("Enter URL:", previousUrl);
+
+    // cancelled
+    if (url === null) {
+      return;
     }
+
+    // empty
+    if (url === "") {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
+
+    // update link
+    editor.chain().focus().setLink({ href: url }).run();
   };
 
   const addImage = () => {
@@ -59,7 +71,8 @@ const EditorToolbar = ({ editor }) => {
   };
 
   return (
-    <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
+    // ✅ FIX: Added sticky, top-0, z-10 for sticky behavior
+    <div className="sticky top-0 z-10 border-b border-gray-300 bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
       {/* Headings */}
       <Button
         type="button"
@@ -265,7 +278,7 @@ const PolicyPageEditor = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(""); // Holds content for saving
 
   const pageNames = {
     "privacy-policy": "Privacy Policy",
@@ -287,29 +300,32 @@ const PolicyPageEditor = () => {
       TextStyle,
       Color,
     ],
-    content: content,
+    // ❌ Fix: Removed content: content to prevent scroll snapping issue
     onUpdate: ({ editor }) => {
       setContent(editor.getHTML());
     },
     immediatelyRender: false,
   });
 
+  // ✅ Fix: Only load content when editor is ready
   useEffect(() => {
-    loadContent();
-  }, [slug]);
-
-  useEffect(() => {
-    if (editor && content) {
-      editor.commands.setContent(content);
+    if (editor) {
+      loadContent();
     }
-  }, [editor, content]);
-
+  }, [slug, editor]); 
+  
   const loadContent = async () => {
     setLoading(true);
     try {
       const result = await getContentByKeyAction(slug);
       if (result.success && result.data) {
-        setContent(result.data.content || "");
+        const initialContent = result.data.content || "";
+        setContent(initialContent);
+        
+        // 💡 Explicitly set content on the editor after fetch
+        if (editor) {
+          editor.commands.setContent(initialContent);
+        }
       }
     } catch (error) {
       toast.error("Failed to load content");
@@ -412,7 +428,8 @@ const PolicyPageEditor = () => {
           <CardTitle className="uppercase">Content Editor</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
+          {/* ✅ FIX: Removed 'overflow-hidden' to allow sticky positioning to work. */}
+          <div className="border border-gray-300 rounded-lg bg-white"> 
             <EditorToolbar editor={editor} />
             <EditorContent
               editor={editor}

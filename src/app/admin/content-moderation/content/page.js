@@ -1,6 +1,7 @@
 // app/admin/content/page.js
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { FileText, Edit2, Eye, Calendar, Loader2 } from "lucide-react";
 import {
   Card,
@@ -13,11 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getAllContentAction } from "@/app/actions/admin/pages";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const CMS = () => {
-  const router = useRouter();
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,23 +80,20 @@ const CMS = () => {
     }
   };
 
-  const handleEdit = (page) => {
-    // Navigate to edit page based on type
+  // Get edit URL based on page type
+  const getEditUrl = (page) => {
     if (page.key === "landing-page") {
-      router.push(`/admin/content-moderation/content/landing-page`);
+      return `/admin/content-moderation/content/landing-page`;
     } else if (page.type === "page") {
-      // For policy pages: /admin/content-moderation/content/pages/[slug]
-      router.push(`/admin/content-moderation/content/pages/${page.key}`);
+      return `/admin/content-moderation/content/${page.key}`;
     } else if (page.type === "faq") {
-      // For FAQ pages: /admin/content-moderation/content/faq/[slug]
-      router.push(`/admin/content-moderation/content/faq/${page.key}`);
-    } else {
-      router.push(`/admin/content-moderation/content/edit/${page.key}`);
+      return `/admin/content-moderation/content/faq/${page.key}`;
     }
+    return `/admin/content-moderation/content/edit/${page.key}`;
   };
 
-  const handlePreview = (page) => {
-    // Open preview in new tab
+  // Get preview URL
+  const getPreviewUrl = (page) => {
     const previewUrls = {
       "privacy-policy": "/privacy-policy",
       "cookie-policy": "/cookie-policy",
@@ -106,13 +102,10 @@ const CMS = () => {
       "faq-customer": "/faq",
       "landing-page": "/",
     };
-
-    const url = previewUrls[page.key] || `/${page.key}`;
-    window.open(url, "_blank");
+    return previewUrls[page.key] || `/${page.key}`;
   };
 
   const getStatusBadge = (content) => {
-    // Check if content exists and has data
     if (
       !content.content ||
       (typeof content.content === "string" && !content.content.trim()) ||
@@ -175,11 +168,11 @@ const CMS = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  {getStatusBadge(page)}
+                  {/* {getStatusBadge(page)} */}
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-1">
+              {/* <CardContent className="space-y-1">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span>
@@ -190,25 +183,29 @@ const CMS = () => {
                       : "Not created yet"}
                   </span>
                 </div>
-              </CardContent>
+              </CardContent> */}
 
               <CardFooter className="flex gap-2 pt-1">
-                <Button
-                  onClick={() => handleEdit(page)}
-                  className="flex-1"
-                  size="sm"
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit
+                <Button asChild className="flex-1" size="sm">
+                  <Link href={getEditUrl(page)}>
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Edit
+                  </Link>
                 </Button>
                 <Button
-                  onClick={() => handlePreview(page)}
+                  asChild
                   variant="outline"
                   size="sm"
                   disabled={!page.content}
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  Preview
+                  <Link 
+                    href={getPreviewUrl(page)} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>

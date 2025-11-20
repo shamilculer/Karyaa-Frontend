@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, Pagination, EffectCoverflow } from "swiper/modules";
 import "swiper/css"; 
@@ -10,8 +11,8 @@ import 'swiper/css/effect-coverflow';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const Hero = () => {
-  const images = [
+const Hero = ({ data } = {}) => {
+  const defaultImages = [
     "/new-banner-9.jpg",
     "/new-banner-18.jpg",
     "/cta-2.webp",
@@ -30,11 +31,15 @@ const Hero = () => {
     "/new-banner-7.jpg"
   ];
 
+  const heading = data?.heading || "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
+  const description = data?.description || "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
+  const images = Array.isArray(data?.images) && data?.images.length > 0 ? data?.images : defaultImages;
+
   return (
     <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
       <div className='w-full flex-center flex-col text-center px-4'>
-        <h1 className='text-center uppercase max-md:!text-[22px] !text-[30px] w-full sm:w-md md:w-xl leading-[1.2em]'>Your Perfect Event Starts Here. Plan. Connect. Celebrate.</h1>
-        <p className="max-md:mt-2 max-md:!text-xs">Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.</p>
+        <h1 className='text-center uppercase max-md:!text-[22px] !text-[30px] w-full sm:w-md md:w-xl leading-[1.2em]'>{heading}</h1>
+        <p className="max-md:mt-2 max-md:!text-xs">{description}</p>
       </div>
 
       <div className="w-full max-w-[1600px] relative">

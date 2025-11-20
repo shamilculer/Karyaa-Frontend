@@ -149,30 +149,33 @@ export default function LeadDetailsModal({ lead, open, onOpenChange, onUpdate })
                             <div className="space-y-4">
                                 <label className="text-sm font-medium">Current Status</label>
                                 <div className="flex items-center gap-3">
-                                    <Select
-                                        value={selectedStatus}
-                                        onValueChange={setSelectedStatus}
-                                        disabled={updatingStatus}
-                                    >
-                                        <SelectTrigger className="w-full border-gray-400">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {STATUS_OPTIONS.map(status => (
-                                                <SelectItem key={status} value={status}>
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={`inline-flex items-center border-0 gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(status)}`}
-                                                        >
-                                                            <IconCircleFilled className="size-2 fill-current" />
-                                                            {status}
-                                                        </Badge>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {/* FIX: Allow the Select container to shrink inside flex (prevents overflow) */}
+                                    <div className="flex-1 min-w-0"> 
+                                        <Select
+                                            value={selectedStatus}
+                                            onValueChange={setSelectedStatus}
+                                            disabled={updatingStatus}
+                                        >
+                                            <SelectTrigger className="w-full border-gray-400">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {STATUS_OPTIONS.map(status => (
+                                                    <SelectItem key={status} value={status}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={`inline-flex items-center border-0 gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(status)}`}
+                                                            >
+                                                                <IconCircleFilled className="size-2 fill-current" />
+                                                                {status}
+                                                            </Badge>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     {selectedStatus !== lead.status && (
                                         <Button
                                             onClick={handleStatusUpdate}
@@ -245,7 +248,7 @@ export default function LeadDetailsModal({ lead, open, onOpenChange, onUpdate })
                                 <div className="grid gap-4">
                                     {lead.eventType && (
                                         <div className="flex items-start gap-3">
-                                            <div className="w-4 h-4 flex items-center justify1center mt-0.5">
+                                            <div className="w-4 h-4 flex items-center justify-center mt-0.5">
                                                 <span className="text-lg">🎉</span>
                                             </div>
                                             <div>
@@ -288,9 +291,11 @@ export default function LeadDetailsModal({ lead, open, onOpenChange, onUpdate })
                                     {lead.message && (
                                         <div className="flex items-start gap-3">
                                             <MessageSquare className="w-4 h-4 text-muted-foreground mt-1.5" />
-                                            <div className="flex-1">
+                                            <div className="flex-1 min-w-0">
                                                 <p className="!text-sm text-muted-foreground">Message</p>
-                                                <p className="font-medium whitespace-pre-wrap bg-muted p-3 rounded-md mt-1">
+                                                <p
+                                                    className="font-medium whitespace-pre-wrap bg-muted p-3 rounded-md mt-1 break-words max-w-full overflow-x-auto"
+                                                >
                                                     {lead.message}
                                                 </p>
                                             </div>
@@ -311,7 +316,8 @@ export default function LeadDetailsModal({ lead, open, onOpenChange, onUpdate })
 
                     </ScrollArea>
 
-                     <Separator />               
+                    <Separator />
+
                     <DialogFooter className="flex-col sm:flex-row gap-2 pt-6">
                         <Button
                             variant="destructive"

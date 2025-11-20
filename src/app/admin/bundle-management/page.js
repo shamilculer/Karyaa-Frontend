@@ -88,7 +88,7 @@ async function Stats() {
 // -------------------------
 const BundleManagementPage = () => {
   return (
-    <div className="h-full dashboard-container space-y-8 mb-16">
+    <div className="mb-12 dashboard-container space-y-8 mb-16">
       
       <Suspense fallback={<StatsSkeleton />}>
         {/* Inline error boundary */}

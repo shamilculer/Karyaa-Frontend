@@ -132,11 +132,17 @@ export const createBundleAction = async (formData) => {
     const endpoint = `/admin/bundles/new`;
 
     try {
+        // Backwards compatibility: if frontend sends `isAddon`, also include `isPopular` for the API
+        const payload = { ...formData };
+        if (payload.isAddon !== undefined && payload.isPopular === undefined) {
+            payload.isPopular = payload.isAddon;
+        }
+
         const response = await apiFetch(endpoint, {
             method: "POST",
             role: "admin",
             auth: true,
-            body: JSON.stringify(formData),
+            body: JSON.stringify(payload),
         });
 
         if (response.success) {
@@ -191,11 +197,17 @@ export const updateBundleAction = async (id, formData) => {
     const endpoint = `/admin/bundles/${id}`;
 
     try {
+        // Backwards compatibility: if frontend sends `isAddon`, also include `isPopular` for the API
+        const payload = { ...formData };
+        if (payload.isAddon !== undefined && payload.isPopular === undefined) {
+            payload.isPopular = payload.isAddon;
+        }
+
         const response = await apiFetch(endpoint, {
             method: "PUT",
             role: "admin",
             auth: true,
-            body: JSON.stringify(formData),
+            body: JSON.stringify(payload),
         });
 
         if (response.success) {

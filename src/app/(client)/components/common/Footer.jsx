@@ -6,6 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useClientStore } from "@/store/clientStore"
 import { getBrandDetailsAction } from "@/app/actions/brand";
+import { getContentByKeyAction } from "@/app/actions/content";
 import { useEffect, useState } from "react";
 import ReferModal from "../ReferModal";
 import NewsletterField from "../NewsLetterField";
@@ -16,6 +17,7 @@ const Footer = () => {
   const isLoggedIn = !!user;
 
   const [contactDetails, setContactDetails] = useState({})
+  const [ctaSections, setCtaSections] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +26,36 @@ const Footer = () => {
     }
 
     fetchData()
+
+    const fetchCtas = async () => {
+      try {
+        const res = await getContentByKeyAction("cta-sections")
+            console.log(res)
+
+        // parse if string
+        if (res?.success && res.data?.content) {
+          try {
+            const parsed = typeof res.data.content === "string" ? JSON.parse(res.data.content) : res.data.content
+            setCtaSections(parsed)
+          } catch (e) {
+            console.warn("[Footer] failed to parse cta-sections content, using raw value", e)
+            setCtaSections(res.data.content)
+          }
+        }
+      } catch (err) {
+        console.error("[Footer] error fetching cta-sections:", err)
+      }
+    }
+
+    fetchCtas()
   }, [])
+
+
+  const leftHeading =
+    ctaSections?.cta1_heading || "List your services and get discovered";
+
+  const rightHeading =
+    ctaSections?.cta2_heading || "Let The World Know Our Vendors";
 
   const aboutKaryaaLink = [
     {
@@ -87,7 +118,7 @@ const Footer = () => {
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="flex-center flex-col text-center space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
-                List your services and get discovered
+                {leftHeading}
               </h2>
               <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
                 <Link href="/auth/vendor/register">Join As a Vendor</Link>
@@ -99,7 +130,7 @@ const Footer = () => {
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="text-center flex-center flex-col space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
-                Let The World Know Our Vendors
+                {rightHeading}
               </h2>
               <ReferModal />
             </div>
@@ -249,16 +280,16 @@ const Footer = () => {
               </div>
             </div>
 
-            <div>
+            <div className="mt-5 flex flex-col items-center justify-center md:block">
               <h5 className="font-semibold !text-white uppercase !tracking-widest mb-5">
-                Connect With Us
+                Get Connected
               </h5>
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-3 w-full justify-center md:justify-start">
                 {socialLinks.map((social, i) => (
                   <Link
                     key={i}
                     href={social.href}
-                    className="text-secondary hover:text-white transition-colors"
+                    className="text-secondary hover:text-white transition-colors flex-shrink-0"
                     aria-label={social.label}
                   >
                     {social.icon}
@@ -271,10 +302,8 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t flex flex-col gap-4 items-center border-gray-600">
-          <p className="text-white text-center !text-xs md:!text-sm max-w-3xl leading-relaxed">
-            This website serves solely as a marketplace platform.
-            All financial and contractual transactions occur directly between customers and vendors.
-            We are not liable for any transaction-related disputes, losses, or claims.
+          <p className="text-white text-center !text-xs md:!text-sm leading-relaxed">
+            This website serves solely as a marketplace platform.All financial and contractual transactions occur directly between customers and vendors.<br className="max-lg:hidden" />We are not liable for any transaction-related disputes, losses, or claims.
           </p>
 
           <p className="text-center text-gray-400 text-sm">

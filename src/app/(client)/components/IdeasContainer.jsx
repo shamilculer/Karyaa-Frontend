@@ -59,7 +59,7 @@ function IdeasContainer({ categories }) {
 
   return (
     <section className="w-full max-w-[1500px] mx-auto px-1">
-      <h2 className="uppercase font-semibold text-xl">Popular Categories</h2>
+      <h2 className="uppercase font-semibold text-xl">Occasions</h2>
 
       {/* Category Tabs */}
       {/* <div className="mt-6 w-full  hidden xl:grid grid-cols-8 place-items-center gap-10 overflow-x-auto pb-4 px-5">

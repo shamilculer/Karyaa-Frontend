@@ -142,7 +142,7 @@ export const VendorSelectField = ({
                     </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-[400px] p-0 bg-white" align="start" style={{ zIndex: 9999 }}>
+                <PopoverContent className="w-[400px] p-0 bg-white" align="start" style={{ zIndex: 99999 }}>
                     <Command shouldFilter={false}>
                         <CommandInput
                             placeholder="Search vendors..."

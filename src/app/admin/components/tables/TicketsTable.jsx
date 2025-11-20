@@ -132,6 +132,23 @@ const TicketsTable = ({ controls = true }) => {
 
     // Filter and Pagination State
     const [globalFilter, setGlobalFilter] = useState("")
+    // Local debounced search state to improve typing UX
+    const [searchQuery, setSearchQuery] = useState(globalFilter);
+
+    // Keep local input synced if globalFilter changes externally
+    useEffect(() => {
+        setSearchQuery(globalFilter);
+    }, [globalFilter]);
+
+    // Debounce local search input and apply to globalFilter
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setGlobalFilter(searchQuery);
+            setPageIndex(0);
+        }, 50);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
     const [statusFilter, setStatusFilter] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("")
     const [priorityFilter, setPriorityFilter] = useState("")
@@ -286,9 +303,9 @@ const TicketsTable = ({ controls = true }) => {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search by subject..."
-                            value={globalFilter}
-                            onChange={(e) => handleGlobalFilterChange(e.target.value)}
-                            disabled={isLoading}
+                            // Use local state while typing; globalFilter updates after debounce
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -383,7 +400,7 @@ const TicketsTable = ({ controls = true }) => {
 
             {/* Table */}
             <div className="relative flex flex-col gap-4 overflow-auto">
-                <div className="overflow-hidden border border-gray-300 rounded-lg">
+                <div className="overflow-hidden">
                     <Table >
                         <TableHeader className="sticky top-0 bg-gray-50 z-10">
                             <TableRow>

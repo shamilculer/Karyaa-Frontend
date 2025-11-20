@@ -13,7 +13,7 @@ import { toast } from 'sonner';
  */
 const BundleCard = ({ bundle, selectedId }) => {
     const isSelected = selectedId === bundle._id;
-    const isAddOn = bundle.isPopular;
+    const isAddOn = bundle.isAddon;
     const hasMaxVendors = bundle.maxVendors > 0
 
     const getHeaderStyling = () => {

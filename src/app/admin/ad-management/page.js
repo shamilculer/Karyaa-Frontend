@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Plus } from "lucide-react";
 
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import BannerCarouselContainer from "../components/BannerCarousel";
@@ -40,9 +40,24 @@ const AdManagementPage = () => {
     [router, searchParams]
   );
 
-  const handleSearch = (value) => {
+  const handleSearch = useCallback((value) => {
     updateUrl("search", value);
-  };
+  }, [updateUrl]);
+
+  // Local debounced search state (prevents frequent URL updates while typing)
+  const [searchQuery, setSearchQuery] = useState(search);
+
+  useEffect(() => {
+    setSearchQuery(search);
+  }, [search]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      handleSearch(searchQuery || "");
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery, handleSearch]);
 
   const handleStatusChange = (value) => {
     updateUrl("status", value);
@@ -91,8 +106,9 @@ const AdManagementPage = () => {
               <Input
                 placeholder="Search by Banner Name or Vendor ID..."
                 className="w-64 pl-10"
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
+                // Use the local debounced state while typing
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 

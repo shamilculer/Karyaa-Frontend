@@ -2,7 +2,7 @@ import VendorsTable from "../components/tables/VendorsTable"
 
 const VendorManagementPage = () => {
     return (
-        <div className="h-full dashboard-container space-y-8">
+        <div className="mb-12 dashboard-container space-y-8">
             <div className="w-full">
                 <VendorsTable />
             </div>

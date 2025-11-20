@@ -346,7 +346,7 @@ export const bundleFormSchema = z.object({
 
   // Configuration
   status: z.enum(["active", "inactive"]),
-  isPopular: z.boolean().default(false).optional(),
+  isAddon: z.boolean().default(false).optional(),
   includesRecommended: z.boolean().default(false).optional(),
   isAvailableForInternational: z.boolean().default(true).optional(), // Added
   displayOrder: z

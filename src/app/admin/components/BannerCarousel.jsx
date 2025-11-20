@@ -238,12 +238,12 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                             </div>
 
                             <div className="absolute top-0 left-0 w-full h-full bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex justify-center items-center gap-5">
-                                <Button
+                                {/* <Button
                                     className="hover:text-white"
                                     onClick={() => openEditModal(ad)}
                                 >
                                     <FileEdit className="w-5 mr-2" /> Edit
-                                </Button>
+                                </Button> */}
 
                                 <Button
                                     variant="destructive"
