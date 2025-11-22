@@ -16,6 +16,21 @@ export const getCategories = async () => {
   }
 };
 
+// Get only categories with vendors (for client-side display)
+export const getCategoriesWithVendors = async () => {
+  try {
+    const response = await apiFetch("/categories/with-vendors");
+    if (response.success) {
+      return { success: true, categories: response.categories };
+    } else {
+      throw new Error(response.message || "Failed to fetch categories with vendors.");
+    }
+  } catch (error) {
+    console.error("Error fetching categories with vendors:", error);
+    return { success: false, message: error.message };
+  }
+};
+
 export const getCategoryDetails = async (categorySlug) => {
   try {
     const response = await apiFetch(`/categories/${categorySlug}`);

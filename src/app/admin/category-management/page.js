@@ -249,7 +249,7 @@ const CategoryCard = ({ category }) => {
           <p className="!text-sm font-heading font-medium text-gray-700 mt-2">
             Total Vendors:
             <span className="text-primary font-semibold">
-              {category.totalVendorCount || category.vendorCount || 0}
+              {category.vendorCount || 0}
             </span>
           </p>
         </div>

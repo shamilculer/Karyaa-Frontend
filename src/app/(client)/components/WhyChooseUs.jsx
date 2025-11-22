@@ -5,13 +5,15 @@ import React from "react";
 
 export default function WhyChooseUs({ data } = {}) {
 
-    console.log(data)
+  console.log(data)
 
   const title = data?.title || "Why choose us ?";
   const heading = data?.heading || "Why thousands trust us";
   const description = data?.description ||
-    "Karyaa is a UAE-based online platform that connects users with trusted event vendors — all in one place. Whether it’s a wedding, birthday, or corporate event, you can easily find and compare planners, caterers, photographers, venues, and more.\n\nWe cater to both individuals and businesses, offering a smart, streamlined way to plan any event. Karyaa helps local vendors grow while making event planning simple, fast, and stress-free.";
+    "Karyaa is a UAE-based online platform that connects users with trusted event vendors — all in one place. Whether it's a wedding, birthday, or corporate event, you can easily find and compare planners, caterers, photographers, venues, and more.\n\nWe cater to both individuals and businesses, offering a smart, streamlined way to plan any event. Karyaa helps local vendors grow while making event planning simple, fast, and stress-free.";
   const imageSrc = data?.image || "/banner-2.jpg";
+  const ctaText = data?.cta_text || "Find Your Vendor";
+  const ctaLink = data?.cta_link || "/categories";
 
   return (
     <section className="mx-auto w-full px-6 max-w-7xl">
@@ -30,7 +32,7 @@ export default function WhyChooseUs({ data } = {}) {
           <h2>{heading}</h2>
           <p style={{ whiteSpace: "pre-line" }}>{description}</p>
           <Button asChild>
-            <Link href="/categories">Find Your Vendor</Link>
+            <Link href={ctaLink}>{ctaText}</Link>
           </Button>
         </div>
       </div>

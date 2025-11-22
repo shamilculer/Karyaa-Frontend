@@ -14,18 +14,18 @@ import {
 
 import UserMenu from "../UserDropDownMenu"; // This is your client component
 import { checkAuthStatus } from "../../../actions/user/user";
-import { getCategories } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/categories";
 import MobileSheetWrapper from "./MobileSheetWrapper"; // 👈 New Import
 
 const Header = async () => {
-    const categoriesResponse = await getCategories();
+    const categoriesResponse = await getCategoriesWithVendors();
     const { isAuthenticated, user } = await checkAuthStatus();
 
     const categories = categoriesResponse.categories || [];
 
     return (
         <header className="sticky top-0 bg-[#FFFEF9] z-900">
-            
+
             {/* -------------------- Desktop Header (Unchanged) -------------------- */}
             <div className="hidden lg:flex w-full py-4 h-[80px] border-b border-gray-300 items-center">
                 <div className="container flex items-center justify-between">
@@ -99,7 +99,7 @@ const Header = async () => {
                                 alt="Karyaa"
                                 width={132}
                                 height={24}
-                                className={`w-44 ${isAuthenticated ? "ml-16" : "ml-10" }`}
+                                className={`w-44 ${isAuthenticated ? "ml-16" : "ml-10"}`}
                             />
                         </Link>
                     </div>
@@ -150,7 +150,7 @@ const Header = async () => {
             {/* -------------------- Mobile Header (Updated) -------------------- */}
             <div className="flex lg:hidden w-full py-4 h-[65px] border-b border-gray-300 items-center">
                 <div className="container flex items-center justify-between">
-                    
+
                     {/* 1. Mobile Sheet Wrapper */}
                     <MobileSheetWrapper
                         isAuthenticated={isAuthenticated}

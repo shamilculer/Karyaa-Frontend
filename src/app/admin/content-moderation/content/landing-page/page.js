@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useForm, Controller } from "react-hook-form";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -34,7 +32,9 @@ const sections = [
     fields: [
       { name: "heading", label: "Heading", type: "text", placeholder: "Why thousands trust us" },
       { name: "description", label: "Description", type: "textarea", placeholder: "Explain what makes you special..." },
-      { name: "image", label: "Feature Image", type: "image" }
+      { name: "image", label: "Feature Image", type: "image" },
+      { name: "cta_text", label: "CTA Button Text", type: "text", placeholder: "Get Started" },
+      { name: "cta_link", label: "CTA Button Link", type: "text", placeholder: "/vendors" }
     ]
   },
   {

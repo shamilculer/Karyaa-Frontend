@@ -9,6 +9,44 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CircleArrowRight } from "lucide-react";
 
+// Generate metadata for SEO
+export async function generateMetadata({ params }) {
+  const { post } = await params;
+  const blogPost = await getBlogPost(post);
+
+  if (!blogPost) {
+    return {
+      title: 'Blog Not Found',
+      description: 'The requested blog post could not be found.',
+    };
+  }
+
+  // Use custom meta title/description if available, otherwise fall back to title
+  const metaTitle = blogPost.metaTitle || blogPost.title;
+  const metaDescription = blogPost.metaDescription || blogPost.title;
+  const keywords = blogPost.seoKeywords || [];
+
+  return {
+    title: metaTitle,
+    description: metaDescription,
+    keywords: keywords.length > 0 ? keywords.join(', ') : undefined,
+    openGraph: {
+      title: metaTitle,
+      description: metaDescription,
+      images: blogPost.coverImage ? [blogPost.coverImage] : [],
+      type: 'article',
+      publishedTime: blogPost.publishedAt || blogPost.createdAt,
+      authors: [blogPost.author?.username || 'Admin'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: metaTitle,
+      description: metaDescription,
+      images: blogPost.coverImage ? [blogPost.coverImage] : [],
+    },
+  };
+}
+
 const BlogPostPage = async ({ params }) => {
   const { post } = await params;
 

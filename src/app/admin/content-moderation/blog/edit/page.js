@@ -294,6 +294,7 @@ const EditBlogPage = () => {
         ctaLink: fetchedData?.ctaLink || "/contact",
         metaTitle: fetchedData?.metaTitle || "",
         metaDescription: fetchedData?.metaDescription || "",
+        seoKeywords: fetchedData?.seoKeywords || [],
     }), [fetchedData])
 
     // Initialize useForm only after data is fetched
@@ -493,33 +494,24 @@ const EditBlogPage = () => {
                                             TextStyle,
                                             Color,
                                         ],
-                                        // Initial content from form state (which is initially empty or loaded via values prop)
                                         content: field.value,
                                         onUpdate: ({ editor }) => {
-                                            // This ensures form state tracks changes from the editor
                                             field.onChange(editor.getHTML())
                                         },
                                         immediatelyRender: false,
                                     })
 
-                                    // --- FIX START ---
-                                    // Effect to manually sync react-hook-form's value to the Tiptap editor
                                     // eslint-disable-next-line react-hooks/rules-of-hooks
                                     useEffect(() => {
                                         if (editor && field.value) {
-                                            // Check if the editor's current content is different from the form value 
-                                            // to prevent infinite loop (set content -> onUpdate -> field.onChange -> useEffect)
                                             const isContentDifferent = editor.getHTML() !== field.value;
-
                                             if (isContentDifferent) {
-                                                // Set the content without setting the focus (false)
                                                 editor.commands.setContent(field.value, false);
                                             }
                                         }
-                                    }, [editor, field.value]) // Dependency on the editor instance and the RHF value
+                                    }, [editor, field.value])
 
                                     if (!editor) return null
-                                    // --- FIX END ---
 
                                     return (
                                         <div className="rounded-lg border border-gray-300 bg-white overflow-visible">
@@ -538,7 +530,6 @@ const EditBlogPage = () => {
                         </div>
                     </CardContent>
                 </Card>
-
 
                 {/* Call to Action */}
                 <Card>
@@ -624,6 +615,101 @@ const EditBlogPage = () => {
                                 {watch("metaDescription")?.length || 0}/160 characters
                             </p>
                         </div>
+
+                        {/* SEO Keywords */}
+                        <div className="space-y-2">
+                            <Label htmlFor="seoKeywords">SEO Keywords</Label>
+                            <Controller
+                                name="seoKeywords"
+                                control={control}
+                                render={({ field }) => {
+                                    const [inputValue, setInputValue] = useState("");
+                                    const keywords = field.value || [];
+
+                                    const addKeyword = () => {
+                                        const keyword = inputValue.trim().toLowerCase();
+                                        if (keyword && !keywords.includes(keyword) && keywords.length < 10) {
+                                            field.onChange([...keywords, keyword]);
+                                            setInputValue("");
+                                        } else if (keywords.length >= 10) {
+                                            toast.error("Maximum 10 keywords allowed");
+                                        } else if (keywords.includes(keyword)) {
+                                            toast.error("Keyword already added");
+                                        }
+                                    };
+
+                                    const removeKeyword = (index) => {
+                                        field.onChange(keywords.filter((_, i) => i !== index));
+                                    };
+
+                                    const handleKeyDown = (e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            addKeyword();
+                                        }
+                                    };
+
+                                    return (
+                                        <div className="space-y-3">
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    id="seoKeywords"
+                                                    placeholder="Enter keyword and press Enter"
+                                                    value={inputValue}
+                                                    onChange={(e) => setInputValue(e.target.value)}
+                                                    onKeyDown={handleKeyDown}
+                                                    className="flex-1"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    onClick={addKeyword}
+                                                    variant="outline"
+                                                    disabled={keywords.length >= 10}
+                                                >
+                                                    Add
+                                                </Button>
+                                            </div>
+                                            
+                                            {keywords.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                    {keywords.map((keyword, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
+                                                        >
+                                                            {keyword}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeKeyword(index)}
+                                                                className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                                                            >
+                                                                <svg
+                                                                    className="w-3 h-3"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M6 18L18 6M6 6l12 12"
+                                                                    />
+                                                                </svg>
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            <p className="text-xs text-gray-500">
+                                                {keywords.length}/10 keywords • Press Enter or click Add to add keywords
+                                            </p>
+                                        </div>
+                                    );
+                                }}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -654,7 +740,7 @@ const EditBlogPage = () => {
                 </div>
             </form>
 
-            {/* Tiptap Editor Styles (Ensure these are globally applied or wrapped in a CSS-in-JS solution) */}
+            {/* Tiptap Editor Styles */}
             <style jsx global>{`
                 .ProseMirror { outline: none; }
                 .ProseMirror p { margin: 0.75rem 0; }

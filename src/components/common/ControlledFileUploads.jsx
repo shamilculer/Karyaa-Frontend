@@ -47,16 +47,18 @@ export default function ControlledFileUpload({
                     
                     {/* Single File Mode - Show uploaded file info */}
                     {!multiple && value && !isUploading ? (
-                        <p className="!text-xs text-green-600 truncate p-2 border border-green-200 rounded-lg bg-green-50 flex justify-between items-center">
-                            ✅ File uploaded: <span className="font-medium max-md:!text-[0px]">{value.substring(value.lastIndexOf('/') + 1)}</span> 
+                        <div className="text-xs text-green-600 p-2 border border-green-200 rounded-lg bg-green-50 flex justify-between items-start gap-2">
+                            <span className="flex-1 break-all">
+                                ✅ File uploaded: <span className="font-medium">{value.substring(value.lastIndexOf('/') + 1)}</span>
+                            </span>
                             <button 
                                 type="button" 
                                 onClick={() => onChange('')}
-                                className="ml-2 text-red-500 hover:text-red-700 text-xs underline font-normal"
+                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs underline font-normal"
                             >
                                 Remove
                             </button>
-                        </p>
+                        </div>
                     ) : (
                         <CldUploadWidget
                             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}

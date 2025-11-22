@@ -1,13 +1,13 @@
 import { Suspense } from "react";
-import { getCategories } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/categories";
 import CategoriesListClient from "./CategoriesList.client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryGridClient } from "./CategoriesList.client";
 
 // --- Async Server Component ---
-async function CategoryListContent({isSavedPage}) {
+async function CategoryListContent({ isSavedPage }) {
   try {
-    const response = await getCategories();
+    const response = await getCategoriesWithVendors();
     return (
       <CategoriesListClient isSavedPage={isSavedPage} initialCategories={response.categories || []} />
     );
@@ -23,7 +23,7 @@ async function CategoryListContent({isSavedPage}) {
 
 async function CategoryGridContent() {
   try {
-    const response = await getCategories();
+    const response = await getCategoriesWithVendors();
     return (
       <CategoryGridClient initialCategories={response.categories || []} />
     );
