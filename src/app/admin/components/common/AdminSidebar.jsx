@@ -80,6 +80,12 @@ const items = [
         accessKey: "reviewManagement",
     },
     {
+        title: "Leads Management",
+        url: "/admin/leads-management",
+        icon: Users,
+        accessKey: "leadsManagement",
+    },
+    {
         title: "Analytics & Insights",
         icon: ChartNoAxesCombined,
         isGroup: true,

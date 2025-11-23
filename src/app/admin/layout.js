@@ -12,6 +12,7 @@ export default function AdminLayout({ children }) {
     const showOverviewStats = [
         "/admin/dashboard",
         "/admin/category-management",
+        "/admin/leads-management",
         "/admin/vendor-management",
         "/admin/review-management",
         "/admin/analytics-insights/vendor-analytics",

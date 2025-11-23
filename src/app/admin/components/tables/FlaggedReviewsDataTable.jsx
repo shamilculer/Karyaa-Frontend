@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Search, Filter, ChevronDown, Check, X, Trash2, Clock, Eye, AlertTriangle, Flag } from 'lucide-react';
+import { Star, Search, Filter, ChevronDown, Check, X, Trash2, Clock, Eye, Flag, AlertTriangle } from 'lucide-react';
 import {
     Pagination,
     PaginationContent,
@@ -17,38 +16,36 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import { getInitials } from '@/utils';
-import { getAllReviews, adminUpdateReview, deleteReview } from '@/app/actions/admin/flaggedReviews';
-import { toast } from 'sonner';
+import { getFlaggedReviews, adminUpdateReview, deleteReview } from '@/app/actions/admin/flaggedReviews';
+import { toast } from "sonner";
 
-const ReviewDataTable = () => {
+const FlaggedReviewsDataTable = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
-    const [ratingFilter, setRatingFilter] = useState(0);
-    const [flaggedFilter, setFlaggedFilter] = useState(false);
-    const [selectedReviews, setSelectedReviews] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
+    const [selectedReviews, setSelectedReviews] = useState([]);
 
     const fetchReviews = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await getAllReviews(currentPage, 15, statusFilter, searchTerm, flaggedFilter);
-            if (response.error) {
-                toast.error(response.error);
+            const res = await getFlaggedReviews(currentPage, 10, statusFilter, searchTerm);
+            if (res.error) {
+                toast.error(res.error);
             } else {
-                setReviews(response.reviews || []);
-                setTotalPages(response.totalPages || 1);
-                setTotalReviews(response.totalReviews || 0);
+                setReviews(res.reviews);
+                setTotalPages(res.totalPages);
+                setTotalReviews(res.totalReviews);
             }
         } catch (error) {
             toast.error("Failed to fetch reviews");
         } finally {
             setLoading(false);
         }
-    }, [currentPage, statusFilter, searchTerm, flaggedFilter]);
+    }, [currentPage, statusFilter, searchTerm]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -57,7 +54,39 @@ const ReviewDataTable = () => {
         return () => clearTimeout(timer);
     }, [fetchReviews]);
 
-    // Status color mapping for the Badge
+    const handleAction = async (id, action) => {
+        let res;
+        if (action === 'Approve') {
+            res = await adminUpdateReview(id, { status: 'Approved', flaggedForRemoval: false });
+        } else if (action === 'Reject') {
+            res = await adminUpdateReview(id, { status: 'Rejected', flaggedForRemoval: false });
+        } else if (action === 'Delete') {
+            res = await deleteReview(id);
+        } else if (action === 'DismissFlag') {
+            res = await adminUpdateReview(id, { flaggedForRemoval: false });
+        }
+
+        if (res?.success) {
+            toast.success(res.message);
+            fetchReviews();
+            setSelectedReviews(prev => prev.filter(rId => rId !== id));
+        } else {
+            toast.error(res?.error || "Action failed");
+        }
+    };
+
+    const handleBulkAction = async (action) => {
+        if (selectedReviews.length === 0) return;
+
+        // Execute actions in parallel
+        const promises = selectedReviews.map(id => handleAction(id, action));
+        await Promise.all(promises);
+
+        setSelectedReviews([]);
+        toast.success(`Bulk ${action} completed`);
+    };
+
+    // Status color mapping
     const getStatusColor = (status) => {
         switch (status) {
             case 'Pending': return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-300';
@@ -67,14 +96,6 @@ const ReviewDataTable = () => {
         }
     };
 
-    const handlePageChange = (page) => {
-        if (page > 0 && page <= totalPages) {
-            setCurrentPage(page);
-            setSelectedReviews([]); // Clear selection on page change
-        }
-    };
-
-    // --- Selection Logic ---
     const handleSelectAll = (checked) => {
         if (checked) {
             setSelectedReviews(reviews.map(r => r._id));
@@ -92,65 +113,17 @@ const ReviewDataTable = () => {
     const isAllSelected = reviews.length > 0 && selectedReviews.length === reviews.length;
     const isIndeterminate = selectedReviews.length > 0 && selectedReviews.length < reviews.length;
 
-    // --- Actions ---
-    const handleAction = async (id, action) => {
-        let result;
-        if (action === 'Delete') {
-            if (!confirm("Are you sure you want to delete this review?")) return;
-            result = await deleteReview(id);
-        } else if (action === 'Dismiss Flag') {
-            result = await adminUpdateReview(id, { flaggedForRemoval: false });
-        } else {
-            // Approve or Reject
-            result = await adminUpdateReview(id, { status: action });
-        }
-
-        if (result.success) {
-            toast.success(result.message);
-            fetchReviews(); // Refresh data
-        } else {
-            toast.error(result.error);
-        }
-    };
-
-    const handleBulkAction = async (action) => {
-        if (!confirm(`Are you sure you want to ${action} ${selectedReviews.length} reviews?`)) return;
-
-        let successCount = 0;
-        let failCount = 0;
-
-        for (const id of selectedReviews) {
-            let result;
-            if (action === 'Delete') {
-                result = await deleteReview(id);
-            } else if (action === 'Dismiss Flag') {
-                result = await adminUpdateReview(id, { flaggedForRemoval: false });
-            } else {
-                result = await adminUpdateReview(id, { status: action });
-            }
-
-            if (result.success) successCount++;
-            else failCount++;
-        }
-
-        if (successCount > 0) toast.success(`Successfully processed ${successCount} reviews.`);
-        if (failCount > 0) toast.error(`Failed to process ${failCount} reviews.`);
-
-        setSelectedReviews([]);
-        fetchReviews();
-    };
-
     return (
         <div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
 
                 {/* Left Side: Search & Filters */}
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-4">
                     {/* Search Input */}
                     <div className="relative w-72">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <Input
-                            placeholder="Search reviews..."
+                            placeholder="Search text..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 pr-4 h-10 bg-white border-gray-300"
@@ -169,21 +142,11 @@ const ReviewDataTable = () => {
                         <DropdownMenuContent align="start">
                             <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => setStatusFilter('All')}>All</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('Pending')}>Pending</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setStatusFilter('Pending')}>Pending Approval</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setStatusFilter('Approved')}>Approved</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setStatusFilter('Rejected')}>Rejected</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-
-                    {/* Flagged Filter Toggle */}
-                    <Button
-                        variant={flaggedFilter ? "destructive" : "outline"}
-                        onClick={() => setFlaggedFilter(!flaggedFilter)}
-                        className={`flex items-center gap-2 border ${flaggedFilter ? '' : 'border-gray-200 bg-[#F2F4FF] text-primary'}`}
-                    >
-                        <AlertTriangle className="w-4 h-4" />
-                        {flaggedFilter ? "Showing Flagged" : "Show Flagged"}
-                    </Button>
                 </div>
 
                 {/* Right Side: Select All and Bulk Actions */}
@@ -208,13 +171,13 @@ const ReviewDataTable = () => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleBulkAction('Approved')}>
+                                <DropdownMenuItem onClick={() => handleBulkAction('Approve')}>
                                     <Check className="w-4 h-4 mr-2 text-green-600" /> Bulk Approve
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleBulkAction('Rejected')}>
+                                <DropdownMenuItem onClick={() => handleBulkAction('Reject')}>
                                     <X className="w-4 h-4 mr-2 text-red-600" /> Bulk Reject
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleBulkAction('Dismiss Flag')}>
+                                <DropdownMenuItem onClick={() => handleBulkAction('DismissFlag')}>
                                     <Flag className="w-4 h-4 mr-2 text-blue-600" /> Bulk Dismiss Flag
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleBulkAction('Delete')} className="text-red-500">
@@ -235,9 +198,7 @@ const ReviewDataTable = () => {
                         <div
                             key={review._id}
                             className={`flex items-start p-4 border-b border-gray-200 transition-colors 
-                                ${selectedReviews.includes(review._id) ? 'bg-indigo-50 border-indigo-300' : 'bg-transparent hover:bg-gray-50'}
-                                ${review.flaggedForRemoval ? 'bg-red-50 border-l-4 border-l-red-500' : ''}
-                            `}
+                                ${selectedReviews.includes(review._id) ? 'bg-indigo-50 border-indigo-300' : 'bg-transparent hover:bg-gray-50'}`}
                         >
 
                             {/* Left Section: Checkbox & Primary Metadata */}
@@ -247,37 +208,20 @@ const ReviewDataTable = () => {
                                         checked={selectedReviews.includes(review._id)}
                                         onCheckedChange={(checked) => handleSelectReview(review._id, checked)}
                                     />
-                                    <span className="!text-sm font-medium text-gray-900">Review #{review._id.slice(-6)}</span>
-                                    {review.flaggedForRemoval && (
-                                        <Badge variant="destructive" className="ml-2 text-[10px] px-1 py-0 h-5">Flagged</Badge>
-                                    )}
+                                    <span className="!text-sm font-medium text-gray-900 flex items-center gap-2">
+                                        Review #{review._id.slice(-6)}
+                                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                                    </span>
                                 </div>
 
                                 {/* User Avatar and Name */}
                                 <div className="flex items-center space-x-2 text-sm mt-5">
                                     <Avatar className="w-10 h-10">
                                         <AvatarImage src={review.user?.profileImage} alt={`${review.user?.username} avatar`} />
-                                        <AvatarFallback>{getInitials(review.user?.username || "User")}</AvatarFallback>
+                                        <AvatarFallback>{getInitials(review.user?.username)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <HoverCard>
-                                            <HoverCardTrigger asChild>
-                                                <p className="!font-medium font-heading text-gray-900 !leading-5 cursor-pointer hover:underline">
-                                                    {review.user?.username || "Unknown User"}
-                                                </p>
-                                            </HoverCardTrigger>
-                                            <HoverCardContent className="w-80 bg-white">
-                                                <div className="space-y-1">
-                                                    <h4 className="text-sm font-semibold">User Details</h4>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">Email:</span> {review.user?.emailAddress || "N/A"}
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">Mobile:</span> {review.user?.mobileNumber || "N/A"}
-                                                    </div>
-                                                </div>
-                                            </HoverCardContent>
-                                        </HoverCard>
+                                        <p className="!font-medium font-heading text-gray-900 !leading-5">{review.user?.username || 'Unknown User'}</p>
                                         <p className="!text-xs text-gray-500">Reviewer</p>
                                     </div>
                                 </div>
@@ -286,33 +230,10 @@ const ReviewDataTable = () => {
                                 <div className="flex items-center space-x-2 text-sm">
                                     <Avatar className="w-10 h-10">
                                         <AvatarImage src={review.vendor?.businessLogo} alt={`${review.vendor?.businessName} avatar`} />
-                                        <AvatarFallback>{getInitials(review.vendor?.businessName || "Vendor")}</AvatarFallback>
+                                        <AvatarFallback>{getInitials(review.vendor?.businessName)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <HoverCard>
-                                            <HoverCardTrigger asChild>
-                                                <p className="!font-medium text-gray-700 font-heading !leading-5 cursor-pointer hover:underline">
-                                                    {review.vendor?.businessName || "Unknown Vendor"}
-                                                </p>
-                                            </HoverCardTrigger>
-                                            <HoverCardContent className="w-80 bg-white">
-                                                <div className="space-y-1">
-                                                    <h4 className="text-sm font-semibold">Vendor Details</h4>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">Owner:</span> {review.vendor?.ownerName || "N/A"}
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">Email:</span> {review.vendor?.email || "N/A"}
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">Phone:</span> {review.vendor?.phoneNumber || "N/A"}
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="font-medium">WhatsApp:</span> {review.vendor?.whatsAppNumber || "N/A"}
-                                                    </div>
-                                                </div>
-                                            </HoverCardContent>
-                                        </HoverCard>
+                                        <p className="!font-medium text-gray-700 font-heading !leading-5">{review.vendor?.businessName || 'Unknown Vendor'}</p>
                                         <p className="!text-xs text-gray-500">Vendor Received</p>
                                     </div>
                                 </div>
@@ -340,6 +261,10 @@ const ReviewDataTable = () => {
                                         <Clock className="w-3 h-3 mr-1" />
                                         {new Date(review.createdAt).toLocaleDateString()}
                                     </div>
+                                    <div className="flex items-center text-red-500 font-medium">
+                                        <Flag className="w-3 h-3 mr-1" />
+                                        Flagged for Removal
+                                    </div>
                                 </div>
                             </div>
 
@@ -357,19 +282,17 @@ const ReviewDataTable = () => {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-40">
                                         <DropdownMenuLabel>Moderation</DropdownMenuLabel>
+                                        <DropdownMenuItem onClick={() => handleAction(review._id, 'DismissFlag')}>
+                                            <Flag className="w-4 h-4 mr-2" /> Dismiss Flag
+                                        </DropdownMenuItem>
                                         {review.status !== 'Approved' && (
-                                            <DropdownMenuItem onClick={() => handleAction(review._id, 'Approved')} className="text-green-600">
+                                            <DropdownMenuItem onClick={() => handleAction(review._id, 'Approve')} className="text-green-600">
                                                 <Check className="w-4 h-4 mr-2" /> Approve
                                             </DropdownMenuItem>
                                         )}
                                         {review.status !== 'Rejected' && (
-                                            <DropdownMenuItem onClick={() => handleAction(review._id, 'Rejected')} className="text-red-600">
+                                            <DropdownMenuItem onClick={() => handleAction(review._id, 'Reject')} className="text-red-600">
                                                 <X className="w-4 h-4 mr-2" /> Reject
-                                            </DropdownMenuItem>
-                                        )}
-                                        {review.flaggedForRemoval && (
-                                            <DropdownMenuItem onClick={() => handleAction(review._id, 'Dismiss Flag')} className="text-blue-600">
-                                                <Flag className="w-4 h-4 mr-2" /> Dismiss Flag
                                             </DropdownMenuItem>
                                         )}
                                         <DropdownMenuItem onClick={() => handleAction(review._id, 'Delete')} className="text-red-500">
@@ -382,46 +305,44 @@ const ReviewDataTable = () => {
                     ))
                 ) : (
                     <div className="text-center py-10 text-gray-500 border border-gray-200 rounded-lg">
-                        No reviews match the current search or filters.
+                        No flagged reviews match the current search or filters.
                     </div>
                 )}
             </div>
 
             {/* Pagination */}
-            {
-                reviews.length > 0 && (
-                    <div className="flex justify-center mt-8">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                    />
+            {reviews.length > 0 && (
+                <div className="flex justify-center mt-8">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                />
+                            </PaginationItem>
+                            {[...Array(totalPages)].map((_, i) => (
+                                <PaginationItem key={i}>
+                                    <PaginationLink
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        isActive={currentPage === i + 1}
+                                    >
+                                        {i + 1}
+                                    </PaginationLink>
                                 </PaginationItem>
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <PaginationItem key={i}>
-                                        <PaginationLink
-                                            onClick={() => handlePageChange(i + 1)}
-                                            isActive={currentPage === i + 1}
-                                        >
-                                            {i + 1}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                ))}
-                                <PaginationItem>
-                                    <PaginationNext
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
-                )
-            }
-        </div >
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
+        </div>
     );
 };
 
-export default ReviewDataTable;
+export default FlaggedReviewsDataTable;

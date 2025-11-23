@@ -3,7 +3,7 @@ import ReviewDataTable from "../components/tables/ReviewDataTable"
 
 const ReviewManagementPage = () => {
   return (
-    <div className="h-full dashboard-container space-y-8">
+    <div className="mb-10 dashboard-container space-y-8">
         <ReviewStatsWrapper />
 
 
