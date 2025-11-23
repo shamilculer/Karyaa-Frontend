@@ -7,8 +7,9 @@ import { getPublishedBlogPosts } from "../../../actions/blog";
 import { Skeleton } from "@/components/ui/skeleton";
 
 async function BlogPostsContent({ searchParams, showPagination = true, exclude }) {
-  const page = Number(searchParams.page ?? 1);
-  const limit = Number(searchParams.limit ?? 15);
+  const params = await searchParams;
+  const page = Number(params.page ?? 1);
+  const limit = Number(params.limit ?? 15);
 
   // Pass exclude slug/id to backend
   const postResponse = await getPublishedBlogPosts({ limit, page, exclude });

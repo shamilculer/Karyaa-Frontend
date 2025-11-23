@@ -131,7 +131,6 @@ const items = [
 function AdminSidebar() {
     const pathname = usePathname();
     const { admin } = useAdminStore();
-
     const [openGroups, setOpenGroups] = useState({});
 
     // auto-open correct group on load and route change

@@ -379,3 +379,26 @@ export async function deleteUserAccount(password) {
     };
   }
 }
+
+/**
+ * Sync current user data from server
+ * @param {string} userId
+ */
+export async function syncCurrentUserDataAction(userId) {
+  try {
+      const response = await apiFetch(`/util/user/${userId}/me`, {
+          method: "GET",
+          auth: true, 
+          role: "user"
+      });
+
+      return response;
+
+  } catch (error) {
+      console.error("Sync user data error:", error);
+      return {
+          success: false,
+          message: error.message || "Failed to sync user data."
+      };
+  }
+}

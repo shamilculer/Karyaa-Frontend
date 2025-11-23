@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export const useClientStore = create(
   persist(
@@ -9,10 +9,17 @@ export const useClientStore = create(
 
       // --- actions ---
       setUser: (user) => set({ user, isAuthenticated: !!user }),
+      
+      // Update user profile (merge with existing data)
+      updateUser: (updates) => set((state) => ({
+        user: state.user ? { ...state.user, ...updates } : null
+      })),
+      
       logout: () => set({ user: null, isAuthenticated: false }),
     }),
     {
-      name: "client-store", // key in localStorage
+      name: "client-store", // key in sessionStorage
+      storage: createJSONStorage(() => sessionStorage), // Use sessionStorage instead of localStorage
     }
   )
 );

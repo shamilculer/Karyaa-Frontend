@@ -180,3 +180,26 @@ export const updateVendorProfile = async (vendorId, updateData) => {
         };
     }
 };
+
+/**
+ * Sync current vendor data from server
+ * @param {string} vendorId
+ */
+export async function syncCurrentVendorDataAction(vendorId) {
+    try {
+        const response = await apiFetch(`/util/vendor/${vendorId}/me`, {
+            method: "GET",
+            auth: true, 
+            role: "vendor"
+        });
+  
+        return response;
+  
+    } catch (error) {
+        console.error("Sync vendor data error:", error);
+        return {
+            success: false,
+            message: error.message || "Failed to sync vendor data."
+        };
+    }
+  }

@@ -8,7 +8,7 @@ import {
   changePassword,
   deleteUserAccount,
 } from "@/app/actions/user/user";
-import ControlledFileUpload from "@/components/common/ControlledFileUploads";
+
 import {
   Card,
   CardContent,
@@ -43,8 +43,10 @@ import {
   Lock,
   Shield,
   AlertTriangle,
+  Camera,
 } from "lucide-react";
 import { useClientStore } from "@/store/clientStore";
+import { CldUploadWidget } from "next-cloudinary";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -141,6 +143,28 @@ export default function ProfilePage() {
     }
   };
 
+  const handleProfileImageUpload = async (result) => {
+    if (result.event === 'success') {
+        const imageUrl = result.info.secure_url
+        
+        // Optimistic update
+        setUser(prev => ({ ...prev, profileImage: imageUrl }))
+        
+        // Save to backend
+        const updateResult = await updateUserProfile({ profileImage: imageUrl })
+        
+        if (updateResult.success) {
+            setStoredUser({ ...storedUser, profileImage: imageUrl })
+            setMessage({ type: "success", text: "Profile picture updated successfully" })
+            setTimeout(() => setMessage({ type: "", text: "" }), 3000)
+        } else {
+            setMessage({ type: "error", text: updateResult.error })
+            // Revert on failure
+            setUser(prev => ({ ...prev, profileImage: user.profileImage }))
+        }
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -202,7 +226,7 @@ export default function ProfilePage() {
           <Card className="border-0 overflow-hidden">
             <CardContent className="relative max-xl:px-0">
               <div className="flex flex-col md:flex-row items-start md:items-end gap-6 px-4">
-                <div className="relative">
+                <div className="relative group">
                   <Avatar className="size-24 xl:size-32 border-4 border-white shadow-2xl ring-4 ring-indigo-100">
                     <AvatarImage
                       src={user?.profileImage}
@@ -212,7 +236,30 @@ export default function ProfilePage() {
                       {getInitials(user?.username)}
                     </AvatarFallback>
                   </Avatar>
+
+                  {/* Upload Button Overlay */}
+                  <CldUploadWidget
+                      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                      onSuccess={handleProfileImageUpload}
+                      options={{
+                          folder: 'client/profiles',
+                          maxFiles: 1,
+                          clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+                          maxFileSize: 5000000, // 5MB
+                      }}
+                  >
+                      {({ open }) => (
+                          <button
+                              type="button"
+                              onClick={() => open()}
+                              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer z-10"
+                          >
+                              <Camera className="w-8 h-8 text-white" />
+                          </button>
+                      )}
+                  </CldUploadWidget>
                 </div>
+
 
                 <div className="flex-1 space-y-2">
                   <div>
@@ -300,25 +347,7 @@ export default function ProfilePage() {
               </div>
             </CardHeader>
             <CardContent className="xl:p-8 space-y-8">
-              {isEditing && (
-                <>
-                  <div className="space-y-2">
-                    <Label className="text-base font-semibold text-gray-700">
-                      Profile Picture
-                    </Label>
-                    <ControlledFileUpload
-                      control={control}
-                      name="profileImage"
-                      label="Upload Profile Image"
-                      errors={profileErrors}
-                      allowedMimeType={["image/jpeg", "image/png", "image/jpg"]}
-                      folderPath="profile-images"
-                      multiple={false}
-                    />
-                  </div>
-                  <Separator className="my-6" />
-                </>
-              )}
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">

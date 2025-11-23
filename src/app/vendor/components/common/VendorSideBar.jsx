@@ -139,10 +139,14 @@ function VendorSideBar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="flex-center p-7">
+            <SidebarFooter className="flex-center py-3 px-1">
                 <Link href="/" onClick={handleLinkClick}>
                     <Image width={150} height={40} alt="Logo" className="w-32" src="/logo.svg" />
                 </Link>
+
+                <p className="text-gray-500 text-center !text-[10px] leading-relaxed">
+                    This website serves solely as a marketplace platform.All financial and contractual transactions occur directly between customers and vendors.<br className="max-lg:hidden" />We are not liable for any transaction-related disputes, losses, or claims.
+                </p>
             </SidebarFooter>
         </Sidebar>
     )

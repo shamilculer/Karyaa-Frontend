@@ -15,9 +15,9 @@ export const getAllAdminsAction = async ({
   const queryParams = new URLSearchParams();
   queryParams.append("page", String(page));
   queryParams.append("limit", String(limit));
-  if (search) queryParams.append("search", search); // Key name updated from 'role' to 'adminLevel'
+  if (search) queryParams.append("search", search);
 
-  if (adminLevel) queryParams.append("adminLevel", adminLevel); // Key name updated from 'status' to 'isActive'
+  if (adminLevel) queryParams.append("adminLevel", adminLevel);
 
   if (isActive !== "") queryParams.append("isActive", isActive);
 
@@ -177,6 +177,89 @@ export const updateAdminPermissionsAction = async (adminId, permissions) => {
         return {
             success: false,
             message: error.message || "An unexpected network error occurred while updating permissions.",
+        };
+    }
+};
+
+// Update admin profile (name, email, phone number)
+export const updateAdminProfileAction = async (profileData) => {
+    if (!profileData) {
+        return {
+            success: false,
+            message: "Profile data is required.",
+        };
+    }
+
+    const endpoint = `/admin/admins/profile/update`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            method: "PUT",
+            role: "admin",
+            auth: true,
+            body: JSON.stringify(profileData),
+        });
+
+        console.log(response);
+
+        if (response.success) {
+            revalidatePath("/admin/settings");
+
+            return {
+                success: true,
+                admin: response.admin,
+                message: response.message || "Profile updated successfully.",
+            };
+        } else {
+            return {
+                success: false,
+                message: response.message || "Failed to update profile.",
+            };
+        }
+    } catch (error) {
+        console.error("Error updating admin profile:", error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred while updating profile.",
+        };
+    }
+};
+
+// Update admin password
+export const updateAdminPasswordAction = async (passwordData) => {
+    if (!passwordData || !passwordData.currentPassword || !passwordData.newPassword) {
+        return {
+            success: false,
+            message: "Current password and new password are required.",
+        };
+    }
+
+    const endpoint = `/admin/admins/password/update`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            method: "PUT",
+            role: "admin",
+            auth: true,
+            body: JSON.stringify(passwordData),
+        });
+
+        if (response.success) {
+            return {
+                success: true,
+                message: response.message || "Password updated successfully.",
+            };
+        } else {
+            return {
+                success: false,
+                message: response.message || "Failed to update password.",
+            };
+        }
+    } catch (error) {
+        console.error("Error updating admin password:", error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred while updating password.",
         };
     }
 };

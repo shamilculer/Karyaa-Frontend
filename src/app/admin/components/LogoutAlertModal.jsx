@@ -41,7 +41,10 @@ const LogoutAlertModal = () => {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button ><LogOut /> Logout</Button>
+                <Button variant="destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
