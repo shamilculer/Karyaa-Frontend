@@ -74,10 +74,10 @@ export default function ViewPackageModal({ packageData }) {
                         <div className="flex flex-wrap gap-2">
                             {packageData.services.map((service) => (
                                 <Badge
-                                    key={service._id}
+                                    key={service}
                                     className="text-xs rounded-full bg-gray-200 text-gray-600"
                                 >
-                                    {service.name}
+                                    {service}
                                 </Badge>
                             ))}
                         </div>
@@ -113,7 +113,8 @@ export default function ViewPackageModal({ packageData }) {
                 </ScrollArea>
 
                 {/* FOOTER (not scrollable) */}
-                <div className="px-6 py-4 border-t flex justify-end border-gray-300">
+                <div className="px-6 py-4 border-t flex items-center justify-between border-gray-300">
+                    <div className="mt-4 text-xs">Starting From <span className="!text-base font-medium font-heading">AED {Number(packageData.priceStartingFrom).toLocaleString()}</span></div>
                     <Button
                         variant="outline"
                         onClick={() => setOpen(false)}

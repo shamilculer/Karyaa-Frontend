@@ -4,20 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useVendorFormStore } from "@/store/vendorFormStore";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 
 import { registerVendor } from "@/app/actions/vendor/auth";
 
 export default function Step03_Review({ isLastStep }) {
     const router = useRouter(); // NEW: Initialize router
     // Added resetForm from store to clear state after successful submission
-    const { formData, resetForm } = useVendorFormStore(); 
+    const { formData, resetForm } = useVendorFormStore();
     const [isConsentChecked, setIsConsentChecked] = useState(false);
     const [showError, setShowError] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
-        
+
         // Check if consent checkbox is checked
         if (!isConsentChecked) {
             setShowError(true);
@@ -32,37 +32,19 @@ export default function Step03_Review({ isLastStep }) {
 
         if (response && response.success) {
             // SUCCESS SCENARIO
-            // 1. Show Success Toast
-            toast.success("Registration Successful!", { // Using toast.success
-                description: "You have been registered! Redirecting to the success page...",
-                duration: 3000,
-            });
-            
-                // 2. Client-Side Redirect (include vendorId in query if available)
-                resetForm(); // Optional: Clear Zustand store state
-                const vendorId = response?.data?.vendor?._id;
-                setTimeout(() => {
-                    // Navigate to the desired success page, passing vendorId when available
-                    if (vendorId) {
-                        router.push(`/auth/vendor/register/success?vendorId=${vendorId}`);
-                    } else {
-                        router.push('/auth/vendor/register/success');
-                    }
-                }, 500); // Wait 500ms for the user to see the toast pop up
-            
         } else if (response && !response.success) {
             // FAILURE SCENARIO
             // 1. Show Error Toast
-            toast.error("Registration Failed", { 
+            toast.error("Registration Failed", {
                 position: "top-center",
                 description: response.error,
                 duration: 5000,
             });
-            
+
             // 2. Stop loading
-            setIsSubmitting(false); 
+            setIsSubmitting(false);
         }
-        
+
         // No need to set isSubmitting(false) on success because the router.push will unmount the component
     };
 
@@ -137,7 +119,7 @@ export default function Step03_Review({ isLastStep }) {
                     className="w-full md:w-60 text-base bg-green-600 hover:bg-green-700"
                     disabled={isSubmitting} // Disable button when submitting
                 >
-                    {isSubmitting ? "Submitting..." : "Submit Registration"} 
+                    {isSubmitting ? "Submitting..." : "Submit Registration"}
                 </Button>
             </div>
         </div>

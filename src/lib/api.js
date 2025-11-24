@@ -156,7 +156,6 @@ export async function apiFetch(url, options = {}) {
 
             if (!response.ok) {
                 const error = await response.json().catch(() => ({}));
-                // console.log(response)
                 throw new Error(error.message || `HTTP ${response.status}`);
             }
 

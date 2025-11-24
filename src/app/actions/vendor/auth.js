@@ -65,6 +65,8 @@ export const loginVendor = async (data) => {
         path: '/',
     });
 
+    console.log(vendor);
+
     return {
       success: true,
       data: vendor,

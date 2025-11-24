@@ -7,7 +7,7 @@ import {
     XCircle,
     Hourglass,
     Calendar,
-    DollarSign,
+    Tag,
     Package,
     Rocket,
     AlertTriangle,
@@ -207,7 +207,7 @@ const SubscriptionData = () => {
                     
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
-                            <DollarSign className="w-4 h-4" />
+                            <Tag className="w-4 h-4" />
                             <span>Price</span>
                         </div>
                         <p className="text-sm font-semibold text-gray-900">{bundle.price ? `${bundle.price} AED` : 'Custom'}</p>

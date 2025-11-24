@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
@@ -252,6 +252,132 @@ const EditorToolbar = ({ editor }) => {
   );
 };
 
+  // Rich text editor wrapper (hooks used at top-level of a component)
+  const RichTextEditor = ({ value, onChange }) => {
+    const editor = useEditor({
+      extensions: [
+        StarterKit,
+        Underline,
+        Link.configure({ openOnClick: false }),
+        Image,
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+        TextStyle,
+        Color,
+      ],
+      content: value,
+      onUpdate: ({ editor }) => {
+        onChange(editor.getHTML());
+      },
+      immediatelyRender: false,
+    });
+
+    useEffect(() => {
+      if (editor && value !== undefined && editor.getHTML() !== value) {
+        editor.commands.setContent(value || "", false);
+      }
+    }, [editor, value]);
+
+    if (!editor) return null;
+
+    return (
+      <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
+        <EditorToolbar editor={editor} />
+        <EditorContent
+          editor={editor}
+          className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
+        />
+      </div>
+    );
+  };
+
+  // Keywords input wrapper (uses hooks at top-level of a component)
+  const KeywordsInput = ({ value = [], onChange }) => {
+    const [inputValue, setInputValue] = useState("");
+    const keywords = value || [];
+
+    const addKeyword = () => {
+      const keyword = inputValue.trim().toLowerCase();
+      if (keyword && !keywords.includes(keyword) && keywords.length < 10) {
+        onChange([...keywords, keyword]);
+        setInputValue("");
+      } else if (keywords.length >= 10) {
+        toast.error("Maximum 10 keywords allowed");
+      } else if (keywords.includes(keyword)) {
+        toast.error("Keyword already added");
+      }
+    };
+
+    const removeKeyword = (index) => {
+      onChange(keywords.filter((_, i) => i !== index));
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addKeyword();
+      }
+    };
+
+    return (
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <Input
+            id="seoKeywords"
+            placeholder="Enter keyword and press Enter"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            onClick={addKeyword}
+            variant="outline"
+            disabled={keywords.length >= 10}
+          >
+            Add
+          </Button>
+        </div>
+
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            {keywords.map((keyword, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
+              >
+                {keyword}
+                <button
+                  type="button"
+                  onClick={() => removeKeyword(index)}
+                  className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <p className="text-xs text-gray-500">
+          {keywords.length}/10 keywords • Press Enter or click Add to add keywords
+        </p>
+      </div>
+    );
+  };
+
 const AddBlogPage = () => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -439,39 +565,9 @@ const AddBlogPage = () => {
                 name="content"
                 control={control}
                 rules={{ required: "Content is required" }}
-                render={({ field }) => {
-                  // eslint-disable-next-line react-hooks/rules-of-hooks
-                  const editor = useEditor({
-                    extensions: [
-                      StarterKit,
-                      Underline,
-                      Link.configure({
-                        openOnClick: false,
-                      }),
-                      Image,
-                      TextAlign.configure({
-                        types: ["heading", "paragraph"],
-                      }),
-                      TextStyle,
-                      Color,
-                    ],
-                    content: field.value,
-                    onUpdate: ({ editor }) => {
-                      field.onChange(editor.getHTML());
-                    },
-                    immediatelyRender: false,
-                  });
-
-                  return (
-                    <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
-                      <EditorToolbar editor={editor} />
-                      <EditorContent
-                        editor={editor}
-                        className="prose max-w-none border-0 p-4 min-h-[400px] focus:outline-none"
-                      />
-                    </div>
-                  );
-                }}
+                render={({ field }) => (
+                  <RichTextEditor value={field.value} onChange={field.onChange} />
+                )}
               />
               {errors.content && (
                 <p className="text-red-500 text-sm">{errors.content.message}</p>
@@ -575,92 +671,9 @@ const AddBlogPage = () => {
               <Controller
                 name="seoKeywords"
                 control={control}
-                render={({ field }) => {
-                  const [inputValue, setInputValue] = useState("");
-                  const keywords = field.value || [];
-
-                  const addKeyword = () => {
-                    const keyword = inputValue.trim().toLowerCase();
-                    if (keyword && !keywords.includes(keyword) && keywords.length < 10) {
-                      field.onChange([...keywords, keyword]);
-                      setInputValue("");
-                    } else if (keywords.length >= 10) {
-                      toast.error("Maximum 10 keywords allowed");
-                    } else if (keywords.includes(keyword)) {
-                      toast.error("Keyword already added");
-                    }
-                  };
-
-                  const removeKeyword = (index) => {
-                    field.onChange(keywords.filter((_, i) => i !== index));
-                  };
-
-                  const handleKeyDown = (e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addKeyword();
-                    }
-                  };
-
-                  return (
-                    <div className="space-y-3">
-                      <div className="flex gap-2">
-                        <Input
-                          id="seoKeywords"
-                          placeholder="Enter keyword and press Enter"
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          onKeyDown={handleKeyDown}
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          onClick={addKeyword}
-                          variant="outline"
-                          disabled={keywords.length >= 10}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                      
-                      {keywords.length > 0 && (
-                        <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                          {keywords.map((keyword, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                            >
-                              {keyword}
-                              <button
-                                type="button"
-                                onClick={() => removeKeyword(index)}
-                                className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                              >
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <p className="text-xs text-gray-500">
-                        {keywords.length}/10 keywords • Press Enter or click Add to add keywords
-                      </p>
-                    </div>
-                  );
-                }}
+                render={({ field }) => (
+                  <KeywordsInput value={field.value} onChange={field.onChange} />
+                )}
               />
             </div>
           </CardContent>

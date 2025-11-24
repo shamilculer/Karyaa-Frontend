@@ -174,9 +174,9 @@ function ReviewsManagePageContent() {
                         <div className="text-lg text-gray-500">Loading stats...</div>
                     ) :  (
                         <>
-                            <div className="text-5xl font-heading font-medium">
+                            <div className="text-3xl font-heading font-medium">
                                 {stats.averageRating?.toFixed(1)}
-                                <span className="text-2xl">/5</span>
+                                <span>/5</span>
                             </div>
                             <div className="flex items-center">
                                 {renderStars(Math.round(stats.averageRating))}

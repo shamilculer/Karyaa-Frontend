@@ -49,8 +49,6 @@ const VendorLoginForm = () => {
                 setErrorMessage(result.error || "Login failed. Please try again.");
                 return;
             }
-
-
             setVendor(result.data);
             
             // Redirect to vendor dashboard

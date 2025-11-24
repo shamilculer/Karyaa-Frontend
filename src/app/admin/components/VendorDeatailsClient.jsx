@@ -1,130 +1,195 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
-    Building2,
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Globe,
-    Calendar,
-    Download,
-    Star,
-    Package,
-    Tag,
-    CheckCircle2,
-    XCircle,
-    Clock,
-    Award,
-    Facebook,
-    Instagram,
-    Twitter,
-    MessageCircle,
-    FileText,
-    Loader2,
-    MoreVertical,
-    PlusCircle,
-    Timer,
-    Edit,
+    Building2, User, Mail, Phone, MapPin, Globe, Calendar, Download,
+    CheckCircle2, XCircle, Clock, Timer, Edit,
+    Image as ImageIcon, Box, Trash2, Save, LayoutDashboard, Loader2,
+    FileText, ArrowLeft, X, ChevronUp,
+    BadgeCheck, Star, Facebook, Instagram, Twitter, MessageCircle,
+    Link as LinkIcon, MoreVertical,
+    Package as PackageIcon, Tag, PlusCircle
 } from 'lucide-react';
 
 import {
-    updateVendorStatusAction,
-    toggleVendorRecommendedAction,
-    updateVendorFeaturesAction,
-    updateVendorDurationAction,
+    updateVendorStatusAction, toggleVendorRecommendedAction, updateVendorBundleAction,
+    getVendorGalleryAction, deleteVendorGalleryItemAction,
+    getVendorPackagesAction,
+    updateVendorFeaturesAction, deleteVendorGalleryItemsAction,
+    updateVendorDurationAction
 } from '@/app/actions/admin/vendors';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentEditModal } from './DocumentEditModal';
+import Link from 'next/link';
+import Image from 'next/image';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import ViewPackageModal from '@/app/vendor/components/ViewPackageModal';
+import EditPackageModal from './EditPackageModal';
+import DeletePackageModal from './DeletePackageModal';
+import GalleryToolbar from './GalleryToolbar';
+import AdminVendorProfileForm from './AdminVendorProfileForm';
+import { Checkbox } from '@/components/ui/checkbox';
 
-// --- DROP-DOWN PLACEHOLDERS ---
-const DropdownMenu = ({ children }) => <div className="relative inline-block text-left">{children}</div>;
-const DropdownMenuTrigger = ({ children }) => <div className="cursor-pointer">{children}</div>;
-const DropdownMenuContent = ({ children }) => (
-    <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-1">{children}</div>
-);
-const DropdownMenuItem = ({ onClick, children, disabled, className }) => (
-    <button
-        onClick={onClick}
-        disabled={disabled}
-        className={`group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-    >
-        {children}
-    </button>
-);
-const DropdownMenuSeparator = () => <div className="my-1 h-px bg-gray-200" />;
+import AdminCommentsSection from './AdminCommentsSection';
+import AdditionalDocumentsSection from './AdditionalDocumentsSection';
 
-const Input = ({ value, onChange, placeholder, className, disabled, type = "text" }) => (
-    <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 ${className}`}
-    />
-);
+const OCCASIONS = [
+    { value: "wedding", label: "Wedding" },
+    { value: "engagement", label: "Engagement" },
+    { value: "proposal", label: "Proposal" },
+    { value: "baby-shower", label: "Baby Shower" },
+    { value: "gender-reveal", label: "Gender Reveal" },
+    { value: "birthday", label: "Birthday" },
+    { value: "graduation", label: "Graduation" },
+    { value: "corporate-event", label: "Corporate Event" },
+    { value: "brand-launch", label: "Brand Launch" },
+    { value: "festivities", label: "Festivities" },
+    { value: "anniversary", label: "Anniversary" },
+];
 
-const Select = ({ value, onChange, children, disabled, className }) => (
-    <select
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 ${className}`}
-    >
-        {children}
-    </select>
-);
-
-
-const VendorDetailsClient = ({ vendorData }) => {
+const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcategories = [] }) => {
     const [vendor, setVendor] = useState(vendorData);
+    const [activeTab, setActiveTab] = useState("overview");
     const [isUpdating, setIsUpdating] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [newCustomFeature, setNewCustomFeature] = useState('');
-    const [isFeatureSubmitting, setIsFeatureSubmitting] = useState(false);
     const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
-    
-    // Custom duration states
-    const [showDurationForm, setShowDurationForm] = useState(false);
-    const [customDuration, setCustomDuration] = useState({
-        value: vendor.customDuration?.value || '',
-        unit: vendor.customDuration?.unit || 'months',
-        bonusPeriod: {
-            value: vendor.customDuration?.bonusPeriod?.value || '',
-            unit: vendor.customDuration?.bonusPeriod?.unit || 'months'
-        }
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [isEditingSubscription, setIsEditingSubscription] = useState(false);
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const [isFeatureSubmitting, setIsFeatureSubmitting] = useState(false);
+    const [newCustomFeature, setNewCustomFeature] = useState('');
+    const [galleryItems, setGalleryItems] = useState([]);
+    const [isGalleryLoading, setIsGalleryLoading] = useState(false);
+    const [packages, setPackages] = useState([]);
+    const [isPackagesLoading, setIsPackagesLoading] = useState(false);
+    const [bulkMode, setBulkMode] = useState(false);
+    const [selectedGalleryItems, setSelectedGalleryItems] = useState([]);
+    const [bundleFormData, setBundleFormData] = useState({
+        bundleId: vendor.selectedBundle?._id || "",
+        subscriptionStartDate: vendor.subscriptionStartDate ? new Date(vendor.subscriptionStartDate).toISOString().split('T')[0] : "",
+        subscriptionEndDate: vendor.subscriptionEndDate ? new Date(vendor.subscriptionEndDate).toISOString().split('T')[0] : ""
     });
-    const [isDurationSubmitting, setIsDurationSubmitting] = useState(false);
+    const [customDurationValue, setCustomDurationValue] = useState(vendor.subscriptionDuration?.base?.value || 12);
+    const [customDurationUnit, setCustomDurationUnit] = useState(vendor.subscriptionDuration?.base?.unit || 'months');
+    const [bonusPeriodValue, setBonusPeriodValue] = useState(vendor.subscriptionDuration?.bonus?.value || 0);
+    const [bonusPeriodUnit, setBonusPeriodUnit] = useState(vendor.subscriptionDuration?.bonus?.unit || 'months');
+
+    useEffect(() => {
+        if (activeTab === "gallery") fetchGallery();
+        else if (activeTab === "packages") fetchPackages();
+    }, [activeTab]);
+
+    // Sync duration state with vendor changes (e.g. after bundle update)
+    useEffect(() => {
+        if (vendor.subscriptionDuration) {
+            setCustomDurationValue(vendor.subscriptionDuration.base?.value || 12);
+            setCustomDurationUnit(vendor.subscriptionDuration.base?.unit || 'months');
+            setBonusPeriodValue(vendor.subscriptionDuration.bonus?.value || 0);
+            setBonusPeriodUnit(vendor.subscriptionDuration.bonus?.unit || 'months');
+        }
+    }, [vendor.subscriptionDuration]);
+
+    const fetchGallery = async () => {
+        setIsGalleryLoading(true);
+        const result = await getVendorGalleryAction(vendor._id);
+        if (result.success) setGalleryItems(result.data);
+        else toast.error(result.message);
+        setIsGalleryLoading(false);
+    };
+
+    const fetchPackages = async () => {
+        setIsPackagesLoading(true);
+        const result = await getVendorPackagesAction(vendor._id);
+        if (result.success) setPackages(result.data);
+        else toast.error(result.message);
+        setIsPackagesLoading(false);
+    };
 
     const handleStatusChange = async (newStatus) => {
-        setIsDropdownOpen(false);
+        setIsStatusDropdownOpen(false);
         setIsUpdating(true);
-
         const result = await updateVendorStatusAction(vendor._id, newStatus);
-
         if (result.success) {
             setVendor(result.data);
             toast.success(result.message);
-        } else {
-            toast.error(result.message);
-        }
+        } else toast.error(result.message);
         setIsUpdating(false);
     };
 
-    const handleToggleRecommended = async () => {
-        setIsDropdownOpen(false);
+    const handleToggleCertified = async () => {
+        setIsStatusDropdownOpen(false);
         setIsUpdating(true);
         const result = await toggleVendorRecommendedAction(vendor._id);
-
         if (result.success) {
             setVendor(result.data);
             toast.success(result.message);
+        } else toast.error(result.message);
+        setIsUpdating(false);
+    };
+
+    const handleDeleteGalleryItem = async (itemId) => {
+        if (!confirm("Delete this image?")) return;
+        const result = await deleteVendorGalleryItemAction(vendor._id, itemId);
+        if (result.success) {
+            setGalleryItems(prev => prev.filter(item => item._id !== itemId));
+            toast.success("Image deleted");
+        } else toast.error(result.message);
+    };
+
+    const toggleSelection = (id) => {
+        setSelectedGalleryItems(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Delete ${selectedGalleryItems.length} items?`)) return;
+
+        const result = await deleteVendorGalleryItemsAction(vendor._id, selectedGalleryItems);
+        if (result.success) {
+            setGalleryItems(prev => prev.filter(item => !selectedGalleryItems.includes(item._id)));
+            setSelectedGalleryItems([]);
+            setBulkMode(false);
+            toast.success("Items deleted successfully");
+        } else {
+            toast.error(result.message);
+        }
+    };
+
+    const handleBundleUpdate = async (e) => {
+        e.preventDefault();
+        setIsUpdating(true);
+        const result = await updateVendorBundleAction(vendor._id, bundleFormData);
+        if (result.success) {
+            setVendor(result.data);
+            setIsEditingSubscription(false);
+            toast.success("Bundle updated");
+        } else toast.error(result.message);
+        setIsUpdating(false);
+    };
+
+    const handleDurationUpdate = async (e) => {
+        e.preventDefault();
+        setIsUpdating(true);
+        const result = await updateVendorDurationAction(vendor._id, {
+            value: parseInt(customDurationValue),
+            unit: customDurationUnit,
+            bonusPeriod: {
+                value: parseInt(bonusPeriodValue),
+                unit: bonusPeriodUnit
+            }
+        });
+
+        if (result.success) {
+            setVendor(result.data);
+            toast.success("Duration updated successfully");
         } else {
             toast.error(result.message);
         }
@@ -156,81 +221,26 @@ const VendorDetailsClient = ({ vendorData }) => {
         setIsFeatureSubmitting(false);
     };
 
-    const handleUpdateDuration = async (e) => {
-        e.preventDefault();
-        
-        if (!customDuration.value || customDuration.value <= 0) {
-            toast.error("Duration value must be greater than 0");
-            return;
-        }
-
-        setIsDurationSubmitting(true);
-
-        const durationData = {
-            value: parseInt(customDuration.value),
-            unit: customDuration.unit,
-            bonusPeriod: customDuration.bonusPeriod.value ? {
-                value: parseInt(customDuration.bonusPeriod.value),
-                unit: customDuration.bonusPeriod.unit
-            } : { value: 0, unit: 'months' }
-        };
-
-        const result = await updateVendorDurationAction(vendor._id, durationData);
-
-        if (result.success) {
-            setVendor(result.data);
-            setShowDurationForm(false);
-            toast.success(result.message);
-        } else {
-            toast.error(result.message);
-        }
-
-        setIsDurationSubmitting(false);
-    };
-
-    const handleDocumentUpdate = (updatedData) => {
-        // Merge the updated document data with existing vendor data
-        setVendor(prev => ({
-            ...prev,
-            ...updatedData.documents,
-            tradeLicenseNumber: updatedData.documents?.tradeLicenseNumber || prev.tradeLicenseNumber,
-            personalEmiratesIdNumber: updatedData.documents?.personalEmiratesIdNumber || prev.personalEmiratesIdNumber,
-            tradeLicenseCopy: updatedData.documents?.tradeLicenseCopy || prev.tradeLicenseCopy,
-            emiratesIdCopy: updatedData.documents?.emiratesIdCopy || prev.emiratesIdCopy,
-            businessLicenseCopy: updatedData.documents?.businessLicenseCopy || prev.businessLicenseCopy,
-            passportOrIdCopy: updatedData.documents?.passportOrIdCopy || prev.passportOrIdCopy,
-        }));
-    };
-
     const getStatusColor = (status) => {
         switch (status) {
-            case 'approved':
-                return 'bg-green-100 text-green-800 border-green-200';
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'rejected':
-                return 'bg-red-100 text-red-800 border-red-200';
-            case 'expired':
-                return 'bg-orange-100 text-orange-800 border-orange-200';
-            default:
-                return 'bg-gray-100 text-gray-800 border-gray-200';
+            case 'approved': return 'bg-green-50 text-green-700 border-green-200';
+            case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+            case 'rejected': return 'bg-red-50 text-red-700 border-red-200';
+            case 'expired': return 'bg-orange-50 text-orange-700 border-orange-200';
+            default: return 'bg-gray-50 text-gray-700 border-gray-200';
         }
     };
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     const getDurationDisplay = () => {
         if (vendor.subscriptionDuration) {
             const base = vendor.subscriptionDuration.base;
             const bonus = vendor.subscriptionDuration.bonus;
-            
+
             let display = `${base.value} ${base.unit}`;
             if (bonus && bonus.value > 0) {
                 display += ` + ${bonus.value} ${bonus.unit} bonus`;
@@ -240,642 +250,685 @@ const VendorDetailsClient = ({ vendorData }) => {
         return 'N/A';
     };
 
-    return (
-        <div className="min-h-screen p-4 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-3">
+    console.log(vendor);
 
-                {/* Header Section */}
-                <div>
-                    <div className="p-8">
-                        <div className="flex flex-col md:flex-row gap-6">
-                            {/* Logo */}
-                            <div className="relative">
-                                <Avatar className="w-36 h-36 rounded-2xl border-4 border-white shadow-xl bg-white">
-                                    <AvatarImage className="size-full object-cover" src={vendor.businessLogo || 'https://placehold.co/200x200/6366f1/FFFFFF?text=Logo'} />
-                                    <AvatarFallback>{getInitials(vendor?.businessName)}</AvatarFallback>
-                                </Avatar>
-                                {vendor.isRecommended && (
-                                    <div className="absolute -top-2 -right-2 bg-yellow-400 rounded-full p-2 shadow-lg">
-                                        <Award className="w-5 h-5 text-white" />
-                                    </div>
+    return (
+        <div className="min-h-screen">
+            <div className="max-w-7xl mx-auto p-6 space-y-6">
+                <Link href="/admin/vendor-management">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                        <ArrowLeft className="w-4 h-4" />Back to Vendors
+                    </Button>
+                </Link>
+
+                {/* Header */}
+                <div className='my-5'>
+                    <div className="flex items-start gap-6">
+                        <div className="relative flex-shrink-0">
+                            <Avatar className="w-32 h-32 rounded-2xl border-4 border-white shadow-lg">
+                                <AvatarImage className="object-cover" src={vendor.businessLogo} />
+                                <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl">
+                                    {getInitials(vendor.businessName)}
+                                </AvatarFallback>
+                            </Avatar>
+                            {vendor.isRecommended && (
+                                <div className="absolute -top-2 -left-2 bg-amber-400 rounded-full p-2 shadow-lg">
+                                    <BadgeCheck className="w-5 h-5 text-white" />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                                <div className="flex-1 min-w-0">
+                                    <h1 className="!text-3xl font-bold text-gray-900 mb-1">{vendor.businessName}</h1>
+                                    {vendor.tagline && <p className="!text-sm text-gray-600 italic">{vendor.tagline}</p>}
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Badge className={`${getStatusColor(vendor.vendorStatus)} border-0 font-semibold px-4 py-1.5 text-sm uppercase tracking-wide`}>
+                                        {vendor.vendorStatus === 'approved' && <CheckCircle2 className="w-4 h-4 mr-1.5" />}
+                                        {vendor.vendorStatus === 'pending' && <Clock className="w-4 h-4 mr-1.5" />}
+                                        {vendor.vendorStatus === 'rejected' && <XCircle className="w-4 h-4 mr-1.5" />}
+                                        {vendor.vendorStatus === 'expired' && <Timer className="w-4 h-4 mr-1.5" />}
+                                        {vendor.vendorStatus.toUpperCase()}
+                                    </Badge>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                disabled={isUpdating}
+                                                className="rounded-full border-gray-400 border"
+                                            >
+                                                <MoreVertical className="w-5 h-5" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-48">
+                                            <DropdownMenuItem
+                                                onClick={() => handleStatusChange('approved')}
+                                                disabled={vendor.vendorStatus === 'approved'}
+                                            >
+                                                <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
+                                                Approve
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => handleStatusChange('pending')}
+                                                disabled={vendor.vendorStatus === 'pending'}
+                                            >
+                                                <Clock className="w-4 h-4 mr-2 text-yellow-600" />
+                                                Set Pending
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => handleStatusChange('rejected')}
+                                                disabled={vendor.vendorStatus === 'rejected'}
+                                            >
+                                                <XCircle className="w-4 h-4 mr-2 text-red-600" />
+                                                Reject
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => handleStatusChange('expired')}
+                                                disabled={vendor.vendorStatus === 'expired'}
+                                            >
+                                                <Timer className="w-4 h-4 mr-2 text-orange-600" />
+                                                Set Expired
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onClick={handleToggleCertified}>
+                                                <BadgeCheck className="w-4 h-4 mr-2 text-blue-600" />
+                                                {vendor.isRecommended ? 'Remove From Recommendations' : 'Mark as Recommended'}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {Array.isArray(vendor.mainCategory) && vendor.mainCategory.length > 0 ? (
+                                    vendor.mainCategory.map((cat, idx) => (
+                                        <Badge key={idx} variant="secondary" className="text-xs font-medium bg-indigo-100 text-indigo-700 border-0 px-3 py-1">
+                                            {typeof cat === 'object' ? cat.name : cat}
+                                        </Badge>
+                                    ))
+                                ) : (
+                                    <Badge variant="secondary" className="text-xs font-medium bg-indigo-100 text-indigo-700 border-0 px-3 py-1">
+                                        {vendor.mainCategory?.name || "No Category"}
+                                    </Badge>
                                 )}
                             </div>
 
-                            {/* Business Info and Actions */}
-                            <div className="flex-1 mt-16 md:mt-0">
-                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-
-                                    {/* Business Details */}
-                                    <div>
-                                        <h1 className="!text-[28px] font-bold text-gray-900">{vendor.businessName}</h1>
-                                        {vendor.tagline && <p className="text-gray-600 !text-sm italic mb-1">{vendor.tagline}</p>}
-                                        <div className="flex flex-wrap gap-2 mb-3">
-                                            {vendor.isInternational && (
-                                                <Badge className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-1">
-                                                    <Globe className="w-3 h-3" />
-                                                    International Vendor
-                                                </Badge>
-                                            )}
-                                            {vendor.mainCategory?.map((cat, i) => (
-                                                <Badge key={i} className="px-2 py-.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
-                                                    {cat.name}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm">
-                                            <div className="flex items-center gap-1">
-                                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                <span className="font-semibold">{vendor.averageRating || 0}</span>
-                                                <span className="text-gray-500">({vendor.reviewCount || 0} reviews)</span>
-                                            </div>
-                                            {vendor.pricingStartingFrom > 0 && (
-                                                <>
-                                                    <span className="text-gray-500">•</span>
-                                                    <span className="text-gray-600">Starting from AED {vendor.pricingStartingFrom}</span>
-                                                </>
-                                            )}
-                                        </div>
+                            <div className="flex flex-wrap items-center gap-4 text-sm">
+                                {vendor.averageRating > 0 && (
+                                    <div className="flex items-center gap-1.5">
+                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                        <span className="font-bold text-gray-900">{vendor.averageRating.toFixed(1)}</span>
+                                        <span className="text-gray-500">({vendor.reviewCount || 0} reviews)</span>
                                     </div>
-
-                                    {/* Status Badges and Quick Actions Dropdown */}
-                                    <div className="flex items-start gap-4">
-                                        <div className="flex flex-col gap-2">
-                                            <span className={`px-2 py-1 rounded-lg !text-sm font-semibold border text-center ${getStatusColor(vendor.vendorStatus)}`}>
-                                                {vendor.vendorStatus === 'approved' && <CheckCircle2 className="w-4 h-4 inline mr-2" />}
-                                                {vendor.vendorStatus === 'pending' && <Clock className="w-4 h-4 inline mr-2" />}
-                                                {vendor.vendorStatus === 'rejected' && <XCircle className="w-4 h-4 inline mr-2" />}
-                                                {vendor.vendorStatus === 'expired' && <Timer className="w-4 h-4 inline mr-2" />}
-                                                {vendor.vendorStatus?.toUpperCase()}
-                                            </span>
-
-                                            {vendor.createdAt && (
-                                                <div className="flex items-center gap-2 mt-4 text-gray-600">
-                                                    <Calendar className="w-5 h-5" />
-                                                    <span className='!text-sm'>Registered on {formatDate(vendor.createdAt)}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Quick Actions Dropdown */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="w-10 h-10 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-                                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                                    disabled={isUpdating}
-                                                >
-                                                    {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : <MoreVertical className="w-5 h-5" />}
-                                                </Button>
-                                            </DropdownMenuTrigger>
-
-                                            {isDropdownOpen && (
-                                                <DropdownMenuContent>
-                                                    <div className="p-2 space-y-1">
-                                                        <p className="text-xs font-semibold text-gray-500 uppercase px-2 mb-1">Vendor Status</p>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleStatusChange('approved')}
-                                                            disabled={isUpdating || vendor.vendorStatus === 'approved'}
-                                                            className={vendor.vendorStatus === 'approved' ? 'bg-green-100 text-green-700' : ''}
-                                                        >
-                                                            <CheckCircle2 className="mr-2 h-4 w-4" />
-                                                            <span>{vendor.vendorStatus === 'approved' ? 'Approved ✓' : 'Approve'}</span>
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleStatusChange('pending')}
-                                                            disabled={isUpdating || vendor.vendorStatus === 'pending'}
-                                                            className={vendor.vendorStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' : ''}
-                                                        >
-                                                            <Clock className="mr-2 h-4 w-4" />
-                                                            <span>{vendor.vendorStatus === 'pending' ? 'Pending ✓' : 'Set Pending'}</span>
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleStatusChange('expired')}
-                                                            disabled={isUpdating || vendor.vendorStatus === 'expired'}
-                                                            className={vendor.vendorStatus === 'expired' ? 'bg-orange-100 text-orange-700' : ''}
-                                                        >
-                                                            <Timer className="mr-2 h-4 w-4" />
-                                                            <span>{vendor.vendorStatus === 'expired' ? 'Expired ✓' : 'Mark Expired'}</span>
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleStatusChange('rejected')}
-                                                            disabled={isUpdating || vendor.vendorStatus === 'rejected'}
-                                                            className={vendor.vendorStatus === 'rejected' ? 'bg-red-100 text-red-700' : ''}
-                                                        >
-                                                            <XCircle className="mr-2 h-4 w-4" />
-                                                            <span>{vendor.vendorStatus === 'rejected' ? 'Rejected ✓' : 'Reject'}</span>
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuSeparator />
-
-                                                        <DropdownMenuItem
-                                                            onClick={handleToggleRecommended}
-                                                            disabled={isUpdating}
-                                                            className={vendor.isRecommended ? 'bg-yellow-100 text-yellow-700' : ''}
-                                                        >
-                                                            <Award className="mr-2 h-4 w-4" />
-                                                            <span>{vendor.isRecommended ? 'Recommended ✓' : 'Add Recommended'}</span>
-                                                        </DropdownMenuItem>
-                                                    </div>
-                                                </DropdownMenuContent>
-                                            )}
-                                        </DropdownMenu>
-                                    </div>
-                                </div>
+                                )}
+                                <span className="text-gray-400">•</span>
+                                {vendor.pricingStartingFrom > 0 && (
+                                    <>
+                                        <span className="text-gray-600">Starting from <span className="font-bold text-gray-900">AED {vendor.pricingStartingFrom}</span></span>
+                                        <span className="text-gray-400">•</span>
+                                    </>
+                                )}
+                                <span className="text-gray-500 flex items-center gap-1.5">
+                                    <Calendar className="w-4 h-4" />
+                                    Registered on {formatDate(vendor.createdAt)}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="w-full justify-start border-b border-b-secondary bg-white p-0 h-auto rounded-none shadow-sm">
+                        <TabsTrigger value="overview" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="gallery" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                            <ImageIcon className="w-4 h-4 mr-2" /> Gallery
+                        </TabsTrigger>
+                        <TabsTrigger value="packages" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                            <Box className="w-4 h-4 mr-2" /> Packages
+                        </TabsTrigger>
+                    </TabsList>
 
-                    {/* Right Column - Details */}
-                    <div className="lg:col-span-2 space-y-6">
-
-                        {/* Business Description */}
-                        {vendor.businessDescription && (
-                            <div className="bg-white rounded p-6 border border-gray-100">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-indigo-600" />
-                                    About the Business
-                                </h2>
-
-                                <div className='my-5 flex flex-wrap items-center gap-3'>
-                                    {vendor.subCategories?.length > 0 && vendor.subCategories.map(sub => (
-                                        <Badge key={sub._id} className="bg-gray-100 text-gray-800 !px-3 !py-1 rounded-3xl !text-sm border border-gray-300">{sub.name}</Badge>
-                                    ))}
-                                </div>
-                                <p className="text-gray-700 leading-relaxed">{vendor.businessDescription}</p>
-                            </div>
-                        )}
-
-                        {/* Subscription Details */}
-                        {vendor.selectedBundle && (
-                            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded p-6 border border-indigo-200">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Package className="w-5 h-5 text-indigo-600" />
-                                    Subscription Details
-                                </h2>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Bundle</p>
-                                        <p className="text-lg font-bold text-indigo-600">{vendor.selectedBundle.name}</p>
-                                        <p className="text-sm text-gray-500">AED {vendor.selectedBundle.price}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Total Duration</p>
-                                        <p className="text-lg font-bold text-gray-900">{getDurationDisplay()}</p>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => setShowDurationForm(!showDurationForm)}
-                                            className="text-indigo-600 hover:text-indigo-700 p-0 h-auto mt-1"
-                                        >
-                                            {showDurationForm ? 'Cancel' : 'Customize Duration'}
-                                        </Button>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Status</p>
-                                        <span className={`inline-block px-3 py-1 rounded-lg text-sm font-semibold ${getStatusColor(vendor.vendorStatus)}`}>
-                                            {vendor.vendorStatus?.toUpperCase()}
-                                        </span>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Location</p>
-                                        <p className="font-medium text-gray-900">{vendor.address?.city}, {vendor.address?.country}</p>
-                                    </div>
-
-                                    {vendor.subscriptionStartDate && (
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">Start Date</p>
-                                            <p className="font-medium text-gray-900 flex items-center gap-2">
-                                                <Calendar className="w-4 h-4" />
-                                                {formatDate(vendor.subscriptionStartDate)}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {vendor.subscriptionEndDate && (
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">End Date</p>
-                                            <p className="font-medium text-gray-900 flex items-center gap-2">
-                                                <Calendar className="w-4 h-4" />
-                                                {formatDate(vendor.subscriptionEndDate)}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Custom Duration Form */}
-                                {showDurationForm && (
-                                    <form onSubmit={handleUpdateDuration} className="mt-6 p-4 bg-white rounded-lg border border-indigo-300">
-                                        <h3 className="font-semibold text-gray-800 mb-4">Set Custom Duration</h3>
-                                        
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <label className="text-sm text-gray-600 mb-1 block">Base Duration Value</label>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    value={customDuration.value}
-                                                    onChange={(e) => setCustomDuration(prev => ({ ...prev, value: e.target.value }))}
-                                                    placeholder="e.g., 1"
-                                                    disabled={isDurationSubmitting}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-sm text-gray-600 mb-1 block">Base Duration Unit</label>
-                                                <Select
-                                                    value={customDuration.unit}
-                                                    onChange={(e) => setCustomDuration(prev => ({ ...prev, unit: e.target.value }))}
-                                                    disabled={isDurationSubmitting}
-                                                >
-                                                    <option value="days">Days</option>
-                                                    <option value="months">Months</option>
-                                                    <option value="years">Years</option>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <label className="text-sm text-gray-600 mb-1 block">Bonus Period Value</label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    value={customDuration.bonusPeriod.value}
-                                                    onChange={(e) => setCustomDuration(prev => ({
-                                                        ...prev,
-                                                        bonusPeriod: { ...prev.bonusPeriod, value: e.target.value }
-                                                    }))}
-                                                    placeholder="e.g., 3"
-                                                    disabled={isDurationSubmitting}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-sm text-gray-600 mb-1 block">Bonus Period Unit</label>
-                                                <Select
-                                                    value={customDuration.bonusPeriod.unit}
-                                                    onChange={(e) => setCustomDuration(prev => ({
-                                                        ...prev,
-                                                        bonusPeriod: { ...prev.bonusPeriod, unit: e.target.value }
-                                                    }))}
-                                                    disabled={isDurationSubmitting}
-                                                >
-                                                    <option value="days">Days</option>
-                                                    <option value="months">Months</option>
-                                                    <option value="years">Years</option>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        <Button
-                                            type="submit"
-                                            disabled={isDurationSubmitting || !customDuration.value}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                                        >
-                                            {isDurationSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update Duration'}
-                                        </Button>
-                                    </form>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Features */}
-                        {vendor.allFeatures && vendor.allFeatures.length > 0 && (
-                            <div className="bg-white shadow p-6 border border-gray-100">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Tag className="w-5 h-5 text-indigo-600" />
-                                    Features & Benefits
-                                </h2>
-
-                                <h3 className="font-semibold text-gray-700 !text-base mb-3">Bundle Features</h3>
-                                <div className="grid md:grid-cols-2 gap-3">
-                                    {vendor.allFeatures.map((feature, i) => (
-                                        <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                                            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                            <span className="text-sm text-gray-700">{feature}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {vendor.customFeatures && vendor.customFeatures.length > 0 && (
-                                    <div className="mt-6">
-                                        <h3 className="font-semibold text-gray-700 !text-base mb-3">
-                                            Custom Features
+                    {/* OVERVIEW TAB */}
+                    <TabsContent value="overview" className="mt-6 space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Main Content */}
+                            <div className="lg:col-span-2 space-y-6">
+                                {/* Vendor Profile - EDITABLE */}
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
+                                            <Building2 className="w-5 h-5 text-blue-600" />
+                                            Vendor Profile
                                         </h3>
+                                        {!isEditingProfile && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setIsEditingProfile(true)}
+                                                disabled={isUpdating}
+                                                className="shadow-sm"
+                                            >
+                                                <Edit className="w-3.5 h-3.5 mr-1.5" />Edit
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {isEditingProfile ? (
+                                        <AdminVendorProfileForm
+                                            vendor={vendor}
+                                            categories={categories}
+                                            subcategories={subcategories}
+                                            onSuccess={(updatedVendor) => {
+                                                setVendor(updatedVendor);
+                                                setIsEditingProfile(false);
+                                                toast.success("Profile updated successfully");
+                                            }}
+                                            onCancel={() => setIsEditingProfile(false)}
+                                        />
+                                    ) : (
+                                        <div className="space-y-3 text-sm">
+                                            <div className='my-5 flex flex-wrap items-center gap-3'>
+                                                {vendor.subCategories?.length > 0 && vendor.subCategories.map(sub => (
+                                                    <Badge key={sub._id} className="bg-gray-100 text-gray-800 !px-3 !py-1 rounded-3xl !text-sm border border-gray-300">{sub.name}</Badge>
+                                                ))}
+                                            </div>
+                                            <div><p className="text-xs font-bold text-gray-500 mb-1">Description</p><p className="text-gray-700 whitespace-pre-wrap">{vendor.businessDescription || 'N/A'}</p></div>
+                                            <div><p className="text-xs font-bold text-gray-500 mb-1">Occasions Served</p>
+                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                    {vendor.occasionsServed && vendor.occasionsServed.length > 0 ? vendor.occasionsServed.map((occ, idx) => (
+                                                        <Badge key={idx} variant="outline" className="bg-gray-100 text-gray-800 !px-3 !py-1 rounded-3xl !text-sm border border-gray-300">{OCCASIONS.find(o => o.value === occ)?.label || occ}</Badge>
+                                                    )) : <span className="text-gray-400 text-xs">None</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Subscription Details */}
+                                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded p-6 border border-indigo-200">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
+                                            <PackageIcon className="w-5 h-5 text-blue-600" />
+                                            Subscription Details
+                                        </h3>
+                                        <Button variant="outline" size="sm" onClick={() => setIsEditingSubscription(!isEditingSubscription)} className="shadow-sm">
+                                            {isEditingSubscription ? <><ChevronUp className="w-3.5 h-3.5 mr-1.5" />Close</> : <><Edit className="w-3.5 h-3.5 mr-1.5" />Edit</>}
+                                        </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div><p className="text-xs font-medium text-gray-500 mb-1">Bundle</p><p className="text-sm font-semibold text-gray-900">{vendor.selectedBundle?.name || "None"}</p>{vendor.selectedBundle?.price && <p className="text-xs text-gray-600 mt-0.5">AED {vendor.selectedBundle.price}</p>}</div>
+                                        <div> <p className="text-sm text-gray-600 mb-1">Total Duration</p>
+                                            <p className="text-lg font-bold text-gray-900">{getDurationDisplay()}</p></div>
+                                        <div><p className="text-xs font-medium text-gray-500 mb-1">Start Date</p><p className="text-sm font-semibold text-gray-900">{formatDate(vendor.subscriptionStartDate)}</p></div>
+                                        <div><p className="text-xs font-medium text-gray-500 mb-1">End Date</p><p className="text-sm font-semibold text-gray-900">{formatDate(vendor.subscriptionEndDate)}</p></div>
+                                    </div>
+
+                                    {isEditingSubscription && (
+                                        <div className="border-t pt-5 space-y-4">
+                                            <div className="space-y-6">
+                                                {/* Bundle Update Section */}
+                                                <div className="space-y-3 pb-4 border-b border-gray-100">
+                                                    <h4 className="text-sm font-semibold text-gray-900">Update Bundle Plan</h4>
+                                                    <div className="flex items-end gap-4">
+                                                        <div className="flex-1 space-y-1.5">
+                                                            <label className="text-xs font-medium text-gray-500">Select Bundle</label>
+                                                            <Select
+                                                                value={bundleFormData.bundleId}
+                                                                onValueChange={(value) => setBundleFormData({ ...bundleFormData, bundleId: value })}
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select bundle" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {bundles.map(b => (
+                                                                        <SelectItem key={b._id} value={b._id}>
+                                                                            {b.name} - AED {b.price}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <Button
+                                                            onClick={handleBundleUpdate}
+                                                            disabled={isUpdating}
+                                                            size="sm"
+                                                        >
+                                                            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Bundle'}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Duration Update Section */}
+                                                <div className="space-y-3">
+                                                    <h4 className="text-sm font-semibold text-gray-900">Update Duration</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-medium text-gray-500">Base Duration</label>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={customDurationValue}
+                                                                    onChange={(e) => setCustomDurationValue(e.target.value)}
+                                                                    className=""
+                                                                />
+                                                                <Select value={customDurationUnit} onValueChange={setCustomDurationUnit}>
+                                                                    <SelectTrigger className="flex-1 !h-11">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="days">Days</SelectItem>
+                                                                        <SelectItem value="months">Months</SelectItem>
+                                                                        <SelectItem value="years">Years</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-medium text-gray-500">Bonus Period</label>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={bonusPeriodValue}
+                                                                    onChange={(e) => setBonusPeriodValue(e.target.value)}
+                                                                    className=""
+                                                                />
+                                                                <Select value={bonusPeriodUnit} onValueChange={setBonusPeriodUnit}>
+                                                                    <SelectTrigger className="flex-1 !h-11">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="days">Days</SelectItem>
+                                                                        <SelectItem value="months">Months</SelectItem>
+                                                                        <SelectItem value="years">Years</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-end pt-2">
+                                                        <Button
+                                                            onClick={handleDurationUpdate}
+                                                            disabled={isUpdating}
+                                                            size="sm"
+                                                        >
+                                                            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Clock className="w-4 h-4 mr-1.5" />}
+                                                            Update Duration
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+
+
+                                {vendor.allFeatures && vendor.allFeatures.length > 0 && (
+                                    <div className="bg-white shadow p-6 border border-gray-100">
+                                        <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Tag className="w-5 h-5 text-indigo-600" />
+                                            Features & Benefits
+                                        </h2>
+
+                                        <h3 className="font-semibold text-gray-700 !text-base mb-3">Bundle Features</h3>
                                         <div className="grid md:grid-cols-2 gap-3">
-                                            {vendor.customFeatures.map((feature, i) => (
-                                                <div key={i} className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                                    <CheckCircle2 className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                            {vendor.allFeatures.map((feature, i) => (
+                                                <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                                    <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                                                     <span className="text-sm text-gray-700">{feature}</span>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                )}
 
-                                <form onSubmit={handleAddCustomFeature} className="my-6 p-4 border border-indigo-100 bg-indigo-50 rounded-lg">
-                                    <h3 className="font-semibold text-gray-700 !text-base mb-3 flex items-center gap-2">
-                                        <PlusCircle className="w-4 h-4 text-indigo-600" />
-                                        Add New Custom Feature
-                                    </h3>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            value={newCustomFeature}
-                                            onChange={(e) => setNewCustomFeature(e.target.value)}
-                                            placeholder="Enter feature description..."
-                                            disabled={isFeatureSubmitting}
-                                        />
-                                        <Button
-                                            type="submit"
-                                            disabled={isFeatureSubmitting || newCustomFeature.trim() === ''}
-                                            className="bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
-                                        >
-                                            {isFeatureSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Add'}
+                                        {vendor.customFeatures && vendor.customFeatures.length > 0 && (
+                                            <div className="mt-6">
+                                                <h3 className="font-semibold text-gray-700 !text-base mb-3">
+                                                    Custom Features
+                                                </h3>
+                                                <div className="grid md:grid-cols-2 gap-3">
+                                                    {vendor.customFeatures.map((feature, i) => (
+                                                        <div key={i} className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                            <CheckCircle2 className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                                            <span className="text-sm text-gray-700">{feature}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <form onSubmit={handleAddCustomFeature} className="my-6 p-4 border border-indigo-100 bg-indigo-50 rounded-lg w-full">
+                                            <h3 className="font-semibold text-gray-700 !text-base mb-3 flex items-center gap-2">
+                                                <PlusCircle className="w-4 h-4 text-indigo-600" />
+                                                Add New Custom Feature
+                                            </h3>
+                                            <div className="flex gap-2 w-full">
+                                                <Input
+                                                    value={newCustomFeature}
+                                                    onChange={(e) => setNewCustomFeature(e.target.value)}
+                                                    placeholder="Enter feature description..."
+                                                    disabled={isFeatureSubmitting}
+                                                    className='w-full'
+                                                />
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isFeatureSubmitting || newCustomFeature.trim() === ''}
+                                                    className="bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
+                                                >
+                                                    {isFeatureSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Add'}
+                                                </Button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )
+                                }
+
+
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                            Verification Documents
+                                        </h3>
+                                        <Button variant="outline" size="sm" onClick={() => setIsDocumentModalOpen(true)} className="shadow-sm">
+                                            <Edit className="w-3.5 h-3.5 mr-1.5" />Edit
                                         </Button>
                                     </div>
-                                </form>
-                            </div>
-                        )}
 
-                        {/* Documents - Only show for non-international vendors */}
-                        {!vendor.isInternational && (
-                            <div className="bg-white rounded p-6 border border-gray-100">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <FileText className="w-5 h-5 text-indigo-600" />
-                                    Verification Documents
-                                </h2>
-                                <div className="space-y-4">
-                                    {vendor.tradeLicenseCopy && (
-                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">Trade License</p>
-                                                    <p className="text-sm text-gray-500">{vendor.tradeLicenseNumber}</p>
+                                    <div className="space-y-3">
+                                        {!vendor.isInternational ? (
+                                            <>
+                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                    <div><p className="text-sm font-medium text-gray-900">Trade License</p><p className="text-xs text-gray-600">{vendor.tradeLicenseNumber || "N/A"}</p></div>
+                                                    {vendor.tradeLicenseCopy && <a href={vendor.tradeLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <a
-                                                        href={vendor.tradeLicenseCopy}
-                                                        download
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                        Download
-                                                    </a>
-                                                    <Button
-                                                        onClick={() => setIsDocumentModalOpen(true)}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                        Update
-                                                    </Button>
+                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                    <div><p className="text-sm font-medium text-gray-900">Emirates ID</p><p className="text-xs text-gray-600">{vendor.personalEmiratesIdNumber || "N/A"}</p></div>
+                                                    {vendor.emiratesIdCopy && <a href={vendor.emiratesIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
                                                 </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                    <div><p className="text-sm font-medium text-gray-900">Business License</p><p className="text-xs text-gray-600">{vendor.businessLicenseCopy ? "Uploaded" : "Not uploaded"}</p></div>
+                                                    {vendor.businessLicenseCopy && <a href={vendor.businessLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                    <div><p className="text-sm font-medium text-gray-900">Passport/ID</p><p className="text-xs text-gray-600">{vendor.passportOrIdCopy ? "Uploaded" : "Not uploaded"}</p></div>
+                                                    {vendor.passportOrIdCopy && <a href={vendor.passportOrIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
 
-                                    {vendor.emiratesIdCopy && (
-                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">Emirates ID</p>
-                                                    <p className="text-sm text-gray-500">{vendor.personalEmiratesIdNumber}</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <a
-                                                        href={vendor.emiratesIdCopy}
-                                                        download
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                        Download
-                                                    </a>
-                                                    <Button
-                                                        onClick={() => setIsDocumentModalOpen(true)}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                        Update
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Documents - International vendors */}
-                        {vendor.isInternational && (
-                            <div className="bg-white rounded p-6 border border-gray-100">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <FileText className="w-5 h-5 text-indigo-600" />
-                                    Verification Documents
-                                </h2>
-                                <div className="space-y-4">
-                                    {vendor.businessLicenseCopy && (
-                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">Business License</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <a
-                                                        href={vendor.businessLicenseCopy}
-                                                        download
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                        Download
-                                                    </a>
-                                                    <Button
-                                                        onClick={() => setIsDocumentModalOpen(true)}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                        Update
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {vendor.passportOrIdCopy && (
-                                        <div className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">Passport/ID Copy</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <a
-                                                        href={vendor.passportOrIdCopy}
-                                                        download
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                        Download
-                                                    </a>
-                                                    <Button
-                                                        onClick={() => setIsDocumentModalOpen(true)}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                        Update
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Left Column - Contact & Location */}
-                    <div className="space-y-6">
-
-                        {/* Contact Information */}
-                        <div className="rounded shadow-sm p-6 bg-white border border-gray-100">
-                            <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <User className="w-5 h-5 text-indigo-600" />
-                                Contact Information
-                            </h2>
-                            <div className="space-y-4">
-
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="w-20 h-20 rounded-full overflow-hidden bg-white">
-                                        <AvatarImage className="size-full object-cover" src={vendor.ownerProfileImage || vendor.businessLogo} />
-                                        <AvatarFallback>{getInitials(vendor?.ownerName)}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-medium font-heading text-gray-900">{vendor.ownerName}</p>
-                                        <p className="!text-sm text-gray-500">Owner</p>
+                                    {/* Additional Documents Section */}
+                                    <div className="mt-6 pt-6 border-t border-gray-200">
+                                        <AdditionalDocumentsSection
+                                            vendorId={vendor._id}
+                                            documents={vendor.additionalDocuments || []}
+                                            onUpdate={(updatedDocuments) => {
+                                                setVendor({ ...vendor, additionalDocuments: updatedDocuments });
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-3">
-                                    <Mail className="w-5 h-5 text-gray-400 mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-gray-500">Email</p>
-                                        <a href={`mailto:${vendor.email}`} className="font-medium text-indigo-600 hover:underline">
-                                            {vendor.email}
-                                        </a>
-                                    </div>
-                                </div>
 
-                                <div className="flex items-start gap-3">
-                                    <Phone className="w-5 h-5 text-gray-400 mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-gray-500">Phone</p>
-                                        <a href={`tel:${vendor.phoneNumber}`} className="font-medium text-gray-900">
-                                            {vendor.phoneNumber}
-                                        </a>
-                                    </div>
-                                </div>
+                            </div >
 
-                                {vendor.whatsAppNumber && (
-                                    <div className="flex items-start gap-3">
-                                        <MessageCircle className="w-5 h-5 text-gray-400 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm text-gray-500">WhatsApp</p>
-                                            <a href={`https://wa.me/${vendor.whatsAppNumber.replace(/[^0-9]/g, '')}`} className="font-medium text-green-600 hover:underline">
-                                                {vendor.whatsAppNumber}
-                                            </a>
+                            {/* Sidebar */}
+                            < div className="space-y-6" >
+                                {/* Contact */}
+                                < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
+                                    <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                                        <User className="w-5 h-5 text-blue-600" />
+                                        Contact Information
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3 pb-4 border-b">
+                                            <Avatar className="w-12 h-12 border-2 border-gray-100">
+                                                <AvatarImage src={vendor.ownerProfileImage} />
+                                                <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white">{getInitials(vendor.ownerName)}</AvatarFallback>
+                                            </Avatar>
+                                            <div><p className="text-sm font-semibold text-gray-900">{vendor.ownerName}</p><p className="text-xs text-gray-500">Business Owner</p></div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-start gap-3 text-sm"><Mail className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">Email</p><a href={`mailto:${vendor.email}`} className="text-gray-900 hover:text-blue-600 break-all">{vendor.email}</a></div></div>
+                                            <div className="flex items-start gap-3 text-sm"><Phone className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">Phone</p><a href={`tel:${vendor.phoneNumber}`} className="text-gray-900 hover:text-blue-600">{vendor.phoneNumber}</a></div></div>
+                                            {vendor.whatsAppNumber && (
+                                                <div className="flex items-start gap-3 text-sm"><MessageCircle className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">WhatsApp</p><a href={`https://wa.me/${vendor.whatsAppNumber}`} target="_blank" rel="noreferrer" className="text-gray-900 hover:text-blue-600">{vendor.whatsAppNumber}</a></div></div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div >
+
+                                {/* Location */}
+                                < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
+                                    <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <MapPin className="w-5 h-5 text-blue-600" />
+                                        Location
+                                    </h3>
+                                    <div>
+                                        <p className="text-sm text-gray-900 font-medium">{vendor.address?.city || 'N/A'}, {vendor.address?.country || 'UAE'}</p>
+                                    </div>
+                                </div >
+
+                                {(vendor.websiteLink || vendor.facebookLink || vendor.instagramLink || vendor.twitterLink) && (
+                                    <div className="bg-white rounded shadow-lg p-6 border border-gray-100">
+                                        <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Globe className="w-5 h-5 text-indigo-600" />
+                                            Online Presence
+                                        </h2>
+                                        <div className="space-y-3">
+                                            {vendor.websiteLink && (
+                                                <a href={vendor.websiteLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-indigo-600 transition-colors">
+                                                    <Globe className="w-5 h-5" />
+                                                    <span>Website</span>
+                                                </a>
+                                            )}
+                                            {vendor.facebookLink && (
+                                                <a href={vendor.facebookLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                                                    <Facebook className="w-5 h-5" />
+                                                    <span>Facebook</span>
+                                                </a>
+                                            )}
+                                            {vendor.instagramLink && (
+                                                <a href={vendor.instagramLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-pink-600 transition-colors">
+                                                    <Instagram className="w-5 h-5" />
+                                                    <span>Instagram</span>
+                                                </a>
+                                            )}
+                                            {vendor.twitterLink && (
+                                                <a href={vendor.twitterLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-400 transition-colors">
+                                                    <Twitter className="w-5 h-5" />
+                                                    <span>Twitter</span>
+                                                </a>
+                                            )}
                                         </div>
                                     </div>
                                 )}
-                            </div>
-                        </div>
 
-                        {/* Location */}
-                        <div className="bg-white rounded shadow-sm p-6 border border-gray-100">
-                            <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-indigo-600" />
-                                Location
-                            </h2>
-                            <div className="space-y-0">
-                                {vendor.address?.street && <p className="text-gray-900 !text-sm">{vendor.address.street}</p>}
-                                {vendor.address?.area && <p className="text-gray-600 !text-sm">{vendor.address.area}, {vendor.address.city}</p>}
-                                <p className="text-gray-600">{vendor.address?.state && `${vendor.address.state}, `}{vendor.address?.country} {vendor.address?.zipCode}</p>
-                                {vendor.address?.googleMapLink && (
-                                    <a
-                                        href={vendor.address.googleMapLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-indigo-600 hover:underline mt-3"
-                                    >
-                                        <MapPin className="w-4 h-4" />
-                                        View on Google Maps
-                                    </a>
-                                )}
-                            </div>
-                        </div>
+                                {/* Admin Comments */}
+                                <div className="mt-6">
+                                    <AdminCommentsSection
+                                        vendorId={vendor._id}
+                                        comments={vendor.adminComments || []}
+                                        onUpdate={(updatedComments) => {
+                                            setVendor({ ...vendor, adminComments: updatedComments });
+                                        }}
+                                    />
+                                </div>
+                            </div >
+                        </div >
+                    </TabsContent >
 
-                        {/* Social Links */}
-                        {(vendor.websiteLink || vendor.facebookLink || vendor.instagramLink || vendor.twitterLink) && (
-                            <div className="bg-white rounded shadow-lg p-6 border border-gray-100">
-                                <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Globe className="w-5 h-5 text-indigo-600" />
-                                    Online Presence
-                                </h2>
-                                <div className="space-y-3">
-                                    {vendor.websiteLink && (
-                                        <a href={vendor.websiteLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-indigo-600 transition-colors">
-                                            <Globe className="w-5 h-5" />
-                                            <span>Website</span>
-                                        </a>
-                                    )}
-                                    {vendor.facebookLink && (
-                                        <a href={vendor.facebookLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
-                                            <Facebook className="w-5 h-5" />
-                                            <span>Facebook</span>
-                                        </a>
-                                    )}
-                                    {vendor.instagramLink && (
-                                        <a href={vendor.instagramLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-pink-600 transition-colors">
-                                            <Instagram className="w-5 h-5" />
-                                            <span>Instagram</span>
-                                        </a>
-                                    )}
-                                    {vendor.twitterLink && (
-                                        <a href={vendor.twitterLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-400 transition-colors">
-                                            <Twitter className="w-5 h-5" />
-                                            <span>Twitter</span>
-                                        </a>
-                                    )}
+                    {/* GALLERY TAB */}
+                    < TabsContent value="gallery" className="mt-6" >
+                        <div className="bg-white rounded-xl border border-gray-200 py-6 px-4">
+                            <div className="mb-6">
+                                <h2 className="!text-2xl uppercase font-semibold text-gray-900 mb-4">Gallery</h2>
+                                <GalleryToolbar
+                                    vendorId={vendor._id}
+                                    onUploadComplete={fetchGallery}
+                                    bulkMode={bulkMode}
+                                    setBulkMode={setBulkMode}
+                                    selectedCount={selectedGalleryItems.length}
+                                    onDeleteSelected={handleBulkDelete}
+                                    clearSelection={() => setSelectedGalleryItems([])}
+                                />
+                            </div>
+
+                            {isGalleryLoading ? (
+                                <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+                            ) : galleryItems.length === 0 ? (
+                                <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                    <ImageIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                    <p className="text-sm font-medium text-gray-500">No images in gallery</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {galleryItems.map((item) => (
+                                        <div
+                                            key={item._id}
+                                            className={`group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all shadow-sm ${selectedGalleryItems.includes(item._id) ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-100 hover:border-blue-300'
+                                                }`}
+                                            onClick={() => bulkMode && toggleSelection(item._id)}
+                                        >
+                                            <img src={item.url} alt={item.caption || "Gallery"} className="w-full h-full object-cover" />
+
+                                            {bulkMode && (
+                                                <div className="absolute top-2 right-2 z-10">
+                                                    <Checkbox
+                                                        checked={selectedGalleryItems.includes(item._id)}
+                                                        onCheckedChange={() => toggleSelection(item._id)}
+                                                        className="bg-white border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 w-5 h-5"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {!bulkMode && (
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-3 gap-2">
+                                                    <Button variant="destructive" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteGalleryItem(item._id); }} className="w-full shadow-lg">
+                                                        <Trash2 className="w-3.5 h-3.5 mr-1.5" />Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </TabsContent >
+
+                    {/* PACKAGES TAB */}
+                    < TabsContent value="packages" className="mt-4" >
+                        <div className="bg-white rounded-xl border border-gray-200 py-6 px-4">
+                            <div className="flex justify-between items-center mb-3">
+                                <h2 className="!text-2xl uppercase font-semibold text-gray-900">Packages</h2>
+                                <div className="flex gap-2">
+                                    <EditPackageModal vendorId={vendor._id} onUpdate={fetchPackages} />
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </div>
+                            {isPackagesLoading ? (
+                                <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+                            ) : packages.length === 0 ? (
+                                <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                    <Box className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                    <p className="text-sm font-medium text-gray-500">No packages available</p>
+                                </div>
+                            ) : (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    {packages.map((pkg, index) => (
+                                        <Card
+                                            key={index}
+                                            className="min-h-[570px] p-3 border-0 shadow-none gap-2 relative"
+                                        >
+                                            <CardHeader className="p-0">
+                                                <Image
+                                                    src={pkg.coverImage}
+                                                    width={300}
+                                                    height={300}
+                                                    alt={pkg.name}
+                                                    className="w-full object-cover rounded-xl h-64"
+                                                />
+                                            </CardHeader>
 
-                {/* Document Edit Modal */}
-                <DocumentEditModal
-                    vendor={vendor}
-                    isOpen={isDocumentModalOpen}
-                    onClose={() => setIsDocumentModalOpen(false)}
-                    onUpdate={handleDocumentUpdate}
-                />
-            </div>
-        </div>
+                                            <CardContent className="p-0">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {pkg.services?.slice(0, 3).map((service) => {
+                                                        return (
+                                                            <Badge
+                                                                key={service}
+                                                                className="text-xs rounded-full bg-gray-200 text-gray-600"
+                                                            >
+                                                                {service}
+                                                            </Badge>
+                                                        )
+                                                    })}
+                                                    {pkg.services && pkg.services.length > 3 && (
+                                                        <Badge className="text-xs rounded-full bg-gray-200 text-gray-600">
+                                                            & {pkg.services.length - 3} more
+                                                        </Badge>
+                                                    )}
+                                                </div>
+
+                                                <h3 className="!text-[20px] mt-5 leading-5 line-clamp-1">
+                                                    {pkg.name}
+                                                </h3>
+
+                                                <div className="my-3">
+                                                    <p className="!text-sm !font-medium font-heading text-gray-700 mb-2">
+                                                        This package includes:
+                                                    </p>
+
+                                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 pl-4">
+                                                        {pkg.includes?.slice(0, 3).map((item, index) => (
+                                                            <li key={index} className="truncate">
+                                                                {item}
+                                                            </li>
+                                                        ))}
+
+                                                        {pkg.includes?.length > 5 && (
+                                                            <li className="list-none pl-4 text-gray-400">....</li>
+                                                        )}
+                                                    </ul>
+
+                                                    <div className="mt-4 ">Starting From <span className="font-medium font-heading">AED {Number(pkg.priceStartingFrom).toLocaleString()}</span></div>
+                                                </div>
+
+                                                <div className="w-full flex items-center justify-end gap-4 pt-4 border-t border-gray-300">
+                                                    <ViewPackageModal vendorId={vendor._id} packageData={pkg} />
+                                                    <EditPackageModal vendorId={vendor._id} packageData={pkg} onUpdate={fetchPackages} />
+                                                    <DeletePackageModal
+                                                        vendorId={vendor._id}
+                                                        packageId={pkg._id}
+                                                        packageName={pkg.name}
+                                                        onDelete={(deletedId) => setPackages(prev => prev.filter(p => p._id !== deletedId))}
+                                                    />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </TabsContent >
+                </Tabs >
+            </div >
+
+            <DocumentEditModal
+                isOpen={isDocumentModalOpen}
+                onClose={() => setIsDocumentModalOpen(false)}
+                vendor={vendor}
+                onUpdate={(updatedData) => setVendor(prev => ({ ...prev, ...updatedData }))}
+            />
+        </div >
     );
 };
 

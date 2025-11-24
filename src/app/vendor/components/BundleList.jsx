@@ -101,7 +101,6 @@ const BundleCard = ({ bundle, selectedId }) => {
 
 const BundleList = ({ bundles }) => {
     const { vendor } = useVendorStore();
-
     const selectedBundleId = vendor?.bundle
 
     if (!bundles || bundles.length === 0) {

@@ -26,16 +26,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@/components/ui/hover-card"
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import {
     EllipsisVertical,
@@ -43,7 +35,6 @@ import {
     ChevronDown,
     Mail,
     User,
-    Star,
     Tag,
     ChevronLeft,
     ChevronRight,
@@ -59,48 +50,105 @@ import { getAllVendorsAction, updateVendorStatusAction } from "@/app/actions/adm
 
 export const description = "Vendors Management Table with API Integration"
 
-// --- Helper component for HoverCard Content with Avatar
+// --- Helper function for date formatting ---
+const formatDate = (dateString) => {
+    if (!dateString) return "N/A"
+    const date = new Date(dateString)
+    return isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString("en-US", {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    })
+}
+
+// --- Helper component for HoverCard Content with Avatar ---
 const VendorDetails = ({ vendor }) => (
-    <div className="flex items-start space-x-4 p-1">
-        <Avatar className="h-16 w-16">
-            <AvatarImage src={vendor.ownerProfileImage} alt={vendor.businessName} />
-            <AvatarFallback>{getInitials(vendor.businessName)}</AvatarFallback>
-        </Avatar>
-        <div className="space-y-1">
-            <h4 className="font-bold text-lg">{vendor.businessName}</h4>
-            <div className="flex items-center space-x-2 text-sm">
-                <User className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700 font-medium">{vendor.ownerName}</span>
+    <div className="space-y-4">
+        <div className="flex items-center gap-4">
+            <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                <AvatarImage src={vendor.ownerProfileImage} alt={vendor.businessName} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                    {getInitials(vendor.businessName)}
+                </AvatarFallback>
+            </Avatar>
+            <div>
+                <h4 className="font-bold text-lg leading-tight">{vendor.businessName}</h4>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    <User className="w-3.5 h-3.5" />
+                    <span>{vendor.ownerName}</span>
+                </div>
             </div>
-            <div className="flex items-center space-x-2 text-sm">
-                <Tag className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">{vendor.mainCategories}</span>
+        </div>
+
+        <div className="grid gap-3 text-sm">
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                    <Tag className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Category</span>
+                    <span className="font-medium">{vendor.mainCategories}</span>
+                </div>
             </div>
-            <div className="flex items-center space-x-2 text-sm">
-                <Mail className="w-4 h-4 text-gray-500" />
-                <span className="text-blue-600 hover:underline">{vendor.email}</span>
+
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-purple-600" />
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Email</span>
+                    <span className="font-medium break-all">{vendor.email}</span>
+                </div>
             </div>
-            <div className="flex items-center space-x-2 text-sm">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">{vendor.city}, {vendor.country}</span>
+
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Location</span>
+                    <span className="font-medium">{vendor.city}, {vendor.country}</span>
+                </div>
             </div>
+
             {vendor.isInternational && (
-                <div className="flex items-center space-x-2 text-sm">
-                    <Globe className="w-4 h-4 text-blue-500" />
-                    <span className="text-blue-600 font-semibold">International Vendor</span>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
+                        <Globe className="w-4 h-4 text-indigo-600" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Type</span>
+                        <span className="font-medium text-indigo-600">International Vendor</span>
+                    </div>
                 </div>
             )}
-            <div className="flex items-center space-x-2 text-sm">
-                <PackageCheck className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700 font-semibold">{vendor.bundleName} - AED {vendor.bundlePrice}</span>
+
+            <div className="pt-2 mt-2 border-t grid grid-cols-2 gap-4">
+                <div>
+                    <span className="text-xs text-muted-foreground block mb-1">Subscription</span>
+                    <div className="flex items-center gap-1.5">
+                        <PackageCheck className="w-3.5 h-3.5 text-orange-500" />
+                        <span className="font-medium">{vendor.bundleName}</span>
+                    </div>
+                </div>
+                <div>
+                    <span className="text-xs text-muted-foreground block mb-1">Price</span>
+                    <span className="font-medium">AED {vendor.bundlePrice}</span>
+                </div>
             </div>
-            <div className="flex items-center space-x-2 text-sm">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-gray-700 font-semibold">{vendor.rating} / 5.0</span>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <span className="text-xs text-muted-foreground block mb-1">Start Date</span>
+                    <span className="font-medium">{formatDate(vendor.subscriptionStart)}</span>
+                </div>
+                <div>
+                    <span className="text-xs text-muted-foreground block mb-1">End Date</span>
+                    <span className="font-medium">{formatDate(vendor.subscriptionEnd)}</span>
+                </div>
             </div>
         </div>
     </div>
-);
+)
 
 // --- Pagination Component ---
 const TablePagination = ({
@@ -112,57 +160,35 @@ const TablePagination = ({
     selectedRowCount,
     filteredVendorsCount,
     totalVendors,
-    pageSizes = [15, 30, 50, 75, 100]
+    pageSizes = [15, 30, 50, 75, 100],
 }) => (
     <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium text-muted-foreground">Vendors per page</p>
-                <Select
-                    value={String(pageSize)}
-                    onValueChange={(value) => {
-                        setPageSize(Number(value))
-                        setPageIndex(0)
-                    }}
-                >
-                    <SelectTrigger className="h-8 w-[70px]">
-                        <SelectValue placeholder={pageSize || "15"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {pageSizes.map((size) => (
-                            <SelectItem key={size} value={String(size)}>
-                                {size}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground">Vendors per page</p>
+            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPageIndex(0); }}>
+                <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={pageSize.toString()} />
+                </SelectTrigger>
+                <SelectContent>
+                    {pageSizes.map((size) => (
+                        <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
             <div className="text-sm text-muted-foreground">
                 {selectedRowCount > 0 && `${selectedRowCount} selected. `}
                 {filteredVendorsCount} of {totalVendors} vendor(s) visible.
             </div>
         </div>
-
         <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="text-sm font-medium text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground">
                 Page {pageIndex + 1} of {pageCount}
-            </div>
+            </p>
             <div className="flex items-center space-x-2">
-                <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-                    disabled={pageIndex === 0}
-                >
+                <Button variant="outline" className="h-8 w-8 p-0" onClick={() => setPageIndex((p) => Math.max(0, p - 1))} disabled={pageIndex === 0}>
                     <ChevronLeft />
                 </Button>
-
-                <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPageIndex(prev => prev + 1)}
-                    disabled={pageIndex >= pageCount - 1 || pageCount === 0}
-                >
+                <Button variant="outline" className="h-8 w-8 p-0" onClick={() => setPageIndex((p) => p + 1)} disabled={pageIndex >= pageCount - 1 || pageCount === 0}>
                     <ChevronRight />
                 </Button>
             </div>
@@ -170,7 +196,6 @@ const TablePagination = ({
     </div>
 )
 
-// --- Main Vendors Table Component ---
 export default function VendorsTable({ controls = true }) {
     const [data, setData] = useState([])
     const [isLoading, setIsLoading] = useState(true)
@@ -182,23 +207,7 @@ export default function VendorsTable({ controls = true }) {
     const [pageIndex, setPageIndex] = useState(0)
     const [pageSize, setPageSize] = useState(15)
     const [globalFilter, setGlobalFilter] = useState('')
-    // Local debounced search state to improve typing UX
-    const [searchQuery, setSearchQuery] = useState(globalFilter);
-
-    // Keep local input synced if globalFilter changes externally
-    useEffect(() => {
-        setSearchQuery(globalFilter);
-    }, [globalFilter]);
-
-    // Debounce local search input and apply to globalFilter
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setGlobalFilter(searchQuery);
-            setPageIndex(0);
-        }, 50);
-
-        return () => clearTimeout(handler);
-    }, [searchQuery]);
+    const [searchQuery, setSearchQuery] = useState('')
 
     const [filterVendorStatus, setFilterVendorStatus] = useState('')
     const [filterCity, setFilterCity] = useState('')
@@ -206,11 +215,24 @@ export default function VendorsTable({ controls = true }) {
 
     const uniqueVendorStatuses = ['pending', 'approved', 'rejected', 'expired']
 
+    // Sync local search input with global filter
+    useEffect(() => {
+        setSearchQuery(globalFilter)
+    }, [globalFilter])
+
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setGlobalFilter(searchQuery)
+            setPageIndex(0)
+        }, 200)
+        return () => clearTimeout(handler)
+    }, [searchQuery])
+
     const fetchData = useCallback(async () => {
         setIsLoading(true)
         setApiError(null)
         setRowSelection({})
-
         try {
             const result = await getAllVendorsAction({
                 page: pageIndex + 1,
@@ -220,8 +242,8 @@ export default function VendorsTable({ controls = true }) {
                 city: filterCity,
                 isInternational: filterIsInternational,
             })
-
             if (result.success) {
+                console.log(result.data)
                 setData(result.data || [])
                 setTotalVendors(result.pagination?.total || 0)
                 setTotalPages(result.pagination?.pages || 0)
@@ -231,9 +253,8 @@ export default function VendorsTable({ controls = true }) {
                 setTotalPages(0)
                 setApiError(result.message)
             }
-
-        } catch (error) {
-            setApiError("Server connection failed.")
+        } catch (e) {
+            setApiError('Server connection failed.')
             setData([])
         } finally {
             setIsLoading(false)
@@ -241,97 +262,42 @@ export default function VendorsTable({ controls = true }) {
     }, [pageIndex, pageSize, globalFilter, filterVendorStatus, filterCity, filterIsInternational])
 
     useEffect(() => {
-        const delay = setTimeout(() => {
-            fetchData()
-        }, 300)
+        const delay = setTimeout(fetchData, 300)
         return () => clearTimeout(delay)
     }, [fetchData])
 
     // --- Selection Logic ---
     const toggleRowSelected = (id) => {
-        setRowSelection(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }))
+        setRowSelection((prev) => ({ ...prev, [id]: !prev[id] }))
     }
 
     const isRowSelected = (id) => !!rowSelection[id]
 
-    const isAllSelected = data.length > 0 && data.every(row => isRowSelected(row._id))
-    const isSomeSelected = data.some(row => isRowSelected(row._id)) && !isAllSelected
+    const isAllSelected = data.length > 0 && data.every((row) => isRowSelected(row._id))
+    const isSomeSelected = data.some((row) => isRowSelected(row._id)) && !isAllSelected
 
     const toggleAllRowsSelected = (checked) => {
-        const currentPageIds = data.map(row => row._id)
-
-        setRowSelection(prev => {
-            let newSelection = Object.fromEntries(
-                Object.entries(prev).filter(([id]) => !currentPageIds.includes(id))
-            )
-
+        const currentPageIds = data.map((row) => row._id)
+        setRowSelection(() => {
+            const newSelection = {}
             if (checked) {
-                currentPageIds.forEach(id => {
+                currentPageIds.forEach((id) => {
                     newSelection[id] = true
                 })
             }
-
             return newSelection
         })
     }
 
-    const selectedRowCount = data.filter(row => rowSelection[row._id]).length
+    const selectedRowCount = data.filter((row) => rowSelection[row._id]).length
 
-    // --- Action Handlers ---
-    const handleStatusChange = async (id, status) => {
-        const res = await updateVendorStatusAction(id, status)
-
-        if (res.success) {
-            toast.success(res.message)
-            fetchData()
-        } else {
-            toast.error(res.message)
-        }
-    }
-
-    const handleBulkApprove = async () => {
-        const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id])
-
-        if (selectedIds.length === 0) {
-            toast.error("No vendors selected.")
-            return
-        }
-
-        let successCount = 0
-        for (const id of selectedIds) {
-            try {
-                const res = await updateVendorStatusAction(id, 'approved')
-                if (res.success) successCount++
-            } catch (error) {
-                console.error(`Failed to approve ${id}:`, error)
-            }
-        }
-
-        toast.success(`Approved ${successCount} vendor(s)`)
-        setRowSelection({})
-        fetchData()
-    }
-
-    const headers = [
-        "No.",
-        "Business Name",
-        "Categories",
-        "Owner",
-        "Location",
-        "Rating",
-        "Status",
-        "Actions"
-    ]
-
+    // Helper to get badge color based on status
     const getStatusColor = (status) => {
         switch (status) {
-            case 'approved':
-                return 'bg-green-100 text-green-800'
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800'
+            case 'approved':
+                return 'bg-green-100 text-green-800'
             case 'rejected':
                 return 'bg-red-100 text-red-800'
             case 'expired':
@@ -341,6 +307,46 @@ export default function VendorsTable({ controls = true }) {
         }
     }
 
+    // --- Action Handlers ---
+    const handleStatusChange = async (id, status) => {
+        const res = await updateVendorStatusAction(id, status)
+        if (res.success) {
+            toast.success(res.message)
+            fetchData()
+        } else {
+            toast.error(res.message)
+        }
+    }
+
+    const handleBulkApprove = async () => {
+        const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
+        if (selectedIds.length === 0) {
+            toast.error('No vendors selected.')
+            return
+        }
+        for (const id of selectedIds) {
+            try {
+                await updateVendorStatusAction(id, 'approved')
+            } catch (e) {
+                console.error('Bulk approve error', e)
+            }
+        }
+        toast.success('Selected vendors approved.')
+        fetchData()
+    }
+
+    const headers = [
+        'Ref ID',
+        'Business Name',
+        'Categories',
+        'Owner',
+        'Location',
+        'Subscription Start',
+        'Subscription End',
+        'Status',
+        'Actions',
+    ]
+
     return (
         <div className="w-full">
             {controls && (
@@ -349,91 +355,70 @@ export default function VendorsTable({ controls = true }) {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search vendors..."
-                            // Use local state while typing; globalFilter updates after debounce
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
-
                     <div className="flex items-center gap-2 flex-wrap justify-end">
                         {selectedRowCount > 0 && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button className="flex items-center gap-2 bg-[#F2F4FF] border border-gray-300 text-primary">
                                         Bulk Actions
-                                        <Badge className="bg-primary text-white px-2 rounded-full">
-                                            {selectedRowCount}
-                                        </Badge>
+                                        <Badge className="bg-primary text-white px-2 rounded-full">{selectedRowCount}</Badge>
                                         <ChevronDown className="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={handleBulkApprove}>
-                                        Approve Selected
-                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleBulkApprove}>Approve Selected</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
-
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Status: {filterVendorStatus || "All"}
+                                    Status: {filterVendorStatus || 'All'}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setFilterVendorStatus(''); setPageIndex(0) }}>
-                                    Show All
-                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setFilterVendorStatus(''); setPageIndex(0); }}>Show All</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                {uniqueVendorStatuses.map(status => (
+                                {uniqueVendorStatuses.map((status) => (
                                     <DropdownMenuCheckboxItem
                                         key={status}
                                         checked={filterVendorStatus === status}
-                                        onCheckedChange={() => {
-                                            setFilterVendorStatus(status)
-                                            setPageIndex(0)
-                                        }}
+                                        onCheckedChange={() => { setFilterVendorStatus(status); setPageIndex(0); }}
                                     >
                                         {status}
                                     </DropdownMenuCheckboxItem>
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                    Type: {filterIsInternational === "true" ? "International" : filterIsInternational === "false" ? "Local" : "All"}
+                                    Type: {filterIsInternational === 'true' ? 'International' : filterIsInternational === 'false' ? 'Local' : 'All'}
                                     <ChevronDown className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Vendor Type</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setFilterIsInternational(''); setPageIndex(0) }}>
-                                    Show All
-                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setFilterIsInternational(''); setPageIndex(0); }}>Show All</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuCheckboxItem
-                                    checked={filterIsInternational === "false"}
-                                    onCheckedChange={() => {
-                                        setFilterIsInternational("false")
-                                        setPageIndex(0)
-                                    }}
+                                    checked={filterIsInternational === 'false'}
+                                    onCheckedChange={() => { setFilterIsInternational('false'); setPageIndex(0); }}
                                 >
                                     Local (UAE)
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
-                                    checked={filterIsInternational === "true"}
-                                    onCheckedChange={() => {
-                                        setFilterIsInternational("true")
-                                        setPageIndex(0)
-                                    }}
+                                    checked={filterIsInternational === 'true'}
+                                    onCheckedChange={() => { setFilterIsInternational('true'); setPageIndex(0); }}
                                 >
                                     International
                                 </DropdownMenuCheckboxItem>
@@ -442,7 +427,6 @@ export default function VendorsTable({ controls = true }) {
                     </div>
                 </div>
             )}
-
             <div className="relative flex flex-col gap-4 overflow-auto">
                 <div className="overflow-hidden ">
                     <Table>
@@ -460,7 +444,6 @@ export default function VendorsTable({ controls = true }) {
                                 ))}
                             </TableRow>
                         </TableHeader>
-
                         <TableBody>
                             {isLoading && (
                                 <TableRow>
@@ -470,7 +453,6 @@ export default function VendorsTable({ controls = true }) {
                                     </TableCell>
                                 </TableRow>
                             )}
-
                             {apiError && !isLoading && (
                                 <TableRow>
                                     <TableCell colSpan={headers.length + 1} className="text-center text-red-600">
@@ -478,7 +460,6 @@ export default function VendorsTable({ controls = true }) {
                                     </TableCell>
                                 </TableRow>
                             )}
-
                             {!isLoading && !apiError && data.map((row, index) => (
                                 <TableRow key={row._id} className="hover:bg-gray-50">
                                     <TableCell>
@@ -487,7 +468,7 @@ export default function VendorsTable({ controls = true }) {
                                             onCheckedChange={() => toggleRowSelected(row._id)}
                                         />
                                     </TableCell>
-                                    <TableCell className="text-sm text-gray-700">{pageIndex * pageSize + index + 1}</TableCell>
+                                    <TableCell className="text-sm text-gray-700 font-mono">{row.referenceId || "N/A"}</TableCell>
                                     <TableCell>
                                         <HoverCard>
                                             <HoverCardTrigger asChild>
@@ -497,16 +478,11 @@ export default function VendorsTable({ controls = true }) {
                                                         <AvatarFallback>{getInitials(row.businessName)}</AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex flex-col">
-                                                        <Link
-                                                            href={`/admin/vendor-management/${row._id}`}
-                                                            className="hover:underline hover:text-blue-600 font-medium"
-                                                        >
-                                                            {row.businessName}
-                                                        </Link>
+                                                        <span className="font-medium text-gray-800">{row.businessName}</span>
                                                         {row.isInternational && (
-                                                            <span className="text-xs text-blue-600 flex items-center gap-1">
-                                                                <Globe className="w-3 h-3" /> International
-                                                            </span>
+                                                            <Badge variant="secondary" className="h-4 px-1 text-[9px] bg-indigo-50 text-indigo-700 border-indigo-100 w-fit mt-0.5">
+                                                                International
+                                                            </Badge>
                                                         )}
                                                     </div>
                                                 </div>
@@ -524,11 +500,14 @@ export default function VendorsTable({ controls = true }) {
                                             <span className="text-gray-500 text-xs">{row.country}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{row.rating.toFixed(1)}</TableCell>
+                                    <TableCell className="text-sm text-gray-700">
+                                        {formatDate(row.subscriptionStartDate)}
+                                    </TableCell>
+                                    <TableCell className="text-sm text-gray-700">
+                                        {formatDate(row.subscriptionEndDate)}
+                                    </TableCell>
                                     <TableCell>
-                                        <Badge className={getStatusColor(row.vendorStatus)}>
-                                            {row.vendorStatus}
-                                        </Badge>
+                                        <Badge className={getStatusColor(row.vendorStatus)}>{row.vendorStatus}</Badge>
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <DropdownMenu>
@@ -542,27 +521,20 @@ export default function VendorsTable({ controls = true }) {
                                                     <Link href={`/admin/vendor-management/${row._id}`}>View Details</Link>
                                                 </DropdownMenuItem>
                                                 {row.vendorStatus === 'pending' && (
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'approved')}>
-                                                        Approve Vendor
-                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'approved')}>Approve Vendor</DropdownMenuItem>
                                                 )}
                                                 {row.vendorStatus === 'approved' && (
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'expired')}>
-                                                        Mark as Expired
-                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'expired')}>Mark as Expired</DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuSeparator />
                                                 {row.vendorStatus !== 'rejected' && (
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'rejected')} className="text-red-600">
-                                                        Reject Vendor
-                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'rejected')} className="text-red-600">Reject Vendor</DropdownMenuItem>
                                                 )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             ))}
-
                             {!isLoading && data.length === 0 && !apiError && (
                                 <TableRow>
                                     <TableCell colSpan={headers.length + 1} className="text-center text-gray-500">
@@ -574,7 +546,6 @@ export default function VendorsTable({ controls = true }) {
                     </Table>
                 </div>
             </div>
-
             {!isLoading && totalVendors > 0 && controls && (
                 <TablePagination
                     pageIndex={pageIndex}
