@@ -17,7 +17,11 @@ const SubCategoryPage = async ({ params, searchParams }) => {
 
   return (
     <div>
-      <PageTitle imgUrl={subCategoryData?.coverImage} title={subCategoryData?.name} />
+      <PageTitle 
+        placement={`Subcategory: ${subCategoryData?.parentCategory?.name} > ${subCategoryData?.name}`}
+        imgUrl={subCategoryData?.coverImage} 
+        title={subCategoryData?.name} 
+      />
 
       <section className="container !mb-16">
         <PageSearchBar />

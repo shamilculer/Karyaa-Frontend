@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect, useCallback } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -48,7 +49,7 @@ import Link from "next/link"
 import { getInitials } from "@/utils"
 import { getAllVendorsAction, updateVendorStatusAction } from "@/app/actions/admin/vendors"
 
-export const description = "Vendors Management Table with API Integration"
+export const description = "Vendors Management Table with URL-based Filtering"
 
 // --- Helper function for date formatting ---
 const formatDate = (dateString) => {
@@ -155,8 +156,7 @@ const TablePagination = ({
     pageIndex,
     pageCount,
     pageSize,
-    setPageIndex,
-    setPageSize,
+    updateURLParams,
     selectedRowCount,
     filteredVendorsCount,
     totalVendors,
@@ -165,7 +165,7 @@ const TablePagination = ({
     <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-6 lg:space-x-8">
             <p className="text-sm font-medium text-muted-foreground">Vendors per page</p>
-            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPageIndex(0); }}>
+            <Select value={String(pageSize)} onValueChange={(v) => updateURLParams({ pageSize: v, page: '1' })}>
                 <SelectTrigger className="h-8 w-[70px]">
                     <SelectValue placeholder={pageSize.toString()} />
                 </SelectTrigger>
@@ -185,10 +185,20 @@ const TablePagination = ({
                 Page {pageIndex + 1} of {pageCount}
             </p>
             <div className="flex items-center space-x-2">
-                <Button variant="outline" className="h-8 w-8 p-0" onClick={() => setPageIndex((p) => Math.max(0, p - 1))} disabled={pageIndex === 0}>
+                <Button 
+                    variant="outline" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => updateURLParams({ page: String(pageIndex) })} 
+                    disabled={pageIndex === 0}
+                >
                     <ChevronLeft />
                 </Button>
-                <Button variant="outline" className="h-8 w-8 p-0" onClick={() => setPageIndex((p) => p + 1)} disabled={pageIndex >= pageCount - 1 || pageCount === 0}>
+                <Button 
+                    variant="outline" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => updateURLParams({ page: String(pageIndex + 2) })} 
+                    disabled={pageIndex >= pageCount - 1 || pageCount === 0}
+                >
                     <ChevronRight />
                 </Button>
             </div>
@@ -197,37 +207,60 @@ const TablePagination = ({
 )
 
 export default function VendorsTable({ controls = true }) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+
     const [data, setData] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [totalVendors, setTotalVendors] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [apiError, setApiError] = useState(null)
-
     const [rowSelection, setRowSelection] = useState({})
-    const [pageIndex, setPageIndex] = useState(0)
-    const [pageSize, setPageSize] = useState(15)
-    const [globalFilter, setGlobalFilter] = useState('')
-    const [searchQuery, setSearchQuery] = useState('')
+    
+    // Local state for search input (for debouncing)
+    const [searchInput, setSearchInput] = useState('')
 
-    const [filterVendorStatus, setFilterVendorStatus] = useState('')
-    const [filterCity, setFilterCity] = useState('')
-    const [filterIsInternational, setFilterIsInternational] = useState('')
+    // Read URL params
+    const pageIndex = Number(searchParams.get('page') || '1') - 1
+    const pageSize = Number(searchParams.get('pageSize') || '15')
+    const globalFilter = searchParams.get('search') || ''
+    const filterVendorStatus = searchParams.get('status') || ''
+    const filterCity = searchParams.get('city') || ''
+    const filterIsInternational = searchParams.get('type') || ''
+    const filterExpiryStatus = searchParams.get('expiry') || ''
 
     const uniqueVendorStatuses = ['pending', 'approved', 'rejected', 'expired']
 
-    // Sync local search input with global filter
+    // Sync search input with URL on mount and when URL changes
     useEffect(() => {
-        setSearchQuery(globalFilter)
+        setSearchInput(globalFilter)
     }, [globalFilter])
+
+    // Helper function to update URL parameters
+    const updateURLParams = useCallback((updates) => {
+        const params = new URLSearchParams(searchParams.toString())
+        
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value)
+            } else {
+                params.delete(key)
+            }
+        })
+
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }, [searchParams, pathname, router])
 
     // Debounce search input
     useEffect(() => {
         const handler = setTimeout(() => {
-            setGlobalFilter(searchQuery)
-            setPageIndex(0)
-        }, 200)
+            if (searchInput !== globalFilter) {
+                updateURLParams({ search: searchInput, page: '1' })
+            }
+        }, 300)
         return () => clearTimeout(handler)
-    }, [searchQuery])
+    }, [searchInput, globalFilter, updateURLParams])
 
     const fetchData = useCallback(async () => {
         setIsLoading(true)
@@ -240,6 +273,7 @@ export default function VendorsTable({ controls = true }) {
                 search: globalFilter,
                 vendorStatus: filterVendorStatus,
                 city: filterCity,
+                expiryStatus: filterExpiryStatus,
                 isInternational: filterIsInternational,
             })
             if (result.success) {
@@ -259,11 +293,10 @@ export default function VendorsTable({ controls = true }) {
         } finally {
             setIsLoading(false)
         }
-    }, [pageIndex, pageSize, globalFilter, filterVendorStatus, filterCity, filterIsInternational])
+    }, [pageIndex, pageSize, globalFilter, filterVendorStatus, filterCity, filterIsInternational, filterExpiryStatus])
 
     useEffect(() => {
-        const delay = setTimeout(fetchData, 300)
-        return () => clearTimeout(delay)
+        fetchData()
     }, [fetchData])
 
     // --- Selection Logic ---
@@ -355,8 +388,8 @@ export default function VendorsTable({ controls = true }) {
                         <Search className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-500 w-4 h-4" />
                         <Input
                             placeholder="Search vendors..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             className="pl-10 h-10"
                         />
                     </div>
@@ -385,13 +418,15 @@ export default function VendorsTable({ controls = true }) {
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setFilterVendorStatus(''); setPageIndex(0); }}>Show All</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateURLParams({ status: '', page: '1' })}>
+                                    Show All
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {uniqueVendorStatuses.map((status) => (
                                     <DropdownMenuCheckboxItem
                                         key={status}
                                         checked={filterVendorStatus === status}
-                                        onCheckedChange={() => { setFilterVendorStatus(status); setPageIndex(0); }}
+                                        onCheckedChange={() => updateURLParams({ status, page: '1' })}
                                     >
                                         {status}
                                     </DropdownMenuCheckboxItem>
@@ -408,22 +443,54 @@ export default function VendorsTable({ controls = true }) {
                             <DropdownMenuContent className="w-48">
                                 <DropdownMenuLabel>Filter by Vendor Type</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setFilterIsInternational(''); setPageIndex(0); }}>Show All</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateURLParams({ type: '', page: '1' })}>
+                                    Show All
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuCheckboxItem
                                     checked={filterIsInternational === 'false'}
-                                    onCheckedChange={() => { setFilterIsInternational('false'); setPageIndex(0); }}
+                                    onCheckedChange={() => updateURLParams({ type: 'false', page: '1' })}
                                 >
                                     Local (UAE)
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={filterIsInternational === 'true'}
-                                    onCheckedChange={() => { setFilterIsInternational('true'); setPageIndex(0); }}
+                                    onCheckedChange={() => updateURLParams({ type: 'true', page: '1' })}
                                 >
                                     International
                                 </DropdownMenuCheckboxItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                        {/* Expiry Filter */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
+                                Expiry: {filterExpiryStatus === 'expiring-soon' ? 'Expiring Soon' : filterExpiryStatus === 'expired' ? 'Expired' : 'All'}
+                                <ChevronDown className="w-4 h-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuLabel>Filter by Expiry Status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => updateURLParams({ expiry: '', page: '1' })}>
+                                Show All
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuCheckboxItem
+                                checked={filterExpiryStatus === 'expiring-soon'}
+                                onCheckedChange={() => updateURLParams({ expiry: 'expiring-soon', page: '1' })}
+                            >
+                                Expiring Soon (3 months)
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={filterExpiryStatus === 'expired'}
+                                onCheckedChange={() => updateURLParams({ expiry: 'expired', page: '1' })}
+                            >
+                                Expired
+                            </DropdownMenuCheckboxItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     </div>
                 </div>
             )}
@@ -551,8 +618,7 @@ export default function VendorsTable({ controls = true }) {
                     pageIndex={pageIndex}
                     pageCount={totalPages}
                     pageSize={pageSize}
-                    setPageIndex={setPageIndex}
-                    setPageSize={setPageSize}
+                    updateURLParams={updateURLParams}
                     selectedRowCount={selectedRowCount}
                     filteredVendorsCount={data.length}
                     totalVendors={totalVendors}

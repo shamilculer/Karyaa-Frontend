@@ -75,7 +75,7 @@ export default function EditBannerModal({
                 isVendorSpecific: banner.isVendorSpecific,
                 fullBanner: banner
             });
-            
+
             reset({
                 imageUrl: banner.imageUrl || "",
                 name: banner.name || "",
@@ -306,12 +306,12 @@ export default function EditBannerModal({
                                                     </Label>
                                                     <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                                         {banner?.businessLogo && (
-                                                            <Image 
-                                                                src={banner.businessLogo} 
-                                                                width={48} 
-                                                                height={48} 
-                                                                alt={banner.businessName} 
-                                                                className="object-cover rounded-full size-12" 
+                                                            <Image
+                                                                src={banner.businessLogo}
+                                                                width={48}
+                                                                height={48}
+                                                                alt={banner.businessName}
+                                                                className="object-cover rounded-full size-12"
                                                             />
                                                         )}
                                                         <div className="flex-1">

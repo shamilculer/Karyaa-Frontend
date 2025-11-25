@@ -14,7 +14,7 @@ const GalleryPage = async ({ searchParams }) => {
 
   return (
     <div className="min-h-screen">
-      <PageTitle imgUrl="/new-banner-7.jpg" title="Gallery" />
+      <PageTitle placement="Gallery" imgUrl="/new-banner-7.jpg" title="Gallery" />
       
       <section className="container !mb-14">
         <PageSearchBar />

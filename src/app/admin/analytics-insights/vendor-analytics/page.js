@@ -1,5 +1,4 @@
 import VendorAcquisitionOverTime from "../../components/charts/VendorAqquisitionTrend"
-import OverViewStats from "../../components/common/OverviewStatsAdmin"
 import TopPerformingVendors from "../../components/common/TopPerformingVendors"
 import VendorStatusSummary from "../../components/common/VendorStatusSummary"
 import ReviewStatsWrapper from "../../components/ReviewStatsWrapper"
@@ -7,9 +6,7 @@ import VendorsByCategoryChart from "@/app/vendor/components/charts/VendorCategor
 
 const VendorAnalyticsPage = () => {
     return (
-        <div className="h-full dashboard-container space-y-14 mb-10">
-            <OverViewStats />
-
+        <div className="mb-5 dashboard-container space-y-14 mb-10">
             <div className="space-y-4">
                 <span className="text-xl font-semibold text-sidebar-foreground uppercase tracking-widest block">Vendor Analytics</span>
                 <div className="w-full flex gap-10">

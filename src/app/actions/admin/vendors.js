@@ -9,6 +9,7 @@ export const getAllVendorsAction = async ({
     search = "", 
     vendorStatus = "",
     city = "",
+    expiryStatus = "",
     isInternational = "",
     sortBy = "createdAt",
     sortOrder = "desc"
@@ -20,6 +21,7 @@ export const getAllVendorsAction = async ({
     if (search) queryParams.append('search', search);
     if (vendorStatus) queryParams.append('vendorStatus', vendorStatus);
     if (city) queryParams.append('city', city);
+    if (expiryStatus) queryParams.append('expiryStatus', expiryStatus);
     if (isInternational !== "") queryParams.append('isInternational', isInternational);
     queryParams.append('sortBy', sortBy);
     queryParams.append('sortOrder', sortOrder);
@@ -145,11 +147,11 @@ export const updateVendorDurationAction = async (id, customDuration) => {
     }
 
     // Validate customDuration structure
-    if (customDuration) {
-        if (!customDuration.value || !customDuration.unit) {
+if (customDuration) {
+        if (typeof customDuration.value !== 'number' || !customDuration.unit) {
             return { 
                 success: false, 
-                message: "customDuration must include 'value' and 'unit'" 
+                message: "customDuration must include 'value' (number) and 'unit'" 
             };
         }
 

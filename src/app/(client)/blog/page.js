@@ -13,6 +13,7 @@ const BlogPage = async ({ searchParams }) => {
         imgUrl="/banner-1.avif"
         title="News & Updates"
         tagline="Ideas, Inspiration & Expert Tips for Every Event"
+        placement="Blog Page"
       />
 
       <section className="container !mb-14">

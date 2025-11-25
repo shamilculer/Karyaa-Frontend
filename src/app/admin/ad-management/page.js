@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -13,6 +15,7 @@ import { Search, Plus } from "lucide-react";
 
 import { useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getCategoriesWithVendors } from "@/app/actions/categories";
 
 import BannerCarouselContainer from "../components/BannerCarousel";
 import Link from "next/link";
@@ -22,8 +25,21 @@ const AdManagementPage = () => {
   const searchParams = useSearchParams();
 
   const search = searchParams.get("search") ?? "";
-  const status = searchParams.get("status") ?? "all"; // ✅ Changed to "all"
-  const placement = searchParams.get("placement") ?? "all"; // ✅ Changed to "all"
+  const status = searchParams.get("status") ?? "all";
+  const placement = searchParams.get("placement") ?? "all";
+
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await getCategoriesWithVendors();
+      if (response?.success) {
+        setCategories(response.categories || []);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const updateUrl = useCallback(
     (key, value) => {
@@ -106,7 +122,6 @@ const AdManagementPage = () => {
               <Input
                 placeholder="Search by Banner Name or Vendor ID..."
                 className="w-64 pl-10"
-                // Use the local debounced state while typing
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -124,12 +139,37 @@ const AdManagementPage = () => {
             </Select>
 
             <Select value={placement} onValueChange={handlePlacementChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by Slot" />
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by Placement" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="all">All Placements</SelectItem>
-                <SelectItem value="Homepage Carousel">Homepage</SelectItem>
+                
+                <SelectGroup>
+                  <SelectLabel>Static Pages</SelectLabel>
+                  <SelectItem value="Hero Section">Hero Section</SelectItem>
+                  <SelectItem value="Homepage Carousel">Homepage Carousel</SelectItem>
+                  <SelectItem value="Contact">Contact</SelectItem>
+                  <SelectItem value="Ideas">Ideas</SelectItem>
+                  <SelectItem value="Gallery">Gallery</SelectItem>
+                  <SelectItem value="Blog Page">Blog Page</SelectItem>
+                </SelectGroup>
+
+                {categories.length > 0 && categories.map((cat) => (
+                  <SelectGroup key={cat._id}>
+                    <SelectItem value={`Category: ${cat.name}`}>
+                      {cat.name} (Main)
+                    </SelectItem>
+                    {cat.subCategories?.map((subCat) => (
+                      <SelectItem
+                        key={subCat._id}
+                        value={`Subcategory: ${cat.name} > ${subCat.name}`}
+                      >
+                        <span className="pl-4">→ {subCat.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
               </SelectContent>
             </Select>
           </div>

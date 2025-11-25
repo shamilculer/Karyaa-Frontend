@@ -21,6 +21,7 @@ const CategoryPage = async ({ params, searchParams }) => {
     <div>
 
       <PageTitle
+        placement={`Category: ${categoryData?.name}`}
         imgUrl={categoryData?.coverImage}
         title={categoryData?.name}
       />

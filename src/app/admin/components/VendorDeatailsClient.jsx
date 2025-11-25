@@ -178,15 +178,25 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
     const handleDurationUpdate = async (e) => {
         e.preventDefault();
         setIsUpdating(true);
+        
+        const parsedValue = parseInt(customDurationValue, 10);
+        const parsedBonusValue = parseInt(bonusPeriodValue, 10);
+        
+        // Ensure we're sending valid numbers (including 0)
+        if (isNaN(parsedValue) || parsedValue < 0) {
+            toast.error("Please enter a valid duration value (0 or greater)");
+            setIsUpdating(false);
+            return;
+        }
+        
         const result = await updateVendorDurationAction(vendor._id, {
-            value: parseInt(customDurationValue),
+            value: parsedValue,
             unit: customDurationUnit,
             bonusPeriod: {
-                value: parseInt(bonusPeriodValue),
+                value: isNaN(parsedBonusValue) ? 0 : parsedBonusValue,
                 unit: bonusPeriodUnit
             }
         });
-
         if (result.success) {
             setVendor(result.data);
             toast.success("Duration updated successfully");
@@ -250,7 +260,53 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
         return 'N/A';
     };
 
-    console.log(vendor);
+
+    const getTimeRemaining = (endDate) => {
+        if (!endDate) return null;
+        
+        const end = new Date(endDate);
+        const today = new Date();
+        
+        if (end <= today) {
+            return { expired: true, text: "Expired" };
+        }
+        
+        // Calculate difference
+        const diffTime = end - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // If less than a year, break it down into months and days
+        if (diffDays < 365) {
+            const months = Math.floor(diffDays / 30);
+            const days = diffDays % 30;
+            
+            let text = "";
+            if (months > 0 && days > 0) {
+                text = `${months} month${months > 1 ? 's' : ''} and ${days} day${days > 1 ? 's' : ''} left`;
+            } else if (months > 0) {
+                text = `${months} month${months > 1 ? 's' : ''} left`;
+            } else {
+                text = `${days} day${days > 1 ? 's' : ''} left`;
+            }
+            
+            return {
+                expired: false,
+                totalDays: diffDays,
+                months: months,
+                days: days,
+                text: text,
+                lessThanYear: true
+            };
+        }
+        
+        // More than a year - just show days
+        return {
+            expired: false,
+            totalDays: diffDays,
+            text: `${diffDays} days left`,
+            lessThanYear: false
+        };
+    };
 
     return (
         <div className="min-h-screen">
@@ -461,11 +517,47 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                             {isEditingSubscription ? <><ChevronUp className="w-3.5 h-3.5 mr-1.5" />Close</> : <><Edit className="w-3.5 h-3.5 mr-1.5" />Edit</>}
                                         </Button>
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
+<div className="grid grid-cols-2 gap-4 mb-4">
                                         <div><p className="text-xs font-medium text-gray-500 mb-1">Bundle</p><p className="text-sm font-semibold text-gray-900">{vendor.selectedBundle?.name || "None"}</p>{vendor.selectedBundle?.price && <p className="text-xs text-gray-600 mt-0.5">AED {vendor.selectedBundle.price}</p>}</div>
-                                        <div> <p className="text-sm text-gray-600 mb-1">Total Duration</p>
-                                            <p className="text-lg font-bold text-gray-900">{getDurationDisplay()}</p></div>
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-1">Total Duration</p>
+                                            <p className="text-lg font-bold text-gray-900">{getDurationDisplay()}</p>
+                                            {(() => {
+                                                const timeLeft = getTimeRemaining(vendor.subscriptionEndDate);
+                                                if (!timeLeft) return null;
+                                                
+                                                // Expired
+                                                if (timeLeft.expired) {
+                                                    return (
+                                                        <p className="text-xs text-red-600 font-medium mt-1 flex items-center gap-1">
+                                                            <XCircle className="w-3 h-3" />
+                                                            Expired
+                                                        </p>
+                                                    );
+                                                }
+                                                
+                                                // Determine color based on days remaining
+                                                let colorClass = "text-green-600"; // Default: more than 3 months
+                                                let IconComponent = Timer;
+                                                
+                                                if (timeLeft.totalDays <= 30) {
+                                                    // Less than 1 month - Red (critical)
+                                                    colorClass = "text-red-600";
+                                                    IconComponent = XCircle;
+                                                } else if (timeLeft.totalDays <= 90) {
+                                                    // Less than 3 months - Orange (warning)
+                                                    colorClass = "text-orange-600";
+                                                    IconComponent = Timer;
+                                                }
+                                                
+                                                return (
+                                                    <p className={`text-xs ${colorClass} font-medium mt-1 flex items-center gap-1`}>
+                                                        <IconComponent className="w-3 h-3" />
+                                                        {timeLeft.text}
+                                                    </p>
+                                                );
+                                            })()}
+                                        </div>
                                         <div><p className="text-xs font-medium text-gray-500 mb-1">Start Date</p><p className="text-sm font-semibold text-gray-900">{formatDate(vendor.subscriptionStartDate)}</p></div>
                                         <div><p className="text-xs font-medium text-gray-500 mb-1">End Date</p><p className="text-sm font-semibold text-gray-900">{formatDate(vendor.subscriptionEndDate)}</p></div>
                                     </div>
@@ -514,6 +606,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                                             <div className="flex gap-2">
                                                                 <Input
                                                                     type="number"
+                                                                    min={0}
                                                                     value={customDurationValue}
                                                                     onChange={(e) => setCustomDurationValue(e.target.value)}
                                                                     className=""
@@ -535,6 +628,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                                             <div className="flex gap-2">
                                                                 <Input
                                                                     type="number"
+                                                                    min={0}
                                                                     value={bonusPeriodValue}
                                                                     onChange={(e) => setBonusPeriodValue(e.target.value)}
                                                                     className=""

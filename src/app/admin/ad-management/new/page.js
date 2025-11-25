@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { createBannerAction } from "@/app/actions/admin/banner";
+import { getCategoriesWithVendors } from "@/app/actions/categories";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { VendorSelectField } from "@/components/common/VendorSelectField";
+import { MultiSelect } from "@/components/common/MultiSelect";
 import {
   Upload,
   Image as ImageIcon,
@@ -32,6 +34,14 @@ import { toast } from "sonner";
 export default function AddBannerPage() {
   const router = useRouter();
   const [isVendorSpecific, setIsVendorSpecific] = useState(true);
+  const [placementOptions, setPlacementOptions] = useState([
+    { label: "Hero Section", value: "Hero Section" },
+    { label: "Homepage Carousel", value: "Homepage Carousel" },
+    { label: "Contact Page", value: "Contact" },
+    { label: "Ideas Page", value: "Ideas" },
+    { label: "Gallery Page", value: "Gallery" },
+    { label: "Blog Page", value: "Blog Page" },
+  ]);
 
   const methods = useForm({
     defaultValues: {
@@ -55,7 +65,47 @@ export default function AddBannerPage() {
     formState: { errors },
   } = methods;
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategoriesWithVendors();
+        if (response?.categories) {
+          const categoryOptions = response.categories.flatMap((cat) => {
+            const options = [
+              { label: `Category: ${cat.name}`, value: `Category: ${cat.name}` },
+            ];
+            
+            if (cat.subCategories && cat.subCategories.length > 0) {
+              cat.subCategories.forEach((sub) => {
+                options.push({
+                  label: `Subcategory: ${cat.name} > ${sub.name}`,
+                  value: `Subcategory: ${cat.name} > ${sub.name}`,
+                });
+              });
+            }
+            return options;
+          });
+          
+          setPlacementOptions((prev) => {
+            // Filter out existing category/subcategory options to avoid duplicates if re-fetching
+            const staticOptions = prev.filter(p => !p.value.startsWith("Category") && !p.value.startsWith("Subcategory"));
+            return [...staticOptions, ...categoryOptions];
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const onSubmit = async (data) => {
+    // Validate placement
+    if (!data.placement || data.placement.length === 0) {
+      toast.error("Please select at least one placement location");
+      return;
+    }
+
     // Validate vendor if vendor-specific
     if (data.isVendorSpecific && !data.vendor) {
       toast.error("Please select a vendor");
@@ -69,7 +119,6 @@ export default function AddBannerPage() {
     }
 
     try {
-      
       const result = await createBannerAction(data);
       if (result?.success) {
         toast.success(result?.message || "Banner has been added successfully.");
@@ -149,22 +198,24 @@ export default function AddBannerPage() {
                     htmlFor="placement"
                     className="text-sm font-semibold text-gray-700 flex items-center gap-2"
                   >
-                    Placement Location
+                    Placement Location(s)
                     <Badge
                       variant="outline"
                       className="text-xs bg-green-50 text-green-700 border-green-200"
                     >
-                      Homepage
+                      Multi-select
                     </Badge>
                   </Label>
-                  <select
-                    id="placement"
-                    className="border border-gray-300 w-full h-11 px-3 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    {...register("placement")}
-                    onChange={(e) => setValue("placement", [e.target.value])}
-                  >
-                    <option value="Homepage Carousel">Homepage Carousel</option>
-                  </select>
+                  <MultiSelect
+                    options={placementOptions}
+                    selected={watch("placement") || []}
+                    onChange={(selected) => setValue("placement", selected)}
+                    placeholder="Select pages to display banner..."
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Select one or more pages where this banner should appear.
+                  </p>
                 </div>
               </div>
 

@@ -3,13 +3,14 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, Pagination, EffectCoverflow } from "swiper/modules";
-import "swiper/css"; 
+import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import 'swiper/css/effect-coverflow';
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const Hero = ({ data } = {}) => {
   const defaultImages = [
@@ -33,7 +34,35 @@ const Hero = ({ data } = {}) => {
 
   const heading = data?.heading || "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
   const description = data?.description || "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
-  const images = Array.isArray(data?.images) && data?.images.length > 0 ? data?.images : defaultImages;
+
+  // Logic to determine final images
+  let images = [];
+
+  // 1. Check if we have incoming images from props (banners)
+  const incomingImages = Array.isArray(data?.images) ? data.images : [];
+
+  // 2. Normalize incoming images to object structure { src, link }
+  const normalizedIncoming = incomingImages.map(img => {
+    if (typeof img === 'string') return { src: img, link: null };
+    return img; // Already an object { src, link }
+  });
+
+  // 3. Apply logic based on count
+  if (normalizedIncoming.length === 0) {
+    // No banners -> Use all defaults
+    images = defaultImages.map(src => ({ src, link: null }));
+  } else if (data?.shouldMergeDefaults) {
+    // Less than 3 banners -> Merge with defaults to reach at least 3
+    // We'll take all banners, then fill with defaults until we have enough
+    // Let's just append some defaults to make it look full
+    const needed = Math.max(0, 10 - normalizedIncoming.length);
+    const defaultsToAdd = defaultImages.slice(0, needed).map(src => ({ src, link: null }));
+    images = [...normalizedIncoming, ...defaultsToAdd];
+  } else {
+    // 3 or more banners -> Use ONLY banners
+    images = normalizedIncoming;
+  }
+
 
   return (
     <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
@@ -122,13 +151,23 @@ const Hero = ({ data } = {}) => {
           }}
           className="hero-swiper relative"
         >
-          {images.map((src, idx) => (
+          {images.map((item, idx) => (
             <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
-              <img
-                src={src}
-                alt={`slide-${idx}`}
-                className="h-full w-full object-cover rounded-2xl shadow-lg"
-              />
+              {item.link ? (
+                <Link href={item.link} className="block w-full h-full">
+                  <img
+                    src={item.src}
+                    alt={`slide-${idx}`}
+                    className="h-full w-full object-cover rounded-2xl shadow-lg"
+                  />
+                </Link>
+              ) : (
+                <img
+                  src={item.src}
+                  alt={`slide-${idx}`}
+                  className="h-full w-full object-cover rounded-2xl shadow-lg"
+                />
+              )}
             </SwiperSlide>
           ))}
         </Swiper>

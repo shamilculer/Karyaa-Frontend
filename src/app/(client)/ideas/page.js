@@ -26,7 +26,7 @@ export default async function IdeasPage() {
 
   return (
     <div className='min-h-screen'>
-      <PageTitle imgUrl="/new-banner-2.jpg" title="Ideas" tagline="Ideas, Inspiration & Expert Tips for Every Event" />
+      <PageTitle placement="Ideas" imgUrl="/new-banner-2.jpg" title="Ideas" tagline="Ideas, Inspiration & Expert Tips for Every Event" />
 
       {!categories.length && !error && (
         <div className="flex justify-center py-16">
