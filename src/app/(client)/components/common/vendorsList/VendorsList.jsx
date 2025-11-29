@@ -86,8 +86,8 @@ const VendorEmptyState = () => (
 
 // 📌 MAIN SERVER COMPONENT
 const VendorsList = async ({ showControls, filters }) => {
-  const authResult = await checkAuthStatus();
-  const savedVendorIds = authResult.user?.savedVendors || [];
+  const authResult = await checkAuthStatus("user", true);
+  const savedVendorIds = [];
 
   const requestFilters = {
     page: filters?.page || 1,

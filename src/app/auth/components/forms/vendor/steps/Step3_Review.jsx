@@ -11,7 +11,7 @@ import { registerVendor } from "@/app/actions/vendor/auth";
 export default function Step03_Review({ isLastStep }) {
     const router = useRouter(); // NEW: Initialize router
     // Added resetForm from store to clear state after successful submission
-    const { formData, resetForm } = useVendorFormStore();
+    const { formData, resetForm, prevStep } = useVendorFormStore();
     const [isConsentChecked, setIsConsentChecked] = useState(false);
     const [showError, setShowError] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +32,19 @@ export default function Step03_Review({ isLastStep }) {
 
         if (response && response.success) {
             // SUCCESS SCENARIO
+            toast.success("Registration Successful!", {
+                position: "top-center",
+                description: "Redirecting to success page...",
+                duration: 3000,
+            });
+
+            // Reset form data
+            resetForm();
+
+            // Redirect to success page with vendor ID
+            const vendorId = response.data?.vendor?.referenceId || response.data?.vendor?._id;
+            router.push(`/auth/vendor/register/success?vendorId=${vendorId}`);
+
         } else if (response && !response.success) {
             // FAILURE SCENARIO
             // 1. Show Error Toast
@@ -44,8 +57,6 @@ export default function Step03_Review({ isLastStep }) {
             // 2. Stop loading
             setIsSubmitting(false);
         }
-
-        // No need to set isSubmitting(false) on success because the router.push will unmount the component
     };
 
     const handleCheckboxChange = (e) => {
@@ -54,6 +65,10 @@ export default function Step03_Review({ isLastStep }) {
         if (e.target.checked) {
             setShowError(false);
         }
+    };
+
+    const handleBack = () => {
+        prevStep();
     };
 
     const { password, ...displayData } = formData;
@@ -96,7 +111,7 @@ export default function Step03_Review({ isLastStep }) {
                     />
                     <label htmlFor="consent" className="text-sm text-gray-700">
                         I confirm that all information provided is accurate and I agree to the{" "}
-                        <a href="/terms" target="_blank" className="text-indigo-600 underline">
+                        <a href="/terms-and-conditions" target="_blank" className="text-indigo-600 underline">
                             Vendor Terms and Conditions
                         </a>
                         .
@@ -112,7 +127,15 @@ export default function Step03_Review({ isLastStep }) {
             </div>
 
             {/* --- FINAL SUBMISSION BUTTON --- */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBack}
+                    className="w-40 text-base"
+                >
+                    ← Back
+                </Button>
                 <Button
                     type="button"
                     onClick={handleSubmit}

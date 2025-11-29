@@ -124,21 +124,25 @@ export async function apiFetch(url, options = {}) {
                     // Update cookies using the SAME cookieStore instance
                     const isProduction = process.env.NODE_ENV === 'production';
 
-                    cookieStore.set(`accessToken_${role}`, newAccessToken, {
-                        httpOnly: true,
-                        secure: isProduction,
-                        sameSite: 'lax',
-                        maxAge: 15 * 60,
-                        path: '/',
-                    });
+                    try {
+                        cookieStore.set(`accessToken_${role}`, newAccessToken, {
+                            httpOnly: true,
+                            secure: isProduction,
+                            sameSite: 'lax',
+                            maxAge: 15 * 60,
+                            path: '/',
+                        });
 
-                    cookieStore.set(`refreshToken_${role}`, newRefreshToken, {
-                        httpOnly: true,
-                        secure: isProduction,
-                        sameSite: 'lax',
-                        maxAge: 30 * 24 * 60 * 60,
-                        path: '/',
-                    });
+                        cookieStore.set(`refreshToken_${role}`, newRefreshToken, {
+                            httpOnly: true,
+                            secure: isProduction,
+                            sameSite: 'lax',
+                            maxAge: 30 * 24 * 60 * 60,
+                            path: '/',
+                        });
+                    } catch (error) {
+                        console.warn(`Could not set auth cookies (likely in Server Component): ${error.message}`);
+                    }
 
                     // Retry original request with new token
                     const retryResponse = await fetch(fullUrl, {

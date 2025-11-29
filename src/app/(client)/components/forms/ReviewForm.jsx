@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"; // 💡 Added for client-side refre
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Star } from "lucide-react";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +48,7 @@ const ReviewForm = ({ vendorId, closeModal }) => {
   const currentRating = watch("rating");
 
   const onSubmit = async (data) => {
+    console.log(data)
     try {
       // Call the Server Action to create the review
       const response = await createReview(vendorId, {
@@ -59,10 +60,10 @@ const ReviewForm = ({ vendorId, closeModal }) => {
         toast.error(response.error.message);
       } else {
         toast.success(response.message || "Your review has been submitted!");
-        form.reset(); 
-        closeModal(); 
+        form.reset();
+        closeModal();
 
-        router.refresh(); 
+        router.refresh();
       }
     } catch (error) {
       toast.error(error.error || "An unexpected error occurred. Please try again.");
@@ -85,10 +86,10 @@ const ReviewForm = ({ vendorId, closeModal }) => {
                     <Star
                       key={starValue}
                       className={`cursor-pointer transition-colors duration-200 
-                                  ${starValue <= (hoverRating || currentRating) 
-                                     ? "text-yellow-400 fill-yellow-400" 
-                                     : "text-gray-300"
-                                  }`}
+                                  ${starValue <= (hoverRating || currentRating)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                        }`}
                       size={32}
                       onClick={() => field.onChange(starValue)}
                       onMouseEnter={() => setHoverRating(starValue)}

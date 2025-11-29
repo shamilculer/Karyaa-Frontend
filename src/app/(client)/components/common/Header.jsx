@@ -19,7 +19,7 @@ import MobileSheetWrapper from "./MobileSheetWrapper"; // 👈 New Import
 
 const Header = async () => {
     const categoriesResponse = await getCategoriesWithVendors();
-    const { isAuthenticated, user } = await checkAuthStatus();
+    const { isAuthenticated, user } = await checkAuthStatus("user", true);
 
     const categories = categoriesResponse.categories || [];
 

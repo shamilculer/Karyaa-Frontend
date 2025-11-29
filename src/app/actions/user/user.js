@@ -131,9 +131,11 @@ export async function logoutUser() {
 /**
  * Check authentication status (FAST - no backend call)
  * Decodes JWT locally instead of making expensive API calls
- * Also fetches savedVendors for authenticated users
+ * Also fetches savedVendors for authenticated users (unless skipSavedVendors is true)
+ * @param {string} role - 'user' | 'vendor' | 'admin'
+ * @param {boolean} skipSavedVendors - If true, skip fetching savedVendors to avoid token refresh during rendering
  */
-export async function checkAuthStatus(role = "user") {
+export async function checkAuthStatus(role = "user", skipSavedVendors = false) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(`accessToken_${role}`)?.value;
@@ -150,8 +152,8 @@ export async function checkAuthStatus(role = "user") {
       return { isAuthenticated: false, user: null };
     }
 
-    // Fetch savedVendors from backend for authenticated users
-    if (role === "user") {
+    // Fetch savedVendors from backend for authenticated users (unless skipped)
+    if (role === "user" && !skipSavedVendors) {
       try {
         const profileResponse = await apiFetch("/user/profile", {
           auth: true,
@@ -170,6 +172,9 @@ export async function checkAuthStatus(role = "user") {
         // Don't fail auth check if savedVendors fetch fails
         user.savedVendors = [];
       }
+    } else if (skipSavedVendors) {
+      // Set empty array if we're skipping the fetch
+      user.savedVendors = [];
     }
 
     return {

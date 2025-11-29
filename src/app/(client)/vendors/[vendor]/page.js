@@ -235,10 +235,10 @@ const VendorPage = async ({ params }) => {
                   <div className="flex items-center gap-4">
 
                     <Button asChild variant="ghost" className="p-0">
-                        <Link href={`tel:${vendorData.phoneNumber}`} target="_blank">
-                          <IconPhone className="text-primary" />
-                        </Link>
-                      </Button>
+                      <Link href={`tel:${vendorData.phoneNumber}`} target="_blank">
+                        <IconPhone className="text-primary" />
+                      </Link>
+                    </Button>
 
                     {vendorData?.websiteLink && (
                       <Button asChild variant="ghost" className="p-0">
@@ -385,11 +385,11 @@ const VendorPage = async ({ params }) => {
           </div>
 
           {/* ✅ Right Column - STICKY SIDEBAR (4 columns on large screens) */}
-          <aside 
-            className="lg:col-span-4 order-1 lg:order-2 z-60" 
-            style={{ 
-              position: 'sticky', 
-              top: '80px', 
+          <aside
+            className="lg:col-span-4 order-1 lg:order-2 z-60"
+            style={{
+              position: 'sticky',
+              top: '80px',
               alignSelf: 'flex-start',
               maxHeight: 'calc(100vh - 120px)'
             }}
@@ -480,7 +480,7 @@ const VendorPage = async ({ params }) => {
             </div>
           </div>
         )}
-        
+
         <div className="relative">
           <div className="flex justify-between items-center max-lg:items-end mb-6 md:mb-8">
             <h2 className="uppercase text-2xl font-bold">Similar Vendors</h2>

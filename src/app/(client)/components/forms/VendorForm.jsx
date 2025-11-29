@@ -25,6 +25,7 @@ import { vendorFormSchema } from "@/lib/schema";
 import { postLead } from "@/app/actions/public/leads";
 import { toast } from "sonner";
 import { useClientStore } from "@/store/clientStore";
+import Link from "next/link";
 
 // ----------------------------------------------------------------------
 // 2. Vendor Form Component (REVISED to accept setIsOpen)
@@ -283,7 +284,7 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                         </div>
                     )}
 
-                    <span className="text-xs !leading-[.8em]">By clicking "Submit" you accept our Terms of Use and Privacy Policy.</span>
+                    <span className="text-xs !leading-[.8em]">By clicking "Submit" you accept our <Link className="text-blue-500 underline" href="/terms-and-conditions">Terms and Conditions</Link> and <Link className="text-blue-500 underline" href="/privacy-policy">Privacy Policy</Link>.</span>
 
                     <Button type="submit" className="w-full mt-5" disabled={isSubmitting}>
                         {isSubmitting ? "Sending..." : "Send Message"}
