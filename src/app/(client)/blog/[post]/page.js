@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import Image from "next/image";
 import BlogPosts, { BlogCarousel } from "../../components/common/BlogPosts";
-import { getBlogPost } from "../../../actions/blog";
+import { getBlogPost } from "@/app/actions/public/blog";
 import { initialBlogParams } from "@/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -51,7 +51,7 @@ const BlogPostPage = async ({ params }) => {
   const { post } = await params;
 
   const blogPost = await getBlogPost(post);
-  
+
   const ctaUrl = blogPost.ctaLink?.trim();
   const isExternal = ctaUrl?.startsWith("http");
 

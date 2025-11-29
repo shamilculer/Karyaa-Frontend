@@ -9,11 +9,11 @@ import {
     AvatarImage
 } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button';
-import ReviewsToolbar from '../components/ReviewsToolbar';
+import ReviewsToolbar from "../components/sections/ReviewsToolbar";
 import { Star, Trash } from 'lucide-react';
 import { useVendorStore } from '@/store/vendorStore';
 import { getReviewStats } from '@/app/actions/vendor/reviews';
-import { getAllVendorReviews } from '@/app/actions/reviews';
+import { getAllVendorReviews } from '@/app/actions/shared/reviews';
 import { flagReviewForRemoval } from '@/app/actions/vendor/reviews';
 import { GlobalPagination } from '@/components/common/GlobalPagination';
 import { toast } from "sonner";

@@ -15,9 +15,9 @@ import { Search, Plus } from "lucide-react";
 
 import { useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getCategoriesWithVendors } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 
-import BannerCarouselContainer from "../components/BannerCarousel";
+import BannerCarouselContainer from "../components/sections/BannerCarousel";
 import Link from "next/link";
 
 const AdManagementPage = () => {

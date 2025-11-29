@@ -1,4 +1,4 @@
-import ReviewStatsWrapper from "../components/ReviewStatsWrapper"
+import ReviewStatsWrapper from "../components/sections/ReviewStatsWrapper"
 import ReviewDataTable from "../components/tables/ReviewDataTable"
 
 const ReviewManagementPage = () => {

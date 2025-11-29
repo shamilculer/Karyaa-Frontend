@@ -77,7 +77,7 @@ export async function loginUser(data) {
     if (!response.success) {
       return {
         success: false,
-        message: response.message || "Internel server error. Please try again!",
+        message: response.message || "Internal server error. Please try again!",
       };
     }
 
@@ -108,7 +108,7 @@ export async function loginUser(data) {
     console.error("Login failed:", error.message);
     return {
       success: false,
-      error: error.message || "Internel server error. Please try again!",
+      error: error.message || "Internal server error. Please try again!",
     };
   }
 }
@@ -131,6 +131,7 @@ export async function logoutUser() {
 /**
  * Check authentication status (FAST - no backend call)
  * Decodes JWT locally instead of making expensive API calls
+ * Also fetches savedVendors for authenticated users
  */
 export async function checkAuthStatus(role = "user") {
   try {
@@ -147,6 +148,28 @@ export async function checkAuthStatus(role = "user") {
 
     if (!user) {
       return { isAuthenticated: false, user: null };
+    }
+
+    // Fetch savedVendors from backend for authenticated users
+    if (role === "user") {
+      try {
+        const profileResponse = await apiFetch("/user/profile", {
+          auth: true,
+          role: "user",
+        });
+
+        // Merge savedVendors into user object
+        if (profileResponse?.user?.savedVendors) {
+          console.log("DEBUG: savedVendors from profile:", profileResponse.user.savedVendors);
+          user.savedVendors = profileResponse.user.savedVendors;
+        } else {
+          console.log("DEBUG: No savedVendors in profile response");
+        }
+      } catch (error) {
+        console.error("Failed to fetch savedVendors:", error);
+        // Don't fail auth check if savedVendors fetch fails
+        user.savedVendors = [];
+      }
     }
 
     return {
@@ -216,9 +239,15 @@ export async function toggleSavedVendor(vendorId) {
       role: "user",
     });
 
+    // Check if authentication is required
+    if (response.requiresAuth) {
+      return response; // Return the auth error to client
+    }
+
     // Revalidate relevant pages
     revalidatePath("/vendors");
     revalidatePath("/saved-vendors");
+    revalidatePath("/vendors/[vendor]", "page"); // Revalidate vendor detail pages
 
     return {
       success: true,
@@ -364,9 +393,6 @@ export async function deleteUserAccount(password) {
     cookieStore.delete("accessToken_user");
     cookieStore.delete("refreshToken_user");
 
-    // Redirect to home page
-    redirect("/");
-
     return {
       success: true,
       message: response.message || "Account deleted successfully",
@@ -386,19 +412,19 @@ export async function deleteUserAccount(password) {
  */
 export async function syncCurrentUserDataAction(userId) {
   try {
-      const response = await apiFetch(`/util/user/${userId}/me`, {
-          method: "GET",
-          auth: true, 
-          role: "user"
-      });
+    const response = await apiFetch(`/util/user/${userId}/me`, {
+      method: "GET",
+      auth: true,
+      role: "user"
+    });
 
-      return response;
+    return response;
 
   } catch (error) {
-      console.error("Sync user data error:", error);
-      return {
-          success: false,
-          message: error.message || "Failed to sync user data."
-      };
+    console.error("Sync user data error:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to sync user data."
+    };
   }
 }

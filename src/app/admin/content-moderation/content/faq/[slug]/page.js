@@ -1,23 +1,13 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ArrowLeft,
-  Save,
-  Plus,
-  Trash2,
-  GripVertical,
-  Loader2,
-  Eye,
-} from "lucide-react";
-import { getContentByKeyAction } from "@/app/actions/content";
-import { upsertContentAction } from "@/app/actions/admin/pages";
-import { toast } from "sonner";
+"use client"
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { Loader2, ArrowLeft, Eye, Plus, Save, GripVertical, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getContentByKeyAction, upsertContentAction } from "@/app/actions/public/content"
 
 const FaqEditor = () => {
   const params = useParams();

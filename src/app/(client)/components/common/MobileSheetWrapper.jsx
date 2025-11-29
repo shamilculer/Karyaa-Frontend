@@ -1,4 +1,3 @@
-// app/components/MobileSheetWrapper.jsx
 "use client";
 
 import { useState } from "react";
@@ -17,8 +16,8 @@ import { Menu } from "lucide-react";
 
 // Assuming these paths are correct relative to this component's location
 import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
-import UserMenu from "../UserDropDownMenu";
-import MobileNavLinks from "./MobileNavLinks"; 
+import UserMenu from "../ui/UserDropDownMenu";
+import MobileNavLinks from "./MobileNavLinks";
 
 /**
  * Client Component: Manages the open/close state of the mobile menu Sheet.
@@ -35,7 +34,7 @@ const MobileSheetWrapper = ({ isAuthenticated, user, categories }) => {
                     <Menu />
                 </Button>
             </SheetTrigger>
-            
+
             <SheetContent side="left" className="flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>

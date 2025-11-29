@@ -1,10 +1,10 @@
 // Category pages fetch server-side data (category details) and may access cookies via shared helpers.
-export const dynamic = 'force-dynamic';
+
 
 import { SubCategoryCarouselWrapper } from "../../components/common/SubCategories";
 import PageSearchBar from "../../components/common/PageSearchBar/PageSearchBar";
 import Image from "next/image";
-import { getCategoryDetails } from "@/app/actions/categories";
+import { getCategoryDetails } from "@/app/actions/public/categories";
 import VendorsListWrapper from "../../components/common/vendorsList/VendorListWrapper";
 import PageTitle from "../../components/common/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -58,29 +58,29 @@ const CategoryPage = async ({ params, searchParams }) => {
         </div>
       </section>
 
-              <section className="container divide-y divide-gray-300">
-          <div className="w-full flex-between !items-end pb-5">
-            <div>
-              <h6 className="uppercase max-lg:!text-sm !font-medium">Blog</h6>
-              <h2 className="uppercase">What to read next</h2>
-            </div>
-
-            <Button
-              asChild
-              variant="ghost"
-              className="text-gray-700 font-medium text-base hover:underline max-md:hidden"
-            >
-              <Link href="/blog">View All</Link>
-            </Button>
+      <section className="container divide-y divide-gray-300">
+        <div className="w-full flex-between !items-end pb-5">
+          <div>
+            <h6 className="uppercase max-lg:!text-sm !font-medium">Blog</h6>
+            <h2 className="uppercase">What to read next</h2>
           </div>
 
-          <div className="pt-5">
-            <BlogPosts
-              searchParams={initialBlogParams}
-              showPagination={false}
-            />
-          </div>
-        </section>
+          <Button
+            asChild
+            variant="ghost"
+            className="text-gray-700 font-medium text-base hover:underline max-md:hidden"
+          >
+            <Link href="/blog">View All</Link>
+          </Button>
+        </div>
+
+        <div className="pt-5">
+          <BlogPosts
+            searchParams={initialBlogParams}
+            showPagination={false}
+          />
+        </div>
+      </section>
 
       <section className="container flex-center flex-col gap-8">
         <h2 className="texxt-center">

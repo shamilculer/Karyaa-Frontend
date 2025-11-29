@@ -39,13 +39,9 @@ import {
     Loader2,
     Zap,
 } from "lucide-react"
-import { toast } from "sonner"
-import CreateBundleModal from "../CreateBundelModal"
-import EditBundleModal from "../EditBundleModal"
 
-export const description = "Bundle Management Table"
-
-const initialBundleData = []
+import CreateBundleModal from "../modals/bundles/CreateBundelModal"
+import EditBundleModal from "../modals/bundles/EditBundleModal"
 
 // --- Helper Functions ---
 const formatPrice = (price, currency = 'AED') => {
@@ -138,12 +134,12 @@ const BundlesTable = ({ controls = true }) => {
 
     // --- URL-Derived State ---
     // Page is 1-indexed in URL for user readability, 0-indexed in code.
-    const urlPageIndex = Number(searchParams.get("page")) - 1 || 0 
+    const urlPageIndex = Number(searchParams.get("page")) - 1 || 0
     const urlPageSize = Number(searchParams.get("limit")) || 15
     const urlGlobalFilter = searchParams.get("search") || ""
     const urlStatusFilter = searchParams.get("status") || ""
 
-    const [data, setData] = useState(initialBundleData)
+    const [data, setData] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [totalBundles, setTotalBundles] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
@@ -157,7 +153,7 @@ const BundlesTable = ({ controls = true }) => {
     // --- Core function to update the URL ---
     const updateUrl = useCallback((newParams) => {
         const params = new URLSearchParams(searchParams.toString())
-        
+
         Object.keys(newParams).forEach(key => {
             const value = newParams[key]
             if (value === null || value === undefined || value === "" || (key === 'page' && value === 1)) {
@@ -241,7 +237,7 @@ const BundlesTable = ({ controls = true }) => {
 
         return () => clearTimeout(handler);
     }, [searchQuery]);
-    
+
     // Function to refetch data after modal closure/action
     const refetchBundles = () => {
         fetchData();
@@ -253,7 +249,7 @@ const BundlesTable = ({ controls = true }) => {
         // CRUCIAL FIX: If the modal is closing (isOpen is false), clear the selected bundle
         // This ensures the modal component unmounts and releases any focus/layering effects.
         if (!isOpen) {
-            setSelectedBundle(null); 
+            setSelectedBundle(null);
         }
     };
 
@@ -443,7 +439,7 @@ const BundlesTable = ({ controls = true }) => {
                                     <Checkbox
                                         checked={isAllSelected}
                                         // Pass undefined when false to avoid DOM warning (Received 'false' for non-boolean attribute 'indeterminate')
-                                        indeterminate={isSomeSelected ? true : undefined} 
+                                        indeterminate={isSomeSelected ? true : undefined}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -594,7 +590,7 @@ const BundlesTable = ({ controls = true }) => {
                     bundle={selectedBundle}
                     onSuccess={() => {
                         refetchBundles();
-                        handleModalClose(false); 
+                        handleModalClose(false);
                     }}
                 />
             )}

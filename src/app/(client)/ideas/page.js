@@ -1,8 +1,8 @@
 // app/ideas/page.jsx
 
 import PageTitle from "../components/common/PageTitle";
-import IdeasContainer from "../components/IdeasContainer";
-import { getAllIdeaCategoriesAction } from "@/app/actions/ideas";
+import IdeasContainer from "../components/features/ideas/IdeasContainer";
+import { getAllIdeaCategoriesAction } from "@/app/actions/public/ideas";
 
 // This route uses server-only cookies via apiFetch; force dynamic rendering so Next
 // doesn't attempt to statically prerender it and error on cookie usage.

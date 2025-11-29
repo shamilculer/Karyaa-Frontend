@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react";
 import { getAllActiveBundles } from "@/app/actions/vendor/bundles";
-import BundleList from "../components/BundleList";
+import BundleList from "../components/sections/BundleList";
 
 export const dynamic = 'force-dynamic'
 

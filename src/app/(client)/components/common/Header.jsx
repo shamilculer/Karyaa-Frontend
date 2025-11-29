@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/navigation-menu";
 
 
-import UserMenu from "../UserDropDownMenu"; // This is your client component
+import UserMenu from "../ui/UserDropDownMenu"; // This is your client component
 import { checkAuthStatus } from "../../../actions/user/user";
-import { getCategoriesWithVendors } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 import MobileSheetWrapper from "./MobileSheetWrapper"; // 👈 New Import
 
 const Header = async () => {

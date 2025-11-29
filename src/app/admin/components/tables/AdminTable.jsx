@@ -55,7 +55,7 @@ import { getInitials } from "@/utils"
 
 import { getAllAdminsAction, toggleAdminStatusAction } from "@/app/actions/admin/admin"
 
-import { AdminManagementModal } from "../AdminManagementModal" // Ensure this path is correct
+import { AdminManagementModal } from "../modals/admin/AdminManagementModal";
 
 export const description = "Admins Management Table with API Integration and RBAC"
 
@@ -296,7 +296,7 @@ export default function AdminsTable({ controls = true }) {
             toast.error("An unexpected error occurred during status update.");
         }
     };
-    
+
 
     const headers = [
         "Full Name",

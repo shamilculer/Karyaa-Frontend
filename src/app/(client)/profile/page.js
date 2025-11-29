@@ -44,6 +44,8 @@ import {
   Shield,
   AlertTriangle,
   Camera,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useClientStore } from "@/store/clientStore";
 import { CldUploadWidget } from "next-cloudinary";
@@ -54,6 +56,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const { user: storedUser, setUser: setStoredUser } = useClientStore();
 
   // Profile form
@@ -140,28 +144,36 @@ export default function ProfilePage() {
 
     if (!result.success) {
       setMessage({ type: "error", text: result.error });
+    } else {
+      setMessage({ type: "success", text: result.message });
+      setShowDeleteModal(false);
+      setStoredUser(null);
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
     }
   };
 
   const handleProfileImageUpload = async (result) => {
     if (result.event === 'success') {
-        const imageUrl = result.info.secure_url
-        
-        // Optimistic update
-        setUser(prev => ({ ...prev, profileImage: imageUrl }))
-        
-        // Save to backend
-        const updateResult = await updateUserProfile({ profileImage: imageUrl })
-        
-        if (updateResult.success) {
-            setStoredUser({ ...storedUser, profileImage: imageUrl })
-            setMessage({ type: "success", text: "Profile picture updated successfully" })
-            setTimeout(() => setMessage({ type: "", text: "" }), 3000)
-        } else {
-            setMessage({ type: "error", text: updateResult.error })
-            // Revert on failure
-            setUser(prev => ({ ...prev, profileImage: user.profileImage }))
-        }
+      const imageUrl = result.info.secure_url
+
+      // Optimistic update
+      setUser(prev => ({ ...prev, profileImage: imageUrl }))
+
+      // Save to backend
+      const updateResult = await updateUserProfile({ profileImage: imageUrl })
+
+      if (updateResult.success) {
+        setStoredUser({ ...storedUser, profileImage: imageUrl })
+        setMessage({ type: "success", text: "Profile picture updated successfully" })
+        setTimeout(() => setMessage({ type: "", text: "" }), 3000)
+      } else {
+        setMessage({ type: "error", text: updateResult.error })
+        // Revert on failure
+        setUser(prev => ({ ...prev, profileImage: user.profileImage }))
+      }
     }
   }
 
@@ -201,11 +213,10 @@ export default function ProfilePage() {
           {/* Message Alert */}
           {message.text && (
             <Alert
-              className={`${
-                message.type === "success"
-                  ? "bg-green-50 border-green-200"
-                  : "bg-red-50 border-red-200"
-              } shadow-lg`}
+              className={`${message.type === "success"
+                ? "bg-green-50 border-green-200"
+                : "bg-red-50 border-red-200"
+                } shadow-lg`}
             >
               {message.type === "success" ? (
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -239,24 +250,24 @@ export default function ProfilePage() {
 
                   {/* Upload Button Overlay */}
                   <CldUploadWidget
-                      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                      onSuccess={handleProfileImageUpload}
-                      options={{
-                          folder: 'client/profiles',
-                          maxFiles: 1,
-                          clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-                          maxFileSize: 5000000, // 5MB
-                      }}
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                    onSuccess={handleProfileImageUpload}
+                    options={{
+                      folder: 'client/profiles',
+                      maxFiles: 1,
+                      clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+                      maxFileSize: 5000000, // 5MB
+                    }}
                   >
-                      {({ open }) => (
-                          <button
-                              type="button"
-                              onClick={() => open()}
-                              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer z-10"
-                          >
-                              <Camera className="w-8 h-8 text-white" />
-                          </button>
-                      )}
+                    {({ open }) => (
+                      <button
+                        type="button"
+                        onClick={() => open()}
+                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer z-10"
+                      >
+                        <Camera className="w-8 h-8 text-white" />
+                      </button>
+                    )}
                   </CldUploadWidget>
                 </div>
 
@@ -364,11 +375,10 @@ export default function ProfilePage() {
                       required: "Name is required",
                     })}
                     disabled={!isEditing}
-                    className={`h-12 ${
-                      !isEditing
-                        ? "bg-gray-200 border-gray-200"
-                        : "border-indigo-200"
-                    }`}
+                    className={`h-12 ${!isEditing
+                      ? "bg-gray-200 border-gray-200"
+                      : "border-indigo-200"
+                      }`}
                   />
                   {profileErrors.username && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
@@ -392,11 +402,10 @@ export default function ProfilePage() {
                       required: "Email is required",
                     })}
                     disabled={!isEditing}
-                    className={`h-12 ${
-                      !isEditing
-                        ? "bg-gray-200 border-gray-200"
-                        : "border-indigo-200"
-                    }`}
+                    className={`h-12 ${!isEditing
+                      ? "bg-gray-200 border-gray-200"
+                      : "border-indigo-200"
+                      }`}
                   />
                   {profileErrors.emailAddress && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
@@ -420,11 +429,10 @@ export default function ProfilePage() {
                       required: "Mobile number is required",
                     })}
                     disabled={!isEditing}
-                    className={`h-12 ${
-                      !isEditing
-                        ? "bg-gray-200 border-gray-200"
-                        : "border-indigo-200"
-                    }`}
+                    className={`h-12 ${!isEditing
+                      ? "bg-gray-200 border-gray-200"
+                      : "border-indigo-200"
+                      }`}
                   />
                   {profileErrors.mobileNumber && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
@@ -448,11 +456,10 @@ export default function ProfilePage() {
                       required: "Location is required",
                     })}
                     disabled={!isEditing}
-                    className={`h-12 ${
-                      !isEditing
-                        ? "bg-gray-200 border-gray-200"
-                        : "border-indigo-200"
-                    }`}
+                    className={`h-12 ${!isEditing
+                      ? "bg-gray-200 border-gray-200"
+                      : "border-indigo-200"
+                      }`}
                   />
                   {profileErrors.location && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
@@ -498,15 +505,30 @@ export default function ProfilePage() {
                   >
                     Current Password
                   </Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    {...registerPassword("currentPassword", {
-                      required: "Current password is required",
-                    })}
-                    placeholder="••••••••"
-                    className="h-12 border-indigo-200"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showCurrentPassword ? "text" : "password"}
+                      {...registerPassword("currentPassword", {
+                        required: "Current password is required",
+                      })}
+                      placeholder="••••••••"
+                      className="h-12 border-indigo-200 pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    >
+                      {showCurrentPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
                   {passwordErrors.currentPassword && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
                       <XCircle className="h-3 w-3" />
@@ -522,19 +544,34 @@ export default function ProfilePage() {
                   >
                     New Password
                   </Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    {...registerPassword("newPassword", {
-                      required: "New password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters",
-                      },
-                    })}
-                    placeholder="••••••••"
-                    className="h-12 border-indigo-200"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      {...registerPassword("newPassword", {
+                        required: "New password is required",
+                        minLength: {
+                          value: 6,
+                          message: "Password must be at least 6 characters",
+                        },
+                      })}
+                      placeholder="••••••••"
+                      className="h-12 border-indigo-200 pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
                   {passwordErrors.newPassword && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
                       <XCircle className="h-3 w-3" />

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { GlobalPagination } from "@/components/common/GlobalPagination";
-import { getPublishedBlogPosts } from "../../../actions/blog";
+import { getPublishedBlogPosts } from "@/app/actions/public/blog";
 import { Skeleton } from "@/components/ui/skeleton";
 
 async function BlogPostsContent({ searchParams, showPagination = true, exclude }) {

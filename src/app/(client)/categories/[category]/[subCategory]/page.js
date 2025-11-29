@@ -1,11 +1,11 @@
 // Subcategory pages fetch server data and may rely on cookies; force dynamic rendering.
-export const dynamic = 'force-dynamic';
+
 
 import CategoryList from "@/app/(client)/components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "@/app/(client)/components/common/PageTitle";
 import VendorsListWrapper from "@/app/(client)/components/common/vendorsList/VendorListWrapper";
-import { getSubcategoryDetails } from "@/app/actions/categories";
+import { getSubcategoryDetails } from "@/app/actions/public/categories";
 import Image from "next/image";
 
 const SubCategoryPage = async ({ params, searchParams }) => {
@@ -17,17 +17,17 @@ const SubCategoryPage = async ({ params, searchParams }) => {
 
   return (
     <div>
-      <PageTitle 
+      <PageTitle
         placement={`Subcategory: ${subCategoryData?.parentCategory?.name} > ${subCategoryData?.name}`}
-        imgUrl={subCategoryData?.coverImage} 
-        title={subCategoryData?.name} 
+        imgUrl={subCategoryData?.coverImage}
+        title={subCategoryData?.name}
       />
 
       <section className="container !mb-16">
         <PageSearchBar />
       </section>
 
-        <CategoryList />
+      <CategoryList />
 
       <section className="container !mt-0">
         <div className="relative">
@@ -36,7 +36,7 @@ const SubCategoryPage = async ({ params, searchParams }) => {
               Featured Partners
             </h2>
           </div>
-          <VendorsListWrapper showControls={true} isSubPage={true} filters={{subCategory : subCategory, ...filters }} />
+          <VendorsListWrapper showControls={true} isSubPage={true} filters={{ subCategory: subCategory, ...filters }} />
         </div>
       </section>
 

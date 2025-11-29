@@ -1,12 +1,12 @@
-import { getAllIdeaCategoriesAction } from "@/app/actions/ideas";
+import { getAllIdeaCategoriesAction } from "@/app/actions/public/ideas";
 import IdeasTable from "../../components/tables/IdeasTable";
-import IdeaCategories from "../../components/IdeaCategories";
+import IdeaCategories from "../../components/sections/IdeaCategories";
 
 export const dynamic = 'force-dynamic'
 
 const IdeasManagementPage = async () => {
     // Fetch categories for the filter dropdown
-    const categoriesResult = await getAllIdeaCategoriesAction({role: "admin"});
+    const categoriesResult = await getAllIdeaCategoriesAction({ role: "admin" });
     const categories = categoriesResult.success ? categoriesResult.data : [];
 
     return (

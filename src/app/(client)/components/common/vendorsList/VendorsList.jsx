@@ -8,7 +8,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Carousel } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getActiveVendors } from "@/app/actions/vendors";
+import { getActiveVendors } from "@/app/actions/public/vendors";
 
 // Sorters
 import {
@@ -23,7 +23,7 @@ import { checkAuthStatus } from "@/app/actions/user/user";
 import { GlobalPagination } from "@/components/common/GlobalPagination";
 import VendorsMapView from "./VendorMapView";
 import ViewToggle from "./ViewToggle";
-import StarRating from "../../StarRating";
+import StarRating from "../../features/reviews/StarRating";
 import { VendorsMapViewWrapper } from "./VendorsMapViewClient";
 
 // Helper function

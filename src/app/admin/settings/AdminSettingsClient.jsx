@@ -13,7 +13,7 @@ import { updateAdminProfileAction, updateAdminPasswordAction } from '@/app/actio
 import { getInitials } from '@/utils'
 import { CldUploadWidget } from 'next-cloudinary'
 import { useAdminStore } from '@/store/adminStore'
-import LogoutAlertModal from '../components/LogoutAlertModal'
+import LogoutAlertModal from "../components/modals/shared/LogoutAlertModal"
 
 const AdminSettingsClient = ({ admin: initialAdmin }) => {
     // Use admin from store for reactive updates, fallback to initialAdmin

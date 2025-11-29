@@ -1,6 +1,6 @@
 // app/faq/page.js
 import React from "react";
-import { getBulkContentAction } from "@/app/actions/content";
+import { getBulkContentAction } from "@/app/actions/public/content";
 import {
   Accordion,
   AccordionContent,

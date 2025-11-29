@@ -4,20 +4,18 @@ export const dynamic = "force-dynamic";
 
 import Image from "next/image";
 import Link from "next/link";
-
-import Hero from "./components/HeroServer";
+import { Button } from "@/components/ui/button";
+import Hero from "./components/sections/Hero";
 import PageSearchBar from "./components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "./components/common/CategoriesList/CategoriesList";
-
-import BlogPosts from "./components/common/BlogPosts";
-import { Button } from "@/components/ui/button";
-import Testimonials from "./components/TestimonialsServer";
-import WhyChooseUs from "./components/WhyChooseUsServer";
-import HowItWorks from "./components/HowItWorksServer";
-
-import { initialBlogParams } from "@/utils";
 import VendorsCarousel from "./components/common/VendorsCarousel";
-import AdbannerWrapper from "./components/adBanner/AdBannerWrapper";
+import WhyChooseUs from "./components/sections/WhyChooseUs";
+import HowItWorks from "./components/sections/HowItWorks";
+import AdbannerWrapper from "./components/features/adBanner/AdBannerWrapper";
+import BlogPosts from "./components/common/BlogPosts";
+import Testimonials from "./components/sections/Testimonials";
+
+const initialBlogParams = { page: 1, limit: 3 };
 
 export default function LandingPage() {
   return (

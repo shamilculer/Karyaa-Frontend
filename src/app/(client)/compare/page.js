@@ -3,8 +3,8 @@ export const dynamic = 'force-dynamic';
 
 // app/compare/page.js
 import { Suspense } from "react";
-import CompareTable from "../components/CompareTable";
-import { getVendorsBySlugs } from "@/app/actions/vendors";
+import CompareTable from "../components/features/vendors/CompareTable";
+import { getVendorsBySlugs } from "@/app/actions/public/vendors";
 import { Skeleton } from "@/components/ui/skeleton";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";

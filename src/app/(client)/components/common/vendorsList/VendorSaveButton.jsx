@@ -2,8 +2,8 @@
 
 import { Heart } from "lucide-react";
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button"; // Assuming your button component
-import { toast } from "sonner"; // Assuming Sonner is configured and available
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { toggleSavedVendor } from "@/app/actions/user/user";
 import { useClientStore } from "@/store/clientStore";
 
@@ -17,10 +17,10 @@ import { useClientStore } from "@/store/clientStore";
 export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPage }) {
 
     const { isAuthenticated } = useClientStore();
-    
+
     // 1. State for the current saved status
     const [isSaved, setIsSaved] = useState(isInitialSaved);
-    
+
     // 2. State for handling pending transitions (loading state)
     const [isPending, startTransition] = useTransition();
 
@@ -30,7 +30,7 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
         if (!isAuthenticated) {
             toast.info("Please log in to save items to your wishlist.", { duration: 3000 });
             // Use window.location.assign for full page redirect
-            window.location.assign('/auth/login'); 
+            window.location.assign('/auth/login');
             return;
         }
 
@@ -40,12 +40,12 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
         // --- Optimistic UI Update ---
         const previousSavedState = isSaved;
         // Immediately flip the saved state for a fast user experience
-        setIsSaved(prev => !prev); 
-        
-        const actionMessage = previousSavedState 
-            ? "Removing vendor..." 
+        setIsSaved(prev => !prev);
+
+        const actionMessage = previousSavedState
+            ? "Removing vendor..."
             : "Saving vendor...";
-        
+
         // Use a persistent toast for the loading state
         const loadingToastId = toast.loading(actionMessage);
 
@@ -54,13 +54,19 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
             try {
                 const result = await toggleSavedVendor(vendorId);
 
-                // No need to check for result.redirectTo here, as the client check handles it.
-                // However, we still handle potential errors or unexpected redirect signals 
-                // that might be returned if the Server Action failed for auth reasons after all.
-                
+                // Handle authentication required response
+                if (result.requiresAuth) {
+                    toast.error(result.error || "Please log in to save vendors.", { id: loadingToastId });
+                    // Redirect to login page
+                    setTimeout(() => {
+                        window.location.assign(result.redirectTo || '/auth/login');
+                    }, 1000);
+                    return;
+                }
+
                 if (result.error || !result.success) {
                     // Revert the state if the request fails
-                    setIsSaved(previousSavedState); 
+                    setIsSaved(previousSavedState);
                     toast.error(result.error || "Failed to update saved status.", { id: loadingToastId });
                 } else {
                     // Success: Update state based on the backend's final status
@@ -93,13 +99,13 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
         buttonClassName = `
             w-8 h-8 !p-0 bg-transparent text-white border-0 rounded-full flex items-center justify-center 
             absolute top-3 right-3 z-10 transition-colors duration-200 
-            ${isSaved 
-                ? 'text-red-500' 
+            ${isSaved
+                ? 'text-red-500'
                 : 'hover:text-red-500 hover:border-red-700'
             }
         `;
     }
-    
+
     // Determine the icon size based on the page
     const iconSize = isVendorPage ? 20 : 25;
 
@@ -107,13 +113,13 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
     // only if it was initially saved (to match server state), but the click redirects.
 
     return (
-        <Button 
-            className={buttonClassName} 
+        <Button
+            className={buttonClassName}
             onClick={handleSaveToggle}
             // Disable button only during pending server transition, not for unauthenticated status
-            disabled={isPending} 
+            disabled={isPending}
             aria-label={isSaved ? "Unsave Vendor" : "Save Vendor"}
-            type="button" 
+            type="button"
             variant="ghost"
         >
             {/* Conditional fill for the Heart icon */}

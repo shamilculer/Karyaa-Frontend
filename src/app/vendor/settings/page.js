@@ -5,10 +5,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Eye, UserPen } from 'lucide-react'
-import LogoutAlertModal from '../components/LogoutAlertModal'
+import LogoutAlertModal from "../components/modals/shared/LogoutAlertModal"
 import { getVendorFromToken } from '../utils/getVendor'
 import { getInitials } from '@/utils'
-import SubscriptionStatus from '../components/SubscriptionStatus';
+import SubscriptionStatus from "../components/sections/SubscriptionStatus";
 
 const VendorSettingsPage = async () => {
 

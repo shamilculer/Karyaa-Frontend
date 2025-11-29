@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getCategoriesWithVendors } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 import CategoriesListClient from "./CategoriesList.client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryGridClient } from "./CategoriesList.client";

@@ -1,4 +1,4 @@
-import { getActiveBanners } from "@/app/actions/adBanner";
+import { getActiveBanners } from "@/app/actions/public/adBanner";
 import Image from "next/image";
 import Link from "next/link";
 import PageTitleSlider from "./PageTitleSlider";

@@ -5,7 +5,7 @@ import InquiriesByLocation from '../components/charts/InquiriesByLocation'
 import LeadSource from '../components/charts/LeadSource'
 import ProfileViewsOverTime from '../components/charts/ProfileViewsOverTime'
 import VisitAndEnquiries from '../components/charts/VisitAndEnquiries'
-import PackageEnquiry from '../components/PackageEnquiry'
+import PackageEnquiry from "../components/sections/PackageEnquiry"
 import LeadsTable from '../components/tables/LeadsTable'
 
 const VendorAnalyticsPage = () => {

@@ -11,22 +11,22 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ControlledFileUpload from '@/components/common/ControlledFileUploads';
 import { getVendorProfile, updateVendorProfile } from '@/app/actions/vendor/auth';
-import { getCategories } from '@/app/actions/categories';
+import { getCategories } from '@/app/actions/public/categories';
 import { useVendorStore } from '@/store/vendorStore';
 import Image from 'next/image';
 
 const OCCASION_OPTIONS = [
-    { slug: "wedding", name: "Wedding" },
-    { slug: "engagement", name: "Engagement" },
-    { slug: "proposal", name: "Proposal" },
-    { slug: "baby-shower", name: "Baby Shower" },
-    { slug: "gender-reveal", name: "Gender Reveal" },
-    { slug: "birthday", name: "Birthday" },
-    { slug: "graduation", name: "Graduation" },
-    { slug: "corporate-event", name: "Corporate Event" },
-    { slug: "brand-launch", name: "Brand Launch" },
-    { slug: "festivities", name: "Festivities" },
-    { slug: "anniversary", name: "Anniversary" },
+  { slug: "wedding", name: "Wedding" },
+  { slug: "engagement", name: "Engagement" },
+  { slug: "proposal", name: "Proposal" },
+  { slug: "baby-shower", name: "Baby Shower" },
+  { slug: "gender-reveal", name: "Gender Reveal" },
+  { slug: "birthday", name: "Birthday" },
+  { slug: "graduation", name: "Graduation" },
+  { slug: "corporate-event", name: "Corporate Event" },
+  { slug: "brand-launch", name: "Brand Launch" },
+  { slug: "festivities", name: "Festivities" },
+  { slug: "anniversary", name: "Anniversary" },
 ];
 
 const editProfileSchema = z.object({
@@ -68,8 +68,8 @@ const editProfileSchema = z.object({
 }).refine((data) => {
   // If UAE vendor, require UAE documents
   if (!data.isInternational) {
-    return !!(data.tradeLicenseNumber && data.tradeLicenseCopy && 
-              data.personalEmiratesIdNumber && data.emiratesIdCopy);
+    return !!(data.tradeLicenseNumber && data.tradeLicenseCopy &&
+      data.personalEmiratesIdNumber && data.emiratesIdCopy);
   }
   // If international vendor, require international documents
   return !!(data.businessLicenseCopy && data.passportOrIdCopy);
@@ -80,12 +80,12 @@ const editProfileSchema = z.object({
 
 const ImagePreview = ({ src, alt, onRemove, label }) => {
   if (!src) return null;
-  
+
   return (
     <div className="relative inline-block">
       <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
-        <Image 
-          src={src} 
+        <Image
+          src={src}
           alt={alt}
           fill
           className="object-cover"
@@ -107,10 +107,10 @@ const ImagePreview = ({ src, alt, onRemove, label }) => {
 
 const DocumentPreview = ({ src, label, onRemove }) => {
   if (!src) return null;
-  
+
   const isPDF = src.toLowerCase().includes('.pdf');
   const fileName = src.substring(src.lastIndexOf('/') + 1);
-  
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between">
       <div className="flex items-center space-x-3">
@@ -179,11 +179,10 @@ const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, 
                 type="button"
                 onClick={() => toggleSelection(optionValue)}
                 disabled={disabled}
-                className={`px-3 py-1 text-sm rounded-full cursor-pointer transition-colors font-medium ${
-                  isItemSelected(optionValue)
+                className={`px-3 py-1 text-sm rounded-full cursor-pointer transition-colors font-medium ${isItemSelected(optionValue)
                     ? "bg-primary text-white border-primary"
                     : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {nameToDisplay} {isItemSelected(optionValue) ? '×' : '+'}
               </button>
@@ -268,7 +267,7 @@ const EditProfilePage = () => {
     try {
       setIsLoadingCategories(true);
       const result = await getCategories();
-      
+
       if (result.success) {
         setCategories(result.categories || []);
       }
@@ -286,7 +285,7 @@ const EditProfilePage = () => {
       if (result.success) {
         const vendor = result.data;
         setVendorId(vendor._id);
-        
+
         const formData = {
           ownerName: vendor.ownerName || "",
           email: vendor.email || "",
@@ -322,7 +321,7 @@ const EditProfilePage = () => {
           ownerProfileImage: vendor.ownerProfileImage || "",
           businessLogo: vendor.businessLogo || "",
         };
-        
+
         form.reset(formData);
       } else {
         setError(result.error || "Failed to load profile");
@@ -414,11 +413,10 @@ const EditProfilePage = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   type="button"
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
                       ? "border-blue-600 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -495,7 +493,7 @@ const EditProfilePage = () => {
                         <FormLabel className="text-xs font-medium">Owner Profile Image</FormLabel>
                         <div className="space-y-4">
                           {ownerProfileImage && (
-                            <ImagePreview 
+                            <ImagePreview
                               src={ownerProfileImage}
                               alt="Owner Profile"
                               label="Current Profile Image"
@@ -600,7 +598,7 @@ const EditProfilePage = () => {
                         <FormLabel className="text-xs font-medium">Business Logo *</FormLabel>
                         <div className="space-y-4">
                           {businessLogo && (
-                            <ImagePreview 
+                            <ImagePreview
                               src={businessLogo}
                               alt="Business Logo"
                               label="Current Business Logo"
@@ -717,7 +715,7 @@ const EditProfilePage = () => {
                             <FormLabel className="text-xs font-medium">Trade License Copy *</FormLabel>
                             <div className="space-y-4">
                               {tradeLicenseCopy && (
-                                <DocumentPreview 
+                                <DocumentPreview
                                   src={tradeLicenseCopy}
                                   label="Trade License Document"
                                   onRemove={() => field.onChange('')}
@@ -761,7 +759,7 @@ const EditProfilePage = () => {
                             <FormLabel className="text-xs font-medium">Emirates ID Copy *</FormLabel>
                             <div className="space-y-4">
                               {emiratesIdCopy && (
-                                <DocumentPreview 
+                                <DocumentPreview
                                   src={emiratesIdCopy}
                                   label="Emirates ID Document"
                                   onRemove={() => field.onChange('')}
@@ -794,7 +792,7 @@ const EditProfilePage = () => {
                             <FormLabel className="text-xs font-medium">Business License Copy *</FormLabel>
                             <div className="space-y-4">
                               {businessLicenseCopy && (
-                                <DocumentPreview 
+                                <DocumentPreview
                                   src={businessLicenseCopy}
                                   label="Business License Document"
                                   onRemove={() => field.onChange('')}
@@ -824,7 +822,7 @@ const EditProfilePage = () => {
                             <FormLabel className="text-xs font-medium">Passport or ID Copy *</FormLabel>
                             <div className="space-y-4">
                               {passportOrIdCopy && (
-                                <DocumentPreview 
+                                <DocumentPreview
                                   src={passportOrIdCopy}
                                   label="Passport/ID Document"
                                   onRemove={() => field.onChange('')}

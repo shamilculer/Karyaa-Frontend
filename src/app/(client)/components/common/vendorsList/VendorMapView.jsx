@@ -1,34 +1,29 @@
-"use client";
+"use client"
+import { useState, useEffect, useRef } from "react"
+import dynamic from "next/dynamic"
+import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { BadgeCheckIcon, MapPin, Plus } from "lucide-react"
+import StarRating from "../../features/reviews/StarRating"
+import { getInitials } from "@/utils"
 
-import { useEffect, useState, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { MapPin, Star, Plus, BadgeCheckIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Image from "next/image";
-import VendorShareButton from "./VendorShareButton";
-import VendorSaveButton from "./VendorSaveButton";
-import { getInitials } from "@/utils";
-import StarRating from '../../StarRating';
-
-// Dynamically import react-leaflet components with no SSR
 const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
+    () => import('react-leaflet').then((mod) => mod.MapContainer),
+    { ssr: false }
 );
 const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
+    () => import('react-leaflet').then((mod) => mod.TileLayer),
+    { ssr: false }
 );
 const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
+    () => import('react-leaflet').then((mod) => mod.Marker),
+    { ssr: false }
 );
 const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
+    () => import('react-leaflet').then((mod) => mod.Popup),
+    { ssr: false }
 );
 
 // Helper: generate consistent avatar BG color
@@ -70,7 +65,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                     isInitialSaved={isInitialSaved}
                 /> */}
 
-                <div className='h-8'></div>
+                <div className='h-4'></div>
             </div>
 
             <div className="p-4 space-y-3">
@@ -144,7 +139,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
             import('leaflet/dist/leaflet.css')
         ]).then(([leaflet]) => {
             const L = leaflet.default;
-            
+
             // Fix for default marker icon in React-Leaflet
             delete L.Icon.Default.prototype._getIconUrl;
             L.Icon.Default.mergeOptions({
@@ -152,7 +147,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                 iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
             });
-            
+
             setL(L);
             setMounted(true);
         });
@@ -173,7 +168,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
         // Handle hover events from vendor cards
         const handleOpenMapPopup = (e) => {
             const vendorId = e.detail;
-            
+
             // Clear any pending timeout
             if (popupTimeoutRef.current) {
                 clearTimeout(popupTimeoutRef.current);
@@ -181,7 +176,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
 
             // Close all other popups
             closeAllPopupsExcept(vendorId);
-            
+
             // Open the new popup
             if (markersRef.current[vendorId]) {
                 markersRef.current[vendorId].openPopup();
@@ -201,7 +196,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
 
         window.addEventListener('openMapPopup', handleOpenMapPopup);
         window.addEventListener('closeMapPopup', handleCloseMapPopup);
-        
+
         return () => {
             window.removeEventListener('openMapPopup', handleOpenMapPopup);
             window.removeEventListener('closeMapPopup', handleCloseMapPopup);
@@ -210,12 +205,12 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
 
     const createCustomIcon = (vendor) => {
         if (!L) return null;
-        
+
         const bgColor = vendor.isRecommended ? '#10b981' : '#6366f1';
         const borderColor = vendor.isRecommended ? '#059669' : '#4f46e5';
         const initials = getInitials(vendor.businessName);
         const avatarBgColor = getBgColor(vendor.businessName);
-        
+
         // Convert Tailwind color classes to hex
         const colorMap = {
             'bg-red-500': '#ef4444',
@@ -253,8 +248,8 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                 </clipPath>
               </defs>
               
-              ${vendor.businessLogo 
-                ? `<!-- Vendor logo -->
+              ${vendor.businessLogo
+                    ? `<!-- Vendor logo -->
                    <image 
                      href="${vendor.businessLogo}" 
                      x="16.5" 
@@ -264,7 +259,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                      clip-path="url(#circleClip-${vendor._id})"
                      preserveAspectRatio="xMidYMid slice"
                    />`
-                : `<!-- Fallback initials -->
+                    : `<!-- Fallback initials -->
                    <circle cx="25" cy="19" r="8.5" fill="${fallbackColor}"/>
                    <text 
                      x="25" 
@@ -276,14 +271,14 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
                      font-weight="bold"
                      font-family="Arial, sans-serif"
                    >${initials}</text>`
-              }
+                }
               
-              ${vendor.isRecommended 
-                ? `<!-- Recommended badge -->
+              ${vendor.isRecommended
+                    ? `<!-- Recommended badge -->
                    <circle cx="38" cy="10" r="8" fill="#10b981" stroke="white" stroke-width="2"/>
                    <path d="M35 10l2 2 4-4" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
-                : ''
-              }
+                    : ''
+                }
             </svg>
           </div>
         `,
@@ -297,10 +292,10 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
         if (popupTimeoutRef.current) {
             clearTimeout(popupTimeoutRef.current);
         }
-        
+
         // Close all other popups
         closeAllPopupsExcept(vendorId);
-        
+
         // Open this popup
         setActivePopup(vendorId);
         marker.openPopup();
@@ -339,7 +334,7 @@ const VendorsMapView = ({ vendors, isAuthenticated, savedVendorIds = [] }) => {
         } else {
             // Close all other popups
             closeAllPopupsExcept(vendorId);
-            
+
             setActivePopup(vendorId);
             marker.openPopup();
         }

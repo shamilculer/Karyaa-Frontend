@@ -2,18 +2,18 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
-import PackageToolbar from "../components/PackageToolbar";
+import PackageToolbar from "../components/sections/PackageToolbar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getVendorPackages } from "@/app/actions/packages";
+import { getVendorPackages } from "@/app/actions/public/packages";
 import { getVendorFromToken } from "../utils/getVendor";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import DeletePackageModal from "../components/DeletePackageModal";
-import EditPackageModal from "../components/EditPackageModal";
-import ViewPackageModal from "../components/ViewPackageModal";
+import DeletePackageModal from "../components/modals/packages/DeletePackageModal";
+import EditPackageModal from "../components/modals/packages/EditPackageModal";
+import ViewPackageModal from "@/app/vendor/components/modals/packages/ViewPackageModal";
 
 /* -------------------------------------------
-   Main Page
+   Main Page
 ------------------------------------------- */
 export default function PackagesPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -71,9 +71,9 @@ export default function PackagesPage() {
             {loading ? (
                 <PackagesSkeleton />
             ) : (
-                <PackageList 
-                    packages={packages} 
-                    searchTerm={searchTerm} 
+                <PackageList
+                    packages={packages}
+                    searchTerm={searchTerm}
                     onPackageUpdate={handleUpdatePackages} // Pass the handler
                 />
             )}
@@ -82,7 +82,7 @@ export default function PackagesPage() {
 }
 
 /* -------------------------------------------
-   Package List (Client)
+   Package List (Client)
 ------------------------------------------- */
 function PackageList({ packages, searchTerm, onPackageUpdate }) {
 
@@ -121,9 +121,9 @@ function PackageList({ packages, searchTerm, onPackageUpdate }) {
     return (
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((pkg) => (
-                <PackageCard 
-                    key={pkg._id} 
-                    pkg={pkg} 
+                <PackageCard
+                    key={pkg._id}
+                    pkg={pkg}
                     onPackageUpdate={onPackageUpdate} // Pass the handler to the card
                 />
             ))}
@@ -132,7 +132,7 @@ function PackageList({ packages, searchTerm, onPackageUpdate }) {
 }
 
 /* -------------------------------------------
-   Single Package Card
+   Single Package Card
 ------------------------------------------- */
 // 🟢 UPDATED: PackageCard now accepts onPackageUpdate prop
 function PackageCard({ pkg, onPackageUpdate }) {
@@ -195,7 +195,7 @@ function PackageCard({ pkg, onPackageUpdate }) {
                     </span>
                 </div>
                 {/* End of Price Field */}
-                
+
                 <div className="flex items-center gap-4">
                     <ViewPackageModal packageData={pkg} />
                     {/* 🟢 Pass onUpdate callback */}
@@ -209,7 +209,7 @@ function PackageCard({ pkg, onPackageUpdate }) {
 }
 
 /* -------------------------------------------
-   Suspense Skeleton Loader (Unchanged)
+   Suspense Skeleton Loader (Unchanged)
 ------------------------------------------- */
 function PackagesSkeleton() {
     return (

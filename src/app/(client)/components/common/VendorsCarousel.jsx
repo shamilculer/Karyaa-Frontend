@@ -1,6 +1,6 @@
 import { VendorsCard } from "./vendorsList/VendorsList";
 import { Carousel } from "@/components/ui/carousel";
-import { getActiveVendors } from "@/app/actions/vendors";
+import { getActiveVendors } from "@/app/actions/public/vendors";
 import { checkAuthStatus } from "@/app/actions/user/user";
 
 const VendorsCarousel = async ({ filter = {}, currentVendor }) => {

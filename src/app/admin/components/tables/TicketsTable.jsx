@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from "react"
 // Import the Server Action created in the previous step
 import { getAllSupportTicketsAdmin, deleteTicketAction } from "@/app/actions/admin/tickets"
 
-import TicketDetailsModal from "../TicketDetailsModal"
+import TicketDetailsModal from "../modals/tickets/TicketDetailsModal"
 
 // --- Shadcn UI Imports ---
 import { Badge } from "@/components/ui/badge"

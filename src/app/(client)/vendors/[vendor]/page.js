@@ -8,27 +8,27 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import VendorsCarousel from "../../components/common/VendorsCarousel";
-import VendorContact from "../../components/VendorContact";
-import ScrollHeaderWrapper from "../../components/ScrollHeaderWrapper";
-import VendorGalleryWrapper from "../../components/vendorGallery/VendorGalleryWrapper";
-import { getSingleVendor } from "@/app/actions/vendors";
-import StarRating from "../../components/StarRating";
+import VendorContact from "../../components/features/vendors/VendorContact";
+import ScrollHeaderWrapper from "../../components/features/vendors/ScrollHeaderWrapper";
+import VendorGalleryWrapper from "../../components/features/vendorGallery/VendorGalleryWrapper";
+import { getSingleVendor } from "@/app/actions/public/vendors";
+import StarRating from "../../components/features/reviews/StarRating";
 import { getInitials } from "@/utils";
 import { checkAuthStatus } from "@/app/actions/user/user";
 import VendorSaveButton from "../../components/common/vendorsList/VendorSaveButton";
 import VendorShareButton from "../../components/common/vendorsList/VendorShareButton";
-import { getVendorReviews } from "@/app/actions/reviews";
-import Reviews from "../../components/Reviews";
-import ReviewFormModal from "../../components/ReviewFormModal";
+import { getVendorReviews } from "@/app/actions/shared/reviews";
+import Reviews from "../../components/features/reviews/Reviews";
+import ReviewFormModal from "../../components/modals/ReviewFormModal";
 import { Suspense } from "react";
-import { getVendorPackages } from "@/app/actions/packages";
+import { getVendorPackages } from "@/app/actions/public/packages";
 import {
   Card,
   CardContent,
   CardHeader,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ViewPackageModal from "../../components/ViewPackageModal";
+import ViewPackageModal from "../../components/modals/ViewPackageModal";
 import {
   IconBrandFacebook,
   IconBrandInstagram,

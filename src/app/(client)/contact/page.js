@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 
 import { Mail, MapPin, PhoneCall } from "lucide-react"
 import Link from "next/link"
-import ContactForm from "../components/ContactForm"
-import { getBrandDetailsAction } from "@/app/actions/brand"
+import ContactForm from "../components/forms/ContactForm"
+import { getBrandDetailsAction } from "@/app/actions/public/brand"
 import PageTitle from "../components/common/PageTitle";
 
 

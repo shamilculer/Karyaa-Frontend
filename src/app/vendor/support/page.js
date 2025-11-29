@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import RaiseTicketModal from "../components/RaiseTicketModal";
+import RaiseTicketModal from "../components/modals/support/RaiseTicketModal";
 import { Loader2 } from "lucide-react";
-import { getContentByKeyAction } from "@/app/actions/content";
+import { getContentByKeyAction } from "@/app/actions/public/content";
 import { toast } from "sonner";
 
 const VendorSupportPage = () => {

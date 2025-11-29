@@ -50,7 +50,7 @@ import {
 } from "@tabler/icons-react"
 import { getVendorLeads, updateLeadStatus, deleteLead } from "@/app/actions/vendor/leads"
 import { toast } from "sonner"
-import LeadDetailsModal from "../LeadDetailsModal"
+import LeadDetailsModal from "../modals/leads/LeadDetailsModal"
 
 // Available status options from your schema
 const STATUS_OPTIONS = ["New", "Contacted", "Closed - Won", "Closed - Lost"];

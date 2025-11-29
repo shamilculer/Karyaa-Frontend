@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+
 
 import { Suspense } from "react";
 import Link from "next/link";
@@ -22,7 +22,7 @@ async function SavedVendorsContent({ categorySlug }) {
     return (
       <section className="py-20 text-center space-y-6">
         <h3 className="text-lg text-muted-foreground">
-          {categorySlug 
+          {categorySlug
             ? "No saved vendors found in this category."
             : "You haven't saved any vendors yet."}
         </h3>
@@ -83,7 +83,7 @@ export default async function SavedVendorsPage({ searchParams }) {
         <PageSearchBar />
       </section>
       <CategoryList isSavedPage={true} />
-      
+
       {/* Suspense Wrapper for Vendor Data */}
       <Suspense fallback={<SavedVendorsSkeleton />} key={categorySlug}>
         <SavedVendorsContent categorySlug={categorySlug} />

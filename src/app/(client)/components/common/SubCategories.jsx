@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Carousel } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getSubcategories } from "../../../actions/categories";
+import { getSubcategories } from "@/app/actions/public/categories";
 
 /* --------------------- */
 /*   Main Exported Component with Suspense  */

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,14 +32,13 @@ import "lightgallery/css/lg-thumbnail.css";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
 
-import { getAllIdeasAction } from "@/app/actions/ideas";
-import AddIdeaModal from "../AddIdeaModal";
-import EditIdeaModal from "../EditIdeaModal"; // ⬅️ IMPORT THE EDIT MODAL
+import { getAllIdeasAction } from "@/app/actions/public/ideas";
+import AddIdeaModal from "../modals/ideas/AddIdeaModal";
+import EditIdeaModal from "../modals/ideas/EditIdeaModal";
 import { deleteIdeaAction } from "@/app/actions/admin/ideas";
 import { Badge } from "@/components/ui/badge";
 
 export default function IdeasTable({ categories = [] }) {
-    // ➡️ Hooks for URL-based navigation
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -48,11 +47,11 @@ export default function IdeasTable({ categories = [] }) {
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState(null);
     const [addModalOpen, setAddModalOpen] = useState(false);
-    
+
     // ⬅️ New State for Editing
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [selectedIdea, setSelectedIdea] = useState(null); 
-    
+    const [selectedIdea, setSelectedIdea] = useState(null);
+
     const [deletingId, setDeletingId] = useState(null);
 
     const limit = 20;
@@ -117,8 +116,6 @@ export default function IdeasTable({ categories = [] }) {
     // Handlers to update URL
     // ----------------------------------------------------------------------
 
-    // ... (URL handlers remain the same)
-
     // ➡️ Debounce for Search Input
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
@@ -131,8 +128,8 @@ export default function IdeasTable({ categories = [] }) {
         const timer = setTimeout(() => {
             // Only push update if local term differs from URL term
             if (localSearchTerm !== searchTerm) {
-                 const url = pathname + '?' + createQueryString('search', localSearchTerm);
-                 router.push(url);
+                const url = pathname + '?' + createQueryString('search', localSearchTerm);
+                router.push(url);
             }
         }, 500);
         return () => clearTimeout(timer);
@@ -185,6 +182,11 @@ export default function IdeasTable({ categories = [] }) {
         router.push(url);
     };
 
+    const goToPage = (page) => {
+        const url = pathname + '?' + createQueryString('page', page);
+        router.push(url);
+    };
+
     // ----------------------------------------------------------------------
 
     return (
@@ -198,7 +200,7 @@ export default function IdeasTable({ categories = [] }) {
                         <Input
                             placeholder="Search ideas..."
                             // ➡️ Use local state for controlled input, URL state for filtering logic
-                            value={localSearchTerm} 
+                            value={localSearchTerm}
                             onChange={(e) => setLocalSearchTerm(e.target.value)}
                             className="pl-10"
                         />
@@ -394,8 +396,8 @@ const IdeaCard = ({ idea, onDelete, onEdit, deletingId }) => { // ⬅️ Receive
 
                 <div className="flex justify-end gap-3 mt-4 border-t border-t-gray-300 pt-4">
                     {/* ⬅️ Updated Edit Button to open modal */}
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         onClick={() => onEdit(idea)}
                     >
                         <SquarePen className="w-4 h-4 mr-2" /> Edit

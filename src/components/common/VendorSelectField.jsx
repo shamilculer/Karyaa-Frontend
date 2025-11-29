@@ -8,7 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useFormContext } from "react-hook-form";
 
-import { getAllVendorOptions } from "@/app/actions/vendors";
+import { getAllVendorOptions } from "@/app/actions/public/vendors";
 import Image from "next/image";
 
 // Setting a reasonable limit for the combobox dropdown

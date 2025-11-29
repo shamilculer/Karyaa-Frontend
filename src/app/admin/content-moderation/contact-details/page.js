@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { updateBrandDetailsAction } from "@/app/actions/admin/brand";
-import { getBrandDetailsAction } from "@/app/actions/brand";
+import { getBrandDetailsAction } from "@/app/actions/public/brand";
 
 import {
   Card,

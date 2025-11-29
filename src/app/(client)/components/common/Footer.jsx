@@ -5,11 +5,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Image from "next/image"
 import Link from "next/link"
 import { useClientStore } from "@/store/clientStore"
-import { getBrandDetailsAction } from "@/app/actions/brand";
-import { getContentByKeyAction } from "@/app/actions/content";
+import { getBrandDetailsAction } from "@/app/actions/public/brand";
+import { getContentByKeyAction } from "@/app/actions/public/content";
 import { useEffect, useState } from "react";
-import ReferModal from "../ReferModal";
-import NewsletterField from "../NewsLetterField";
+import ReferModal from "../modals/ReferModal";
+import NewsletterField from "../ui/NewsLetterField";
 import { IconBrandFacebook, IconBrandInstagram, IconBrandLinkedin, IconBrandPinterest, IconBrandTiktok, IconBrandWhatsapp, IconBrandX, IconBrandYoutube, IconPhone } from "@tabler/icons-react";
 
 const Footer = () => {
@@ -30,7 +30,7 @@ const Footer = () => {
     const fetchCtas = async () => {
       try {
         const res = await getContentByKeyAction("cta-sections")
-            console.log(res)
+        console.log(res)
 
         // parse if string
         if (res?.success && res.data?.content) {

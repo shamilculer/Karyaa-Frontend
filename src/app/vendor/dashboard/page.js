@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import EnquiryOverTime from "../components/charts/EnquiryOverTime"
 import LeadSource from "../components/charts/LeadSource"
-import ReviewInsights from "../components/ReviewInsights"
+import ReviewInsights from "../components/sections/ReviewInsights"
 import VisitAndEnquiries from "../components/charts/VisitAndEnquiries"
 import LeadsTable from "../components/tables/LeadsTable"
 import { Button } from "@/components/ui/button"

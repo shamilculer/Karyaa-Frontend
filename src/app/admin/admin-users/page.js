@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { CreateAdminModal } from "../components/CreateAdminModal";
+import { CreateAdminModal } from "../components/modals/admin/CreateAdminModal";
 import AdminsTable from "../components/tables/AdminTable";
 
 const AdminUsersPage = () => {

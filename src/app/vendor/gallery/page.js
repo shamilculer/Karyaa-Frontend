@@ -3,9 +3,9 @@
 
 import * as React from "react";
 import Image from "next/image";
-import GalleryToolBar from "../components/GalleryToolbar";
+import GalleryToolBar from "../components/sections/GalleryToolbar";
 import { useVendorStore } from "@/store/vendorStore";
-import { getVendorGalleryItems, deleteVendorGalleryItems } from "@/app/actions/gallery";
+import { getVendorGalleryItems, deleteVendorGalleryItems } from "@/app/actions/shared/gallery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox"; // ✅ <-- SHADCN CHECKBOX

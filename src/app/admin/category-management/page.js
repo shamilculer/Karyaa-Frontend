@@ -9,7 +9,7 @@ import { Eye, Search, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { getCategoryDetails } from "@/app/actions/admin/categories";
-import { AddCategoryModal } from "../components/AddCategoryModal";
+import { AddCategoryModal } from "../components/modals/category/AddCategoryModal";
 
 const CategoryManagementPage = () => {
   return (

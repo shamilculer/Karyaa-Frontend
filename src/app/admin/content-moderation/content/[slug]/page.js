@@ -37,7 +37,7 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
-import { getContentByKeyAction } from "@/app/actions/content";
+import { getContentByKeyAction } from "@/app/actions/public/content";
 import { upsertContentAction } from "@/app/actions/admin/pages";
 
 // Tiptap Editor Toolbar Component
@@ -312,8 +312,8 @@ const PolicyPageEditor = () => {
     if (editor) {
       loadContent();
     }
-  }, [slug, editor]); 
-  
+  }, [slug, editor]);
+
   const loadContent = async () => {
     setLoading(true);
     try {
@@ -321,7 +321,7 @@ const PolicyPageEditor = () => {
       if (result.success && result.data) {
         const initialContent = result.data.content || "";
         setContent(initialContent);
-        
+
         // 💡 Explicitly set content on the editor after fetch
         if (editor) {
           editor.commands.setContent(initialContent);
@@ -429,7 +429,7 @@ const PolicyPageEditor = () => {
         </CardHeader>
         <CardContent>
           {/* ✅ FIX: Removed 'overflow-hidden' to allow sticky positioning to work. */}
-          <div className="border border-gray-300 rounded-lg bg-white"> 
+          <div className="border border-gray-300 rounded-lg bg-white">
             <EditorToolbar editor={editor} />
             <EditorContent
               editor={editor}

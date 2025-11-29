@@ -2,7 +2,6 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-// import { AuthError } from '@/utils/error'; // Assuming this utility exists
 
 /**
  * Helper function to clear auth cookies for a specific role and redirect.
@@ -12,11 +11,11 @@ import { redirect } from 'next/navigation';
  */
 function clearAuthAndRedirect(role, path) {
     const cookieStore = cookies();
-    
+
     // Clear the specific role-based cookies
     cookieStore.delete(`accessToken_${role}`);
     cookieStore.delete(`refreshToken_${role}`);
-    
+
     // Perform the redirect, which must be the last step
     redirect(path);
 }
@@ -43,14 +42,14 @@ function getLoginUrl(role) {
  * @param {number} [options.retries=1] - Retry attempts
  */
 export async function apiFetch(url, options = {}) {
-    const { 
-        role = 'user', 
-        auth = false, 
+    const {
+        role = 'user',
+        auth = false,
         retries = 1,
-        ...fetchOptions 
+        ...fetchOptions
     } = options;
 
-    const fullUrl = url.startsWith('/') 
+    const fullUrl = url.startsWith('/')
         ? `${process.env.BACKEND_URL}${url}`
         : url;
 
@@ -66,7 +65,14 @@ export async function apiFetch(url, options = {}) {
         refreshToken = cookieStore.get(`refreshToken_${role}`)?.value;
 
         if (!accessToken && !refreshToken) {
-            redirect(getLoginUrl(role));
+            // Return error object instead of redirecting
+            // This allows client components to show proper toast messages
+            return {
+                success: false,
+                error: 'Authentication required. Please log in to continue.',
+                requiresAuth: true,
+                redirectTo: getLoginUrl(role)
+            };
         }
     }
 
@@ -149,9 +155,13 @@ export async function apiFetch(url, options = {}) {
                     }
                 }
 
-                // **FIX APPLIED HERE**
-                // Refresh failed - use the clean utility to clear cookies and redirect
-                clearAuthAndRedirect(role, getLoginUrl(role));
+                // Refresh failed - return error object instead of redirecting
+                return {
+                    success: false,
+                    error: 'Session expired. Please log in again.',
+                    requiresAuth: true,
+                    redirectTo: getLoginUrl(role)
+                };
             }
 
             if (!response.ok) {

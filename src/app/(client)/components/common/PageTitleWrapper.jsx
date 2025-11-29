@@ -1,4 +1,4 @@
-import { getActiveBanners } from "@/app/actions/adBanner";
+import { getActiveBanners } from "@/app/actions/public/adBanner";
 import PageTitle from "./PageTitle";
 
 export default async function PageTitleWrapper({ imgUrl, title, tagline, placement }) {

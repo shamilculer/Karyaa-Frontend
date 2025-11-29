@@ -1,6 +1,6 @@
 // app/terms-and-conditions/page.js
 import React from "react";
-import { getContentByKeyAction } from "@/app/actions/content";
+import { getContentByKeyAction } from "@/app/actions/public/content";
 import { Card } from "@/components/ui/card";
 
 export const metadata = {

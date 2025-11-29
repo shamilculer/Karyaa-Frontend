@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { createBannerAction } from "@/app/actions/admin/banner";
-import { getCategoriesWithVendors } from "@/app/actions/categories";
+import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

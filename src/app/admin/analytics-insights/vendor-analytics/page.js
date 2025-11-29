@@ -1,7 +1,7 @@
 import VendorAcquisitionOverTime from "../../components/charts/VendorAqquisitionTrend"
 import TopPerformingVendors from "../../components/common/TopPerformingVendors"
 import VendorStatusSummary from "../../components/common/VendorStatusSummary"
-import ReviewStatsWrapper from "../../components/ReviewStatsWrapper"
+import ReviewStatsWrapper from "../../components/sections/ReviewStatsWrapper"
 import VendorsByCategoryChart from "@/app/vendor/components/charts/VendorCategoryDistribution"
 
 const VendorAnalyticsPage = () => {
@@ -20,9 +20,9 @@ const VendorAnalyticsPage = () => {
                 </div>
 
                 <div className="w-full grid grid-cols-2 gap-10">
-                        <TopPerformingVendors />
+                    <TopPerformingVendors />
 
-                        <VendorsByCategoryChart />
+                    <VendorsByCategoryChart />
                 </div>
 
                 <div className="w-full">

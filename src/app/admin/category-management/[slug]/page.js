@@ -16,7 +16,7 @@ import {
 } from "@/app/actions/admin/categories";
 import Link from "next/link";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
-import SubcategorySection from "../../components/SubCategoryManage";
+import SubcategorySection from "../../components/modals/category/SubCategoryManage";
 import { toast } from "sonner";
 import { IconBriefcase } from "@tabler/icons-react";
 
