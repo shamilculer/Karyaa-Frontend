@@ -169,6 +169,7 @@ export async function apiFetch(url, options = {}) {
             }
 
             if (!response.ok) {
+                // console.log(response)
                 const error = await response.json().catch(() => ({}));
                 throw new Error(error.message || `HTTP ${response.status}`);
             }

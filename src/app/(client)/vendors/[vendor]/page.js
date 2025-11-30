@@ -471,7 +471,7 @@ const VendorPage = async ({ params }) => {
                     </div>
 
                     <div className="w-full">
-                      <ViewPackageModal packageData={pkg} />
+                      <ViewPackageModal packageData={pkg} vendorId={vendorData._id} />
                     </div>
                   </CardContent>
                 </Card>

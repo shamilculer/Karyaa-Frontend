@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CircleCheckBig, Eye } from "lucide-react";
 import Image from "next/image";
+import { trackPackageInterest } from "@/app/actions/vendor/packageAnalytics";
 
 import {
     Dialog,
@@ -16,11 +17,44 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-export default function ViewPackageModal({ packageData }) {
+// Helper function to get or create session ID
+function getSessionId() {
+    if (typeof window === "undefined") return null;
+
+    let sessionId = localStorage.getItem("sessionId");
+    if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem("sessionId", sessionId);
+    }
+    return sessionId;
+}
+
+export default function ViewPackageModal({ packageData, vendorId }) {
     const [open, setOpen] = useState(false);
 
+    const handleOpenChange = async (isOpen) => {
+        setOpen(isOpen);
+
+        // Track package interest when modal opens
+        if (isOpen && vendorId && packageData._id) {
+            const sessionId = getSessionId();
+            if (sessionId) {
+                try {
+                    await trackPackageInterest(
+                        vendorId,
+                        packageData._id,
+                        packageData.name,
+                        sessionId
+                    );
+                } catch (error) {
+                    console.error("Failed to track package interest:", error);
+                }
+            }
+        }
+    };
+
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button className="w-full">
                     Know More

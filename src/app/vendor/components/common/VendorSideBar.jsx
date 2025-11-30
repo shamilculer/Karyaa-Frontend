@@ -88,6 +88,8 @@ function VendorSideBar() {
     const pathname = usePathname();
     const { setOpenMobile } = useSidebar();
 
+    console.log(vendor)
+
     // Close sidebar on mobile when navigating
     const handleLinkClick = () => {
         setOpenMobile(false);
@@ -111,7 +113,12 @@ function VendorSideBar() {
                         <AvatarImage className="size-full object-cover" src={vendor?.businessLogo || ""} />
                         <AvatarFallback>{getInitials(vendor?.businessName || "")}</AvatarFallback>
                     </Avatar>
-                    <span className="font-heading font-medium text-[15px] leading-[1.2em] text-black">{vendor?.businessName}</span>
+                    <div className="flex flex-col">
+                        <span className="font-heading font-medium text-[15px] leading-[1.2em] text-black">{vendor?.businessName}</span>
+                        {vendor?.refId && (
+                            <span className="text-[10px] text-gray-500 leading-tight">ID: {vendor.refId}</span>
+                        )}
+                    </div>
                 </div>
             </SidebarHeader>
             <SidebarContent>

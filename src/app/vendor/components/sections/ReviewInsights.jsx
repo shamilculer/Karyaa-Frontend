@@ -100,22 +100,6 @@ const ReviewInsights = () => {
                             </div>
                         </div>
 
-                        {/* Status Breakdown */}
-                        <div className="grid grid-cols-3 gap-2 mt-6">
-                            <div className="bg-green-50 p-2 rounded-lg text-center border border-green-100">
-                                <div className="text-lg font-bold text-green-700">{data.reviewStatusCounts?.Approved || 0}</div>
-                                <div className="text-xs text-green-600 font-medium">Approved</div>
-                            </div>
-                            <div className="bg-yellow-50 p-2 rounded-lg text-center border border-yellow-100">
-                                <div className="text-lg font-bold text-yellow-700">{data.reviewStatusCounts?.Pending || 0}</div>
-                                <div className="text-xs text-yellow-600 font-medium">Pending</div>
-                            </div>
-                            <div className="bg-red-50 p-2 rounded-lg text-center border border-red-100">
-                                <div className="text-lg font-bold text-red-700">{data.reviewStatusCounts?.Rejected || 0}</div>
-                                <div className="text-xs text-red-600 font-medium">Rejected</div>
-                            </div>
-                        </div>
-
                         {data.flaggedCount > 0 && (
                             <div className="mt-3 bg-orange-50 p-2 rounded-lg flex items-center justify-between border border-orange-100 px-3">
                                 <span className="text-xs text-orange-700 font-medium">Flagged for removal</span>

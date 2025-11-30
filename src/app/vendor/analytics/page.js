@@ -7,6 +7,7 @@ import ProfileViewsOverTime from '../components/charts/ProfileViewsOverTime'
 import VisitAndEnquiries from '../components/charts/VisitAndEnquiries'
 import PackageEnquiry from "../components/sections/PackageEnquiry"
 import LeadsTable from '../components/tables/LeadsTable'
+import InterestsByPackage from '../components/charts/InterestsByPackage'
 
 const VendorAnalyticsPage = () => {
     return (
@@ -62,7 +63,7 @@ const VendorAnalyticsPage = () => {
                     </div>
 
                     <div className="w-full lg:w-2/6">
-                        <PackageEnquiry />
+                        <InterestsByPackage />
                     </div>
                 </div>
             </div>

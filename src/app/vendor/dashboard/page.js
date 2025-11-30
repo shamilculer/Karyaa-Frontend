@@ -3,6 +3,8 @@ import EnquiryOverTime from "../components/charts/EnquiryOverTime"
 import LeadSource from "../components/charts/LeadSource"
 import ReviewInsights from "../components/sections/ReviewInsights"
 import VisitAndEnquiries from "../components/charts/VisitAndEnquiries"
+import PackageInterestsOverTime from "../components/charts/PackageInterestsOverTime"
+import InterestsByPackage from "../components/charts/InterestsByPackage"
 import LeadsTable from "../components/tables/LeadsTable"
 import DashboardGallery from "../components/sections/DashboardGallery"
 import { Button } from "@/components/ui/button"
@@ -29,6 +31,16 @@ const VendorDashboardPage = () => {
 
         <div className="w-full lg:w-3/5">
           <VisitAndEnquiries />
+        </div>
+      </div>
+
+      <div className="flex max-lg:flex-col gap-6">
+        <div className="w-full lg:w-3/5">
+          <PackageInterestsOverTime />
+        </div>
+
+        <div className="w-full lg:w-2/5">
+          <InterestsByPackage />
         </div>
       </div>
 

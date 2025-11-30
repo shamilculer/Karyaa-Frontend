@@ -9,6 +9,7 @@ import LogoutAlertModal from "../components/modals/shared/LogoutAlertModal"
 import { getVendorFromToken } from '../utils/getVendor'
 import { getInitials } from '@/utils'
 import SubscriptionStatus from "../components/sections/SubscriptionStatus";
+import ChangePasswordSection from "../components/sections/ChangePasswordSection";
 
 const VendorSettingsPage = async () => {
 
@@ -31,14 +32,16 @@ const VendorSettingsPage = async () => {
                     </div>
 
                     <div className='flex-center gap-4'>
-                       <Button asChild><Link href={`/vendors/${vendor?.slug || '#'}`}><Eye className='w-5' /> Preview Profile</Link></Button>
+                        <Button asChild><Link href={`/vendors/${vendor?.slug || '#'}`}><Eye className='w-5' /> Preview Profile</Link></Button>
                         <Button asChild><Link href="settings/edit-profile"><UserPen className='w-5' /> Edit Profile</Link></Button>
                     </div>
                 </div>
 
                 <SubscriptionStatus />
 
-                <div className='w-full flex-between max-lg:flex-col max-lg:!items-start gap-5 lg:p-6'>
+                <ChangePasswordSection />
+
+                <div className='w-full flex-between max-lg:flex-col max-lg:!items-start gap-5 lg:p-6 border-t border-gray-300 pt-10'>
                     <div>
                         <h3>Log Out</h3>
                         <p className='text-sm text-gray-400'>Lorem ipsum dolor sit amet, consect adipiscing elit, sed do sit amet.</p>
@@ -54,3 +57,4 @@ const VendorSettingsPage = async () => {
 }
 
 export default VendorSettingsPage
+
