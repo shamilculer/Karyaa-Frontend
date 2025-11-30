@@ -361,7 +361,7 @@ export default function LeadsTable({ controls = true }) {
                 <div className="flex items-center justify-center">
                     <Checkbox
                         checked={table.getIsAllPageRowsSelected()}
-                        indeterminate={table.getIsSomePageRowsSelected() ? true : undefined}
+                        indeterminate={table.getIsSomePageRowsSelected() ? true : undefined || undefined}
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all"
                     />

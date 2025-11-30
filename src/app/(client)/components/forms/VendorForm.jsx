@@ -284,7 +284,7 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                         </div>
                     )}
 
-                    <span className="text-xs !leading-[.8em]">By clicking "Submit" you accept our <Link className="text-blue-500 underline" href="/terms-and-conditions">Terms and Conditions</Link> and <Link className="text-blue-500 underline" href="/privacy-policy">Privacy Policy</Link>.</span>
+                    <span className="text-xs !leading-[.8em]">By clicking "Submit" you accept our <Link target="_blank" className="text-blue-500 underline" href="/terms-and-conditions">Terms and Conditions</Link> and <Link target="_blank" className="text-blue-500 underline" href="/privacy-policy">Privacy Policy</Link>.</span>
 
                     <Button type="submit" className="w-full mt-5" disabled={isSubmitting}>
                         {isSubmitting ? "Sending..." : "Send Message"}

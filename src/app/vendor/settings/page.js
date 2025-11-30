@@ -15,7 +15,7 @@ const VendorSettingsPage = async () => {
     const { vendor } = await getVendorFromToken();
 
     return (
-        <div className="dashboard-container space-y-8">
+        <div className="dashboard-container mb-10 space-y-8">
             <div className='w-full bg-white flex flex-col gap-7 p-5 lg:p-12 border border-gray-200'>
                 <div className='w-full flex-between max-lg:flex-col gap-10 lg:gap-48 pb-10 border-b border-gray-300'>
                     <div className='flex items-center max-lg:flex-col gap-4'>

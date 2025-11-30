@@ -1,5 +1,5 @@
 "use client"
-import { AlertCircle, Check} from 'lucide-react';
+import { AlertCircle, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle, CardFooter } from '@/components/ui/card';
@@ -30,7 +30,7 @@ const BundleCard = ({ bundle, selectedId }) => {
         try {
             const enquiryResponse = await sendBundleEnquiryAction(bundleId);
 
-            if(!enquiryResponse.success){
+            if (!enquiryResponse.success) {
                 console.log(enquiryResponse)
                 toast.error(enquiryResponse.message || "Something went wrong! Please try again.");
                 return
@@ -101,7 +101,8 @@ const BundleCard = ({ bundle, selectedId }) => {
 
 const BundleList = ({ bundles }) => {
     const { vendor } = useVendorStore();
-    const selectedBundleId = vendor?.bundle
+    // Handle both object format (vendor.bundle._id) and string format (vendor.bundle)
+    const selectedBundleId = vendor?.bundle?._id || vendor?.bundle || null;
 
     if (!bundles || bundles.length === 0) {
         return (

@@ -159,7 +159,7 @@ function ReviewsManagePageContent() {
     };
 
     return (
-        <div className="dashboard-container space-y-8 mb-14">
+        <div className="dashboard-container space-y-8 mb-10">
             {/* Error Banner */}
             {error && (
                 <div className="bg-red-100 text-red-700 border border-red-300 p-3 rounded-md">

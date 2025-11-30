@@ -170,7 +170,7 @@ export default function GalleryPage() {
 
   if (!isHydrated || !vendorId) {
     return (
-      <div className="h-full dashboard-container space-y-8">
+      <div className="dashboard-container mb-10 space-y-8">
         <div className="flex items-end lg:gap-6 w-full max-lg:flex-wrap">
           <Skeleton className="h-10 w-32" />
           <Skeleton className="h-10 w-40" />
@@ -181,7 +181,7 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="h-full dashboard-container space-y-8">
+    <div className="mb-10 dashboard-container space-y-8">
 
       <GalleryToolBar
         vendorId={vendorId}

@@ -10,7 +10,7 @@ const VendorBundlePage = async () => {
   if (bundlesResponse.error) {
     // Error State
     return (
-      <div className="dashboard-container mb-12">
+      <div className="dashboard-container mb-10">
         <header className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900">Choose Your Vendor Package</h1>
         </header>

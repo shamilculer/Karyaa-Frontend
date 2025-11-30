@@ -10,7 +10,7 @@ import Image from "next/image"
 
 const VendorDashboardPage = () => {
   return (
-    <div className="dashboard-container space-y-8">
+    <div className="dashboard-container mb-5 space-y-8">
       <div className="w-full flex max-lg:flex-col gap-6">
         <div className="w-full lg:w-4/6">
           <EnquiryOverTime />

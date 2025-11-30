@@ -65,7 +65,7 @@ export default function PackagesPage() {
     }, []);
 
     return (
-        <div className="dashboard-container space-y-8 mb-16">
+        <div className="dashboard-container space-y-8 mb-10">
             <PackageToolbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
             {loading ? (

@@ -10,7 +10,7 @@ import LeadsTable from '../components/tables/LeadsTable'
 
 const VendorAnalyticsPage = () => {
     return (
-        <div className="dashboard-container space-y-8 mb-14">
+        <div className="dashboard-container space-y-8 mb-10">
             <div className='w-full space-y-5 mb-20'>
 
                 <div>

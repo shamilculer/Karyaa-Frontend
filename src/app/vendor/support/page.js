@@ -47,7 +47,7 @@ const VendorSupportPage = () => {
   }
 
   return (
-    <div className="dashboard-container space-y-8 mb-12">
+    <div className="dashboard-container space-y-8 mb-10">
       {/* Frequently Asked Questions */}
       <div className="w-full bg-white flex flex-col gap-6 p-5 lg:p-10 border border-gray-200">
         <h3 className="pb-5 border-b border-b-gray-300">Frequently Asked Questions</h3>
