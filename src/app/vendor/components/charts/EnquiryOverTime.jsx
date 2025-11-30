@@ -1,8 +1,8 @@
 "use client"
 import * as React from "react"
 import { TrendingUp } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts" // YAxis is required for horizontal lines
-import { useState } from "react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useState, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import {
     Card,
@@ -17,37 +17,11 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-// Hypothetical UI components for the dropdown
-import { Button } from "@/components/ui/button" 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu" 
-
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { getEnquiriesOverTime } from "@/app/actions/vendor/analytics"
 
 export const description = "Enquiries Over Time Area Chart with Timeframe Filter and Gridlines"
-
-// --- DUMMY DATA ---
-const data24h = Array.from({ length: 8 }, (_, i) => ({ time: `${i * 3}:00`, enquiries: Math.floor(Math.random() * 10) + 1 })); 
-const data1Week = Array.from({ length: 7 }, (_, i) => ({ time: `Day ${i + 1}`, enquiries: Math.floor(Math.random() * 20) + 5 })); 
-const data1Month = Array.from({ length: 4 }, (_, i) => ({ time: `Week ${i + 1}`, enquiries: Math.floor(Math.random() * 50) + 10 })); 
-const data3Month = [
-    { time: "Jul", enquiries: 120 },
-    { time: "Aug", enquiries: 180 },
-    { time: "Sep", enquiries: 95 },
-];
-const data6Month = [
-    { time: "Apr", enquiries: 80 },
-    { time: "May", enquiries: 150 },
-    { time: "Jun", enquiries: 100 },
-    ...data3Month
-];
-const dataLastYear = [
-    { time: "Jan", enquiries: 110 },
-    { time: "Feb", enquiries: 130 },
-    { time: "Mar", enquiries: 90 },
-    ...data6Month,
-    { time: "Oct", enquiries: 220 },
-    { time: "Nov", enquiries: 160 },
-    { time: "Dec", enquiries: 245 },
-];
 
 const chartConfig = {
     enquiries: {
@@ -56,43 +30,57 @@ const chartConfig = {
     },
 }
 
-const filterData = (timeframe) => {
-    switch (timeframe) {
-        case "24H": return data24h;
-        case "1W": return data1Week;
-        case "1M": return data1Month;
-        case "3M": return data3Month;
-        case "6M": return data6Month;
-        case "1Y": return dataLastYear;
-        default: return data6Month;
-    }
-}
-
-const timeframeLabelMap = { 
-    "24H": "Last 24 Hours", 
-    "1W": "Last 1 Week", 
-    "1M": "Last 1 Month", 
-    "3M": "Last 3 Months", 
-    "6M": "Last 6 Months", 
-    "1Y": "Last Year" 
+const timeframeLabelMap = {
+    "24H": "Last 24 Hours",
+    "1W": "Last 1 Week",
+    "1M": "Last 1 Month",
+    "3M": "Last 3 Months",
+    "6M": "Last 6 Months",
+    "1Y": "Last Year"
 };
-
 
 function EnquiryOverTime() {
     const [timeframe, setTimeframe] = useState("6M")
-    const currentChartData = filterData(timeframe)
+    const [chartData, setChartData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
     const timeframeLabel = timeframeLabelMap[timeframe];
-    
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+
+            const result = await getEnquiriesOverTime(timeframe)
+
+            if (result.success && result.data) {
+                // Transform data to match chart format
+                const formattedData = result.data.map(item => ({
+                    time: item.period,
+                    enquiries: item.enquiries
+                }))
+                setChartData(formattedData)
+            } else {
+                setError(result.message || "Failed to load data")
+                setChartData([])
+            }
+
+            setLoading(false)
+        }
+
+        fetchData()
+    }, [timeframe])
+
     // Calculate performance indicator based on filtered data
-    const firstPeriodEnquiries = currentChartData[0]?.enquiries || 0;
-    const lastPeriodEnquiries = currentChartData[currentChartData.length - 1]?.enquiries || 0;
+    const firstPeriodEnquiries = chartData[0]?.enquiries || 0;
+    const lastPeriodEnquiries = chartData[chartData.length - 1]?.enquiries || 0;
     const enquiryChange = lastPeriodEnquiries - firstPeriodEnquiries;
-    const percentageChange = firstPeriodEnquiries > 0 
-        ? ((enquiryChange / firstPeriodEnquiries) * 100).toFixed(1) 
+    const percentageChange = firstPeriodEnquiries > 0
+        ? ((enquiryChange / firstPeriodEnquiries) * 100).toFixed(1)
         : "N/A";
     const isPositiveTrend = enquiryChange >= 0;
-    const totalEnquiries = currentChartData.reduce((acc, item) => acc + item.enquiries, 0);
-
+    const totalEnquiries = chartData.reduce((acc, item) => acc + item.enquiries, 0);
 
     return (
         <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md max-lg:!py-4">
@@ -109,8 +97,8 @@ function EnquiryOverTime() {
                 {/* Dropdown Menu for Timeframe Filter */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             className="h-8 text-xs font-normal"
                         >
                             {timeframe}
@@ -141,68 +129,83 @@ function EnquiryOverTime() {
 
             </CardHeader>
             <CardContent>
-                <ChartContainer 
-                    config={chartConfig}
-                    className=""
-                >
-                    <AreaChart
-                        accessibilityLayer
-                        data={currentChartData}
-                        margin={{
-                            left: 12,
-                            right: 12,
-                        }}
+                {loading ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">Loading...</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-red-500">{error}</p>
+                    </div>
+                ) : chartData.length === 0 ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">No data available for this period</p>
+                    </div>
+                ) : (
+                    <ChartContainer
+                        config={chartConfig}
+                        className=""
                     >
-                        <defs>
-                            <linearGradient id="fillEnquiries" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="var(--color-enquiries)" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="var(--color-enquiries)" stopOpacity={0.1} />
-                            </linearGradient>
-                        </defs>
+                        <AreaChart
+                            accessibilityLayer
+                            data={chartData}
+                            margin={{
+                                left: 12,
+                                right: 12,
+                            }}
+                        >
+                            <defs>
+                                <linearGradient id="fillEnquiries" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="var(--color-enquiries)" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="var(--color-enquiries)" stopOpacity={0.1} />
+                                </linearGradient>
+                            </defs>
 
-                        {/* FIX: Explicitly set stroke and ensure horizontal is true */}
-                        <CartesianGrid 
-                            vertical={false} 
-                            horizontal={true} 
-                            stroke="#E0E0E0" // Added explicit light gray stroke color
-                            strokeDasharray="3 3" 
-                        /> 
-                        
-                        {/* YAxis is required by CartesianGrid for horizontal lines, even if hidden. */}
-                        <YAxis hide={true} domain={['dataMin', 'dataMax']} />
+                            <CartesianGrid
+                                vertical={false}
+                                horizontal={true}
+                                stroke="#E0E0E0"
+                                strokeDasharray="3 3"
+                            />
 
-                        <XAxis
-                            dataKey="time"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            tickFormatter={(value) => value.slice(0, 3)} 
-                        />
-                        <ChartTooltip
-                            cursor={{ stroke: 'var(--color-enquiries)', strokeDasharray: '2 2' }}
-                            content={
-                                <ChartTooltipContent 
-                                    indicator="line" 
-                                    nameKey="enquiries"
-                                />
-                            }
-                        />
-                        <Area
-                            dataKey="enquiries"
-                            type="natural"
-                            fill="url(#fillEnquiries)"
-                            fillOpacity={0.4}
-                            stroke="var(--color-enquiries)"
-                            strokeWidth={2}
-                        />
-                    </AreaChart>
-                </ChartContainer>
+                            <YAxis hide={true} domain={['dataMin', 'dataMax']} />
+
+                            <XAxis
+                                dataKey="time"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={8}
+                                tickFormatter={(value) => value.slice(0, 10)}
+                            />
+                            <ChartTooltip
+                                cursor={{ stroke: 'var(--color-enquiries)', strokeDasharray: '2 2' }}
+                                content={
+                                    <ChartTooltipContent
+                                        indicator="line"
+                                        nameKey="enquiries"
+                                    />
+                                }
+                            />
+                            <Area
+                                dataKey="enquiries"
+                                type="natural"
+                                fill="url(#fillEnquiries)"
+                                fillOpacity={0.4}
+                                stroke="var(--color-enquiries)"
+                                strokeWidth={2}
+                            />
+                        </AreaChart>
+                    </ChartContainer>
+                )}
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex items-center gap-2 font-medium leading-none max-lg:!text-xs">
-                    {/* Display the trend calculation */}
-                    {isPositiveTrend ? "Up" : "Down"} by {percentageChange}% this period 
-                    <TrendingUp className={`h-4 w-4 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`} />
+                    {percentageChange !== "N/A" && (
+                        <>
+                            {isPositiveTrend ? "Up" : "Down"} by {Math.abs(percentageChange)}% this period
+                            <TrendingUp className={`h-4 w-4 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`} />
+                        </>
+                    )}
                 </div>
                 <div className="leading-none text-muted-foreground max-lg:!text-xs">
                     Total inquiries received in the {timeframeLabel}: {totalEnquiries.toLocaleString()}

@@ -1,8 +1,8 @@
 "use client"
 import * as React from "react"
 import { Label, Pie, PieChart } from "recharts"
-import { useState } from "react" // Import useState hook
-import { ChevronDown } from "lucide-react" // For the dropdown icon
+import { useState, useEffect } from "react"
+import { ChevronDown } from "lucide-react"
 import {
     Card,
     CardContent,
@@ -16,15 +16,15 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-// Hypothetical UI components for the dropdown
-import { Button } from "@/components/ui/button" 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu" 
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { getProfileViewSourceBreakdown } from "@/app/actions/vendor/analytics"
 
-export const description = "Lead source breakdown (donut chart) with timeframe filter"
+export const description = "Profile view source breakdown (donut chart) with timeframe filter"
 
 const chartConfig = {
     leads: {
-        label: "Leads",
+        label: "Views",
     },
     category: {
         label: "Category Page",
@@ -39,83 +39,76 @@ const chartConfig = {
         color: "var(--chart-3)",
     },
     direct: {
-        label: "Direct Link/Traffic", // Renamed for clarity
+        label: "Direct Link",
         color: "var(--chart-4)",
+    },
+    other: {
+        label: "Other",
+        color: "var(--chart-5)",
     },
 }
 
-// Function to simulate dummy data for different timeframes
-const getLeadData = (factor) => {
-    // Base data (e.g., for 1 Month, factor = 1)
-    const baseLeads = {
-        category: 40, 
-        search: 60, 
-        featured: 25, 
-        direct: 15
-    };
-    
-    // Scale the data by the factor and round it
-    const scaledData = {
-        category: Math.round(baseLeads.category * factor),
-        search: Math.round(baseLeads.search * factor),
-        featured: Math.round(baseLeads.featured * factor),
-        direct: Math.round(baseLeads.direct * factor),
-    };
-
-    return [
-        { source: "Category", leads: scaledData.category, fill: "var(--chart-1)" },
-        { source: "Search", leads: scaledData.search, fill: "var(--chart-2)" },
-        { source: "Featured", leads: scaledData.featured, fill: "var(--chart-3)" },
-        { source: "Direct", leads: scaledData.direct, fill: "var(--chart-4)" },
-    ];
+const timeframeLabelMap = {
+    "24H": "Last 24 Hours",
+    "1W": "Last 1 Week",
+    "1M": "Last 1 Month",
+    "3M": "Last 3 Months",
+    "6M": "Last 6 Months",
+    "1Y": "Last Year"
 };
 
-// Function to simulate data filtering based on timeframe
-const filterData = (timeframe) => {
-    switch (timeframe) {
-        case "24H": // Very small amount of leads
-            return getLeadData(0.1); 
-        case "1W": // About 1/4 of a month
-            return getLeadData(0.25);
-        case "1M": // Base leads
-            return getLeadData(1);
-        case "3M": 
-            return getLeadData(2.5);
-        case "6M": // Default
-            return getLeadData(5); 
-        case "1Y": // Full year data
-            return getLeadData(10); 
-        default:
-            return getLeadData(5);
-    }
-}
-
-// Map for displaying friendly labels
-const timeframeLabelMap = { 
-    "24H": "Last 24 Hours", 
-    "1W": "Last 1 Week", 
-    "1M": "Last 1 Month", 
-    "3M": "Last 3 Months", 
-    "6M": "Last 6 Months", 
-    "1Y": "Last Year" 
+const colorMap = {
+    category: "var(--chart-1)",
+    search: "var(--chart-2)",
+    featured: "var(--chart-3)",
+    direct: "var(--chart-4)",
+    other: "var(--chart-5)",
 };
-
 
 function LeadSource() {
     const [timeframe, setTimeframe] = useState("6M")
-    const currentChartData = filterData(timeframe)
+    const [chartData, setChartData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
     const timeframeLabel = timeframeLabelMap[timeframe];
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+
+            const result = await getProfileViewSourceBreakdown(timeframe)
+
+            if (result.success && result.data) {
+                // Transform data to match chart format
+                const formattedData = result.data.map(item => ({
+                    source: item.label || item.source,
+                    leads: item.count,
+                    fill: colorMap[item.source] || "var(--chart-5)",
+                }))
+                setChartData(formattedData)
+            } else {
+                setError(result.message || "Failed to load data")
+                setChartData([])
+            }
+
+            setLoading(false)
+        }
+
+        fetchData()
+    }, [timeframe])
+
     const totalLeads = React.useMemo(() => {
-        return currentChartData.reduce((acc, curr) => acc + curr.leads, 0)
-    }, [currentChartData])
+        return chartData.reduce((acc, curr) => acc + curr.leads, 0)
+    }, [chartData])
 
     return (
         <Card className="flex flex-col h-full w-full bg-white border border-gray-200 shadow-none rounded-md max-lg:!py-4">
             <CardHeader className="flex flex-row items-start justify-between pb-0 max-lg:!px-3">
                 <div>
                     <CardTitle className="uppercase text-[#2F4A9D] font-medium tracking-widest text-base">
-                        Lead Sources
+                        Profile View Sources
                     </CardTitle>
                     <CardDescription className="text-xs text-gray-500">
                         Showing breakdown for the {timeframeLabel}
@@ -125,8 +118,8 @@ function LeadSource() {
                 {/* Dropdown Menu for Timeframe Filter */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             className="h-8 text-xs font-normal"
                         >
                             {timeframe}
@@ -156,57 +149,71 @@ function LeadSource() {
                 </DropdownMenu>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
-                <ChartContainer
-                    config={chartConfig}
-                    className="mx-auto aspect-square max-h-[450px]"
-                >
-                    <PieChart>
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Pie
-                            data={currentChartData} // Use filtered data
-                            dataKey="leads"
-                            nameKey="source"
-                            innerRadius={60}
-                            strokeWidth={5}
-                        >
-                            <Label
-                                content={({ viewBox }) => {
-                                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                        return (
-                                            <text
-                                                x={viewBox.cx}
-                                                y={viewBox.cy}
-                                                textAnchor="middle"
-                                                dominantBaseline="middle"
-                                            >
-                                                <tspan
+                {loading ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">Loading...</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-red-500">{error}</p>
+                    </div>
+                ) : chartData.length === 0 ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">No data available for this period</p>
+                    </div>
+                ) : (
+                    <ChartContainer
+                        config={chartConfig}
+                        className="mx-auto aspect-square max-h-[450px]"
+                    >
+                        <PieChart>
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                            />
+                            <Pie
+                                data={chartData}
+                                dataKey="leads"
+                                nameKey="source"
+                                innerRadius={60}
+                                strokeWidth={5}
+                            >
+                                <Label
+                                    content={({ viewBox }) => {
+                                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                            return (
+                                                <text
                                                     x={viewBox.cx}
                                                     y={viewBox.cy}
-                                                    className="fill-foreground text-3xl font-bold"
+                                                    textAnchor="middle"
+                                                    dominantBaseline="middle"
                                                 >
-                                                    {totalLeads.toLocaleString()}
-                                                </tspan>
-                                                <tspan
-                                                    x={viewBox.cx}
-                                                    y={(viewBox.cy || 0) + 24}
-                                                    className="fill-muted-foreground text-sm"
-                                                >
-                                                    Total Leads
-                                                </tspan>
-                                            </text>
-                                        )
-                                    }
-                                }}
-                            />
-                        </Pie>
-                    </PieChart>
-                </ChartContainer>
+                                                    <tspan
+                                                        x={viewBox.cx}
+                                                        y={viewBox.cy}
+                                                        className="fill-foreground text-3xl font-bold"
+                                                    >
+                                                        {totalLeads.toLocaleString()}
+                                                    </tspan>
+                                                    <tspan
+                                                        x={viewBox.cx}
+                                                        y={(viewBox.cy || 0) + 24}
+                                                        className="fill-muted-foreground text-sm"
+                                                    >
+                                                        Total Views
+                                                    </tspan>
+                                                </text>
+                                            )
+                                        }
+                                    }}
+                                />
+                            </Pie>
+                        </PieChart>
+                    </ChartContainer>
+                )}
             </CardContent>
             <CardFooter className="flex flex-wrap gap-4 text-sm pt-4">
-                {currentChartData.map((item) => {
+                {chartData.map((item) => {
                     const percentage = totalLeads > 0 ? ((item.leads / totalLeads) * 100).toFixed(1) : 0;
                     return (
                         <div key={item.source} className="flex items-center gap-2">

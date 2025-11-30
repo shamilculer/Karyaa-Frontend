@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import {
     Card,
@@ -21,17 +21,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { getViewsVsEnquiries } from "@/app/actions/vendor/analytics"
 
 export const description = "Profile Visits vs Enquiries (Bar Chart with Timeframe Filter)"
-
-const fullChartData = [
-    { month: "January", visits: 1200, enquiries: 85 },
-    { month: "February", visits: 950, enquiries: 70 },
-    { month: "March", visits: 1400, enquiries: 110 },
-    { month: "April", visits: 800, enquiries: 55 },
-    { month: "May", visits: 1600, enquiries: 125 },
-    { month: "June", visits: 1300, enquiries: 95 },
-]
 
 const chartConfig = {
     visits: {
@@ -46,12 +38,37 @@ const chartConfig = {
 
 function VisitAndEnquiries() {
     const [timeframe, setTimeframe] = useState("6m")
+    const [chartData, setChartData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    const chartData = useMemo(() => {
-        if (timeframe === "3m") {
-            return fullChartData.slice(-3)
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+
+            // Map UI timeframe to API timeframe
+            const apiTimeframe = timeframe === "3m" ? "3M" : "6M"
+
+            const result = await getViewsVsEnquiries(apiTimeframe)
+
+            if (result.success && result.data) {
+                // Transform data to match chart format
+                const formattedData = result.data.map(item => ({
+                    month: item.period,
+                    visits: item.views,
+                    enquiries: item.enquiries,
+                }))
+                setChartData(formattedData)
+            } else {
+                setError(result.message || "Failed to load data")
+                setChartData([])
+            }
+
+            setLoading(false)
         }
-        return fullChartData
+
+        fetchData()
     }, [timeframe])
 
     const months = chartData.map(d => d.month)
@@ -82,24 +99,38 @@ function VisitAndEnquiries() {
                 </Select>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <BarChart accessibilityLayer data={chartData}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            tickMargin={10}
-                            axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 3)}
-                        />
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent indicator="dashed" />}
-                        />
-                        <Bar dataKey="visits" fill="#2563EB" radius={4} />
-                        <Bar dataKey="enquiries" fill="#10B981" radius={4} />
-                    </BarChart>
-                </ChartContainer>
+                {loading ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">Loading...</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-red-500">{error}</p>
+                    </div>
+                ) : chartData.length === 0 ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                        <p className="text-sm text-gray-500">No data available for this period</p>
+                    </div>
+                ) : (
+                    <ChartContainer config={chartConfig}>
+                        <BarChart accessibilityLayer data={chartData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 10)}
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="dashed" />}
+                            />
+                            <Bar dataKey="visits" fill="#2563EB" radius={4} />
+                            <Bar dataKey="enquiries" fill="#10B981" radius={4} />
+                        </BarChart>
+                    </ChartContainer>
+                )}
             </CardContent>
             <CardFooter className="flex max-lg:flex-col max-lg:items-start gap-3 lg:gap-6 text-sm">
                 {/* Legends */}

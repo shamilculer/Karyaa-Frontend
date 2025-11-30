@@ -38,6 +38,7 @@ import {
   IconMapPinFilled,
   IconPhone,
 } from "@tabler/icons-react";
+import ProfileViewTracker from "@/components/ProfileViewTracker";
 
 const VendorPage = async ({ params }) => {
   const { vendor: vendorSlug } = await params;
@@ -94,6 +95,7 @@ const VendorPage = async ({ params }) => {
 
   return (
     <div className="min-h-screen">
+      <ProfileViewTracker vendorId={vendorData._id} />
       {/* ScrollHeaderWrapper (Assuming it includes VendorPopupHeader) */}
       <ScrollHeaderWrapper hasPackages={hasPackages} />
 
