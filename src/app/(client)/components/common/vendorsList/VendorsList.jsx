@@ -85,7 +85,7 @@ const VendorEmptyState = () => (
 );
 
 // 📌 MAIN SERVER COMPONENT
-const VendorsList = async ({ showControls, filters }) => {
+const VendorsList = async ({ showControls, filters, source = "category" }) => {
   const authResult = await checkAuthStatus("user", true);
   const savedVendorIds = [];
 
@@ -147,6 +147,7 @@ const VendorsList = async ({ showControls, filters }) => {
                     vendor={vendor}
                     isAuthenticated={authResult.isAuthenticated}
                     isInitialSaved={savedVendorIds.includes(vendor._id)}
+                    source={source}
                   />
                 ))}
               </div>
@@ -167,8 +168,11 @@ const VendorsList = async ({ showControls, filters }) => {
 };
 
 // 📌 CARD COMPONENT
-export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact = false }) => {
+export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact = false, source }) => {
   const vendorId = vendor._id || vendor.id;
+
+  // Determine the actual source - use "recommended" if vendor is recommended, otherwise use provided source
+  const vendorUrl = source ? `/vendors/${vendor.slug}?source=${source}` : `/vendors/${vendor.slug}`;
 
   if (compact) {
     return (
@@ -197,7 +201,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
               navigationStyles="size-7 p-0 opacity-50"
             >
               {vendor.gallery.map((img, idx) => (
-                <Link key={idx} href={`/vendors/${vendor.slug}`}>
+                <Link key={idx} href={vendorUrl}>
                   <Image
                     fill
                     src={img.url}
@@ -208,7 +212,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
               ))}
             </Carousel>
           ) : (
-            <Link href={`/vendors/${vendor.slug}`}>
+            <Link href={vendorUrl}>
               <Image
                 height={198}
                 width={300}
@@ -227,7 +231,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
             <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
           </p>
           <div className="w-full relative">
-            <Link href={`/vendors/${vendor.slug}`} className="!text-lg text-[#232536] font-heading !font-medium truncate">
+            <Link href={vendorUrl} className="!text-lg text-[#232536] font-heading !font-medium truncate">
               {vendor.businessName}
             </Link>
             <div>
@@ -242,7 +246,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
 
           <div className="w-full flex-between mt-3">
             <Button asChild>
-              <Link href={`/vendors/${vendor.slug}`}>Know More</Link>
+              <Link href={vendorUrl}>Know More</Link>
             </Button>
 
             <Link
@@ -284,7 +288,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
             navigationStyles="size-7 p-0 opacity-50"
           >
             {vendor.gallery.map((img, idx) => (
-              <Link key={idx} href={`/vendors/${vendor.slug}`}>
+              <Link key={idx} href={vendorUrl}>
                 <Image
                   fill
                   src={img.url}
@@ -295,7 +299,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
             ))}
           </Carousel>
         ) : (
-          <Link href={`/vendors/${vendor.slug}`}>
+          <Link href={vendorUrl}>
             <Image
               height={240}
               width={300}
@@ -314,7 +318,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
           <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
         </p>
         <div className="w-full relative">
-          <Link href={`/vendors/${vendor.slug}`} className="!text-2xl max-md:!text-lg text-[#232536] font-heading !font-medium truncate">
+          <Link href={vendorUrl} className="!text-2xl max-md:!text-lg text-[#232536] font-heading !font-medium truncate">
             {vendor.businessName}
           </Link>
           <div>
@@ -329,7 +333,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
 
         <div className="w-full flex-between mt-6">
           <Button asChild>
-            <Link href={`/vendors/${vendor.slug}`}>Know More</Link>
+            <Link href={vendorUrl}>Know More</Link>
           </Button>
 
           <Link

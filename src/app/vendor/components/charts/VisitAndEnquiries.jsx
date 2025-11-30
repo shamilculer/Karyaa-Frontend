@@ -37,7 +37,7 @@ const chartConfig = {
 }
 
 function VisitAndEnquiries() {
-    const [timeframe, setTimeframe] = useState("6m")
+    const [timeframe, setTimeframe] = useState("1m")
     const [chartData, setChartData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -48,7 +48,9 @@ function VisitAndEnquiries() {
             setError(null)
 
             // Map UI timeframe to API timeframe
-            const apiTimeframe = timeframe === "3m" ? "3M" : "6M"
+            let apiTimeframe = "6M";
+            if (timeframe === "1m") apiTimeframe = "1M";
+            else if (timeframe === "3m") apiTimeframe = "3M";
 
             const result = await getViewsVsEnquiries(apiTimeframe)
 
@@ -93,6 +95,7 @@ function VisitAndEnquiries() {
                         <SelectValue placeholder="Select timeframe" />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="1m">Last 1 Month</SelectItem>
                         <SelectItem value="3m">Last 3 Months</SelectItem>
                         <SelectItem value="6m">Last 6 Months</SelectItem>
                     </SelectContent>
@@ -149,7 +152,7 @@ function VisitAndEnquiries() {
                     <span>{chartConfig.enquiries.label}</span>
                 </div>
                 <div className="text-muted-foreground leading-none">
-                    Showing profile visits vs enquiries for the last {timeframe === "3m" ? "3" : "6"} months.
+                    Showing profile visits vs enquiries for the last {timeframe === "1m" ? "1" : timeframe === "3m" ? "3" : "6"} months.
                 </div>
             </CardFooter>
         </Card>

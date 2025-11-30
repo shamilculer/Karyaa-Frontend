@@ -8,7 +8,7 @@ const VendorShareButton = ({ businessName, slug, isVendorPage }) => {
     const handleShare = () => {
         // ✅ CORRECTED: Construct the URL inside the client-side event handler.
         // This code only runs after the component has been hydrated in the browser.
-        const vendorUrl = `${window.location.origin}/vendors/${slug}`;
+        const vendorUrl = `${window.location.origin}/vendors/${slug}?source=shared`;
         
         if (navigator.share) {
             navigator.share({

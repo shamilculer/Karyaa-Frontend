@@ -16,9 +16,9 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { getProfileViewSourceBreakdown } from "@/app/actions/vendor/analytics"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 export const description = "Profile view source breakdown (donut chart) with timeframe filter"
 
@@ -26,25 +26,45 @@ const chartConfig = {
     leads: {
         label: "Views",
     },
+    homepage: {
+        label: "Homepage",
+        color: "#3b82f6", // Blue 500
+    },
     category: {
         label: "Category Page",
-        color: "var(--chart-1)",
+        color: "#10b981", // Emerald 500
+    },
+    subcategory: {
+        label: "Subcategory Page",
+        color: "#8b5cf6", // Violet 500
     },
     search: {
         label: "Search Results",
-        color: "var(--chart-2)",
+        color: "#f59e0b", // Amber 500
     },
-    featured: {
-        label: "Featured Vendors",
-        color: "var(--chart-3)",
+    recommended: {
+        label: "Recommended Sections",
+        color: "#ec4899", // Pink 500
+    },
+    vendor_page: {
+        label: "Similar Vendors",
+        color: "#06b6d4", // Cyan 500
+    },
+    saved: {
+        label: "Saved Vendors",
+        color: "#84cc16", // Lime 500
+    },
+    shared: {
+        label: "Shared Link",
+        color: "#f97316", // Orange 500
     },
     direct: {
         label: "Direct Link",
-        color: "var(--chart-4)",
+        color: "#6366f1", // Indigo 500
     },
     other: {
         label: "Other",
-        color: "var(--chart-5)",
+        color: "#64748b", // Slate 500
     },
 }
 
@@ -58,15 +78,20 @@ const timeframeLabelMap = {
 };
 
 const colorMap = {
-    category: "var(--chart-1)",
-    search: "var(--chart-2)",
-    featured: "var(--chart-3)",
-    direct: "var(--chart-4)",
-    other: "var(--chart-5)",
+    homepage: "#3b82f6",
+    category: "#10b981",
+    subcategory: "#8b5cf6",
+    search: "#f59e0b",
+    recommended: "#ec4899",
+    vendor_page: "#06b6d4",
+    saved: "#84cc16",
+    shared: "#f97316",
+    direct: "#6366f1",
+    other: "#64748b",
 };
 
 function LeadSource() {
-    const [timeframe, setTimeframe] = useState("6M")
+    const [timeframe, setTimeframe] = useState("1M")
     const [chartData, setChartData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -222,7 +247,7 @@ function LeadSource() {
                                 style={{ backgroundColor: `${item.fill}` }}
                             />
                             <span className="max-lg:!text-sm">
-                                {item.source}: **{percentage}%** ({item.leads})
+                                {item.source}: {percentage}% ({item.leads})
                             </span>
                         </div>
                     );

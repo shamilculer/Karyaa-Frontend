@@ -315,3 +315,55 @@ export async function getViewsVsEnquiries(timeframe = "6M") {
         };
     }
 }
+
+/**
+ * Get overview stats
+ */
+export async function getOverviewStats() {
+    try {
+        const clientDate = new Date().toISOString();
+        const res = await apiFetch(`/analytics/vendor/overview-stats?clientDate=${clientDate}`, {
+            method: "GET",
+            role: "vendor",
+            auth: true,
+            cache: "no-store",
+        });
+
+        if (!res.success) {
+            return {
+                success: false,
+                message: res.message || "Failed to fetch overview stats.",
+                data: null,
+            };
+        }
+
+        return {
+            success: true,
+            data: res.data,
+        };
+    } catch (error) {
+        console.error("Error fetching overview stats:", error);
+        return {
+            success: false,
+            message: error.message || "Failed to fetch overview stats.",
+            data: null,
+        };
+    }
+}
+
+/**
+ * Track WhatsApp click
+ */
+export async function trackWhatsAppClick(vendorId) {
+    try {
+        const res = await apiFetch(`/analytics/track-whatsapp`, {
+            method: "POST",
+            body: JSON.stringify({ vendorId }),
+        });
+
+        return { success: res.success || false };
+    } catch (error) {
+        console.error("Error tracking WhatsApp click:", error);
+        return { success: false };
+    }
+}

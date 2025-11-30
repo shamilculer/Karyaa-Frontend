@@ -33,7 +33,7 @@ export default function ProfileViewTracker({ vendorId }) {
         const getSource = () => {
             // First, check URL parameter
             const urlSource = searchParams.get("source");
-            if (urlSource && ["category", "search", "featured", "direct", "other"].includes(urlSource)) {
+            if (urlSource && ["homepage", "category", "subcategory", "search", "recommended", "vendor_page", "saved", "shared", "direct", "other"].includes(urlSource)) {
                 return urlSource;
             }
 

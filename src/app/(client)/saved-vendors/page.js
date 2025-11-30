@@ -42,6 +42,7 @@ async function SavedVendorsContent({ categorySlug }) {
             vendor={vendor}
             isAuthenticated={isAuthenticated}
             isInitialSaved={true}
+            source="saved"
           />
         ))}
       </div>

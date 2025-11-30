@@ -8,8 +8,10 @@ import { getSavedVendors } from "@/app/actions/user/user";
 /**
  * Client-side wrapper for VendorsCarousel that handles saved vendor state
  * This component fetches saved vendors client-side to avoid cookie modification errors
+ * 
+ * @param {string} sourceType - The source context for tracking (e.g., "recommended", "vendor_page")
  */
-export function VendorsCarouselClient({ vendors, isAuthenticated, currentVendor }) {
+export function VendorsCarouselClient({ vendors, isAuthenticated, currentVendor, sourceType = "other" }) {
     const [savedVendorIds, setSavedVendorIds] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -65,6 +67,7 @@ export function VendorsCarouselClient({ vendors, isAuthenticated, currentVendor 
                     vendor={vendor}
                     isAuthenticated={isAuthenticated}
                     isInitialSaved={savedVendorIds.includes(vendor._id)}
+                    source={sourceType}
                 />
             ))}
         </Carousel>

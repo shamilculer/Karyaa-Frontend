@@ -36,7 +36,7 @@ export default function LandingPage() {
             <div className="flex justify-between items-center max-lg:items-end mb-6 md:mb-8">
               <h2 className="uppercase">KARYAA Recommends</h2>
             </div>
-            <VendorsCarousel filter={{ isRecommended: true }} />
+            <VendorsCarousel sourceType="recommended" filter={{ isRecommended: true }} />
           </div>
         </section>
 

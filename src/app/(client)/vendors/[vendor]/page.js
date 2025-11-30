@@ -39,6 +39,7 @@ import {
   IconPhone,
 } from "@tabler/icons-react";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
+import WhatsAppButton from "../../components/features/vendors/WhatsAppButton";
 
 const VendorPage = async ({ params }) => {
   const { vendor: vendorSlug } = await params;
@@ -274,14 +275,10 @@ const VendorPage = async ({ params }) => {
                       </Button>
                     )}
 
-                    <Button asChild variant="ghost" className="p-0">
-                      <Link
-                        href={getWhatsAppLink(vendorData?.whatsAppNumber)}
-                        target="_blank"
-                      >
-                        <IconBrandWhatsapp className="text-primary" />
-                      </Link>
-                    </Button>
+                    <WhatsAppButton
+                      phoneNumber={vendorData?.whatsAppNumber}
+                      vendorId={vendorData._id}
+                    />
                   </div>
                 </div>
                 <div className="mt-4">

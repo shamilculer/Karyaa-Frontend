@@ -2,7 +2,7 @@ import { VendorsCarouselClient } from "./VendorsCarouselClient";
 import { getActiveVendors } from "@/app/actions/public/vendors";
 import { checkAuthStatus } from "@/app/actions/user/user";
 
-const VendorsCarousel = async ({ filter = {}, currentVendor }) => {
+const VendorsCarousel = async ({ filter = {}, currentVendor, sourceType = "other" }) => {
 
     const resultVendors = await getActiveVendors(filter);
     const vendors = resultVendors.data || [];
@@ -16,6 +16,7 @@ const VendorsCarousel = async ({ filter = {}, currentVendor }) => {
             vendors={vendors}
             isAuthenticated={isAuthenticated}
             currentVendor={currentVendor}
+            sourceType={sourceType}
         />
     );
 

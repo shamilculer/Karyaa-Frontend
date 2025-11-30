@@ -94,18 +94,46 @@ const ReviewInsights = () => {
                             </div>
 
                             <div>
-                                <span className="!text-sm font-heading font-normal">({data.reviewCount} Total Reviews)</span>
                                 <div className="flex items-center">
                                     {renderStars(Math.round(data.averageRating))}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-12 lg:mt-8">
+                        {/* Status Breakdown */}
+                        <div className="grid grid-cols-3 gap-2 mt-6">
+                            <div className="bg-green-50 p-2 rounded-lg text-center border border-green-100">
+                                <div className="text-lg font-bold text-green-700">{data.reviewStatusCounts?.Approved || 0}</div>
+                                <div className="text-xs text-green-600 font-medium">Approved</div>
+                            </div>
+                            <div className="bg-yellow-50 p-2 rounded-lg text-center border border-yellow-100">
+                                <div className="text-lg font-bold text-yellow-700">{data.reviewStatusCounts?.Pending || 0}</div>
+                                <div className="text-xs text-yellow-600 font-medium">Pending</div>
+                            </div>
+                            <div className="bg-red-50 p-2 rounded-lg text-center border border-red-100">
+                                <div className="text-lg font-bold text-red-700">{data.reviewStatusCounts?.Rejected || 0}</div>
+                                <div className="text-xs text-red-600 font-medium">Rejected</div>
+                            </div>
+                        </div>
+
+                        {data.flaggedCount > 0 && (
+                            <div className="mt-3 bg-orange-50 p-2 rounded-lg flex items-center justify-between border border-orange-100 px-3">
+                                <span className="text-xs text-orange-700 font-medium">Flagged for removal</span>
+                                <span className="text-sm font-bold text-orange-800">{data.flaggedCount}</span>
+                            </div>
+                        )}
+
+                        <div className="mt-8 lg:mt-6">
                             <div className="w-full space-y-5">
                                 {data.recentReviews && data.recentReviews.length > 0 ? (
                                     data.recentReviews.map((review, index) => (
-                                        <div key={review._id || index} className="border-b border-gray-300 lg:p-4 max-lg:pb-6">
+                                        <div key={review._id || index} className="border-b border-gray-300 lg:p-4 max-lg:pb-6 relative">
+                                            {review.flaggedForRemoval && (
+                                                <span className="absolute top-2 right-2 bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-medium border border-red-200">
+                                                    Flagged
+                                                </span>
+                                            )}
+
                                             <div className="w-full flex-between gap-5">
                                                 <div className="flex items-center gap-4">
                                                     <Avatar className="size-10 border border-gray-400 rounded-full">

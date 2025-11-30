@@ -4,6 +4,7 @@ import LeadSource from "../components/charts/LeadSource"
 import ReviewInsights from "../components/sections/ReviewInsights"
 import VisitAndEnquiries from "../components/charts/VisitAndEnquiries"
 import LeadsTable from "../components/tables/LeadsTable"
+import DashboardGallery from "../components/sections/DashboardGallery"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
@@ -46,7 +47,7 @@ const VendorDashboardPage = () => {
           </Button>
         </div>
         <Suspense fallback={<div>Loading leads...</div>}>
-          <LeadsTable />
+          <LeadsTable controls={false} />
         </Suspense>
       </div>
 
@@ -62,13 +63,7 @@ const VendorDashboardPage = () => {
         </div>
 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full place-items-center gap-5" >
-          <Image src="/why-us.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-          <Image src="/banner-2.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-          <Image src="/blog-2.webp" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-          <Image src="/banner-1.avif" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-          <Image src="/new-banner-1.jpg" className="h-72 object-cover rounded-2xl border border-gray-300" width={300} height={300} alt="Gallery" />
-        </div>
+        <DashboardGallery />
       </div>
     </div>
   )

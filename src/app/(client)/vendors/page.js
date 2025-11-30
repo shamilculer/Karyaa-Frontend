@@ -25,7 +25,7 @@ const VendorsPage = async ({ searchParams }) => {
             <h2 className=" font-semibold uppercase">Featured Partners</h2>
           </div>
 
-          <VendorsListWrapper showControls={true} filters={filters} />
+          <VendorsListWrapper showControls={true} filters={filters} source="search" />
         </div>
       </section>
     </div>

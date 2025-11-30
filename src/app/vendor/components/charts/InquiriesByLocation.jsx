@@ -38,7 +38,7 @@ const timeframeLabelMap = {
 };
 
 function InquiriesByLocation() {
-    const [timeframe, setTimeframe] = useState("6M")
+    const [timeframe, setTimeframe] = useState("1M")
     const [chartData, setChartData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
