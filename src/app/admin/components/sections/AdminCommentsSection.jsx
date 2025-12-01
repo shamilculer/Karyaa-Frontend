@@ -105,7 +105,7 @@ export default function AdminCommentsSection({ vendorId, comments = [], onUpdate
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
-                                <p className="!text-xs text-gray-500">
+                                <p className="!text-xs text-gray-500" suppressHydrationWarning>
                                     {new Date(comment.createdAt).toLocaleString()}
                                 </p>
                             </div>

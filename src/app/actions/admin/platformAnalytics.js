@@ -99,3 +99,17 @@ export async function getEngagementMetrics(timeframe = "6M") {
     return { success: false, message: error.message };
   }
 }
+
+// Get review statistics
+export async function getReviewStats() {
+  try {
+    const data = await apiFetch(`/admin/analytics/platform/review-stats`, {
+      role: "admin",
+      auth: true,
+    });
+    return data;
+  } catch (error) {
+    console.error("Error fetching review stats:", error);
+    return { success: false, message: error.message };
+  }
+}

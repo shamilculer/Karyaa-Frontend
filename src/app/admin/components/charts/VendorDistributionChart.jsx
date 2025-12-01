@@ -38,7 +38,7 @@ const chartConfig = {
 }
 
 function VendorDistributionChart() {
-    const [timeframe, setTimeframe] = useState("6M")
+    const [timeframe, setTimeframe] = useState("1M")
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -160,7 +160,12 @@ function VendorDistributionChart() {
                             bottom: 0,
                         }}
                     >
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid
+                            vertical={true}
+                            horizontal={true}
+                            stroke="#d6d6d6ff"
+                            strokeDasharray="3 3"
+                        />
                         <XAxis
                             dataKey="category"
                             tickLine={false}

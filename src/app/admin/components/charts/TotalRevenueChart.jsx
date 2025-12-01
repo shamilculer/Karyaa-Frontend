@@ -39,7 +39,7 @@ const timeframeLabelMap = {
 };
 
 const TotalRevenueChart = () => {
-  const [timeframe, setTimeframe] = useState("6M")
+  const [timeframe, setTimeframe] = useState("1M")
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -159,9 +159,9 @@ const TotalRevenueChart = () => {
             </defs>
 
             <CartesianGrid
-              vertical={false}
+              vertical={true}
               horizontal={true}
-              stroke="#E0E0E0"
+              stroke="#d6d6d6ff"
               strokeDasharray="3 3"
             />
 

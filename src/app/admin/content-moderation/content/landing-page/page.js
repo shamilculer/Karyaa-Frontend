@@ -18,11 +18,10 @@ const sections = [
   {
     key: "hero-section",
     label: "Hero Section",
-    description: "Main banner with headline, description, and images",
+    description: "Main banner with headline and description",
     fields: [
       { name: "heading", label: "Heading", type: "text", placeholder: "YOUR PERFECT EVENT STARTS HERE." },
       { name: "description", label: "Description", type: "textarea", placeholder: "Plan your next celebration in the perfect venue..." },
-      { name: "images", label: "Hero Images", type: "images", maxImages: 30 }
     ]
   },
   {
@@ -83,7 +82,7 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
 
   const handleUploadSuccess = (result) => {
     const uploadedUrl = result.info.secure_url;
-    
+
     if (isMultiple) {
       uploadedUrlsRef.current.push(uploadedUrl);
       toast.success("Image uploaded successfully!");
@@ -112,15 +111,15 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
   return (
     <div className="space-y-3">
       <Label>{label}</Label>
-      
+
       {/* Image Preview Grid */}
       {images.length > 0 && (
         <div className={`grid ${isMultiple ? 'grid-cols-5' : 'grid-cols-1'} gap-3`}>
           {images.map((img, idx) => (
             <div key={idx} className="relative group aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
-              <Image 
-                src={img} 
-                alt={`Upload ${idx + 1}`} 
+              <Image
+                src={img}
+                alt={`Upload ${idx + 1}`}
                 className="w-full h-full object-cover"
                 width={200}
                 height={200}
@@ -148,18 +147,23 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
           options={{
             sources: ['local'],
             multiple: isMultiple,
-            maxFileSize: 10485760,
+            maxFileSize: sectionKey === 'testimonial' ? 2097152 : 10485760, // 2MB for testimonials, 10MB for others
             clientAllowedFormats: ['jpeg', 'png', 'webp', 'gif', 'jpg'],
             folder: 'landing-page',
             resourceType: 'auto',
-            showAdvancedOptions: false
+            showAdvancedOptions: false,
+            ...(sectionKey === 'testimonial' && {
+              transformation: [
+                { width: 400, height: 400, crop: 'limit' }
+              ]
+            })
           }}
           onSuccess={handleUploadSuccess}
           onError={handleUploadError}
           onQueuesEnd={handleQueuesEnd}
         >
           {({ open }) => (
-            <button 
+            <button
               type="button"
               onClick={() => {
                 setUploading(true);
@@ -177,8 +181,8 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
                 <>
                   <Upload className="h-4 w-4" />
                   <span>
-                    {isMultiple 
-                      ? `Upload Images (${images.length}/${maxImages})` 
+                    {isMultiple
+                      ? `Upload Images (${images.length}/${maxImages})`
                       : "Upload Image"
                     }
                   </span>
@@ -310,7 +314,7 @@ const LandingPageEditor = () => {
   const loadContent = async () => {
     setLoading(true);
     try {
-      const promises = sections.map(section => 
+      const promises = sections.map(section =>
         getContentByKeyAction(section.key)
       );
 
@@ -319,8 +323,8 @@ const LandingPageEditor = () => {
 
       results.forEach((result, index) => {
         if (result.success && result.data?.content) {
-          const parsedContent = typeof result.data.content === 'string' 
-            ? JSON.parse(result.data.content) 
+          const parsedContent = typeof result.data.content === 'string'
+            ? JSON.parse(result.data.content)
             : result.data.content;
           contentMap[sections[index].key] = parsedContent;
         }
@@ -465,9 +469,9 @@ const LandingPageEditor = () => {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="!rounded-full bg-gray-300"
                 onClick={() => router.push("/admin/content-moderation/content")}
               >
@@ -479,8 +483,8 @@ const LandingPageEditor = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => window.open("/", "_blank")}
               >

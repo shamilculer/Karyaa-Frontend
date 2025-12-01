@@ -17,6 +17,15 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { VendorSelectField } from "@/components/common/VendorSelectField";
@@ -27,6 +36,9 @@ import {
   Link2,
   CheckCircle2,
   ArrowLeft,
+  Type,
+  Calendar as CalendarIcon,
+  Smartphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -37,6 +49,7 @@ export default function AddBannerPage() {
   const [placementOptions, setPlacementOptions] = useState([
     { label: "Hero Section", value: "Hero Section" },
     { label: "Homepage Carousel", value: "Homepage Carousel" },
+    { label: "Karyaa Recommends", value: "Karyaa Recommends" },
     { label: "Contact Page", value: "Contact" },
     { label: "Ideas Page", value: "Ideas" },
     { label: "Gallery Page", value: "Gallery" },
@@ -52,6 +65,11 @@ export default function AddBannerPage() {
       customUrl: "",
       isVendorSpecific: true,
       status: "Active",
+      title: "",
+      tagline: "",
+      mobileImageUrl: "",
+      activeFrom: undefined,
+      activeUntil: undefined,
     },
   });
 
@@ -65,6 +83,9 @@ export default function AddBannerPage() {
     formState: { errors },
   } = methods;
 
+  const activeFrom = watch("activeFrom");
+  const activeUntil = watch("activeUntil");
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -74,7 +95,7 @@ export default function AddBannerPage() {
             const options = [
               { label: `Category: ${cat.name}`, value: `Category: ${cat.name}` },
             ];
-            
+
             if (cat.subCategories && cat.subCategories.length > 0) {
               cat.subCategories.forEach((sub) => {
                 options.push({
@@ -85,7 +106,7 @@ export default function AddBannerPage() {
             }
             return options;
           });
-          
+
           setPlacementOptions((prev) => {
             // Filter out existing category/subcategory options to avoid duplicates if re-fetching
             const staticOptions = prev.filter(p => !p.value.startsWith("Category") && !p.value.startsWith("Subcategory"));
@@ -115,6 +136,12 @@ export default function AddBannerPage() {
     // Validate custom URL if not vendor-specific
     if (!data.isVendorSpecific && !data.customUrl) {
       toast.error("Please provide a custom URL");
+      return;
+    }
+
+    // Validate dates
+    if (data.activeFrom && data.activeUntil && new Date(data.activeFrom) > new Date(data.activeUntil)) {
+      toast.error("Active From date must be before Active Until date");
       return;
     }
 
@@ -246,6 +273,153 @@ export default function AddBannerPage() {
                 <p className="text-xs text-gray-500 flex items-center gap-2">
                   <CheckCircle2 className="w-3 h-3" />
                   Supported formats: PNG, JPG, JPEG, WEBP (Max 5MB)
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Page Title & Tagline Card */}
+          <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Type className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-bold">
+                    Page Title & Tagline
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Optional text to display over the banner
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
+                    Page Title
+                  </Label>
+                  <Input
+                    id="title"
+                    {...register("title")}
+                    placeholder="e.g., Find Your Dream Venue"
+                    className="h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tagline" className="text-sm font-semibold text-gray-700">
+                    Tagline
+                  </Label>
+                  <Textarea
+                    id="tagline"
+                    {...register("tagline")}
+                    placeholder="e.g., Discover the best wedding venues in your area"
+                    className="min-h-[44px]"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 flex items-center gap-2">
+                <CheckCircle2 className="w-3 h-3" />
+                If left empty, the default page title and tagline will be used.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Schedule & Mobile Card */}
+          <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <CalendarIcon className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-bold">
+                    Schedule & Mobile
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Set activation dates and mobile-specific image
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Active From</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-11",
+                          !activeFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {activeFrom ? format(activeFrom, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={activeFrom}
+                        onSelect={(date) => setValue("activeFrom", date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Active Until</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-11",
+                          !activeUntil && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {activeUntil ? format(activeUntil, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={activeUntil}
+                        onSelect={(date) => setValue("activeUntil", date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Smartphone className="w-4 h-4" />
+                  Mobile Banner Image (Optional)
+                </Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <ControlledFileUpload
+                    control={control}
+                    name="mobileImageUrl"
+                    label="Upload mobile version (optional)"
+                    allowedMimeType={[
+                      "image/png",
+                      "image/jpg",
+                      "image/jpeg",
+                      "image/webp",
+                    ]}
+                    folderPath="ad-banners/mobile"
+                    errors={errors}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  If not provided, the desktop image will be used on mobile devices.
                 </p>
               </div>
             </CardContent>

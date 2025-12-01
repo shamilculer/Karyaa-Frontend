@@ -38,7 +38,7 @@ const chartConfig = {
 }
 
 function EngagementMetricsChart() {
-    const [timeframe, setTimeframe] = useState("6M")
+    const [timeframe, setTimeframe] = useState("1M")
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -162,7 +162,12 @@ function EngagementMetricsChart() {
                             bottom: 0,
                         }}
                     >
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid
+                            vertical={true}
+                            horizontal={true}
+                            stroke="#d6d6d6ff"
+                            strokeDasharray="3 3"
+                        />
                         <XAxis
                             dataKey="metric"
                             tickLine={false}

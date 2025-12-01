@@ -39,7 +39,7 @@ const timeframeLabelMap = {
 };
 
 const UserGrowthChart = () => {
-    const [timeframe, setTimeframe] = useState("6M")
+    const [timeframe, setTimeframe] = useState("1M")
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -57,7 +57,11 @@ const UserGrowthChart = () => {
                 if (response.success && response.data) {
                     // Transform the data for the chart
                     const transformedData = response.data.map(item => ({
-                        time: item._id.month ? `${item._id.month}/${item._id.year}` : `Day ${item._id.day}`,
+                        time: item._id.hour !== undefined
+                            ? `${String(item._id.hour).padStart(2, '0')}:00`
+                            : item._id.day
+                                ? `${item._id.month}/${item._id.day}`
+                                : `${item._id.month}/${item._id.year}`,
                         users: item.count
                     }))
 
@@ -159,13 +163,13 @@ const UserGrowthChart = () => {
                         </defs>
 
                         <CartesianGrid
-                            vertical={false}
+                            vertical={true}
                             horizontal={true}
-                            stroke="#E0E0E0"
+                            stroke="#d6d6d6ff"
                             strokeDasharray="3 3"
                         />
 
-                        <YAxis hide={true} domain={['dataMin', 'dataMax']} />
+                        <YAxis hide={true} domain={[0, 'auto']} />
 
                         <XAxis
                             dataKey="time"

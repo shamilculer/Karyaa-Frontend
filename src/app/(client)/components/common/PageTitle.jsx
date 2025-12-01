@@ -20,20 +20,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         if (banners.length > 1) {
             return (
                 <section className="!m-0 relative h-64 md:h-[400px] flex-center px-4 overflow-hidden">
-                    <PageTitleSlider banners={banners} title={title} />
-
-                    {/* Overlay Text */}
-                    {(title || tagline) && (
-                        <>
-                            <div className="absolute inset-0 bg-black opacity-30 w-full h-full pointer-events-none z-10"></div>
-                            <div className="relative z-20 text-white text-center pointer-events-none">
-                                {title && <h1 className="!text-white !text-4xl lg:!text-[55px]">{title}</h1>}
-                                {tagline && (
-                                    <p className="mt-2 !text-sm max-md:text-xs">{tagline}</p>
-                                )}
-                            </div>
-                        </>
-                    )}
+                    <PageTitleSlider banners={banners} defaultTitle={title} defaultTagline={tagline} />
                 </section>
             );
         }
@@ -45,27 +32,44 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
                 ? `/vendors/${bannerToShow.vendorSlug}`
                 : bannerToShow.customUrl || "#";
 
+        // Determine title and tagline to show
+        const displayTitle = bannerToShow.title || title;
+        const displayTagline = bannerToShow.tagline || tagline;
+        const showOverlay = !!(displayTitle || displayTagline);
+
         return (
             <section className="!m-0 relative h-64 md:h-[400px] flex-center px-4">
                 <Link href={destinationLink} className="absolute inset-0 w-full h-full">
+                    {/* Desktop Image */}
                     <Image
                         src={bannerToShow.imageUrl}
-                        alt={bannerToShow.name || title}
+                        alt={bannerToShow.name || displayTitle || "Banner"}
                         fill
-                        className="object-cover"
+                        className={`object-cover ${bannerToShow.mobileImageUrl ? "hidden md:block" : ""}`}
                         priority
                         sizes="100vw"
                     />
+                    {/* Mobile Image (if available) */}
+                    {bannerToShow.mobileImageUrl && (
+                        <Image
+                            src={bannerToShow.mobileImageUrl}
+                            alt={bannerToShow.name || displayTitle || "Banner"}
+                            fill
+                            className="object-cover md:hidden"
+                            priority
+                            sizes="100vw"
+                        />
+                    )}
                 </Link>
 
-                {/* Optional: Overlay for better text readability if title/tagline are still needed */}
-                {(title || tagline) && (
+                {/* Conditional Overlay */}
+                {showOverlay && (
                     <>
                         <div className="absolute inset-0 bg-black opacity-30 w-full h-full pointer-events-none"></div>
                         <div className="relative z-10 text-white text-center pointer-events-none">
-                            {title && <h1 className="!text-white !text-4xl lg:!text-[55px]">{title}</h1>}
-                            {tagline && (
-                                <p className="mt-2 !text-sm max-md:text-xs">{tagline}</p>
+                            {displayTitle && <h1 className="!text-white !text-4xl lg:!text-[55px]">{displayTitle}</h1>}
+                            {displayTagline && (
+                                <p className="mt-2 !text-sm max-md:text-xs">{displayTagline}</p>
                             )}
                         </div>
                     </>

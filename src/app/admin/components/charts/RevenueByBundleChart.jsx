@@ -114,7 +114,12 @@ function RevenueByBundleChart() {
                             bottom: 0,
                         }}
                     >
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid
+                            vertical={true}
+                            horizontal={true}
+                            stroke="#d6d6d6ff"
+                            strokeDasharray="3 3"
+                        />
                         <XAxis
                             dataKey="bundle"
                             tickLine={false}

@@ -22,23 +22,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import AdminVendorProfileForm from '../forms/AdminVendorProfileForm';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AdminCommentsSection from './AdminCommentsSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdditionalDocumentsSection from './AdditionalDocumentsSection';
+import AdminCommentsSection from './AdminCommentsSection';
+import GalleryToolbar from './GalleryToolbar';
+import EditPackageModal from '../modals/packages/EditPackageModal';
+import { DocumentEditModal } from '../modals/documents/DocumentEditModal';
+import ViewPackageModal from '@/app/vendor/components/modals/packages/ViewPackageModal';
 
 const OCCASIONS = [
-    { value: "wedding", label: "Wedding" },
-    { value: "engagement", label: "Engagement" },
-    { value: "proposal", label: "Proposal" },
-    { value: "baby-shower", label: "Baby Shower" },
-    { value: "gender-reveal", label: "Gender Reveal" },
-    { value: "birthday", label: "Birthday" },
-    { value: "graduation", label: "Graduation" },
-    { value: "corporate-event", label: "Corporate Event" },
-    { value: "brand-launch", label: "Brand Launch" },
-    { value: "festivities", label: "Festivities" },
-    { value: "anniversary", label: "Anniversary" },
+{ value: "baby-shower", label: "Baby Shower" },
+{ value: "gender-reveal", label: "Gender Reveal" },
+{ value: "birthday", label: "Birthday" },
+{ value: "graduation", label: "Graduation" },
+{ value: "corporate-event", label: "Corporate Event" },
+{ value: "brand-launch", label: "Brand Launch" },
+{ value: "festivities", label: "Festivities" },
+{ value: "anniversary", label: "Anniversary" },
 ];
 
 const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcategories = [] }) => {
@@ -406,7 +412,10 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         <span className="text-gray-500">({vendor.reviewCount || 0} reviews)</span>
                                     </div>
                                 )}
-                                <span className="text-gray-400">•</span>
+                                
+                                 {vendor.averageRating > 0 && (
+                                    <span className="text-gray-400">•</span>
+                                 )}
                                 {vendor.pricingStartingFrom > 0 && (
                                     <>
                                         <span className="text-gray-600">Starting from <span className="font-bold text-gray-900">AED {vendor.pricingStartingFrom}</span></span>

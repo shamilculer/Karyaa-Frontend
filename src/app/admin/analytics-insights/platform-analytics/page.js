@@ -87,7 +87,7 @@ const PlatformAnalyticsPage = () => {
                 {summaryCards.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
-                        <div 
+                        <div
                             key={index}
                             className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow"
                         >
@@ -119,8 +119,13 @@ const PlatformAnalyticsPage = () => {
                 </div>
 
                 {/* Lead Metrics Chart */}
-                <div className="lg:col-span-2">
+                <div>
                     <LeadMetricsChart />
+                </div>
+
+                {/* Engagement Metrics Chart */}
+                <div>
+                    <EngagementMetricsChart />
                 </div>
 
                 {/* Vendor Distribution Chart */}
@@ -133,10 +138,6 @@ const PlatformAnalyticsPage = () => {
                     <VendorStatusChart />
                 </div>
 
-                {/* Engagement Metrics Chart */}
-                <div className="lg:col-span-2">
-                    <EngagementMetricsChart />
-                </div>
             </div>
         </div>
     );

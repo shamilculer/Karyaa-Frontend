@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import { TrendingUp, Users, ChevronDown } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts" 
-import { useState } from "react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useState, useEffect } from "react"
 
-// --- CORRECT SHADCN/UI IMPORTS ---
 import {
     Card,
     CardContent,
@@ -19,81 +18,94 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Button } from "@/components/ui/button" 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu" 
-
-
-// --- DUMMY DATA for Vendors ---
-// Data is structured as { time: string, vendors: number }
-const data24h = Array.from({ length: 8 }, (_, i) => ({ time: `${i * 3}:00`, vendors: Math.floor(Math.random() * 5) + 1 })); 
-const data1Week = Array.from({ length: 7 }, (_, i) => ({ time: `Day ${i + 1}`, vendors: Math.floor(Math.random() * 10) + 2 })); 
-const data1Month = Array.from({ length: 4 }, (_, i) => ({ time: `Week ${i + 1}`, vendors: Math.floor(Math.random() * 25) + 5 })); 
-const data3Month = [
-    { time: "Jul", vendors: 45 },
-    { time: "Aug", vendors: 62 },
-    { time: "Sep", vendors: 38 },
-];
-const data6Month = [
-    { time: "Apr", vendors: 30 },
-    { time: "May", vendors: 50 },
-    { time: "Jun", vendors: 40 },
-    ...data3Month
-];
-const dataLastYear = [
-    { time: "Jan", vendors: 35 },
-    { time: "Feb", vendors: 40 },
-    { time: "Mar", vendors: 32 },
-    ...data6Month,
-    { time: "Oct", vendors: 70 },
-    { time: "Nov", vendors: 55 },
-    { time: "Dec", vendors: 80 },
-];
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { getVendorGrowth } from "@/app/actions/admin/platformAnalytics"
 
 const chartConfig = {
     vendors: {
         label: "New Vendors",
-        // Using a custom CSS variable for a distinct growth color
-        color: "hsl(150, 60%, 40%)", 
+        color: "hsl(150, 60%, 40%)",
     },
 }
 
-const filterData = (timeframe) => {
-    switch (timeframe) {
-        case "24H": return data24h;
-        case "1W": return data1Week;
-        case "1M": return data1Month;
-        case "3M": return data3Month;
-        case "6M": return data6Month;
-        case "1Y": return dataLastYear;
-        default: return data6Month;
-    }
-}
-
-const timeframeLabelMap = { 
-    "24H": "Last 24 Hours", 
-    "1W": "Last 1 Week", 
-    "1M": "Last 1 Month", 
-    "3M": "Last 3 Months", 
-    "6M": "Last 6 Months", 
-    "1Y": "Last Year" 
+const timeframeLabelMap = {
+    "24H": "Last 24 Hours",
+    "1W": "Last 1 Week",
+    "1M": "Last 1 Month",
+    "3M": "Last 3 Months",
+    "6M": "Last 6 Months",
+    "1Y": "Last Year"
 };
 
-
 const VendorAcquisitionOverTime = () => {
-    const [timeframe, setTimeframe] = useState("6M")
-    const currentChartData = filterData(timeframe)
+    const [timeframe, setTimeframe] = useState("1M")
+    const [data, setData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
     const timeframeLabel = timeframeLabelMap[timeframe];
-    
-    // --- Performance Calculation ---
-    const firstPeriodVendors = currentChartData[0]?.vendors || 0;
-    const lastPeriodVendors = currentChartData[currentChartData.length - 1]?.vendors || 0;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+
+            try {
+                const response = await getVendorGrowth(timeframe)
+
+                if (response.success && response.data) {
+                    const transformedData = response.data.map(item => ({
+                        time: item._id.hour !== undefined
+                            ? `${String(item._id.hour).padStart(2, '0')}:00`
+                            : item._id.day
+                                ? `${item._id.month}/${item._id.day}`
+                                : `${item._id.month}/${item._id.year}`,
+                        vendors: item.count
+                    }))
+
+                    setData(transformedData)
+                } else {
+                    setError(response.message || "Failed to fetch data")
+                }
+            } catch (err) {
+                setError(err.message || "An error occurred")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [timeframe])
+
+    const firstPeriodVendors = data[0]?.vendors || 0;
+    const lastPeriodVendors = data[data.length - 1]?.vendors || 0;
     const vendorChange = lastPeriodVendors - firstPeriodVendors;
-    const percentageChange = firstPeriodVendors > 0 
-        ? ((vendorChange / firstPeriodVendors) * 100).toFixed(1) 
+    const percentageChange = firstPeriodVendors > 0
+        ? ((vendorChange / firstPeriodVendors) * 100).toFixed(1)
         : "N/A";
     const isPositiveTrend = vendorChange >= 0;
-    const totalVendors = currentChartData.reduce((acc, item) => acc + item.vendors, 0);
+    const totalVendors = data.reduce((acc, item) => acc + item.vendors, 0);
 
+    if (loading) {
+        return (
+            <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md">
+                <CardContent className="flex items-center justify-center h-64">
+                    <p className="text-gray-500">Loading...</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (error) {
+        return (
+            <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md">
+                <CardContent className="flex items-center justify-center h-64">
+                    <p className="text-red-500">Error: {error}</p>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <Card className="w-full bg-white border border-gray-200 shadow-none rounded-md">
@@ -110,11 +122,10 @@ const VendorAcquisitionOverTime = () => {
                     </div>
                 </div>
 
-                {/* Dropdown Menu for Timeframe Filter */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             className="h-8 text-xs font-normal"
                         >
                             {timeframe}
@@ -133,13 +144,13 @@ const VendorAcquisitionOverTime = () => {
 
             </CardHeader>
             <CardContent>
-                <ChartContainer 
+                <ChartContainer
                     config={chartConfig}
                     className="aspect-[9/4]"
                 >
                     <AreaChart
                         accessibilityLayer
-                        data={currentChartData}
+                        data={data}
                         margin={{ left: 12, right: 12 }}
                     >
                         <defs>
@@ -149,28 +160,28 @@ const VendorAcquisitionOverTime = () => {
                             </linearGradient>
                         </defs>
 
-                        <CartesianGrid 
-                            vertical={false} 
-                            horizontal={true} 
-                            stroke="#E0E0E0"
-                            strokeDasharray="3 3" 
-                        /> 
-                        
-                        <YAxis hide={true} domain={['dataMin', 'dataMax']} />
+                        <CartesianGrid
+                            vertical={true}
+                            horizontal={true}
+                            stroke="#d6d6d6ff"
+                            strokeDasharray="3 3"
+                        />
+
+                        <YAxis hide={true} domain={[0, 'auto']} />
 
                         <XAxis
                             dataKey="time"
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => value.length > 4 ? value.slice(0, 3) : value} 
+                            tickFormatter={(value) => value.length > 4 ? value.slice(0, 3) : value}
                             className="text-xs text-muted-foreground"
                         />
                         <ChartTooltip
                             cursor={{ stroke: 'var(--color-vendors)', strokeDasharray: '2 2' }}
                             content={
-                                <ChartTooltipContent 
-                                    indicator="line" 
+                                <ChartTooltipContent
+                                    indicator="line"
                                     nameKey="vendors"
                                 />
                             }
@@ -188,10 +199,9 @@ const VendorAcquisitionOverTime = () => {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex items-center gap-2 font-medium leading-none">
-                    {/* Display the trend calculation */}
-                    {isPositiveTrend ? "Up" : "Down"} by {percentageChange}% vs. previous period 
-                    <TrendingUp 
-                        className={`h-4 w-4 transition-transform duration-300 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`} 
+                    {isPositiveTrend ? "Up" : "Down"} by {percentageChange}% vs. previous period
+                    <TrendingUp
+                        className={`h-4 w-4 transition-transform duration-300 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`}
                     />
                 </div>
                 <div className="leading-none text-muted-foreground">

@@ -17,6 +17,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
     Upload,
     Image as ImageIcon,
@@ -26,6 +35,9 @@ import {
     X,
     Save,
     Store,
+    Type,
+    Calendar as CalendarIcon,
+    Smartphone,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -33,6 +45,8 @@ import { toast } from "sonner";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { VendorSelectField } from "@/components/common/VendorSelectField";
 import { updateBannerAction } from "@/app/actions/admin/banner";
+import { MultiSelect } from "@/components/common/MultiSelect";
+import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 
 export default function EditBannerModal({
     open,
@@ -42,6 +56,15 @@ export default function EditBannerModal({
 }) {
     const [isVendorSpecific, setIsVendorSpecific] = useState(banner?.isVendorSpecific ?? true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [placementOptions, setPlacementOptions] = useState([
+        { label: "Hero Section", value: "Hero Section" },
+        { label: "Homepage Carousel", value: "Homepage Carousel" },
+        { label: "Karyaa Recommends", value: "Karyaa Recommends" },
+        { label: "Contact Page", value: "Contact" },
+        { label: "Ideas Page", value: "Ideas" },
+        { label: "Gallery Page", value: "Gallery" },
+        { label: "Blog Page", value: "Blog Page" },
+    ]);
 
     const methods = useForm({
         defaultValues: {
@@ -52,6 +75,11 @@ export default function EditBannerModal({
             customUrl: banner?.customUrl || "",
             isVendorSpecific: banner?.isVendorSpecific ?? true,
             status: banner?.status || "Active",
+            title: banner?.title || "",
+            tagline: banner?.tagline || "",
+            mobileImageUrl: banner?.mobileImageUrl || "",
+            activeFrom: banner?.activeFrom ? new Date(banner.activeFrom) : undefined,
+            activeUntil: banner?.activeUntil ? new Date(banner.activeUntil) : undefined,
         },
     });
 
@@ -61,21 +89,50 @@ export default function EditBannerModal({
         setValue,
         handleSubmit,
         reset,
+        watch,
         formState: { errors, isDirty },
     } = methods;
+
+    const activeFrom = watch("activeFrom");
+    const activeUntil = watch("activeUntil");
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await getCategoriesWithVendors();
+                if (response?.categories) {
+                    const categoryOptions = response.categories.flatMap((cat) => {
+                        const options = [
+                            { label: `Category: ${cat.name}`, value: `Category: ${cat.name}` },
+                        ];
+
+                        if (cat.subCategories && cat.subCategories.length > 0) {
+                            cat.subCategories.forEach((sub) => {
+                                options.push({
+                                    label: `Subcategory: ${cat.name} > ${sub.name}`,
+                                    value: `Subcategory: ${cat.name} > ${sub.name}`,
+                                });
+                            });
+                        }
+                        return options;
+                    });
+
+                    setPlacementOptions((prev) => {
+                        // Filter out existing category/subcategory options to avoid duplicates if re-fetching
+                        const staticOptions = prev.filter(p => !p.value.startsWith("Category") && !p.value.startsWith("Subcategory"));
+                        return [...staticOptions, ...categoryOptions];
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to fetch categories:", error);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Reset form when banner changes
     useEffect(() => {
         if (banner) {
-            console.log('EditBannerModal - Banner data:', {
-                _id: banner._id,
-                vendor: banner.vendor,
-                businessName: banner.businessName,
-                businessLogo: banner.businessLogo,
-                isVendorSpecific: banner.isVendorSpecific,
-                fullBanner: banner
-            });
-
             reset({
                 imageUrl: banner.imageUrl || "",
                 name: banner.name || "",
@@ -84,6 +141,11 @@ export default function EditBannerModal({
                 customUrl: banner.customUrl || "",
                 isVendorSpecific: banner.isVendorSpecific ?? true,
                 status: banner.status || "Active",
+                title: banner.title || "",
+                tagline: banner.tagline || "",
+                mobileImageUrl: banner.mobileImageUrl || "",
+                activeFrom: banner.activeFrom ? new Date(banner.activeFrom) : undefined,
+                activeUntil: banner.activeUntil ? new Date(banner.activeUntil) : undefined,
             });
             setIsVendorSpecific(banner.isVendorSpecific ?? true);
         }
@@ -91,9 +153,14 @@ export default function EditBannerModal({
 
     const onSubmit = async (data) => {
         // Validate vendor if vendor-specific
-        if (data.isVendorSpecific && !data.vendor) {
-            toast.error("Please select a vendor");
-            return;
+        if (data.isVendorSpecific && !data.vendor && !data.newVendor) {
+            // If keeping existing vendor (data.vendor is ID string) or selecting new (data.newVendor)
+            // Actually, VendorSelectField might handle this differently.
+            // Let's assume data.vendor holds the ID.
+            if (!data.vendor && !banner.vendor) {
+                toast.error("Please select a vendor");
+                return;
+            }
         }
 
         // Validate custom URL if not vendor-specific
@@ -102,10 +169,26 @@ export default function EditBannerModal({
             return;
         }
 
+        // Validate dates
+        if (data.activeFrom && data.activeUntil && new Date(data.activeFrom) > new Date(data.activeUntil)) {
+            toast.error("Active From date must be before Active Until date");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            const result = await updateBannerAction(banner._id, data);
+            // Handle vendor update logic if needed (e.g. if newVendor is selected)
+            // For now, assuming the form handles it via 'vendor' field or we might need to adjust.
+            // The VendorSelectField in Edit mode usually needs care.
+            // If 'newVendor' is used in the UI, we should map it to 'vendor' before sending.
+
+            const payload = { ...data };
+            if (data.newVendor) {
+                payload.vendor = data.newVendor;
+            }
+
+            const result = await updateBannerAction(banner._id, payload);
 
             if (result?.success) {
                 toast.success("Banner updated successfully!");
@@ -207,16 +290,137 @@ export default function EditBannerModal({
                                             className="text-sm font-semibold text-gray-700 flex items-center gap-2"
                                         >
                                             Placement Location
+                                            <Badge
+                                                variant="outline"
+                                                className="text-xs bg-green-50 text-green-700 border-green-200"
+                                            >
+                                                Multi-select
+                                            </Badge>
                                         </Label>
-                                        <select
-                                            id="edit-placement"
-                                            className="border border-gray-300 w-full h-11 px-3 rounded-md focus:ring-2 focus:ring-blue-500"
-                                            {...register("placement")}
-                                            onChange={(e) => setValue("placement", [e.target.value])}
-                                        >
-                                            <option value="Homepage Carousel">Homepage Carousel</option>
-                                        </select>
+                                        <MultiSelect
+                                            options={placementOptions}
+                                            selected={watch("placement") || []}
+                                            onChange={(selected) => setValue("placement", selected)}
+                                            placeholder="Select pages to display banner..."
+                                            className="w-full"
+                                        />
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Page Title & Tagline */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-1 bg-orange-500 rounded-full" />
+                                    <h3 className="uppercase !text-base !tracking-wide font-semibold">Page Title & Tagline</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
+                                            Page Title
+                                        </Label>
+                                        <Input
+                                            id="edit-title"
+                                            {...register("title")}
+                                            placeholder="e.g., Find Your Dream Venue"
+                                            className="h-11"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-tagline" className="text-sm font-semibold text-gray-700">
+                                            Tagline
+                                        </Label>
+                                        <Textarea
+                                            id="edit-tagline"
+                                            {...register("tagline")}
+                                            placeholder="e.g., Discover the best wedding venues in your area"
+                                            className="min-h-[44px]"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Schedule & Mobile */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-1 bg-green-500 rounded-full" />
+                                    <h3 className="uppercase !text-base !tracking-wide font-semibold">Schedule & Mobile</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700">Active From</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal h-11",
+                                                        !activeFrom && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {activeFrom ? format(activeFrom, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={activeFrom}
+                                                    onSelect={(date) => setValue("activeFrom", date)}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700">Active Until</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal h-11",
+                                                        !activeUntil && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {activeUntil ? format(activeUntil, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={activeUntil}
+                                                    onSelect={(date) => setValue("activeUntil", date)}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
+                                <div className="space-y-3 pt-2">
+                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                        <Smartphone className="w-4 h-4" />
+                                        Mobile Banner Image (Optional)
+                                    </Label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        <ControlledFileUpload
+                                            control={control}
+                                            name="mobileImageUrl"
+                                            label="Upload mobile version (optional)"
+                                            allowedMimeType={[
+                                                "image/png",
+                                                "image/jpg",
+                                                "image/jpeg",
+                                                "image/webp",
+                                            ]}
+                                            folderPath="ad-banners/mobile"
+                                            errors={errors}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        If not provided, the desktop image will be used on mobile devices.
+                                    </p>
                                 </div>
                             </div>
 

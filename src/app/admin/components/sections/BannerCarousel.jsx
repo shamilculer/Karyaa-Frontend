@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { IconCircleFilled } from "@tabler/icons-react";
 import { FileEdit, ShieldMinus, Trash, Loader2 } from "lucide-react";
-import { Carousel } from "@/components/ui/carousel";
 import { toast } from "sonner";
 import {
     AlertDialog,
@@ -29,14 +28,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils";
 
 const NoBannersFound = () => (
-    <div className="w-full p-10 border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center text-gray-500">
+    <div className="w-full p-10 border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center text-gray-500 rounded-lg">
         <p className="text-xl font-semibold mb-2">No Active Banners Found</p>
         <p>Try clearing your filters or <span className="font-semibold">Upload a new banner</span>.</p>
     </div>
 );
 
 const BannerErrorFallback = ({ error }) => (
-    <div className="w-full p-10 border border-red-300 bg-red-50 flex flex-col items-center justify-center text-red-700">
+    <div className="w-full p-10 border border-red-300 bg-red-50 flex flex-col items-center justify-center text-red-700 rounded-lg">
         <p className="text-xl font-semibold mb-2">Error Fetching Banners</p>
         <p>{error?.message || "Could not load banner data from the server."}</p>
     </div>
@@ -195,96 +194,89 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
 
     return (
         <>
-            <Carousel slidesPerView={1} loop={banners.length > 1} autoplay={true} autoplayDelay={5000}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {banners.map((ad) => {
                     const isDeleting = actionLoading[ad._id] === 'delete';
                     const isTogglingStatus = actionLoading[ad._id] === 'status';
 
                     return (
-                        <div className="group relative" key={ad._id}>
-                            <Image
-                                src={ad.imageUrl}
-                                alt={ad.name}
-                                width={1300}
-                                height={400}
-                                className="w-full"
-                                priority
-                            />
+                        <div className="group relative rounded-xl overflow-hidden shadow-sm border border-gray-200 bg-white hover:shadow-md transition-shadow" key={ad._id}>
+                            <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                <Image
+                                    src={ad.imageUrl}
+                                    alt={ad.name}
+                                    fill
+                                    className="object-cover"
+                                    priority={false}
+                                />
 
-                            <Badge
-                                className={`absolute top-5 left-5 rounded-xl flex gap-1 text-base !font-medium leading-0 py-2 px-3 z-[100] transition-colors duration-300 ${ad.status === "Active"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
-                                    }`}
-                            >
-                                <IconCircleFilled className="w-4 h-4" /> {ad.status}
-                            </Badge>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                                    <Button
+                                        size="sm"
+                                        className="bg-white text-black hover:bg-gray-100"
+                                        onClick={() => openEditModal(ad)}
+                                    >
+                                        <FileEdit className="w-4 h-4 mr-2" /> Edit
+                                    </Button>
 
-                            <div className="bg-white absolute top-5 right-5 p-2 rounded z-100">
-                                <span className="text-black font-semibold text-base">
-                                    {ad.name}
-                                </span>
-
-                                {ad.isVendorSpecific && (
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="size-10 rounded-full overflow-hidden bg-green-400">
-                                            <AvatarImage src={ad?.vendor?.businessLogo} className="object-cover" />
-                                            <AvatarFallback>{getInitials(ad?.vendor?.businessName)}</AvatarFallback>
-                                        </Avatar>
-
-                                        <span className="font-medium">{ad?.vendor?.businessName}</span>
-                                    </div>
-                                )}
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => openDeleteDialog(ad._id, ad.name)}
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash className="w-4 h-4" />}
+                                    </Button>
+                                </div>
                             </div>
 
-                            <div className="absolute top-0 left-0 w-full h-full bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex justify-center items-center gap-5">
-                                {/* <Button
-                                    className="hover:text-white"
-                                    onClick={() => openEditModal(ad)}
-                                >
-                                    <FileEdit className="w-5 mr-2" /> Edit
-                                </Button> */}
+                            <div className="p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 className="font-semibold !text-lg line-clamp-1" title={ad.name}>{ad.name}</h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant={ad.status === "Active" ? "success" : "secondary"} className={`${ad.status === "Active" ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                                                <IconCircleFilled className="w-2 h-2 mr-1" /> {ad.status}
+                                            </Badge>
 
-                                <Button
-                                    variant="destructive"
-                                    className="hover:text-white"
-                                    onClick={() => openDeleteDialog(ad._id, ad.name)}
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? (
-                                        <>
-                                            <Loader2 className="w-5 mr-2 animate-spin" />
-                                            Deleting...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Trash className="w-5 mr-2" /> Delete
-                                        </>
-                                    )}
-                                </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 px-2 text-xs"
+                                                onClick={() => handleToggleStatus(ad._id, ad.status)}
+                                                disabled={isTogglingStatus}
+                                            >
+                                                {isTogglingStatus ? <Loader2 className="w-3 h-3 animate-spin" /> : (ad.status === "Active" ? "Deactivate" : "Activate")}
+                                            </Button>
+                                        </div>
+                                    </div>
 
-                                <Button
-                                    className="bg-white text-black hover:bg-gray-100"
-                                    onClick={() => handleToggleStatus(ad._id, ad.status)}
-                                    disabled={isTogglingStatus}
-                                >
-                                    {isTogglingStatus ? (
-                                        <>
-                                            <Loader2 className="w-5 mr-2 animate-spin" />
-                                            {ad.status === "Active" ? "Deactivating..." : "Activating..."}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ShieldMinus className="w-5 mr-2" />
-                                            {ad.status === "Active" ? "Deactivate" : "Activate"}
-                                        </>
+                                    {ad.isVendorSpecific && ad.vendor && (
+                                        <div className="flex items-center gap-2" title={ad.vendor.businessName}>
+                                            <span className="text-sm font-medium text-gray-600 max-w-[100px] truncate">
+                                                {ad.vendor.businessName}
+                                            </span>
+                                            <Avatar className="h-8 w-8 border border-gray-200 shrink-0">
+                                                <AvatarImage src={ad.vendor.businessLogo} />
+                                                <AvatarFallback>{getInitials(ad.vendor.businessName)}</AvatarFallback>
+                                            </Avatar>
+                                        </div>
                                     )}
-                                </Button>
+                                </div>
+
+                                {(ad.activeFrom || ad.activeUntil) && (
+                                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100">
+                                        <div className="flex justify-between">
+                                            <span>Start: {ad.activeFrom ? new Date(ad.activeFrom).toLocaleDateString() : 'Now'}</span>
+                                            <span>End: {ad.activeUntil ? new Date(ad.activeUntil).toLocaleDateString() : 'Indefinite'}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
                 })}
-            </Carousel>
+            </div>
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
