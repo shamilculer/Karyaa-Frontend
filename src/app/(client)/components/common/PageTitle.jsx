@@ -35,7 +35,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         // Determine title and tagline to show
         const displayTitle = bannerToShow.title || title;
         const displayTagline = bannerToShow.tagline || tagline;
-        const showOverlay = !!(displayTitle || displayTagline);
+        const showOverlay = (bannerToShow.showOverlay !== false) && !!(displayTitle || displayTagline);
 
         return (
             <section className="!m-0 relative h-64 md:h-[400px] flex-center px-4">

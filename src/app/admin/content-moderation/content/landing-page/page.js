@@ -61,7 +61,13 @@ const sections = [
     description: "Final conversion sections",
     fields: [
       { name: "cta1_heading", label: "CTA 1 - Heading", type: "text", placeholder: "LIST YOUR SERVICES AND GET DISCOVERED" },
-      { name: "cta2_heading", label: "CTA 2 - Heading", type: "text", placeholder: "LET THE WORLD KNOW OUR VENDORS" }
+      { name: "cta1_button_text", label: "CTA 1 - Button Text", type: "text", placeholder: "Join As a Vendor" },
+      { name: "cta1_button_link", label: "CTA 1 - Button Link", type: "text", placeholder: "/auth/vendor/register" },
+      { name: "cta1_image", label: "CTA 1 - Image", type: "image" },
+      { name: "cta2_heading", label: "CTA 2 - Heading", type: "text", placeholder: "LET THE WORLD KNOW OUR VENDORS" },
+      { name: "cta2_button_text", label: "CTA 2 - Button Text", type: "text", placeholder: "Refer & Earn" },
+      { name: "cta2_button_link", label: "CTA 2 - Button Link", type: "text", placeholder: "Leave empty to open Refer & Earn modal", description: "Leave empty to open Refer & Earn modal" },
+      { name: "cta2_image", label: "CTA 2 - Image", type: "image" }
     ]
   }
 ];

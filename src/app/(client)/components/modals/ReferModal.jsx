@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ReferralForm from "../forms/ReferralForm";
 import ReferralSuccessModal from "../ui/ReferralSuccess";
 
-export default function ReferModal({ children }) {
+export default function ReferModal({ children, triggerText = "Refer & Earn" }) {
     // State for the main Referral Form modal
     const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export default function ReferModal({ children }) {
                 {children || (
                     <DialogTrigger asChild>
                         <Button className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
-                            Refer & Earn
+                            {triggerText}
                         </Button>
                     </DialogTrigger>
                 )}

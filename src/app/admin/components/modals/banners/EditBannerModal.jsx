@@ -71,7 +71,7 @@ export default function EditBannerModal({
             imageUrl: banner?.imageUrl || "",
             name: banner?.name || "",
             placement: banner?.placement || ["Homepage Carousel"],
-            vendor: banner?.vendor || "",
+            vendor: banner?.vendor?._id || banner?.vendor || "",
             customUrl: banner?.customUrl || "",
             isVendorSpecific: banner?.isVendorSpecific ?? true,
             status: banner?.status || "Active",
@@ -80,6 +80,7 @@ export default function EditBannerModal({
             mobileImageUrl: banner?.mobileImageUrl || "",
             activeFrom: banner?.activeFrom ? new Date(banner.activeFrom) : undefined,
             activeUntil: banner?.activeUntil ? new Date(banner.activeUntil) : undefined,
+            showOverlay: banner?.showOverlay ?? true,
         },
     });
 
@@ -137,7 +138,7 @@ export default function EditBannerModal({
                 imageUrl: banner.imageUrl || "",
                 name: banner.name || "",
                 placement: banner.placement || ["Homepage Carousel"],
-                vendor: banner.vendor || "",
+                vendor: banner.vendor?._id || banner.vendor || "",
                 customUrl: banner.customUrl || "",
                 isVendorSpecific: banner.isVendorSpecific ?? true,
                 status: banner.status || "Active",
@@ -146,6 +147,7 @@ export default function EditBannerModal({
                 mobileImageUrl: banner.mobileImageUrl || "",
                 activeFrom: banner.activeFrom ? new Date(banner.activeFrom) : undefined,
                 activeUntil: banner.activeUntil ? new Date(banner.activeUntil) : undefined,
+                showOverlay: banner.showOverlay ?? true,
             });
             setIsVendorSpecific(banner.isVendorSpecific ?? true);
         }
@@ -153,14 +155,9 @@ export default function EditBannerModal({
 
     const onSubmit = async (data) => {
         // Validate vendor if vendor-specific
-        if (data.isVendorSpecific && !data.vendor && !data.newVendor) {
-            // If keeping existing vendor (data.vendor is ID string) or selecting new (data.newVendor)
-            // Actually, VendorSelectField might handle this differently.
-            // Let's assume data.vendor holds the ID.
-            if (!data.vendor && !banner.vendor) {
-                toast.error("Please select a vendor");
-                return;
-            }
+        if (data.isVendorSpecific && !data.vendor) {
+            toast.error("Please select a vendor");
+            return;
         }
 
         // Validate custom URL if not vendor-specific
@@ -178,15 +175,7 @@ export default function EditBannerModal({
         setIsSubmitting(true);
 
         try {
-            // Handle vendor update logic if needed (e.g. if newVendor is selected)
-            // For now, assuming the form handles it via 'vendor' field or we might need to adjust.
-            // The VendorSelectField in Edit mode usually needs care.
-            // If 'newVendor' is used in the UI, we should map it to 'vendor' before sending.
-
             const payload = { ...data };
-            if (data.newVendor) {
-                payload.vendor = data.newVendor;
-            }
 
             const result = await updateBannerAction(banner._id, payload);
 
@@ -336,6 +325,19 @@ export default function EditBannerModal({
                                             placeholder="e.g., Discover the best wedding venues in your area"
                                             className="min-h-[44px]"
                                         />
+                                    </div>
+                                    <div className="md:col-span-2 flex items-center space-x-2 pt-2">
+                                        <Checkbox
+                                            id="edit-showOverlay"
+                                            checked={watch("showOverlay")}
+                                            onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
+                                        />
+                                        <Label
+                                            htmlFor="edit-showOverlay"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Show Title & Overlay
+                                        </Label>
                                     </div>
                                 </div>
                             </div>
@@ -502,46 +504,24 @@ export default function EditBannerModal({
                                 <div className="min-h-[100px]">
                                     {isVendorSpecific ? (
                                         <div className="space-y-4">
-                                            {/* Current Vendor Display */}
-                                            {banner?.vendor && banner?.businessName && (
-                                                <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-gray-700">
-                                                        Current Vendor
-                                                    </Label>
-                                                    <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                                        {banner?.businessLogo && (
-                                                            <Image
-                                                                src={banner.businessLogo}
-                                                                width={48}
-                                                                height={48}
-                                                                alt={banner.businessName}
-                                                                className="object-cover rounded-full size-12"
-                                                            />
-                                                        )}
-                                                        <div className="flex-1">
-                                                            <p className="font-semibold text-gray-900">{banner.businessName}</p>
-                                                            <p className="text-xs text-gray-600">Currently linked vendor</p>
-                                                        </div>
-                                                        <Badge className="bg-blue-500">Active</Badge>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Select New Vendor */}
+                                            {/* Select Vendor */}
                                             <div className="space-y-3">
                                                 <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                    Change Vendor (Optional)
+                                                    Select Vendor
+                                                    <Badge variant="outline" className="text-xs">
+                                                        Required
+                                                    </Badge>
                                                 </Label>
                                                 <VendorSelectField
-                                                    name="newVendor"
-                                                    placeholder="Search to select a different vendor..."
+                                                    name="vendor"
+                                                    placeholder="Search to select a vendor..."
                                                     valueKey="_id"
-                                                    required={false}
-                                                    initialVendor={null}
+                                                    required={true}
+                                                    initialVendor={typeof banner?.vendor === 'object' ? banner.vendor : null}
                                                 />
                                                 <p className="text-xs text-gray-600 flex items-center gap-2">
                                                     <CheckCircle2 className="w-3 h-3" />
-                                                    Leave empty to keep current vendor, or select a new one to replace
+                                                    Select the vendor this banner should link to
                                                 </p>
                                             </div>
                                         </div>
@@ -571,46 +551,35 @@ export default function EditBannerModal({
                                     )}
                                 </div>
                             </div>
-
                         </div>
                     </ScrollArea>
 
-                    <Separator className="shrink-0" />
-
-                    {/* Fixed Footer */}
-                    <DialogFooter className="px-6 py-4 shrink-0">
-                        <div className="flex items-center justify-between w-full">
-                            <p className="text-xs text-gray-500">
-                                {isDirty ? "You have unsaved changes" : "No changes made"}
-                            </p>
-                            <div className="flex gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleClose}
-                                    disabled={isSubmitting}
-                                >
-                                    <X className="w-4 h-4 mr-2" />
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting || !isDirty}
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Saving Changes...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="w-4 h-4 mr-2" />
-                                            Save Changes
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
+                    <DialogFooter className="px-6 py-4 border-t bg-gray-50 shrink-0">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleClose}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="bg-blue-600 hover:bg-blue-700"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Save Changes
+                                </>
+                            )}
+                        </Button>
                     </DialogFooter>
                 </form>
                 </FormProvider>

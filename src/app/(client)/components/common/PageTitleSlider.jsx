@@ -23,7 +23,7 @@ export default function PageTitleSlider({ banners, defaultTitle, defaultTagline 
 
                 const displayTitle = banner.title || defaultTitle;
                 const displayTagline = banner.tagline || defaultTagline;
-                const showOverlay = !!(displayTitle || displayTagline);
+                const showOverlay = (banner.showOverlay !== false) && !!(displayTitle || displayTagline);
 
                 return (
                     <CarouselItem key={banner._id} className="w-full h-full relative p-0">

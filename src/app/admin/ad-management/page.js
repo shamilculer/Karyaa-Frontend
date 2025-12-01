@@ -85,29 +85,6 @@ const AdManagementPage = () => {
 
   return (
     <div className="mb-10 dashboard-container space-y-8">
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-20">
-        <div className="bg-white border border-gray-200 p-5">
-          <span className="uppercase text-sidebar-foreground !text-xs tracking-widest">
-            Total Banner Ads Running
-          </span>
-          <div className="mt-3 text-3xl font-semibold">134</div>
-        </div>
-        <div className="bg-white border border-gray-200 p-5">
-          <span className="uppercase text-sidebar-foreground !text-xs tracking-widest">
-            Total Vendors
-          </span>
-          <div className="mt-3 text-3xl font-semibold">48</div>
-        </div>
-        <div className="bg-white border border-gray-200 p-5">
-          <span className="uppercase text-sidebar-foreground !text-xs tracking-widest">
-            Total Revenue From Ads
-          </span>
-          <div className="text-3xl font-semibold">
-            <span className="!text-base mr-1">AED</span> 55000/-
-          </div>
-        </div>
-      </div>
 
       {/* Filters */}
       <div className="p-7 bg-white border border-gray-200 space-y-5">

@@ -46,17 +46,17 @@ export const Step1Schema = z
   .object({
     ownerName: z.string().trim().min(1, "Owner's Full name is required."),
     isInternational: z.boolean().default(false),
-    
+
     // UAE-specific fields
     tradeLicenseNumber: z.string().trim().optional().or(z.literal("")),
     personalEmiratesIdNumber: z.string().trim().optional().or(z.literal("")),
     emiratesIdCopy: z.string().optional().or(z.literal("")),
     tradeLicenseCopy: z.string().optional().or(z.literal("")),
-    
+
     // International-specific fields
     businessLicenseCopy: z.string().optional().or(z.literal("")),
     passportOrIdCopy: z.string().optional().or(z.literal("")),
-    
+
     // Common fields
     email: z
       .string()
@@ -298,6 +298,7 @@ export const AccessControlSchema = z.object({
   categoryManagement: z.boolean().default(false),
   vendorManagement: z.boolean().default(false),
   reviewManagement: z.boolean().default(false),
+  leadsManagement: z.boolean().default(false),
   analyticsInsights: z.boolean().default(false),
   supportTickets: z.boolean().default(false),
   adManagement: z.boolean().default(false),

@@ -70,6 +70,7 @@ export default function AddBannerPage() {
       mobileImageUrl: "",
       activeFrom: undefined,
       activeUntil: undefined,
+      showOverlay: true,
     },
   });
 
@@ -318,6 +319,20 @@ export default function AddBannerPage() {
                     placeholder="e.g., Discover the best wedding venues in your area"
                     className="min-h-[44px]"
                   />
+                </div>
+
+                <div className="md:col-span-2 flex items-center space-x-2 pt-2">
+                  <Checkbox
+                    id="showOverlay"
+                    checked={watch("showOverlay")}
+                    onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
+                  />
+                  <Label
+                    htmlFor="showOverlay"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Show Title & Overlay
+                  </Label>
                 </div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-2">

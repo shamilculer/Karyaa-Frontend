@@ -53,9 +53,15 @@ const Footer = () => {
 
   const leftHeading =
     ctaSections?.cta1_heading || "List your services and get discovered";
+  const leftButtonText = ctaSections?.cta1_button_text || "Join As a Vendor";
+  const leftButtonLink = ctaSections?.cta1_button_link || "/auth/vendor/register";
+  const leftImage = ctaSections?.cta1_image || "/cta-1.webp";
 
   const rightHeading =
     ctaSections?.cta2_heading || "Let The World Know Our Vendors";
+  const rightButtonText = ctaSections?.cta2_button_text || "Refer & Earn";
+  const rightButtonLink = ctaSections?.cta2_button_link;
+  const rightImage = ctaSections?.cta2_image || "/cta-2.webp";
 
   const aboutKaryaaLink = [
     {
@@ -114,25 +120,37 @@ const Footer = () => {
     <footer className={`w-full py-5 px-4 bg-primary flex-center flex-col ${!isLoggedIn ? "mt-32 lg:mt-24" : "mt-8 lg:mt-10"}`}>
       {!isLoggedIn && (
         <section className="container !m-0 !p-0 !-mt-20 bg-white flex flex-col lg:flex-row items-center gap-0 h-auto lg:h-72 rounded-xl border border-gray-200 overflow-hidden max-lg:gap-8">
-          <div className="h-60 lg:h-full w-full lg:w-1/2 bg-[url('/cta-1.webp')] bg-cover lg:bg-[length:120%] bg-center lg:bg-top rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none flex items-center justify-center relative overflow-hidden clippath-left">
+          <div
+            className="h-60 lg:h-full w-full lg:w-1/2 bg-cover lg:bg-[length:120%] bg-center lg:bg-top rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none flex items-center justify-center relative overflow-hidden clippath-left"
+            style={{ backgroundImage: `url('${leftImage}')` }}
+          >
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="flex-center flex-col text-center space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
                 {leftHeading}
               </h2>
               <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
-                <Link href="/auth/vendor/register">Join As a Vendor</Link>
+                <Link href={leftButtonLink}>{leftButtonText}</Link>
               </Button>
             </div>
           </div>
 
-          <div className="h-60 lg:h-full w-full lg:w-1/2 bg-[url('/cta-2.webp')] bg-cover lg:bg-[length:180%] bg-center rounded-b-xl lg:rounded-r-xl lg:rounded-bl-none flex items-center justify-center relative overflow-hidden clippath-right">
+          <div
+            className="h-60 lg:h-full w-full lg:w-1/2 bg-cover lg:bg-[length:180%] bg-center rounded-b-xl lg:rounded-r-xl lg:rounded-bl-none flex items-center justify-center relative overflow-hidden clippath-right"
+            style={{ backgroundImage: `url('${rightImage}')` }}
+          >
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="text-center flex-center flex-col space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
                 {rightHeading}
               </h2>
-              <ReferModal />
+              {rightButtonLink ? (
+                <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
+                  <Link href={rightButtonLink}>{rightButtonText}</Link>
+                </Button>
+              ) : (
+                <ReferModal triggerText={rightButtonText} />
+              )}
             </div>
           </div>
         </section>
@@ -143,7 +161,7 @@ const Footer = () => {
         {/* Mobile Accordion */}
         <div className="block lg:hidden lg:mt-6">
           <div className="lg:mb-0">
-            <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-40 sm:w-44" />
+            <Image height={50} width={130} src="/logo-gold.svg" alt="Karyaa" className="w-44" />
             <p className="text-secondary font-bold leading-relaxed mt-2">
               Plan. Connect. Celebrate.
             </p>

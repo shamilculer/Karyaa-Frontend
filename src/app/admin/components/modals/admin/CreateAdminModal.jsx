@@ -16,8 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 // Icons & Schema
-import { Copy, RefreshCw, Key, Shield, Mail, User, Loader2 } from 'lucide-react';
-import { AccessControlSchema,CreateAdminSchema } from '@/lib/schema';
+import { Copy, RefreshCw, Key, Shield, Mail, User, Loader2, Upload, X, ImageIcon } from 'lucide-react';
+import { CldUploadWidget } from 'next-cloudinary';
+import Image from 'next/image';
+import { AccessControlSchema, CreateAdminSchema } from '@/lib/schema';
 import { createAdminAction } from '@/app/actions/admin/auth';
 
 // --- Default Permissions Object ---
@@ -144,7 +146,7 @@ const PermissionsSelector = ({ adminLevel, control, setValue, getValues }) => {
                     <span>Access Control (Permissions)</span>
                 </Label>
                 {!isSuperAdmin && currentPermissions && (
-                    <Button variant="link" size="sm" type="button" 
+                    <Button variant="link" size="sm" type="button"
                         onClick={() => toggleAll(!Object.values(currentPermissions).every(p => p))}
                     >
                         {Object.values(currentPermissions).every(p => p) ? "Deselect All" : "Select All"}
@@ -189,20 +191,21 @@ const PermissionsSelector = ({ adminLevel, control, setValue, getValues }) => {
 export function CreateAdminModal({ onSuccess }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // RHF Setup
-    const { 
-        control, 
-        handleSubmit, 
-        reset, 
-        watch, 
-        setValue, 
+    const {
+        control,
+        handleSubmit,
+        reset,
+        watch,
+        setValue,
         getValues,
-        formState: { errors } 
+        formState: { errors }
     } = useForm({
         resolver: zodResolver(CreateAdminSchema),
         defaultValues: {
             fullName: '',
+            profileImage: '',
             email: '',
             password: '',
             adminLevel: 'moderator',
@@ -216,7 +219,7 @@ export function CreateAdminModal({ onSuccess }) {
     // Handle successful form submission
     const onSubmit = async (data) => {
         setIsSubmitting(true);
-        
+
         try {
             // Server actions automatically handle FormData from the form object
             // If you want to use data from RHF directly, you must create a FormData object
@@ -236,7 +239,7 @@ export function CreateAdminModal({ onSuccess }) {
                 toast.success(result.message);
                 setIsOpen(false);
                 reset();
-                if(onSuccess) onSuccess()
+                if (onSuccess) onSuccess()
             } else {
                 // Display server-side errors (e.g., email already exists, or validation from server)
                 if (result.errors) {
@@ -279,7 +282,7 @@ export function CreateAdminModal({ onSuccess }) {
                         Fill in the details to register a new administrator.
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 {/* Use handleSubmit from RHF */}
                 <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
 
@@ -324,6 +327,54 @@ export function CreateAdminModal({ onSuccess }) {
                             )}
                         />
                         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+                    </div>
+
+                    {/* Profile Image Upload (Optional) */}
+                    <div className="grid gap-2">
+                        <Label className="flex items-center space-x-2">
+                            <ImageIcon className="w-4 h-4 text-gray-500" />
+                            <span>Profile Image (Optional)</span>
+                        </Label>
+                        <Controller
+                            name="profileImage"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="space-y-3">
+                                    {field.value && (
+                                        <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
+                                            <Image src={field.value} alt="Profile preview" fill className="object-cover" />
+                                            <button type="button" onClick={() => field.onChange('')} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    )}
+                                    <CldUploadWidget
+                                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                                        options={{
+                                            sources: ['local'],
+                                            multiple: false,
+                                            maxFileSize: 5242880,
+                                            clientAllowedFormats: ['jpeg', 'png', 'webp', 'jpg'],
+                                            folder: 'admin-profiles',
+                                            cropping: true,
+                                            croppingAspectRatio: 1,
+                                        }}
+                                        onSuccess={(result) => {
+                                            field.onChange(result.info.secure_url);
+                                            toast.success('Profile image uploaded!');
+                                        }}
+                                        onError={() => toast.error('Failed to upload image')}
+                                    >
+                                        {({ open }) => (
+                                            <button type="button" onClick={() => open()} className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 transition duration-150 flex items-center justify-center gap-2">
+                                                <Upload className="h-4 w-4" />
+                                                <span>{field.value ? 'Change Image' : 'Upload Image'}</span>
+                                            </button>
+                                        )}
+                                    </CldUploadWidget>
+                                </div>
+                            )}
+                        />
                     </div>
 
                     {/* Admin Level Selector */}

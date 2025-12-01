@@ -4,7 +4,7 @@ import { apiFetch } from "@/lib/api";
 
 export const getBundleOverviewStats = async () => {
   try {
-    const response = await apiFetch("/admin/analytics/bundle-overview", {
+    const response = await apiFetch("/admin/analytics/bundles/bundle-overview", {
       role: "admin",
       auth: true,
     });
