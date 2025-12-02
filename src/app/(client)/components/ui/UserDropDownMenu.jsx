@@ -21,7 +21,7 @@ export default function UserMenu({ isMobile = false }) {
     const { user } = useClientStore();
     return (
         <ReferModal>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     {isMobile ? (
                         <Button variant="ghost" className="p-0">

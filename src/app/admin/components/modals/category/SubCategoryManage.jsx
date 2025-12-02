@@ -222,7 +222,7 @@ const SubcategorySection = ({ category, onUpdate, fetchData }) => {
                         <CardTitle className="uppercase tracking-wide text-xl">Subcategories</CardTitle>
                         <div className="flex items-center gap-2">
                             {selectedRowCount > 0 && (
-                                <DropdownMenu>
+                                <DropdownMenu modal={false}>
                                     <DropdownMenuTrigger asChild>
                                         <Button className="flex items-center gap-2 bg-[#F2F4FF] border border-gray-300 text-primary">
                                             Bulk Actions
@@ -335,7 +335,7 @@ const SubcategorySection = ({ category, onUpdate, fetchData }) => {
                                             </TableCell>
 
                                             <TableCell className="text-right">
-                                                <DropdownMenu>
+                                                <DropdownMenu modal={false}>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="size-8 p-0 rounded-full border border-gray-300">
                                                             <EllipsisVertical className="w-4 h-4" />

@@ -81,6 +81,9 @@ export default function EditBannerModal({
             activeFrom: banner?.activeFrom ? new Date(banner.activeFrom) : undefined,
             activeUntil: banner?.activeUntil ? new Date(banner.activeUntil) : undefined,
             showOverlay: banner?.showOverlay ?? true,
+            displayMode: banner?.displayMode || "standard",
+            mediaType: banner?.mediaType || "image",
+            videoUrl: banner?.videoUrl || "",
         },
     });
 
@@ -148,6 +151,9 @@ export default function EditBannerModal({
                 activeFrom: banner.activeFrom ? new Date(banner.activeFrom) : undefined,
                 activeUntil: banner.activeUntil ? new Date(banner.activeUntil) : undefined,
                 showOverlay: banner.showOverlay ?? true,
+                displayMode: banner.displayMode || "standard",
+                mediaType: banner.mediaType || "image",
+                videoUrl: banner.videoUrl || "",
             });
             setIsVendorSpecific(banner.isVendorSpecific ?? true);
         }
@@ -339,8 +345,93 @@ export default function EditBannerModal({
                                             Show Title & Overlay
                                         </Label>
                                     </div>
+                                    {/* Display Mode Selection */}
+                                    <div className="md:col-span-2 space-y-3 pt-4 border-t">
+                                        <Label className="text-sm font-semibold text-gray-700">
+                                            Display Mode
+                                        </Label>
+                                        <div className="space-y-3">
+                                            <div className="flex items-start space-x-3">
+                                                <input
+                                                    type="radio"
+                                                    id="edit-displayMode-standard"
+                                                    value="standard"
+                                                    {...register("displayMode")}
+                                                    className="mt-1"
+                                                />
+                                                <div className="flex-1">
+                                                    <Label htmlFor="edit-displayMode-standard" className="font-medium cursor-pointer">
+                                                        Standard (Fixed Height)
+                                                    </Label>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start space-x-3">
+                                                <input
+                                                    type="radio"
+                                                    id="edit-displayMode-auto"
+                                                    value="auto"
+                                                    {...register("displayMode")}
+                                                    className="mt-1"
+                                                />
+                                                <div className="flex-1">
+                                                    <Label htmlFor="edit-displayMode-auto" className="font-medium cursor-pointer">
+                                                        Full View (Auto Height)
+                                                    </Label>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Display Mode Selection */}
+                            {/* <div className="md:col-span-2 space-y-3 pt-4 border-t">
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    Display Mode
+                                </Label>
+                                <div className="space-y-3">
+                                    <div className="flex items-start space-x-3">
+                                        <input
+                                            type="radio"
+                                            id="edit-displayMode-standard"
+                                            value="standard"
+                                            {...register("displayMode")}
+                                            className="mt-1"
+                                        />
+                                        <div className="flex-1">
+                                            <Label htmlFor="edit-displayMode-standard" className="font-medium cursor-pointer">
+                                                Standard (Fixed Height)
+                                            </Label>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <input
+                                            type="radio"
+                                            id="edit-displayMode-auto"
+                                            value="auto"
+                                            {...register("displayMode")}
+                                            className="mt-1"
+                                        />
+                                        <div className="flex-1">
+                                            <Label htmlFor="edit-displayMode-auto" className="font-medium cursor-pointer">
+                                                Full View (Auto Height)
+                                            </Label>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> */}
 
                             {/* Schedule & Mobile */}
                             <div className="space-y-4">

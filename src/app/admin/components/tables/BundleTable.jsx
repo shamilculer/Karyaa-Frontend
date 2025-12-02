@@ -375,7 +375,7 @@ const BundlesTable = ({ controls = true }) => {
 
                     <div className="flex items-center gap-2 flex-wrap justify-end">
                         {selectedRowCount > 0 && (
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button className="flex items-center gap-2 bg-[#F2F4FF] border border-gray-300 text-primary">
                                         Bulk Actions
@@ -393,7 +393,7 @@ const BundlesTable = ({ controls = true }) => {
                             </DropdownMenu>
                         )}
 
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     {/* Use URL-derived value for display */}
@@ -520,7 +520,7 @@ const BundlesTable = ({ controls = true }) => {
                                         </TableCell>
 
                                         <TableCell className="text-center">
-                                            <DropdownMenu>
+                                            <DropdownMenu modal={false}>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="size-8 p-0 rounded-full border border-gray-300">
                                                         <EllipsisVertical />

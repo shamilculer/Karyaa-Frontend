@@ -302,7 +302,7 @@ export default function LeadsTable({ controls = true }) {
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
@@ -413,7 +413,7 @@ export default function LeadsTable({ controls = true }) {
                 <div className="flex justify-between items-center gap-4 py-4">
                     <div className="relative">
                         {selectedRowCount > 0 && (
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button
                                         variant="outline"
@@ -460,7 +460,7 @@ export default function LeadsTable({ controls = true }) {
                         </div>
 
                         {/* Status Filter Dropdown */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300 whitespace-nowrap">
                                     Status: {urlStatusFilter || "All"}

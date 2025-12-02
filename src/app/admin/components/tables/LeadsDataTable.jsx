@@ -296,7 +296,7 @@ export default function LeadsDataTable({ controls = true }) {
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
@@ -308,9 +308,13 @@ export default function LeadsDataTable({ controls = true }) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 bg-white">
-                        <DropdownMenuItem onClick={() => {
-                            setSelectedLead(row.original);
-                            setDetailsModalOpen(true);
+                        <DropdownMenuItem onSelect={(e) => {
+                            e.preventDefault();
+                            // Use setTimeout to allow dropdown to close before opening modal
+                            setTimeout(() => {
+                                setSelectedLead(row.original);
+                                setDetailsModalOpen(true);
+                            }, 0);
                         }}>
                             View Details
                         </DropdownMenuItem>

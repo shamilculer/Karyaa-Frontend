@@ -237,7 +237,7 @@ export default function ReferralsCardLayout({ controls = true }) {
                 <div className="flex justify-between items-center gap-4 py-4">
                     <div className="relative">
                         {selectedRowCount > 0 && (
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button
                                         variant="outline"
@@ -287,7 +287,7 @@ export default function ReferralsCardLayout({ controls = true }) {
                             />
                         </div>
 
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300 whitespace-nowrap">
                                     Status: {urlStatusFilter || "All"}
@@ -399,7 +399,7 @@ export default function ReferralsCardLayout({ controls = true }) {
                                             </div>
                                         </div>
 
-                                        <DropdownMenu>
+                                        <DropdownMenu modal={false}>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
                                                     variant="ghost"

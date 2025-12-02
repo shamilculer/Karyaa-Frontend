@@ -335,7 +335,7 @@ export default function AdminsTable({ controls = true }) {
                     <div className="flex items-center gap-2 flex-wrap justify-end">
 
                         {/* Admin Level Filter */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Level: {filterAdminLevel || "All"}
@@ -365,7 +365,7 @@ export default function AdminsTable({ controls = true }) {
                         </DropdownMenu>
 
                         {/* Active Status Filter */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Status: {uniqueIsActiveOptions.find(o => o.value === filterIsActive)?.label || "All"}
@@ -486,7 +486,7 @@ export default function AdminsTable({ controls = true }) {
                                         <TableCell className="text-center">
 
                                             {currentAdminId !== row._id && (
-                                                <DropdownMenu>
+                                                <DropdownMenu modal={false}>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="size-8 p-0 rounded-full border border-gray-300">
                                                             <EllipsisVertical />

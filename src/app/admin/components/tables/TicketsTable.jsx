@@ -314,7 +314,7 @@ const TicketsTable = ({ controls = true }) => {
                     <div className="flex items-center gap-2 flex-wrap justify-end">
 
                         {/* Status Filter */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Status: {statusFilter || "All"}
@@ -341,7 +341,7 @@ const TicketsTable = ({ controls = true }) => {
                         </DropdownMenu>
 
                         {/* Category Filter */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Category: {categoryFilter || "All"}
@@ -368,7 +368,7 @@ const TicketsTable = ({ controls = true }) => {
                         </DropdownMenu>
 
                         {/* Priority Filter */}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Priority: {priorityFilter || "All"}
@@ -481,7 +481,7 @@ const TicketsTable = ({ controls = true }) => {
 
                                         {/* Actions */}
                                         <TableCell className="text-center">
-                                            <DropdownMenu>
+                                            <DropdownMenu modal={false}>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="size-8 p-0 rounded-full border border-gray-300">
                                                         <EllipsisVertical />

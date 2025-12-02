@@ -71,6 +71,9 @@ export default function AddBannerPage() {
       activeFrom: undefined,
       activeUntil: undefined,
       showOverlay: true,
+      displayMode: "standard",
+      mediaType: "image",
+      videoUrl: "",
     },
   });
 
@@ -276,6 +279,68 @@ export default function AddBannerPage() {
                   Supported formats: PNG, JPG, JPEG, WEBP (Max 5MB)
                 </p>
               </div>
+
+              {/* Media Type Selection */}
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-sm font-semibold text-gray-700">
+                  Media Type
+                </Label>
+                <div className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="mediaType-image"
+                      value="image"
+                      {...register("mediaType")}
+                      className="cursor-pointer"
+                    />
+                    <Label htmlFor="mediaType-image" className="cursor-pointer font-normal">
+                      Image
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="mediaType-video"
+                      value="video"
+                      {...register("mediaType")}
+                      className="cursor-pointer"
+                    />
+                    <Label htmlFor="mediaType-video" className="cursor-pointer font-normal">
+                      Video
+                    </Label>
+                  </div>
+                </div>
+              </div>
+              {/* Conditional Video Upload */}
+              {watch("mediaType") === "video" && (
+                <div className="space-y-3 pt-4">
+                  <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Video File
+                    <Badge variant="outline" className="text-xs">
+                      MP4 recommended (Max 20MB)
+                    </Badge>
+                  </Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <ControlledFileUpload
+                      control={control}
+                      name="videoUrl"
+                      label="Click to upload video"
+                      allowedMimeType={[
+                        "video/mp4",
+                        "video/webm",
+                      ]}
+                      folderPath="ad-banners/videos"
+                      errors={errors}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 flex items-center gap-2">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Supported formats: MP4, WebM (Max 20MB). Image will be used as poster/fallback.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -333,6 +398,48 @@ export default function AddBannerPage() {
                   >
                     Show Title & Overlay
                   </Label>
+                </div>
+                {/* Display Mode Selection */}
+                <div className="md:col-span-2 space-y-3 pt-4 border-t">
+                  <Label className="text-sm font-semibold text-gray-700">
+                    Display Mode
+                  </Label>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id="displayMode-standard"
+                        value="standard"
+                        {...register("displayMode")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="displayMode-standard" className="font-medium cursor-pointer">
+                          Standard (Fixed Height)
+                        </Label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id="displayMode-auto"
+                        value="auto"
+                        {...register("displayMode")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="displayMode-auto" className="font-medium cursor-pointer">
+                          Full View (Auto Height)
+                        </Label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-2">

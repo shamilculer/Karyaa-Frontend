@@ -395,7 +395,7 @@ export default function VendorsTable({ controls = true }) {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-end">
                         {selectedRowCount > 0 && (
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button className="flex items-center gap-2 bg-[#F2F4FF] border border-gray-300 text-primary">
                                         Bulk Actions
@@ -408,7 +408,7 @@ export default function VendorsTable({ controls = true }) {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Status: {filterVendorStatus || 'All'}
@@ -433,7 +433,7 @@ export default function VendorsTable({ controls = true }) {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                     Type: {filterIsInternational === 'true' ? 'International' : filterIsInternational === 'false' ? 'Local' : 'All'}
@@ -463,7 +463,7 @@ export default function VendorsTable({ controls = true }) {
                         </DropdownMenu>
 
                         {/* Expiry Filter */}
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
                                 Expiry: {filterExpiryStatus === 'expiring-soon' ? 'Expiring Soon' : filterExpiryStatus === 'expired' ? 'Expired' : 'All'}
@@ -577,7 +577,7 @@ export default function VendorsTable({ controls = true }) {
                                         <Badge className={getStatusColor(row.vendorStatus)}>{row.vendorStatus}</Badge>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <DropdownMenu>
+                                        <DropdownMenu modal={false}>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="size-8 p-0 rounded-full border border-gray-300">
                                                     <EllipsisVertical />

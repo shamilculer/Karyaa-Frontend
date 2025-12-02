@@ -16,16 +16,19 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
 
     // If we have banners
     if (banners.length > 0) {
+        // Check if any banner uses auto display mode
+        const isAutoHeight = banners.some(b => b.displayMode === 'auto');
+
         // If multiple banners, show slider
         if (banners.length > 1) {
             return (
-                <section className="!m-0 relative h-64 md:h-[400px] flex-center px-4 overflow-hidden">
-                    <PageTitleSlider banners={banners} defaultTitle={title} defaultTagline={tagline} />
+                <section className={`!m-0 relative flex-center px-4 overflow-hidden ${isAutoHeight ? 'w-full' : 'h-64 md:h-[400px]'}`}>
+                    <PageTitleSlider banners={banners} defaultTitle={title} defaultTagline={tagline} isAutoHeight={isAutoHeight} />
                 </section>
             );
         }
 
-        // If single banner, show static image
+        // If single banner, show static image/video
         const bannerToShow = banners[0];
         const destinationLink =
             bannerToShow.isVendorSpecific && bannerToShow.vendorSlug
@@ -36,29 +39,90 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         const displayTitle = bannerToShow.title || title;
         const displayTagline = bannerToShow.tagline || tagline;
         const showOverlay = (bannerToShow.showOverlay !== false) && !!(displayTitle || displayTagline);
+        const isAuto = bannerToShow.displayMode === 'auto';
+        const isVideo = bannerToShow.mediaType === 'video';
 
         return (
-            <section className="!m-0 relative h-64 md:h-[400px] flex-center px-4">
-                <Link href={destinationLink} className="absolute inset-0 w-full h-full">
-                    {/* Desktop Image */}
-                    <Image
-                        src={bannerToShow.imageUrl}
-                        alt={bannerToShow.name || displayTitle || "Banner"}
-                        fill
-                        className={`object-cover ${bannerToShow.mobileImageUrl ? "hidden md:block" : ""}`}
-                        priority
-                        sizes="100vw"
-                    />
-                    {/* Mobile Image (if available) */}
-                    {bannerToShow.mobileImageUrl && (
-                        <Image
-                            src={bannerToShow.mobileImageUrl}
-                            alt={bannerToShow.name || displayTitle || "Banner"}
-                            fill
-                            className="object-cover md:hidden"
-                            priority
-                            sizes="100vw"
-                        />
+            <section className={`!m-0 relative flex-center px-4 ${isAuto ? 'w-full' : 'h-64 md:h-[400px]'}`}>
+                <Link href={destinationLink} className={isAuto ? "block w-full" : "absolute inset-0 w-full h-full"}>
+                    {isVideo ? (
+                        // Video rendering
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            poster={bannerToShow.imageUrl}
+                            className={isAuto ? "w-full h-auto" : "w-full h-full object-cover"}
+                        >
+                            <source src={bannerToShow.videoUrl} type="video/mp4" />
+                            {/* Fallback to image if video fails */}
+                            {isAuto ? (
+                                <Image
+                                    src={bannerToShow.imageUrl}
+                                    alt={bannerToShow.name || displayTitle || "Banner"}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-full h-auto"
+                                />
+                            ) : (
+                                <Image
+                                    src={bannerToShow.imageUrl}
+                                    alt={bannerToShow.name || displayTitle || "Banner"}
+                                    fill
+                                    className="object-cover"
+                                />
+                            )}
+                        </video>
+                    ) : (
+                        // Image rendering
+                        <>
+                            {/* Desktop Image */}
+                            {isAuto ? (
+                                <Image
+                                    src={bannerToShow.imageUrl}
+                                    alt={bannerToShow.name || displayTitle || "Banner"}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className={`w-full h-auto ${bannerToShow.mobileImageUrl ? "hidden md:block" : ""}`}
+                                    priority
+                                />
+                            ) : (
+                                <Image
+                                    src={bannerToShow.imageUrl}
+                                    alt={bannerToShow.name || displayTitle || "Banner"}
+                                    fill
+                                    className={`object-cover ${bannerToShow.mobileImageUrl ? "hidden md:block" : ""}`}
+                                    priority
+                                    sizes="100vw"
+                                />
+                            )}
+                            {/* Mobile Image (if available) */}
+                            {bannerToShow.mobileImageUrl && (
+                                isAuto ? (
+                                    <Image
+                                        src={bannerToShow.mobileImageUrl}
+                                        alt={bannerToShow.name || displayTitle || "Banner"}
+                                        width={0}
+                                        height={0}
+                                        sizes="100vw"
+                                        className="w-full h-auto md:hidden"
+                                        priority
+                                    />
+                                ) : (
+                                    <Image
+                                        src={bannerToShow.mobileImageUrl}
+                                        alt={bannerToShow.name || displayTitle || "Banner"}
+                                        fill
+                                        className="object-cover md:hidden"
+                                        priority
+                                        sizes="100vw"
+                                    />
+                                )
+                            )}
+                        </>
                     )}
                 </Link>
 
