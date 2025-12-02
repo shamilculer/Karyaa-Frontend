@@ -237,6 +237,7 @@ export default function Step02_BusinessInfo() {
                                     errors={form.formState.errors}
                                     allowedMimeType={["image/jpeg", "image/png"]}
                                     folderPath={FOLDER_PATH}
+                                    isPublic={true}
                                 />
                             </FormControl>
                             <FormMessage />

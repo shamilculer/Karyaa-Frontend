@@ -1,36 +1,28 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-// UI Components
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-// Icons & Schema
-import { Copy, RefreshCw, Key, Shield, Mail, User, Loader2, Upload, X, ImageIcon } from 'lucide-react';
-import { CldUploadWidget } from 'next-cloudinary';
-import Image from 'next/image';
-import { AccessControlSchema, CreateAdminSchema } from '@/lib/schema';
+import { User, Mail, Shield, Key, RefreshCw, Copy, Loader2 } from 'lucide-react'
 import { createAdminAction } from '@/app/actions/admin/auth';
+import { CreateAdminSchema, AccessControlSchema } from '@/lib/schema';
+import ControlledFileUpload from '@/components/common/ControlledFileUploads';
 
-// --- Default Permissions Object ---
-// Extract default permissions structure for initial state
 const defaultPermissions = Object.keys(AccessControlSchema.shape).reduce((acc, key) => {
     acc[key] = false;
     return acc;
 }, {});
 
 // --- 1. Password Generator Component ---
-// The component is now simplified to work directly with RHF's Controller
 const PasswordGenerator = ({ field, formState }) => {
     const { onChange, value } = field;
     const { errors } = formState;
@@ -60,7 +52,7 @@ const PasswordGenerator = ({ field, formState }) => {
             newPassword += characters[randomIndex];
         }
 
-        onChange(newPassword); // Set password via RHF onChange
+        onChange(newPassword);
     };
 
     const handleCopy = () => {
@@ -70,13 +62,11 @@ const PasswordGenerator = ({ field, formState }) => {
         }
     };
 
-    // Auto-generate password on mount if field is empty (good for usability)
     useEffect(() => {
         if (!value) {
             generatePassword();
         }
     }, [value]);
-
 
     return (
         <div className="space-y-3 p-3 border rounded-md bg-gray-50">
@@ -186,13 +176,11 @@ const PermissionsSelector = ({ adminLevel, control, setValue, getValues }) => {
     );
 };
 
-
-// --- 3. Main Modal Component (React Hook Form Integration) ---
+// --- 3. Main Modal Component ---
 export function CreateAdminModal({ onSuccess }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // RHF Setup
     const {
         control,
         handleSubmit,
@@ -209,24 +197,18 @@ export function CreateAdminModal({ onSuccess }) {
             email: '',
             password: '',
             adminLevel: 'moderator',
-            accessControl: defaultPermissions, // Initialize all permissions to false
+            accessControl: defaultPermissions,
         }
     });
 
     const adminLevel = watch('adminLevel');
 
-
-    // Handle successful form submission
     const onSubmit = async (data) => {
         setIsSubmitting(true);
-
         try {
-            // Server actions automatically handle FormData from the form object
-            // If you want to use data from RHF directly, you must create a FormData object
             const formData = new FormData();
             Object.keys(data).forEach(key => {
                 if (key === 'accessControl') {
-                    // Convert accessControl object to JSON string for FormData
                     formData.append(key, JSON.stringify(data[key]));
                 } else {
                     formData.append(key, data[key]);
@@ -239,11 +221,9 @@ export function CreateAdminModal({ onSuccess }) {
                 toast.success(result.message);
                 setIsOpen(false);
                 reset();
-                if (onSuccess) onSuccess()
+                if (onSuccess) onSuccess();
             } else {
-                // Display server-side errors (e.g., email already exists, or validation from server)
                 if (result.errors) {
-                    // Handle specific field errors if the server sends them back
                     Object.keys(result.errors).forEach(key => {
                         toast.error(`${key}: ${result.errors[key].join(', ')}`);
                     });
@@ -251,7 +231,6 @@ export function CreateAdminModal({ onSuccess }) {
                     toast.error(result.error || result.message || "Failed to create admin.");
                 }
             }
-
         } catch (error) {
             toast.error("An unexpected error occurred during submission.");
         } finally {
@@ -259,14 +238,12 @@ export function CreateAdminModal({ onSuccess }) {
         }
     };
 
-    // Reset form state when the dialog closes
     const handleClose = (open) => {
         if (!open) {
             reset();
         }
         setIsOpen(open);
     };
-
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -283,8 +260,24 @@ export function CreateAdminModal({ onSuccess }) {
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Use handleSubmit from RHF */}
                 <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
+                    {/* Profile Image */}
+                    <div className="grid gap-2">
+                        <Label className="flex items-center space-x-2">
+                            <User className="w-4 h-4 text-gray-500" />
+                            <span>Profile Image (Optional)</span>
+                        </Label>
+                        <ControlledFileUpload
+                            control={control}
+                            name="profileImage"
+                            label="Upload Profile Image"
+                            errors={errors}
+                            allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
+                            folderPath="admins/profiles"
+                            isPublic={false}
+                            role="admin"
+                        />
+                    </div>
 
                     {/* Full Name */}
                     <div className="grid gap-2">
@@ -329,55 +322,7 @@ export function CreateAdminModal({ onSuccess }) {
                         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                     </div>
 
-                    {/* Profile Image Upload (Optional) */}
-                    <div className="grid gap-2">
-                        <Label className="flex items-center space-x-2">
-                            <ImageIcon className="w-4 h-4 text-gray-500" />
-                            <span>Profile Image (Optional)</span>
-                        </Label>
-                        <Controller
-                            name="profileImage"
-                            control={control}
-                            render={({ field }) => (
-                                <div className="space-y-3">
-                                    {field.value && (
-                                        <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-                                            <Image src={field.value} alt="Profile preview" fill className="object-cover" />
-                                            <button type="button" onClick={() => field.onChange('')} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    )}
-                                    <CldUploadWidget
-                                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                                        options={{
-                                            sources: ['local'],
-                                            multiple: false,
-                                            maxFileSize: 5242880,
-                                            clientAllowedFormats: ['jpeg', 'png', 'webp', 'jpg'],
-                                            folder: 'admin-profiles',
-                                            cropping: true,
-                                            croppingAspectRatio: 1,
-                                        }}
-                                        onSuccess={(result) => {
-                                            field.onChange(result.info.secure_url);
-                                            toast.success('Profile image uploaded!');
-                                        }}
-                                        onError={() => toast.error('Failed to upload image')}
-                                    >
-                                        {({ open }) => (
-                                            <button type="button" onClick={() => open()} className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 transition duration-150 flex items-center justify-center gap-2">
-                                                <Upload className="h-4 w-4" />
-                                                <span>{field.value ? 'Change Image' : 'Upload Image'}</span>
-                                            </button>
-                                        )}
-                                    </CldUploadWidget>
-                                </div>
-                            )}
-                        />
-                    </div>
-
-                    {/* Admin Level Selector */}
+                    {/* Admin Level */}
                     <div className="grid gap-2">
                         <Label htmlFor="adminLevel" className="flex items-center space-x-2">
                             <Shield className="w-4 h-4 text-gray-500" />
@@ -387,10 +332,7 @@ export function CreateAdminModal({ onSuccess }) {
                             name="adminLevel"
                             control={control}
                             render={({ field }) => (
-                                <Select
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                >
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger id="adminLevel">
                                         <SelectValue placeholder="Select Admin Level" />
                                     </SelectTrigger>
@@ -404,7 +346,7 @@ export function CreateAdminModal({ onSuccess }) {
                         {errors.adminLevel && <p className="text-red-500 text-xs mt-1">{errors.adminLevel.message}</p>}
                     </div>
 
-                    {/* Password Generator (RHF Controller) */}
+                    {/* Password Generator */}
                     <Controller
                         name="password"
                         control={control}
@@ -413,7 +355,7 @@ export function CreateAdminModal({ onSuccess }) {
                         )}
                     />
 
-                    {/* Permissions Selector (Conditional based on adminLevel) */}
+                    {/* Permissions Selector */}
                     {adminLevel === 'moderator' && (
                         <PermissionsSelector
                             adminLevel={adminLevel}
@@ -432,6 +374,6 @@ export function CreateAdminModal({ onSuccess }) {
                     </Button>
                 </form>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }

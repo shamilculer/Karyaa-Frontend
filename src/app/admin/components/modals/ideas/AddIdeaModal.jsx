@@ -41,7 +41,7 @@ const ideaSchema = z.object({
   title: z.string().min(3, "Title is required"),
   description: z.string().min(10, "Description is too short"),
   // The category value saved in the form is the category name (string)
-  category: z.string().min(1, "Category is required"), 
+  category: z.string().min(1, "Category is required"),
   images: z.array(z.string()).optional(),
 });
 
@@ -75,10 +75,12 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
   });
 
   // ✅ Handle image uploads
-  const handleImageUpload = (url) => {
-    const updated = [...imageList, url];
+  const handleImageUpload = (urls) => {
+    const newUrls = Array.isArray(urls) ? urls : [urls];
+    const updated = [...imageList, ...newUrls];
     setImageList(updated);
     setValue("images", updated);
+    setValue("upload", []);
   };
 
   // ✅ Remove image
@@ -91,7 +93,7 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
   // ✅ Submit
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    const payload = { ...data, images: imageList };
+    const payload = { ...data, gallery: imageList };
     const res = await createIdeaAction(payload);
     setIsSubmitting(false);
 
@@ -110,11 +112,11 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
   // Reset state when modal is closed externally
   const handleDialogChange = (newOpenState) => {
     if (!newOpenState) {
-        // Only reset if it's closing and not currently submitting
-        if (!isSubmitting) {
-            reset();
-            setImageList([]);
-        }
+      // Only reset if it's closing and not currently submitting
+      if (!isSubmitting) {
+        reset();
+        setImageList([]);
+      }
     }
     onOpenChange(newOpenState);
   }
@@ -176,7 +178,7 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
-                        <SelectItem key={cat._id} value={cat.name}>
+                        <SelectItem key={cat._id} value={cat._id}>
                           {cat.name}
                         </SelectItem>
                       ))}
@@ -194,40 +196,44 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
             {/* Gallery Upload */}
             <div className="space-y-3">
               <label className="font-medium text-sm">Gallery Images</label>
+              <p className="text-xs text-gray-500">Upload multiple images at once (JPEG, PNG, WebP)</p>
 
-              <div className="flex flex-wrap gap-4">
-                {imageList.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="relative w-28 h-28 border rounded-lg overflow-hidden group"
-                  >
-                    <img
-                      src={img}
-                      alt={`Idea Image ${idx + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(img)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+              {/* Image Preview Grid */}
+              {imageList.length > 0 && (
+                <div className="flex flex-wrap gap-4 mb-4">
+                  {imageList.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="relative w-28 h-28 border rounded-lg overflow-hidden group"
                     >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-
-                <div className="w-28 h-28 flex items-center justify-center border rounded-lg bg-gray-50 hover:bg-gray-100">
-                  <ControlledFileUpload
-                    control={control}
-                    name="upload"
-                    label="Upload"
-                    folderPath="ideas/gallery"
-                    allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
-                    errors={errors}
-                    onSuccess={(url) => handleImageUpload(url)}
-                  />
+                      <img
+                        src={img}
+                        alt={`Idea Image ${idx + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(img)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
+
+              {/* Upload Area */}
+              <ControlledFileUpload
+                control={control}
+                name="upload"
+                label="Click to upload images (multiple files supported)"
+                folderPath="ideas/gallery"
+                allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                multiple={true}
+                errors={errors}
+                onSuccess={handleImageUpload}
+              />
             </div>
           </div>
 

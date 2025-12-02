@@ -28,6 +28,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from "@/components/ui/sidebar";
 import {
     Avatar,
@@ -137,7 +138,13 @@ const items = [
 function AdminSidebar() {
     const pathname = usePathname();
     const { admin } = useAdminStore();
+    const { setOpenMobile } = useSidebar();
     const [openGroups, setOpenGroups] = useState({});
+
+    // Close sidebar on mobile when navigating
+    const handleLinkClick = () => {
+        setOpenMobile(false);
+    };
 
     // auto-open correct group on load and route change
     useEffect(() => {
@@ -226,7 +233,7 @@ function AdminSidebar() {
                                                                             : "text-[#636387]"
                                                                             }`}
                                                                     >
-                                                                        <Link href={child.url}>
+                                                                        <Link href={child.url} onClick={handleLinkClick}>
                                                                             <span className="text-[13px]">
                                                                                 {child.title}
                                                                             </span>
@@ -254,7 +261,7 @@ function AdminSidebar() {
                                                 : ""
                                                 }`}
                                         >
-                                            <Link href={item.url}>
+                                            <Link href={item.url} onClick={handleLinkClick}>
                                                 <item.icon />
                                                 <span className="text-[13px]">{item.title}</span>
                                             </Link>

@@ -136,26 +136,6 @@ section {
   }
 }
 
-/* Increase Cloudinary Upload Widget modal z-index */
-.cloudinary-widget,
-.cloudinary-widget * {
-  z-index: 999999 !important;
-}
-
-#cloudinary-overlay,
-#cloudinary-modal,
-#cloudinary-widget1 {
-  z-index: 999999 !important;
-}
-
-#cloudinary-widget-background {
-  z-index: 999998 !important;
-}
-
-body .cloudinary-widget {
-  position: relative!important;
-}
-
 .flex-center {
   @apply flex items-center justify-center
 }

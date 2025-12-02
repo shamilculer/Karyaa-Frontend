@@ -73,9 +73,11 @@ export default function AddIdeaPage() {
     },
   });
 
-  // ✅ Handle image uploads
+  // ✅ Handle image uploads (supports both single and multiple)
   const handleImageUpload = (url) => {
-    const updated = [...imageList, url];
+    // Handle both single URL and array of URLs
+    const newUrls = Array.isArray(url) ? url : [url];
+    const updated = [...imageList, ...newUrls];
     setImageList(updated);
     setValue("images", updated);
   };
@@ -208,10 +210,12 @@ export default function AddIdeaPage() {
                     control={control}
                     name="upload"
                     label="Upload"
-                    folderPath="ideas/gallery"
+                    folderPath="admin/ideas/gallery"
                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                     errors={errors}
                     onSuccess={(url) => handleImageUpload(url)}
+                    multiple={true}
+                    isPublic={false}
                   />
                 </div>
               </div>

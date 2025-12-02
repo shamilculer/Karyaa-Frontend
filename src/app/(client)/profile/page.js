@@ -48,7 +48,8 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useClientStore } from "@/store/clientStore";
-import { CldUploadWidget } from "next-cloudinary";
+import { useS3Upload } from "@/hooks/useS3Upload";
+import { useRef } from "react";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -58,7 +59,11 @@ export default function ProfilePage() {
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+
   const { user: storedUser, setUser: setStoredUser } = useClientStore();
+
+  const { uploadFile, uploading: isUploadingImage } = useS3Upload();
+  const fileInputRef = useRef(null);
 
   // Profile form
   const {
@@ -155,25 +160,41 @@ export default function ProfilePage() {
     }
   };
 
-  const handleProfileImageUpload = async (result) => {
-    if (result.event === 'success') {
-      const imageUrl = result.info.secure_url
+  const handleImageSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      // Optimistic update
-      setUser(prev => ({ ...prev, profileImage: imageUrl }))
+    // Optimistic update (optional, or wait for upload)
+    // For now, let's wait for upload to get the URL
 
-      // Save to backend
-      const updateResult = await updateUserProfile({ profileImage: imageUrl })
+    try {
+      const result = await uploadFile(file, { folder: 'client/profiles' });
 
-      if (updateResult.success) {
-        setStoredUser({ ...storedUser, profileImage: imageUrl })
-        setMessage({ type: "success", text: "Profile picture updated successfully" })
-        setTimeout(() => setMessage({ type: "", text: "" }), 3000)
-      } else {
-        setMessage({ type: "error", text: updateResult.error })
-        // Revert on failure
-        setUser(prev => ({ ...prev, profileImage: user.profileImage }))
+      if (result?.url) {
+        const imageUrl = result.url;
+
+        // Optimistic update
+        setUser(prev => ({ ...prev, profileImage: imageUrl }));
+
+        // Save to backend
+        const updateResult = await updateUserProfile({ profileImage: imageUrl });
+
+        if (updateResult.success) {
+          setStoredUser({ ...storedUser, profileImage: imageUrl });
+          setMessage({ type: "success", text: "Profile picture updated successfully" });
+          setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+        } else {
+          setMessage({ type: "error", text: updateResult.error });
+          // Revert on failure
+          setUser(prev => ({ ...prev, profileImage: user.profileImage }));
+        }
       }
+    } catch (error) {
+      console.error("Profile upload error:", error);
+      setMessage({ type: "error", text: "Failed to upload image" });
+    } finally {
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -249,26 +270,27 @@ export default function ProfilePage() {
                   </Avatar>
 
                   {/* Upload Button Overlay */}
-                  <CldUploadWidget
-                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                    onSuccess={handleProfileImageUpload}
-                    options={{
-                      folder: 'client/profiles',
-                      maxFiles: 1,
-                      clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-                      maxFileSize: 5000000, // 5MB
-                    }}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelect}
+                    disabled={isUploadingImage}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer z-10"
                   >
-                    {({ open }) => (
-                      <button
-                        type="button"
-                        onClick={() => open()}
-                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer z-10"
-                      >
-                        <Camera className="w-8 h-8 text-white" />
-                      </button>
+                    {isUploadingImage ? (
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    ) : (
+                      <Camera className="w-8 h-8 text-white" />
                     )}
-                  </CldUploadWidget>
+                  </button>
                 </div>
 
 

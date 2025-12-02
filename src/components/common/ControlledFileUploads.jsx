@@ -1,181 +1,187 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Controller } from 'react-hook-form';
-import { CldUploadWidget } from 'next-cloudinary';
+import { useS3Upload } from '@/hooks/useS3Upload';
+import { Loader2, X, UploadCloud } from 'lucide-react';
 
-export default function ControlledFileUpload({ 
-    control, 
-    name, 
-    label, 
-    errors, 
+export default function ControlledFileUpload({
+    control,
+    name,
+    label,
+    errors,
     allowedMimeType,
     folderPath,
     multiple = false,
     onSuccess,
+    isPublic = false,
+    role = 'user',
 }) {
+    const { uploadFile, uploading, error: uploadError } = useS3Upload();
+    const fileInputRef = useRef(null);
+    const [localUploading, setLocalUploading] = useState(false);
 
-    const [isUploading, setIsUploading] = useState(false);
-    const [widgetReady, setWidgetReady] = useState(false);
-    const uploadedFilesRef = useRef([]);
+    const handleFileChange = async (e, onChange, value) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
-    // Helper function to reset body overflow
-    const resetBodyOverflow = () => {
-        document.body.style.overflow = '';
-        document.body.style.removeProperty('overflow');
+        setLocalUploading(true);
+
+        try {
+            const uploadedUrls = [];
+
+            for (const file of files) {
+                if (allowedMimeType && !allowedMimeType.includes(file.type)) {
+                    console.error(`Invalid file type: ${file.type}`);
+                    continue;
+                }
+
+                const result = await uploadFile(file, {
+                    folder: folderPath,
+                    isPublic: isPublic,
+                    role: role
+                });
+
+                if (result?.url) {
+                    uploadedUrls.push(result.url);
+                }
+            }
+
+            if (uploadedUrls.length > 0) {
+                if (multiple) {
+                    const currentData = Array.isArray(value) ? value : [];
+                    const newValue = [...currentData, ...uploadedUrls];
+                    onChange(newValue);
+                    if (onSuccess) onSuccess(newValue);
+                } else {
+                    const url = uploadedUrls[0];
+                    onChange(url);
+                    if (onSuccess) onSuccess(url);
+                }
+            }
+        } catch (err) {
+            console.error("Upload error:", err);
+        } finally {
+            setLocalUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
     };
 
-    // Ensure widget is ready before rendering
-    useEffect(() => {
-        setWidgetReady(true);
-    }, []);
-
-    if (!widgetReady) {
-        return (
-            <div className="w-full py-2 border border-gray-300 rounded-lg text-gray-700 bg-[#f0f0f0] flex items-center justify-center">
-                <span className="text-sm">Loading uploader...</span>
-            </div>
-        );
-    }
+    const handleRemove = (itemToRemove, onChange, value) => {
+        if (multiple) {
+            const newValue = value.filter(item => item !== itemToRemove);
+            onChange(newValue);
+        } else {
+            onChange(null);
+        }
+    };
 
     return (
         <Controller
             name={name}
             control={control}
-            render={({ field: { onChange, value } }) => (
-                <div className="space-y-2">
-                    
-                    {/* Single File Mode - Show uploaded file info */}
-                    {!multiple && value && !isUploading ? (
-                        <div className="text-xs text-green-600 p-2 border border-green-200 rounded-lg bg-green-50 flex justify-between items-start gap-2">
-                            <span className="flex-1 break-all">
-                                ✅ File uploaded: <span className="font-medium">{value.substring(value.lastIndexOf('/') + 1)}</span>
-                            </span>
-                            <button 
-                                type="button" 
-                                onClick={() => onChange('')}
-                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs underline font-normal"
-                            >
-                                Remove
-                            </button>
-                        </div>
-                    ) : (
-                        <CldUploadWidget
-                            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                            options={{
-                                sources: ['local'],
-                                multiple: multiple,
-                                maxFileSize: 10485760,
-                                clientAllowedFormats: allowedMimeType?.map(type => type.split('/')[1]),
-                                folder: folderPath,
-                                resourceType: 'auto'
-                            }}
-                            onOpen={() => {
-                                console.log('Widget opened');
-                            }}
-                            onSuccess={(result) => {
-                                if (typeof result.info !== 'object') return;
-                                
-                                const uploadedUrl = result.info.secure_url;
-                                
-                                if (multiple) {
-                                    uploadedFilesRef.current.push(uploadedUrl);
-                                } else {
-                                    onChange(uploadedUrl);
-                                    setIsUploading(false);
-                                }
-                                
-                                setTimeout(() => {
-                                    resetBodyOverflow();
-                                }, 100);
-                            }}
-                            onQueuesEnd={(result, { widget }) => {
-                                if (multiple && uploadedFilesRef.current.length > 0) {
-                                    uploadedFilesRef.current.forEach(url => {
-                                        if (onSuccess) {
-                                            onSuccess(url);
-                                        }
-                                    });
-                                    uploadedFilesRef.current = [];
-                                }
-                                
-                                setIsUploading(false);
-                                
-                                setTimeout(() => {
-                                    resetBodyOverflow();
-                                }, 100);
-                            }}
-                            onUploadAdded={() => {
-                                setIsUploading(true);
-                            }}
-                            onError={(error) => {
-                                console.error('Upload error:', error);
-                                setIsUploading(false);
-                                uploadedFilesRef.current = [];
-                                setTimeout(() => {
-                                    resetBodyOverflow();
-                                }, 100);
-                            }}
-                            onClose={() => {
-                                if (multiple && uploadedFilesRef.current.length > 0) {
-                                    uploadedFilesRef.current.forEach(url => {
-                                        if (onSuccess) {
-                                            onSuccess(url);
-                                        }
-                                    });
-                                    uploadedFilesRef.current = [];
-                                }
-                                
-                                setIsUploading(false);
-                                setTimeout(() => {
-                                    resetBodyOverflow();
-                                }, 100);
-                            }}
-                        >
-                            {({ open, isLoading }) => {
-                                // Add safety check
-                                const handleClick = () => {
-                                    if (open && typeof open === 'function') {
-                                        open();
-                                    } else {
-                                        console.error('Upload widget not ready');
-                                    }
-                                };
+            render={({ field: { onChange, value } }) => {
+                return (
+                    <div className="space-y-2">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept={allowedMimeType?.join(',')}
+                            multiple={multiple}
+                            onChange={(e) => handleFileChange(e, onChange, value)}
+                            disabled={localUploading || uploading}
+                        />
 
-                                return (
-                                    <button 
-                                        type="button" 
-                                        onClick={handleClick} 
-                                        disabled={isUploading || isLoading || (!multiple && !!value)}
-                                        className="w-full py-2 border border-gray-300 rounded-lg text-gray-700 bg-[#f0f0f0] hover:bg-gray-100 disabled:opacity-50 transition duration-150 flex items-center justify-center space-x-2"
-                                    >
-                                        {isUploading || isLoading ? (
-                                            <>
-                                                <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                <span>Uploading...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L6.293 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                                </svg>
-                                                <span>
-                                                    {!multiple && value ? 'Change File' : label}
-                                                </span>
-                                            </>
-                                        )}
-                                    </button>
-                                );
-                            }}
-                        </CldUploadWidget>
-                    )}
-                    
-                    {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>}
-                </div>
-            )}
+                        <div
+                            onClick={() => !localUploading && !uploading && fileInputRef.current?.click()}
+                            className={`
+                                relative w-full py-4 border-2 border-dashed rounded-lg text-gray-600 bg-[#f0f0f0] 
+                                flex flex-col items-center justify-center cursor-pointer transition-colors
+                                ${localUploading || uploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 hover:border-gray-400'}
+                                ${errors[name] ? 'border-red-300 bg-red-50' : 'border-gray-300'}
+                            `}
+                        >
+                            {localUploading || uploading ? (
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                    <span className="text-sm font-medium">Uploading...</span>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center gap-1">
+                                    <UploadCloud className="h-6 w-6 text-gray-400" />
+                                    <span className="text-sm font-medium">
+                                        {(!multiple && value) ? 'Change File' : label || 'Click to upload'}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {allowedMimeType ? allowedMimeType.map(t => t.split('/')[1].toUpperCase()).join(', ') : 'Any file'}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {(errors[name] || uploadError) && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors[name]?.message || uploadError}
+                            </p>
+                        )}
+
+                        {value && (
+                            <div className="space-y-2 mt-2">
+                                {multiple ? (
+                                    Array.isArray(value) && value.map((url, index) => (
+                                        <FileItem
+                                            key={index}
+                                            url={url}
+                                            onRemove={() => handleRemove(url, onChange, value)}
+                                        />
+                                    ))
+                                ) : (
+                                    <FileItem
+                                        url={value}
+                                        onRemove={() => handleRemove(value, onChange, value)}
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            }}
         />
     );
-};
+}
+
+function FileItem({ url, onRemove }) {
+    if (!url) return null;
+
+    const fileName = url.split('/').pop();
+    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+
+    return (
+        <div className="flex items-center justify-between p-2 border rounded-lg bg-white text-sm border-gray-200">
+            <div className="flex items-center gap-2 overflow-hidden">
+                {isImage ? (
+                    <img src={url} alt="Preview" className="h-8 w-8 object-cover rounded" />
+                ) : (
+                    <div className="h-8 w-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold text-gray-500">
+                        FILE
+                    </div>
+                )}
+                <div className="flex flex-col overflow-hidden">
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="truncate hover:underline text-blue-600">
+                        {fileName}
+                    </a>
+                </div>
+            </div>
+            <button
+                type="button"
+                onClick={onRemove}
+                className="p-1 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition-colors"
+            >
+                <X className="h-4 w-4" />
+            </button>
+        </div>
+    );
+}

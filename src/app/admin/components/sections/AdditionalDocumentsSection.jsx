@@ -1,61 +1,68 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Trash2, FileText, Download, Upload } from "lucide-react";
+import { Trash2, FileText, Download, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addAdditionalDocumentAction, deleteAdditionalDocumentAction } from "@/app/actions/admin/vendors";
 import { toast } from "sonner";
-import { CldUploadWidget } from "next-cloudinary";
 import Link from "next/link";
+import { useS3Upload } from "@/hooks/useS3Upload";
 
 export default function AdditionalDocumentsSection({ vendorId, documents = [], onUpdate }) {
     const [documentName, setDocumentName] = useState("");
-    const [isUploading, setIsUploading] = useState(false);
-    const currentDocumentNameRef = useRef("");
+    const fileInputRef = useRef(null);
+    const { uploadFile, uploading } = useS3Upload();
+    const [localUploading, setLocalUploading] = useState(false);
 
-    const handleUploadSuccess = async (result) => {
-        console.log("Upload result:", result); // Debug log
+    const handleFileSelect = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        // Extract URL from Cloudinary result
-        const documentUrl = result?.info?.secure_url || result?.info?.url;
-        const capturedDocumentName = currentDocumentNameRef.current;
-
-        console.log("Document URL:", documentUrl); // Debug log
-        console.log("Document Name (from ref):", capturedDocumentName); // Debug log
-
-        if (!documentUrl) {
-            toast.error("Failed to get document URL from upload");
-            setIsUploading(false);
+        const trimmedName = documentName.trim();
+        if (!trimmedName) {
+            toast.error("Please enter a document name first");
+            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
-        if (!capturedDocumentName) {
-            toast.error("Document name is missing");
-            setIsUploading(false);
-            return;
-        }
+        setLocalUploading(true);
+        const loadingToast = toast.loading("Uploading document...");
 
         try {
+            // Upload to S3
+            const result = await uploadFile(file, {
+                folder: `vendors/${vendorId}/documents`,
+                isPublic: true
+            });
+
+            if (!result?.url) {
+                throw new Error("Failed to get upload URL");
+            }
+
+            // Save to database
             const res = await addAdditionalDocumentAction(vendorId, {
-                documentName: capturedDocumentName,
-                documentUrl
+                documentName: trimmedName,
+                documentUrl: result.url
             });
 
             if (res.success) {
                 toast.success("Document added successfully");
                 setDocumentName("");
-                currentDocumentNameRef.current = "";
                 if (onUpdate) onUpdate(res.data);
             } else {
                 toast.error(res.message || "Failed to add document");
             }
         } catch (error) {
-            console.error("Error adding document:", error); // Debug log
-            toast.error("An error occurred");
+            console.error("Error adding document:", error);
+            toast.error("Failed to upload document");
         } finally {
-            setIsUploading(false);
+            toast.dismiss(loadingToast);
+            setLocalUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -75,17 +82,13 @@ export default function AdditionalDocumentsSection({ vendorId, documents = [], o
         }
     };
 
-    const handleUploadClick = (openWidget) => {
+    const handleUploadClick = () => {
         const trimmedName = documentName.trim();
-        console.log("Document name:", trimmedName); // Debug log
         if (!trimmedName) {
             toast.error("Please enter a document name first");
             return;
         }
-        // Store the document name in ref so it's available in the upload callback
-        currentDocumentNameRef.current = trimmedName;
-        setIsUploading(true);
-        openWidget();
+        fileInputRef.current?.click();
     };
 
     return (
@@ -97,8 +100,6 @@ export default function AdditionalDocumentsSection({ vendorId, documents = [], o
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 px-0">
-
-
 
                 {/* Documents List */}
                 {documents.length === 0 ? (
@@ -159,33 +160,38 @@ export default function AdditionalDocumentsSection({ vendorId, documents = [], o
                             placeholder="e.g., Insurance Certificate, Permit Copy"
                             value={documentName}
                             onChange={(e) => setDocumentName(e.target.value)}
-                            disabled={isUploading}
+                            disabled={localUploading || uploading}
                             className="bg-white"
                         />
                     </div>
-                    <CldUploadWidget
-                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                        onSuccess={handleUploadSuccess}
-                        options={{
-                            maxFiles: 1,
-                            resourceType: "auto",
-                            folder: "vendor_additional_documents",
-                        }}
-                        onClose={() => setIsUploading(false)}
+
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileSelect}
+                        disabled={localUploading || uploading}
+                    />
+
+                    <Button
+                        type="button"
+                        onClick={handleUploadClick}
+                        disabled={localUploading || uploading}
+                        size="sm"
+                        className="w-full"
                     >
-                        {({ open }) => (
-                            <Button
-                                type="button"
-                                onClick={() => handleUploadClick(open)}
-                                disabled={isUploading}
-                                size="sm"
-                                className="w-full"
-                            >
+                        {localUploading || uploading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Uploading...
+                            </>
+                        ) : (
+                            <>
                                 <Upload className="w-4 h-4 mr-2" />
-                                {isUploading ? "Uploading..." : "Upload Document"}
-                            </Button>
+                                Upload Document
+                            </>
                         )}
-                    </CldUploadWidget>
+                    </Button>
                 </div>
             </CardContent>
         </Card>

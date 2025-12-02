@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CldUploadWidget } from "next-cloudinary";
+import { useS3Upload } from "@/hooks/useS3Upload";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -75,8 +75,9 @@ const sections = [
 const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, fieldName }) => {
   const images = Array.isArray(value) ? value : (value ? [value] : []);
   const isMultiple = maxImages > 1;
-  const [uploading, setUploading] = useState(false);
-  const uploadedUrlsRef = React.useRef([]);
+  const { uploadFile, uploading } = useS3Upload();
+  const [localUploading, setLocalUploading] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   const removeImage = (index) => {
     if (isMultiple) {
@@ -86,31 +87,61 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
     }
   };
 
-  const handleUploadSuccess = (result) => {
-    const uploadedUrl = result.info.secure_url;
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (isMultiple) {
-      uploadedUrlsRef.current.push(uploadedUrl);
-      toast.success("Image uploaded successfully!");
-    } else {
-      onChange(uploadedUrl);
-      toast.success("Image uploaded successfully!");
-      setUploading(false);
-    }
-  };
+    setLocalUploading(true);
+    const uploadedUrls = [];
 
-  const handleUploadError = (error) => {
-    console.error("Upload error:", error);
-    toast.error("Failed to upload image");
-    setUploading(false);
-  };
+    try {
+      for (const file of files) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error(`Skipping invalid file: ${file.name}`);
+          continue;
+        }
 
-  const handleQueuesEnd = () => {
-    if (isMultiple && uploadedUrlsRef.current.length > 0) {
-      const newImages = [...images, ...uploadedUrlsRef.current].slice(0, maxImages);
-      onChange(newImages);
-      uploadedUrlsRef.current = [];
-      setUploading(false);
+        // Validate file size
+        const maxSize = sectionKey === 'testimonial' ? 2097152 : 10485760; // 2MB for testimonials, 10MB for others
+        if (file.size > maxSize) {
+          toast.error(`${file.name} is too large. Max size is ${maxSize / (1024 * 1024)}MB`);
+          continue;
+        }
+
+        try {
+          const result = await uploadFile(file, {
+            folder: `admin/landing-page/${sectionKey}`,
+            isPublic: false
+          });
+
+          if (result?.url) {
+            uploadedUrls.push(result.url);
+          }
+        } catch (err) {
+          console.error(`Failed to upload ${file.name}:`, err);
+          toast.error(`Failed to upload ${file.name}`);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        if (isMultiple) {
+          const newImages = [...images, ...uploadedUrls].slice(0, maxImages);
+          onChange(newImages);
+          toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
+        } else {
+          onChange(uploadedUrls[0]);
+          toast.success("Image uploaded successfully!");
+        }
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Failed to upload images");
+    } finally {
+      setLocalUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -148,55 +179,40 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
 
       {/* Upload Button */}
       {(!isMultiple || images.length < maxImages) && (
-        <CldUploadWidget
-          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-          options={{
-            sources: ['local'],
-            multiple: isMultiple,
-            maxFileSize: sectionKey === 'testimonial' ? 2097152 : 10485760, // 2MB for testimonials, 10MB for others
-            clientAllowedFormats: ['jpeg', 'png', 'webp', 'gif', 'jpg'],
-            folder: 'landing-page',
-            resourceType: 'auto',
-            showAdvancedOptions: false,
-            ...(sectionKey === 'testimonial' && {
-              transformation: [
-                { width: 400, height: 400, crop: 'limit' }
-              ]
-            })
-          }}
-          onSuccess={handleUploadSuccess}
-          onError={handleUploadError}
-          onQueuesEnd={handleQueuesEnd}
-        >
-          {({ open }) => (
-            <button
-              type="button"
-              onClick={() => {
-                setUploading(true);
-                open();
-              }}
-              disabled={uploading}
-              className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition duration-150 flex items-center justify-center gap-2"
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  <span>
-                    {isMultiple
-                      ? `Upload Images (${images.length}/${maxImages})`
-                      : "Upload Image"
-                    }
-                  </span>
-                </>
-              )}
-            </button>
-          )}
-        </CldUploadWidget>
+        <>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            multiple={isMultiple}
+            onChange={handleFileSelect}
+            disabled={localUploading || uploading}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={localUploading || uploading}
+            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition duration-150 flex items-center justify-center gap-2"
+          >
+            {localUploading || uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                <span>
+                  {isMultiple
+                    ? `Upload Images (${images.length}/${maxImages})`
+                    : "Upload Image"
+                  }
+                </span>
+              </>
+            )}
+          </button>
+        </>
       )}
     </div>
   );

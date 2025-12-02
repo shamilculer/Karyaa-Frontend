@@ -81,7 +81,7 @@ const TagsInput = ({ name, placeholder, errors, getValues, setValue, trigger }) 
                     Add
                 </Button>
             </div>
-            
+
             <div className="flex flex-wrap gap-2 pt-2">
                 {tags.map((tag, index) => (
                     <Badge
@@ -130,22 +130,22 @@ const AddPackageForm = () => {
             priceStartingFrom: Number(values.priceStartingFrom),
             includes: values.includes.filter(item => item.trim() !== ""),
         };
-        
+
         try {
             const res = await createPackage(submissionValues);
-    
-            form.reset(); 
+
+            form.reset();
             toast.success(res.message || "Package created successfully!");
-    
+
             setTimeout(() => router.push("/vendor/packages"), 500);
-    
+
         } catch (err) {
             console.error(err);
             toast.error(err.message || "Something went wrong");
-            form.reset({ 
-                ...submissionValues, 
-                priceStartingFrom: submissionValues.priceStartingFrom || 0 
-            }); 
+            form.reset({
+                ...submissionValues,
+                priceStartingFrom: submissionValues.priceStartingFrom || 0
+            });
         }
     }
 
@@ -183,7 +183,7 @@ const AddPackageForm = () => {
                             </FormItem>
                         )}
                     />
-                    
+
                     {/* Price Field */}
                     <FormField
                         control={form.control}
@@ -192,12 +192,12 @@ const AddPackageForm = () => {
                             <FormItem>
                                 <FormLabel>Starting Price (AED)</FormLabel>
                                 <FormControl>
-                                    <Input 
-                                        type="number" 
-                                        placeholder="5000" 
-                                        {...field} 
+                                    <Input
+                                        type="number"
+                                        placeholder="5000"
+                                        {...field}
                                         onChange={(e) => field.onChange(e.target.valueAsNumber || e.target.value)}
-                                        value={field.value === 0 ? "" : field.value} 
+                                        value={field.value === 0 ? "" : field.value}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -250,7 +250,7 @@ const AddPackageForm = () => {
                             <FormItem>
                                 <FormLabel>Services (Type Name and press Enter or Add)</FormLabel>
                                 <FormControl>
-                                    <TagsInput 
+                                    <TagsInput
                                         name="services"
                                         placeholder="E.g., 'Wedding Photography'"
                                         errors={form.formState.errors}
@@ -275,8 +275,8 @@ const AddPackageForm = () => {
                                     render={({ field }) => (
                                         <FormItem className="flex-grow">
                                             <FormControl>
-                                                <Input 
-                                                    {...field} 
+                                                <Input
+                                                    {...field}
                                                     placeholder={`Item ${i + 1}`}
                                                 />
                                             </FormControl>

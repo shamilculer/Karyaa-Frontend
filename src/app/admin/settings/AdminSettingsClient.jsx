@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,13 +11,15 @@ import { toast } from 'sonner'
 import { User, Mail, Phone, Lock, Loader2, Edit, Camera } from 'lucide-react'
 import { updateAdminProfileAction, updateAdminPasswordAction } from '@/app/actions/admin/admin'
 import { getInitials } from '@/utils'
-import { CldUploadWidget } from 'next-cloudinary'
 import { useAdminStore } from '@/store/adminStore'
 import LogoutAlertModal from "../components/modals/shared/LogoutAlertModal"
+import { useS3Upload } from '@/hooks/useS3Upload'
 
 const AdminSettingsClient = ({ admin: initialAdmin }) => {
     // Use admin from store for reactive updates, fallback to initialAdmin
     const { admin, updateAdmin } = useAdminStore()
+    const { uploadFile, uploading: isUploadingS3 } = useS3Upload()
+    const fileInputRef = useRef(null)
 
     // Profile form state
     const [profileData, setProfileData] = useState({
@@ -52,15 +54,24 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
     }, [admin, initialAdmin])
 
     // Handle profile picture upload
-    const handleProfileImageUpload = async (result) => {
-        if (result.event === 'success') {
-            const imageUrl = result.info.secure_url
-            setProfileData({ ...profileData, profileImage: imageUrl })
+    const handleFileSelect = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
 
-            // Auto-save profile image
-            setIsUpdatingProfile(true)
-            try {
+        try {
+            const result = await uploadFile(file, {
+                folder: 'admin/profiles',
+                isPublic: true
+            })
+
+            if (result?.url) {
+                const imageUrl = result.url
+                setProfileData(prev => ({ ...prev, profileImage: imageUrl }))
+
+                // Auto-save profile image
+                setIsUpdatingProfile(true)
                 const updateResult = await updateAdminProfileAction({ profileImage: imageUrl })
+
                 if (updateResult.success) {
                     // Update Zustand store
                     updateAdmin({
@@ -70,10 +81,14 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
                 } else {
                     toast.error(updateResult.message)
                 }
-            } catch (error) {
-                toast.error('Failed to update profile picture')
-            } finally {
                 setIsUpdatingProfile(false)
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error('Failed to upload profile picture')
+        } finally {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
             }
         }
     }
@@ -179,31 +194,28 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
                             </Avatar>
 
                             {/* Upload Button Overlay */}
-                            <CldUploadWidget
-                                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                                onSuccess={handleProfileImageUpload}
-                                options={{
-                                    folder: 'admin/profiles',
-                                    maxFiles: 1,
-                                    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-                                    maxFileSize: 5000000, // 5MB
-                                }}
-                            >
-                                {({ open }) => (
-                                    <button
-                                        type="button"
-                                        onClick={() => open()}
-                                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
-                                        disabled={isUpdatingProfile}
-                                    >
-                                        {isUpdatingProfile ? (
-                                            <Loader2 className="w-8 h-8 text-white animate-spin" />
-                                        ) : (
-                                            <Camera className="w-8 h-8 text-white" />
-                                        )}
-                                    </button>
-                                )}
-                            </CldUploadWidget>
+                            <div className="absolute -bottom-2 -right-2">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                                    onChange={handleFileSelect}
+                                    disabled={isUpdatingProfile || isUploadingS3}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-10 h-10 bg-primary rounded-full flex items-center justify-center border-2 border-white shadow-md hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isUpdatingProfile || isUploadingS3}
+                                >
+                                    {isUpdatingProfile || isUploadingS3 ? (
+                                        <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                    ) : (
+                                        <Camera className="w-5 h-5 text-white" />
+                                    )}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Profile Info */}
@@ -211,9 +223,9 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
                             <h2 className="text-3xl font-bold text-gray-900">{(admin || initialAdmin)?.username || (admin || initialAdmin)?.fullName || 'Administrator'}</h2>
                             <p className="text-sm text-gray-500 mt-1">{(admin || initialAdmin)?.email || ''}</p>
                         </div>
-                    </div>
 
-                    <LogoutAlertModal />
+                        <LogoutAlertModal />
+                        </div>
                 </CardContent>
             </Card>
 

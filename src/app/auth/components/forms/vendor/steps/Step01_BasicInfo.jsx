@@ -61,18 +61,18 @@ export default function Step01_BasicInfo() {
             email: formData.email || '',
             phoneNumber: formData.phoneNumber || '',
             password: formData.password || '',
-            
+
             // UAE-specific fields
             ownerProfileImage: formData.ownerProfileImage || '',
             tradeLicenseNumber: formData.tradeLicenseNumber || '',
             personalEmiratesIdNumber: formData.personalEmiratesIdNumber || '',
             emiratesIdCopy: formData.emiratesIdCopy || '',
             tradeLicenseCopy: formData.tradeLicenseCopy || '',
-            
+
             // International-specific fields
             businessLicenseCopy: formData.businessLicenseCopy || '',
             passportOrIdCopy: formData.passportOrIdCopy || '',
-            
+
             isInternational: formData.isInternational ?? false,
         },
         mode: 'onBlur',
@@ -153,7 +153,7 @@ export default function Step01_BasicInfo() {
                             </FormItem>
                         )}
                     />
-                    
+
                     {/* UAE or International Selection */}
                     <div className="border border-primary/20 p-3 rounded-lg bg-primary/5 space-y-1">
                         <FormField
@@ -176,7 +176,7 @@ export default function Step01_BasicInfo() {
                                             </div>
                                             <div className={`flex items-center space-x-2 p-3 border rounded-lg transition-colors ${field.value === true ? 'border-primary bg-white shadow-sm' : 'border-gray-300'}`}>
                                                 <RadioGroupItem value="true" id="intl" />
-                                                <label htmlFor="intl" className="text-sm font-medium"><Globe className="inline h-4 w-4 mr-1 text-gray-700"/> International</label>
+                                                <label htmlFor="intl" className="text-sm font-medium"><Globe className="inline h-4 w-4 mr-1 text-gray-700" /> International</label>
                                             </div>
                                         </RadioGroup>
                                     </FormControl>
@@ -191,7 +191,7 @@ export default function Step01_BasicInfo() {
 
                     {/* UAE-Only Conditional Fields */}
                     {!isInternational && (
-                        <>                            
+                        <>
                             {renderInputField(form, "tradeLicenseNumber", "Trade License Number", "Enter trade license number")}
                             {renderInputField(form, "personalEmiratesIdNumber", "Personal Emirates ID Number", "Enter Emirates ID")}
 
@@ -211,6 +211,7 @@ export default function Step01_BasicInfo() {
                                                 errors={form.formState.errors}
                                                 allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
                                                 folderPath={FOLDER_PATH}
+                                                isPublic={true}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -234,6 +235,7 @@ export default function Step01_BasicInfo() {
                                                 errors={form.formState.errors}
                                                 allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
                                                 folderPath={FOLDER_PATH}
+                                                isPublic={true}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -262,6 +264,7 @@ export default function Step01_BasicInfo() {
                                                 errors={form.formState.errors}
                                                 allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
                                                 folderPath={FOLDER_PATH}
+                                                isPublic={true}
                                             />
                                         </FormControl>
                                         <p className="!text-[12px] text-gray-500 mt-1">
@@ -288,6 +291,7 @@ export default function Step01_BasicInfo() {
                                                 errors={form.formState.errors}
                                                 allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
                                                 folderPath={FOLDER_PATH}
+                                                isPublic={true}
                                             />
                                         </FormControl>
                                         <p className="!text-[12px] text-gray-500 mt-1">
@@ -317,6 +321,7 @@ export default function Step01_BasicInfo() {
                                         errors={form.formState.errors}
                                         allowedMimeType={["image/jpeg", "image/png"]}
                                         folderPath={FOLDER_PATH}
+                                        isPublic={true}
                                     />
                                 </FormControl>
                                 <p className="!text-[12px] text-gray-500 mt-1">

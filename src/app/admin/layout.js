@@ -1,7 +1,7 @@
 "use client"
 import { Suspense } from "react";
 import AdminSidebar from "./components/common/AdminSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import OverViewStats from "./components/common/OverviewStatsAdmin";
 import { usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -38,10 +38,10 @@ export default function AdminLayout({ children }) {
             <SidebarProvider>
                 <AdminSidebar />
                 <main
-                    style={{
-                        width: `calc(100% - var(--sidebar-width))`,
-                    }}
+                    className="w-full lg:w-[calc(100% - var(--sidebar-width))]"
                 >
+                    <SidebarTrigger />
+
                     {showOverviewStats && (
                         <div className="dashboard-container">
                             <OverViewStats />

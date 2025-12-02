@@ -1,11 +1,9 @@
-"use client";
-
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Trash2, CheckSquare, XSquare } from "lucide-react";
-import { CldUploadWidget } from "next-cloudinary";
+import { Upload, Trash2, CheckSquare, XSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addVendorGalleryItemsAction } from "@/app/actions/admin/vendors";
+import { useS3Upload } from "@/hooks/useS3Upload";
 
 export default function GalleryToolbar({
     vendorId,
@@ -16,49 +14,81 @@ export default function GalleryToolbar({
     onDeleteSelected,
     clearSelection,
 }) {
-    const uploadedBatchRef = useRef([]);
+    const fileInputRef = useRef(null);
+    const { uploadFile, uploading } = useS3Upload();
+    const [localUploading, setLocalUploading] = useState(false);
 
-    // Collect uploaded items
-    const handleUploadSuccess = (result) => {
-        if (typeof result.info !== "object") return;
-        const url = result.info.secure_url;
-        uploadedBatchRef.current.push(url);
-    };
-
-    // When uploading finishes
-    const handleQueuesEnd = async (result, { widget }) => {
-        widget.close();
+    const handleFileSelect = async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
         if (!vendorId) {
             toast.error("Vendor ID missing — refresh and try again.");
-            uploadedBatchRef.current = [];
             return;
         }
 
-        if (uploadedBatchRef.current.length === 0) return;
-
-        const loadingToast = toast.loading("Saving images...");
-
-        const payload = uploadedBatchRef.current.map((url) => ({
-            url,
-            type: "image",
-        }));
+        setLocalUploading(true);
+        const loadingToast = toast.loading("Uploading images...");
 
         try {
+            const uploadedUrls = [];
+
+            // Upload files to S3
+            for (const file of files) {
+                // Validate type
+                if (!file.type.startsWith('image/')) {
+                    toast.error(`Skipping invalid file: ${file.name}`);
+                    continue;
+                }
+
+                try {
+                    const result = await uploadFile(file, {
+                        folder: `vendors/${vendorId}/gallery`,
+                        isPublic: true
+                    });
+
+                    if (result?.url) {
+                        uploadedUrls.push(result.url);
+                    }
+                } catch (err) {
+                    console.error(`Failed to upload ${file.name}:`, err);
+                    toast.error(`Failed to upload ${file.name}`);
+                }
+            }
+
+            if (uploadedUrls.length === 0) {
+                toast.dismiss(loadingToast);
+                setLocalUploading(false);
+                return;
+            }
+
+            // Save to database
+            toast.loading("Saving to gallery...", { id: loadingToast });
+
+            const payload = uploadedUrls.map((url) => ({
+                url,
+                type: "image",
+            }));
+
             const res = await addVendorGalleryItemsAction(vendorId, payload);
 
             toast.dismiss(loadingToast);
 
-            if (!res.success) toast.error(res.message || "Failed to save gallery items");
-            else {
+            if (!res.success) {
+                toast.error(res.message || "Failed to save gallery items");
+            } else {
                 toast.success(`${payload.length} image(s) added!`);
                 onUploadComplete?.();
             }
         } catch (err) {
+            console.error("Gallery upload error:", err);
             toast.dismiss(loadingToast);
             toast.error("Failed to save gallery items");
         } finally {
-            uploadedBatchRef.current = [];
+            setLocalUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -111,22 +141,31 @@ export default function GalleryToolbar({
             </div>
 
             {/* RIGHT SECTION - UPLOAD */}
-            <CldUploadWidget
-                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                options={{
-                    multiple: true,
-                    folder: `vendor-gallery/${vendorId}`,
-                    resourceType: "image",
-                }}
-                onSuccess={handleUploadSuccess}
-                onQueuesEnd={handleQueuesEnd}
-            >
-                {({ open }) => (
-                    <Button onClick={() => open()}>
-                        <Upload className="w-5 mr-2" /> Upload Images
-                    </Button>
-                )}
-            </CldUploadWidget>
+            <div>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileSelect}
+                    disabled={localUploading || uploading}
+                />
+                <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={localUploading || uploading}
+                >
+                    {localUploading || uploading ? (
+                        <>
+                            <Loader2 className="w-5 mr-2 animate-spin" /> Uploading...
+                        </>
+                    ) : (
+                        <>
+                            <Upload className="w-5 mr-2" /> Upload Images
+                        </>
+                    )}
+                </Button>
+            </div>
         </div>
     );
 }

@@ -32,8 +32,9 @@ const Hero = ({ data } = {}) => {
     "/new-banner-7.jpg"
   ];
 
-  const heading = data?.heading || "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
-  const description = data?.description || "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
+  // Hardcoded heading and description
+  const heading = "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
+  const description = "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
 
   // Logic to determine final images
   let images = [];
@@ -52,14 +53,12 @@ const Hero = ({ data } = {}) => {
     // No banners -> Use all defaults
     images = defaultImages.map(src => ({ src, link: null }));
   } else if (data?.shouldMergeDefaults) {
-    // Less than 3 banners -> Merge with defaults to reach at least 3
-    // We'll take all banners, then fill with defaults until we have enough
-    // Let's just append some defaults to make it look full
-    const needed = Math.max(0, 10 - normalizedIncoming.length);
+    // Less than 6 banners -> Fill with defaults to reach 6
+    const needed = Math.max(0, 6 - normalizedIncoming.length);
     const defaultsToAdd = defaultImages.slice(0, needed).map(src => ({ src, link: null }));
     images = [...normalizedIncoming, ...defaultsToAdd];
   } else {
-    // 3 or more banners -> Use ONLY banners
+    // 6 or more banners -> Use ONLY banners
     images = normalizedIncoming;
   }
 

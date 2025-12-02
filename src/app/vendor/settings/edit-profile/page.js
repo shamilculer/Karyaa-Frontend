@@ -180,8 +180,8 @@ const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, 
                 onClick={() => toggleSelection(optionValue)}
                 disabled={disabled}
                 className={`px-3 py-1 text-sm rounded-full cursor-pointer transition-colors font-medium ${isItemSelected(optionValue)
-                    ? "bg-primary text-white border-primary"
-                    : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
                   }`}
               >
                 {nameToDisplay} {isItemSelected(optionValue) ? '×' : '+'}
@@ -414,8 +414,8 @@ const EditProfilePage = () => {
                   onClick={() => setActiveTab(tab.id)}
                   type="button"
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
                 >
                   {tab.label}

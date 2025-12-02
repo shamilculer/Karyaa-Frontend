@@ -28,15 +28,15 @@ const formSchema = z.object({
     name: z.string().min(2, {
         message: "Category name must be at least 2 characters.",
     }).max(50),
-    // Add validation for the cover image (expecting a Cloudinary URL string)
+    // Add validation for the cover image (expecting an S3 URL string)
     coverImage: z.url({
         message: "A cover image is required.",
     }),
 })
 
 // --- Define constants for file upload ---
-const CATEGORY_IMAGE_MIME_TYPES = ["image/jpeg","image/png", "image/webp"];
-const CLOUDINARY_FOLDER_PATH = "category-images";
+const CATEGORY_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const S3_FOLDER_PATH = "category-images";
 
 
 export function AddCategoryModal({ onOpenChange, open }) {
@@ -112,7 +112,7 @@ export function AddCategoryModal({ onOpenChange, open }) {
                             label="Upload Cover Image"
                             errors={errors}
                             allowedMimeType={CATEGORY_IMAGE_MIME_TYPES}
-                            folderPath={CLOUDINARY_FOLDER_PATH}
+                            folderPath={S3_FOLDER_PATH}
                         />
                         {/* Errors are handled within ControlledFileUpload, but this ensures top-level visibility if needed */}
                         {errors.coverImage && errors.coverImage.type !== 'required' && (

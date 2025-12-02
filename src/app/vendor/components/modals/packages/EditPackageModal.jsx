@@ -89,7 +89,7 @@ const TagsInput = ({ name, placeholder, errors, getValues, setValue, trigger }) 
                     Add
                 </Button>
             </div>
-            
+
             <div className="flex flex-wrap gap-2 pt-2">
                 {tags.map((tag, index) => (
                     <Badge
@@ -125,7 +125,7 @@ export default function EditPackageModal({ packageData, onUpdate }) {
             priceStartingFrom: packageData.priceStartingFrom || 0,
             description: packageData.description || "",
             // Use the service strings directly
-            services: packageData.services?.map(s => typeof s === 'object' ? s.name : s) || [], 
+            services: packageData.services?.map(s => typeof s === 'object' ? s.name : s) || [],
             includes: packageData.includes?.length > 0 ? packageData.includes : [""],
             coverImage: packageData.coverImage || "",
         },
@@ -139,7 +139,7 @@ export default function EditPackageModal({ packageData, onUpdate }) {
     async function onSubmit(values) {
         const submissionValues = {
             // Include packageId for the server action
-            packageId: packageData._id, 
+            packageId: packageData._id,
             ...values,
             priceStartingFrom: Number(values.priceStartingFrom),
             includes: values.includes.filter(item => item.trim() !== ""),
@@ -147,7 +147,7 @@ export default function EditPackageModal({ packageData, onUpdate }) {
 
         try {
             // 🟢 Pass packageId as a separate argument to the server action
-            const res = await updatePackage(submissionValues.packageId, submissionValues); 
+            const res = await updatePackage(submissionValues.packageId, submissionValues);
 
             toast.success(res.message || "Package updated successfully!");
 
@@ -222,12 +222,12 @@ export default function EditPackageModal({ packageData, onUpdate }) {
                                     <FormItem>
                                         <FormLabel>Starting Price (AED)</FormLabel>
                                         <FormControl>
-                                            <Input 
-                                                type="number" 
-                                                placeholder="5000" 
-                                                {...field} 
+                                            <Input
+                                                type="number"
+                                                placeholder="5000"
+                                                {...field}
                                                 onChange={(e) => field.onChange(e.target.valueAsNumber || e.target.value)}
-                                                value={field.value === 0 ? "" : field.value} 
+                                                value={field.value === 0 ? "" : field.value}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -280,7 +280,7 @@ export default function EditPackageModal({ packageData, onUpdate }) {
                                     <FormItem>
                                         <FormLabel>Services (Type Name and press Enter or Add)</FormLabel>
                                         <FormControl>
-                                            <TagsInput 
+                                            <TagsInput
                                                 name="services"
                                                 placeholder="E.g., 'Wedding Photography'"
                                                 errors={form.formState.errors}
@@ -305,8 +305,8 @@ export default function EditPackageModal({ packageData, onUpdate }) {
                                             render={({ field }) => (
                                                 <FormItem className="flex-grow">
                                                     <FormControl>
-                                                        <Input 
-                                                            {...field} 
+                                                        <Input
+                                                            {...field}
                                                             placeholder={`Item ${i + 1}`}
                                                         />
                                                     </FormControl>

@@ -26,7 +26,7 @@ import {
 import { Loader2, X } from "lucide-react";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
-import { updateIdeaAction } from "@/app/actions/admin/ideas"; 
+import { updateIdeaAction } from "@/app/actions/admin/ideas";
 
 // Define the expected structure for category props (same as AddIdeaModal)
 /**
@@ -49,7 +49,7 @@ import { updateIdeaAction } from "@/app/actions/admin/ideas";
 const ideaSchema = z.object({
     title: z.string().min(3, "Title is required"),
     description: z.string().min(10, "Description is too short"),
-    category: z.string().min(1, "Category is required"), 
+    category: z.string().min(1, "Category is required"),
     images: z.array(z.string()).optional(),
 });
 
@@ -80,7 +80,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
         defaultValues: {
             title: idea?.title || "",
             description: idea?.description || "",
-            category: idea?.category?.name || "", // Assuming category object has a 'name' property
+            category: idea?.category?._id || "", // Use ID
             images: idea?.gallery || [],
         },
     });
@@ -91,7 +91,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
             reset({
                 title: idea.title,
                 description: idea.description,
-                category: idea.category?.name || "",
+                category: idea.category?._id || "", // Use ID
                 images: idea.gallery || [],
             });
             setImageList(idea.gallery || []);
@@ -100,10 +100,12 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
 
 
     // ✅ Handle image uploads (reused)
-    const handleImageUpload = (url) => {
-        const updated = [...imageList, url];
+    const handleImageUpload = (urls) => {
+        const newUrls = Array.isArray(urls) ? urls : [urls];
+        const updated = [...imageList, ...newUrls];
         setImageList(updated);
         setValue("images", updated);
+        setValue("upload_new", []); // Reset upload field
     };
 
     // ✅ Remove image (reused)
@@ -119,18 +121,17 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
             toast.error("Error: Idea ID is missing for update.");
             return;
         }
-        
+
         setIsSubmitting(true);
-        const payload = { 
-            id: idea._id, // Send ID to the server action
+        const payload = {
             title: data.title,
             description: data.description,
-            categoryName: data.category, // Send category name
-            gallery: imageList, 
+            category: data.category, // Send category ID
+            gallery: imageList,
         };
-        
-        // 🚨 Assumes you have an updateIdeaAction that takes {id, title, description, categoryName, gallery}
-        const res = await updateIdeaAction(payload); 
+
+        // Correctly call updateIdeaAction with ID and payload
+        const res = await updateIdeaAction(idea._id, payload);
         setIsSubmitting(false);
 
         if (res.success) {
@@ -151,7 +152,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
                 reset({
                     title: idea?.title || "",
                     description: idea?.description || "",
-                    category: idea?.category?.name || "",
+                    category: idea?.category?._id || "",
                     images: idea?.gallery || [],
                 });
                 setImageList(idea?.gallery || []);
@@ -159,7 +160,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
         }
         onOpenChange(newOpenState);
     }
-    
+
     // Safety check: Don't render if essential data is missing
     if (!idea) return null;
 
@@ -221,7 +222,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
                                         </SelectTrigger>
                                         <SelectContent>
                                             {categories.map((cat) => (
-                                                <SelectItem key={cat._id} value={cat.name}>
+                                                <SelectItem key={cat._id} value={cat._id}>
                                                     {cat.name}
                                                 </SelectItem>
                                             ))}
@@ -239,42 +240,44 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
                         {/* Gallery Upload */}
                         <div className="space-y-3">
                             <label className="font-medium text-sm">Gallery Images</label>
+                            <p className="text-xs text-gray-500">Upload multiple images at once (JPEG, PNG, WebP)</p>
 
-                            <div className="flex flex-wrap gap-4">
-                                {/* Display existing images */}
-                                {imageList.map((img, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="relative w-28 h-28 border rounded-lg overflow-hidden group"
-                                    >
-                                        <img
-                                            src={img}
-                                            alt={`Idea Image ${idx + 1}`}
-                                            className="object-cover w-full h-full"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeImage(img)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+                            {/* Image Preview Grid */}
+                            {imageList.length > 0 && (
+                                <div className="flex flex-wrap gap-4 mb-4">
+                                    {imageList.map((img, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="relative w-28 h-28 border rounded-lg overflow-hidden group"
                                         >
-                                            <X size={14} />
-                                        </button>
-                                    </div>
-                                ))}
-
-                                {/* Upload button (uses file upload component) */}
-                                <div className="w-28 h-28 flex items-center justify-center border rounded-lg bg-gray-50 hover:bg-gray-100">
-                                    <ControlledFileUpload
-                                        control={control}
-                                        name="upload_new" // Use a unique temporary name for the upload field
-                                        label="Upload"
-                                        folderPath="ideas/gallery"
-                                        allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
-                                        errors={errors}
-                                        onSuccess={(url) => handleImageUpload(url)}
-                                    />
+                                            <img
+                                                src={img}
+                                                alt={`Idea Image ${idx + 1}`}
+                                                className="object-cover w-full h-full"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(img)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Upload Area */}
+                            <ControlledFileUpload
+                                control={control}
+                                name="upload_new"
+                                label="Click to upload images (multiple files supported)"
+                                folderPath="ideas/gallery"
+                                allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                                multiple={true}
+                                errors={errors}
+                                onSuccess={handleImageUpload}
+                            />
                         </div>
                     </div>
 
