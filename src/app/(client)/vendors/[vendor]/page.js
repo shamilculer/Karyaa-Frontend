@@ -70,9 +70,14 @@ const VendorPage = async ({ params }) => {
 
   // 1. CONDITIONAL REVIEW FETCHING
   let reviews = [];
+  let totalPages = 1;
+  let totalReviews = 0;
+
   if (vendorData.reviewCount > 0) {
     const reviewsResult = await getVendorReviews(vendorData._id);
     reviews = reviewsResult.reviews || [];
+    totalPages = reviewsResult.totalPages || 1;
+    totalReviews = reviewsResult.totalReviews || 0;
   }
 
   const ownerInitials = getInitials(vendorData.ownerName);
@@ -369,7 +374,12 @@ const VendorPage = async ({ params }) => {
                     </div>
 
                     <div className="mt-8 w-full">
-                      <Reviews reviews={reviews} />
+                      <Reviews
+                        initialReviews={reviews}
+                        vendorId={vendorData._id}
+                        totalPages={totalPages}
+                        totalReviews={totalReviews}
+                      />
                     </div>
                   </div>
                 ) : (
