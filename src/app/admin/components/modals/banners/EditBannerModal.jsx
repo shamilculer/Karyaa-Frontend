@@ -84,6 +84,7 @@ export default function EditBannerModal({
             displayMode: banner?.displayMode || "standard",
             mediaType: banner?.mediaType || "image",
             videoUrl: banner?.videoUrl || "",
+            showTitle: banner?.showTitle ?? true,
         },
     });
 
@@ -154,6 +155,7 @@ export default function EditBannerModal({
                 displayMode: banner.displayMode || "standard",
                 mediaType: banner.mediaType || "image",
                 videoUrl: banner.videoUrl || "",
+                showTitle: banner.showTitle ?? true,
             });
             setIsVendorSpecific(banner.isVendorSpecific ?? true);
         }
@@ -208,6 +210,24 @@ export default function EditBannerModal({
             if (!confirmed) return;
         }
         onOpenChange(false);
+    };
+
+    const selectedPlacement = watch("placement") || [];
+    const isHeroOrCarousel = selectedPlacement.some(p => p === "Hero Section" || p === "Homepage Carousel");
+
+    // Auto-hide/disable title fields for Hero/Carousel
+    useEffect(() => {
+        if (isHeroOrCarousel) {
+            setValue("showTitle", false);
+            setValue("showOverlay", false);
+        }
+    }, [isHeroOrCarousel, setValue]);
+
+    const getIdealSizeText = () => {
+        if (selectedPlacement.includes("Hero Section")) return "Recommended: 1920x1080px (Desktop), 1080x1920px (Mobile)";
+        if (selectedPlacement.includes("Homepage Carousel")) return "Recommended: 1300x500px (Standard)";
+        if (selectedPlacement.some(p => ["Contact", "Ideas", "Gallery", "Blog Page"].includes(p))) return "Recommended: 1920x400px (Desktop), 800x260px (Mobile)";
+        return "Recommended: Depends on layout (e.g. 1080x1080px for square)";
     };
 
     return (
@@ -304,91 +324,106 @@ export default function EditBannerModal({
                             </div>
 
                             {/* Page Title & Tagline */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-8 w-1 bg-orange-500 rounded-full" />
-                                    <h3 className="uppercase !text-base !tracking-wide font-semibold">Page Title & Tagline</h3>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
-                                            Page Title
-                                        </Label>
-                                        <Input
-                                            id="edit-title"
-                                            {...register("title")}
-                                            placeholder="e.g., Find Your Dream Venue"
-                                            className="h-11"
-                                        />
+                            {!isHeroOrCarousel && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-8 w-1 bg-orange-500 rounded-full" />
+                                        <h3 className="uppercase !text-base !tracking-wide font-semibold">Page Title & Tagline</h3>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="edit-tagline" className="text-sm font-semibold text-gray-700">
-                                            Tagline
-                                        </Label>
-                                        <Textarea
-                                            id="edit-tagline"
-                                            {...register("tagline")}
-                                            placeholder="e.g., Discover the best wedding venues in your area"
-                                            className="min-h-[44px]"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2 flex items-center space-x-2 pt-2">
-                                        <Checkbox
-                                            id="edit-showOverlay"
-                                            checked={watch("showOverlay")}
-                                            onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
-                                        />
-                                        <Label
-                                            htmlFor="edit-showOverlay"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Show Title & Overlay
-                                        </Label>
-                                    </div>
-                                    {/* Display Mode Selection */}
-                                    <div className="md:col-span-2 space-y-3 pt-4 border-t">
-                                        <Label className="text-sm font-semibold text-gray-700">
-                                            Display Mode
-                                        </Label>
-                                        <div className="space-y-3">
-                                            <div className="flex items-start space-x-3">
-                                                <input
-                                                    type="radio"
-                                                    id="edit-displayMode-standard"
-                                                    value="standard"
-                                                    {...register("displayMode")}
-                                                    className="mt-1"
-                                                />
-                                                <div className="flex-1">
-                                                    <Label htmlFor="edit-displayMode-standard" className="font-medium cursor-pointer">
-                                                        Standard (Fixed Height)
-                                                    </Label>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
-                                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
+                                                Page Title
+                                            </Label>
+                                            <Input
+                                                id="edit-title"
+                                                {...register("title")}
+                                                placeholder="e.g., Find Your Dream Venue"
+                                                className="h-11"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="edit-tagline" className="text-sm font-semibold text-gray-700">
+                                                Tagline
+                                            </Label>
+                                            <Textarea
+                                                id="edit-tagline"
+                                                {...register("tagline")}
+                                                placeholder="e.g., Discover the best wedding venues in your area"
+                                                className="min-h-[44px]"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2 flex items-center space-x-2 pt-2">
+                                            <Checkbox
+                                                id="edit-showOverlay"
+                                                checked={watch("showOverlay")}
+                                                onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
+                                            />
+                                            <Label
+                                                htmlFor="edit-showOverlay"
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                Show Title & Overlay
+                                            </Label>
+                                        </div>
+                                        <div className="md:col-span-2 flex items-center space-x-2">
+                                            <Checkbox
+                                                id="edit-showTitle"
+                                                checked={watch("showTitle")}
+                                                onCheckedChange={(checked) => setValue("showTitle", !!checked)}
+                                            />
+                                            <Label
+                                                htmlFor="edit-showTitle"
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                Show Page Heading (H1)
+                                            </Label>
+                                        </div>
+                                        {/* Display Mode Selection */}
+                                        <div className="md:col-span-2 space-y-3 pt-4 border-t">
+                                            <Label className="text-sm font-semibold text-gray-700">
+                                                Display Mode
+                                            </Label>
+                                            <div className="space-y-3">
+                                                <div className="flex items-start space-x-3">
+                                                    <input
+                                                        type="radio"
+                                                        id="edit-displayMode-standard"
+                                                        value="standard"
+                                                        {...register("displayMode")}
+                                                        className="mt-1"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <Label htmlFor="edit-displayMode-standard" className="font-medium cursor-pointer">
+                                                            Standard (Fixed Height)
+                                                        </Label>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-start space-x-3">
-                                                <input
-                                                    type="radio"
-                                                    id="edit-displayMode-auto"
-                                                    value="auto"
-                                                    {...register("displayMode")}
-                                                    className="mt-1"
-                                                />
-                                                <div className="flex-1">
-                                                    <Label htmlFor="edit-displayMode-auto" className="font-medium cursor-pointer">
-                                                        Full View (Auto Height)
-                                                    </Label>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
-                                                    </p>
+                                                <div className="flex items-start space-x-3">
+                                                    <input
+                                                        type="radio"
+                                                        id="edit-displayMode-auto"
+                                                        value="auto"
+                                                        {...register("displayMode")}
+                                                        className="mt-1"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <Label htmlFor="edit-displayMode-auto" className="font-medium cursor-pointer">
+                                                            Full View (Auto Height)
+                                                        </Label>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Schedule & Mobile */}
                             <div className="space-y-4">
@@ -471,44 +506,6 @@ export default function EditBannerModal({
                                     </div>
                                     <p className="text-xs text-gray-500">
                                         If not provided, the desktop image will be used on mobile devices.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Banner Image Upload */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-8 w-1 bg-purple-500 rounded-full" />
-                                    <h3 className="uppercase !text-base !tracking-wide font-semibold">Banner Image</h3>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                        <Upload className="w-4 h-4" />
-                                        Update Banner Image
-                                        <Badge variant="outline" className="text-xs">
-                                            1300x400 recommended
-                                        </Badge>
-                                    </Label>
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-                                        <ControlledFileUpload
-                                            control={control}
-                                            name="imageUrl"
-                                            label="Click to upload new image"
-                                            allowedMimeType={[
-                                                "image/png",
-                                                "image/jpg",
-                                                "image/jpeg",
-                                                "image/webp",
-                                            ]}
-                                            folderPath="ad-banners"
-                                            errors={errors}
-                                            role="admin"
-                                        />
-                                    </div>
-                                    <p className="text-xs text-gray-500 flex items-center gap-2">
-                                        <CheckCircle2 className="w-3 h-3" />
-                                        Leave empty to keep current image
                                     </p>
                                 </div>
                             </div>
@@ -634,6 +631,6 @@ export default function EditBannerModal({
                 </form>
                 </FormProvider>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

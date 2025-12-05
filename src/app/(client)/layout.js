@@ -3,6 +3,11 @@ import Header from "./components/common/Header";
 import { UserDataSync } from "./components/common/UserDataSync";
 import { cookies } from "next/headers";
 import { decodeJWT } from "@/utils/decodeJWT";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "home");
+}
 
 export default async function ClientLayout({ children }) {
   const cookieStore = await cookies();
@@ -10,15 +15,15 @@ export default async function ClientLayout({ children }) {
   let userId = null;
 
   if (accessToken) {
-      const decoded = decodeJWT(accessToken);
-      userId = decoded?.id;
+    const decoded = decodeJWT(accessToken);
+    userId = decoded?.id;
   }
 
   return (
     <div>
       <UserDataSync currentUserId={userId} />
       <Header />
-        <main>{children}</main>
+      <main>{children}</main>
       <Footer />
     </div>
   );

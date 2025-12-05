@@ -5,6 +5,11 @@ import Link from "next/link"
 import ContactForm from "../components/forms/ContactForm"
 import { getContentByKeyAction } from "@/app/actions/public/content"
 import PageTitle from "../components/common/PageTitle";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+    return await getMetaData("static", "contact");
+}
 
 
 const ContactPage = async () => {

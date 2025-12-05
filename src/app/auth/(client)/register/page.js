@@ -3,6 +3,11 @@ import UserCreateForm from "../../components/forms/UserCreateForm";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Sign Up | Karyaa",
+  description: "Create your Karyaa account and start planning your event.",
+};
+
 const CreateAccountPage = () => {
   return (
     <section className="flex !my-0 relative">

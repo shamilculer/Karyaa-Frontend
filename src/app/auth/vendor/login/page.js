@@ -3,6 +3,11 @@ import VendorLoginForm from "../../components/forms/vendor/VendorLoginForm";
 // import { Button } from "@/components/ui/button";
 // import Link from "next/link";
 
+export const metadata = {
+  title: "Vendor Login | Karyaa",
+  description: "Login to your vendor dashboard to manage your services and leads.",
+};
+
 const UserLoginPage = () => {
   return (
     <section className="flex !my-0">
@@ -17,16 +22,16 @@ const UserLoginPage = () => {
 
       <div className="w-full lg:w-1/3 min-h-screen flex flex-col justify-center px-4 sm:px-10">
 
-       <div>
-         <Image
-           width={150}
-           height={50}
-           alt="Karyaa Logo"
-           src="/logo.svg"
-           className="mb-10 w-32"
-         />
-       </div>
-    
+        <div>
+          <Image
+            width={150}
+            height={50}
+            alt="Karyaa Logo"
+            src="/logo.svg"
+            className="mb-10 w-32"
+          />
+        </div>
+
         <div>
           <h1 className="!text-xl !capitalize !font-semibold mb-2">
             Cood to see you back Partner!

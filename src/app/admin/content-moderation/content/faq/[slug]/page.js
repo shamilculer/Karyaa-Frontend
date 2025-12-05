@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getContentByKeyAction, upsertContentAction } from "@/app/actions/public/content"
+import { getContentByKeyAction, upsertContentAction } from "@/app/actions/admin/pages"
 
 const FaqEditor = () => {
   const params = useParams();

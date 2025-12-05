@@ -41,6 +41,28 @@ import {
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import WhatsAppButton from "../../components/features/vendors/WhatsAppButton";
 
+export async function generateMetadata({ params }) {
+  const { vendor: vendorSlug } = await params;
+  const vendorDataResponse = await getSingleVendor(vendorSlug);
+  const vendorData = vendorDataResponse?.data;
+
+  if (!vendorData) {
+    return {
+      title: "Vendor Not Found | Karyaa",
+    };
+  }
+
+  return {
+    title: `${vendorData.businessName} | Karyaa`,
+    description: vendorData.tagline || vendorData.businessDescription?.substring(0, 160),
+    openGraph: {
+      title: `${vendorData.businessName} | Karyaa`,
+      description: vendorData.tagline || vendorData.businessDescription?.substring(0, 160),
+      images: vendorData.businessLogo ? [vendorData.businessLogo] : [],
+    },
+  };
+}
+
 const VendorPage = async ({ params }) => {
   const { vendor: vendorSlug } = await params;
 

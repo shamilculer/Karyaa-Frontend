@@ -157,13 +157,21 @@ function FileItem({ url, onRemove }) {
     if (!url) return null;
 
     const fileName = url.split('/').pop();
-    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
+    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
 
     return (
         <div className="flex items-center justify-between p-2 border rounded-lg bg-white text-sm border-gray-200">
             <div className="flex items-center gap-2 overflow-hidden">
                 {isImage ? (
                     <img src={url} alt="Preview" className="h-8 w-8 object-cover rounded" />
+                ) : isVideo ? (
+                    <video
+                        src={url}
+                        className="h-8 w-8 object-cover rounded bg-black"
+                        muted
+                        playsInline
+                    />
                 ) : (
                     <div className="h-8 w-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold text-gray-500">
                         FILE

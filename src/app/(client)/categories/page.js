@@ -8,6 +8,11 @@ import { initialBlogParams } from "@/utils";
 import { CategoryGrid } from "../components/common/CategoriesList/CategoriesList";
 import PageTitle from "../components/common/PageTitle";
 import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "categories");
+}
 
 const CategoriesPage = () => {
   return (

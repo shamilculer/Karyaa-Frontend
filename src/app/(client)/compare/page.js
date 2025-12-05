@@ -9,6 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageTitle from "../components/common/PageTitle";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+    return await getMetaData("static", "compare");
+}
 
 // --- Loading & Error Components ---
 const CompareLoadingSkeleton = () => (
@@ -28,15 +33,15 @@ const ErrorState = ({ message }) => (
 // --- Main Server Component ---
 const ComparePage = async ({ searchParams }) => {
     // 1. READ SLUGS from URL
-    const urlSlugs = searchParams.vendors || searchParams.vendor; 
+    const urlSlugs = searchParams.vendors || searchParams.vendor;
     let vendorSlugs = [];
-    
+
     if (urlSlugs) {
         vendorSlugs = Array.isArray(urlSlugs)
             ? urlSlugs
             : urlSlugs.split(',').filter(slug => slug.trim() !== '');
     }
-    
+
     vendorSlugs = [...new Set(vendorSlugs)].slice(0, 3); // Limit to 3
 
     // 2. FETCH INITIAL VENDOR DATA
@@ -57,7 +62,7 @@ const ComparePage = async ({ searchParams }) => {
                 <PageSearchBar />
             </section>
 
-                <CategoryList />
+            <CategoryList />
 
             <Suspense fallback={<CompareLoadingSkeleton />}>
                 <section className='container py-12'>

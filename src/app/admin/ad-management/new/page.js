@@ -39,6 +39,9 @@ import {
   Type,
   Calendar as CalendarIcon,
   Smartphone,
+  Video,
+  Layout,
+  Maximize,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -88,6 +91,35 @@ export default function AddBannerPage() {
 
   const activeFrom = watch("activeFrom");
   const activeUntil = watch("activeUntil");
+  const placement = watch("placement");
+
+  const isHeroOrCarousel = placement && placement.some(p =>
+    p.includes("Hero Section") || p.includes("Homepage Carousel")
+  );
+
+  // Auto-hide title/tagline/overlay for Hero or Carousel placements
+  useEffect(() => {
+    if (isHeroOrCarousel) {
+      setValue("showTitle", false);
+      setValue("showOverlay", false);
+    } else {
+      setValue("showTitle", true);
+      setValue("showOverlay", true);
+    }
+  }, [isHeroOrCarousel, setValue]);
+
+  const getIdealSizeText = (currentPlacement) => {
+    if (!currentPlacement || currentPlacement.length === 0) return "Recommended: 1920x400px";
+
+    if (currentPlacement.some(p => p.includes("Hero Section"))) {
+      return "Recommended: 1920x1080px (Desktop), 1080x1920px (Mobile)";
+    }
+    if (currentPlacement.some(p => p.includes("Homepage Carousel"))) {
+      return "Recommended: 1300x500px (Standard)";
+    }
+    // For Page Titles (Contact, Ideas, Gallery, etc.)
+    return "Recommended: 1920x400px (Desktop), 800x260px (Mobile). Content centered.";
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -255,7 +287,7 @@ export default function AddBannerPage() {
                   <Upload className="w-4 h-4" />
                   Banner Image
                   <Badge variant="outline" className="text-xs">
-                    1300x400 recommended
+                    {getIdealSizeText(watch("placement"))}
                   </Badge>
                 </Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
@@ -271,6 +303,7 @@ export default function AddBannerPage() {
                     ]}
                     folderPath="ad-banners"
                     errors={errors}
+                    role="admin"
                   />
                 </div>
                 <p className="text-xs text-gray-500 flex items-center gap-2">
@@ -284,31 +317,28 @@ export default function AddBannerPage() {
                 <Label className="text-sm font-semibold text-gray-700">
                   Media Type
                 </Label>
-                <div className="flex gap-4">
-                  <div className="flex items-center space-x-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                     <input
                       type="radio"
-                      id="mediaType-image"
                       value="image"
                       {...register("mediaType")}
-                      className="cursor-pointer"
+                      className="peer sr-only"
                     />
-                    <Label htmlFor="mediaType-image" className="cursor-pointer font-normal">
-                      Image
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
+                    <ImageIcon className="w-8 h-8 mb-2 text-gray-500 peer-checked:text-blue-500" />
+                    <span className="font-semibold text-gray-700 peer-checked:text-blue-700">Image Banner</span>
+                  </label>
+
+                  <label className="relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                     <input
                       type="radio"
-                      id="mediaType-video"
                       value="video"
                       {...register("mediaType")}
-                      className="cursor-pointer"
+                      className="peer sr-only"
                     />
-                    <Label htmlFor="mediaType-video" className="cursor-pointer font-normal">
-                      Video
-                    </Label>
-                  </div>
+                    <Video className="w-8 h-8 mb-2 text-gray-500 peer-checked:text-blue-500" />
+                    <span className="font-semibold text-gray-700 peer-checked:text-blue-700">Video Banner</span>
+                  </label>
                 </div>
               </div>
               {/* Conditional Video Upload */}
@@ -332,6 +362,7 @@ export default function AddBannerPage() {
                       ]}
                       folderPath="ad-banners/videos"
                       errors={errors}
+                      role="admin"
                     />
                   </div>
                   <p className="text-xs text-gray-500 flex items-center gap-2">
@@ -344,109 +375,132 @@ export default function AddBannerPage() {
           </Card>
 
           {/* Page Title & Tagline Card */}
-          <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Type className="w-5 h-5 text-orange-600" />
+          {!isHeroOrCarousel && (
+            <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Type className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold">
+                      Page Title & Tagline
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Optional text to display over the banner
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-xl font-bold">
-                    Page Title & Tagline
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Optional text to display over the banner
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
-                    Page Title
-                  </Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    placeholder="e.g., Find Your Dream Venue"
-                    className="h-11"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tagline" className="text-sm font-semibold text-gray-700">
-                    Tagline
-                  </Label>
-                  <Textarea
-                    id="tagline"
-                    {...register("tagline")}
-                    placeholder="e.g., Discover the best wedding venues in your area"
-                    className="min-h-[44px]"
-                  />
-                </div>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
+                      Page Title
+                    </Label>
+                    <Input
+                      id="title"
+                      {...register("title")}
+                      placeholder="e.g., Find Your Dream Venue"
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tagline" className="text-sm font-semibold text-gray-700">
+                      Tagline
+                    </Label>
+                    <Textarea
+                      id="tagline"
+                      {...register("tagline")}
+                      placeholder="e.g., Discover the best wedding venues in your area"
+                      className="min-h-[44px]"
+                    />
+                  </div>
 
-                <div className="md:col-span-2 flex items-center space-x-2 pt-2">
-                  <Checkbox
-                    id="showOverlay"
-                    checked={watch("showOverlay")}
-                    onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
-                  />
-                  <Label
-                    htmlFor="showOverlay"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Show Title & Overlay
-                  </Label>
-                </div>
-                {/* Display Mode Selection */}
-                <div className="md:col-span-2 space-y-3 pt-4 border-t">
-                  <Label className="text-sm font-semibold text-gray-700">
-                    Display Mode
-                  </Label>
-                  <div className="space-y-3">
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="radio"
-                        id="displayMode-standard"
-                        value="standard"
-                        {...register("displayMode")}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="displayMode-standard" className="font-medium cursor-pointer">
-                          Standard (Fixed Height)
-                        </Label>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="radio"
-                        id="displayMode-auto"
-                        value="auto"
-                        {...register("displayMode")}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="displayMode-auto" className="font-medium cursor-pointer">
-                          Full View (Auto Height)
-                        </Label>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
-                        </p>
-                      </div>
+                  <div className="md:col-span-2 flex items-center space-x-2 pt-2">
+                    <Checkbox
+                      id="showOverlay"
+                      checked={watch("showOverlay")}
+                      onCheckedChange={(checked) => setValue("showOverlay", !!checked)}
+                    />
+                    <Label
+                      htmlFor="showOverlay"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Show Title & Overlay
+                    </Label>
+                  </div>
+                  <div className="md:col-span-2 flex items-center space-x-2">
+                    <Checkbox
+                      id="showTitle"
+                      checked={watch("showTitle")}
+                      onCheckedChange={(checked) => setValue("showTitle", !!checked)}
+                    />
+                    <Label
+                      htmlFor="showTitle"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Show Page Heading (H1)
+                    </Label>
+                  </div>
+                  {/* Display Mode Selection */}
+                  <div className="md:col-span-2 space-y-3 pt-4 border-t">
+                    <Label className="text-sm font-semibold text-gray-700">
+                      Display Mode
+                    </Label>
+                    <div className="grid grid-cols-1 gap-4">
+
+                      {/* Standard Mode Card */}
+                      <label className="flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
+                        <div className="flex items-center h-5 mt-1 mr-4">
+                          <input
+                            type="radio"
+                            value="standard"
+                            {...register("displayMode")}
+                            className="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Layout className="w-4 h-4 text-gray-600" />
+                            <span className="font-semibold text-gray-900">Standard (Fixed Height)</span>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Best for page headers. Desktop: 1920x400px | Mobile: 800x512px.
+                          </p>
+                        </div>
+                      </label>
+
+                      {/* Auto Mode Card */}
+                      <label className="flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
+                        <div className="flex items-center h-5 mt-1 mr-4">
+                          <input
+                            type="radio"
+                            value="auto"
+                            {...register("displayMode")}
+                            className="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Maximize className="w-4 h-4 text-gray-600" />
+                            <span className="font-semibold text-gray-900">Full View (Auto Height)</span>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Best for hero sections or creative banners. Maintains original aspect ratio (e.g., 1080x1080).
+                          </p>
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>
-              </div>
-              <p className="text-xs text-gray-500 flex items-center gap-2">
-                <CheckCircle2 className="w-3 h-3" />
-                If left empty, the default page title and tagline will be used.
-              </p>
-            </CardContent>
-          </Card>
+                <p className="text-xs text-gray-500 flex items-center gap-2">
+                  <CheckCircle2 className="w-3 h-3" />
+                  If left empty, the default page title and tagline will be used.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Schedule & Mobile Card */}
           <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">

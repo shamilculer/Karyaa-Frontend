@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import BlogPosts from "../../components/common/BlogPosts";
 import { initialBlogParams } from "@/utils";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata({ params }) {
+  const { category } = await params;
+  return await getMetaData("category", category);
+}
 
 const CategoryPage = async ({ params, searchParams }) => {
   const { category } = await params;

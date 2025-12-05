@@ -1,6 +1,7 @@
 "use client";
 
 import { useVendorFormStore } from '@/store/vendorFormStore';
+import { useEffect } from 'react';
 
 // Import all step components
 import Step01_BasicInfo from './steps/Step01_BasicInfo';
@@ -16,7 +17,14 @@ const STEPS = [
 
 export default function VendorMultiStepForm() {
   // Use the merged store
-  const { formData, currentStepIndex} = useVendorFormStore();
+  const { formData, currentStepIndex } = useVendorFormStore();
+
+  useEffect(() => {
+    const scrollContainer = document.getElementById("vendor-register-scroll-container");
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+    }
+  }, [currentStepIndex]);
 
   const currentStep = STEPS[currentStepIndex];
   const isLastStep = currentStepIndex === STEPS.length - 1;

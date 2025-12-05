@@ -5,6 +5,11 @@ import BlogPosts from "../components/common/BlogPosts";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "../components/common/PageTitle";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "blog");
+}
 
 const BlogPage = async ({ searchParams }) => {
   return (

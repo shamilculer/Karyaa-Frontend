@@ -227,7 +227,7 @@ const CompareTable = ({ initialVendors }) => {
     return (
         <FormProvider {...methods}>
             <div className="comparison-table-wrapper overflow-x-auto rounded-lg">
-                <Table className="min-w-[1080px] table-fixed"> {/* Updated min-width for 180px + 3*300px */}
+                <Table className="min-w-[1080px] table-fixed">
                     <TableHeader className="bg-gray-50">
                         <TableRow className="hover:bg-gray-50/90">
                             <TableHead className="font-bold w-[180px] text-left text-base bg-gray-100">

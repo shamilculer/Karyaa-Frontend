@@ -3,6 +3,11 @@ import UserLoginForm from "../../components/forms/UserLoginForm";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Login | Karyaa",
+  description: "Login to your Karyaa account to access your event planning tools.",
+};
+
 const UserLoginPage = () => {
   return (
     <section className="flex !my-0 relative">

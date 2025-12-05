@@ -39,14 +39,14 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import DeletePackageModal from '../modals/packages/DeletePackageModal';
 
 const OCCASIONS = [
-{ value: "baby-shower", label: "Baby Shower" },
-{ value: "gender-reveal", label: "Gender Reveal" },
-{ value: "birthday", label: "Birthday" },
-{ value: "graduation", label: "Graduation" },
-{ value: "corporate-event", label: "Corporate Event" },
-{ value: "brand-launch", label: "Brand Launch" },
-{ value: "festivities", label: "Festivities" },
-{ value: "anniversary", label: "Anniversary" },
+    { value: "baby-shower", label: "Baby Shower" },
+    { value: "gender-reveal", label: "Gender Reveal" },
+    { value: "birthday", label: "Birthday" },
+    { value: "graduation", label: "Graduation" },
+    { value: "corporate-event", label: "Corporate Event" },
+    { value: "brand-launch", label: "Brand Launch" },
+    { value: "festivities", label: "Festivities" },
+    { value: "anniversary", label: "Anniversary" },
 ];
 
 const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcategories = [] }) => {
@@ -311,17 +311,21 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                 </Link>
 
                 {/* Header */}
-                <div className='my-5'>
-                    <div className="flex items-start gap-6">
-                        <div className="relative flex-shrink-0">
-                            <Avatar className="w-32 h-32 rounded-2xl border-4 border-white shadow-lg">
-                                <AvatarImage className="object-cover" src={vendor.businessLogo} />
-                                <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl">
+                <div className='relative overflow-hidden rounded-3xl bg-white shadow-sm border border-gray-100 p-8'>
+                    <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+                    <div className="relative flex items-start gap-8 z-10">
+                        <div className="relative flex-shrink-0 group">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl opacity-75 group-hover:opacity-100 transition duration-200 blur"></div>
+                            <Avatar className="w-32 h-32 rounded-2xl border-4 border-white shadow-2xl relative">
+                                <AvatarImage className="object-cover rounded-xl" src={vendor.businessLogo} />
+                                <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl">
                                     {getInitials(vendor.businessName)}
                                 </AvatarFallback>
                             </Avatar>
                             {vendor.isRecommended && (
-                                <div className="absolute -top-2 -left-2 bg-amber-400 rounded-full p-2 shadow-lg">
+                                <div className="absolute -top-3 -left-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full p-2.5 shadow-lg border-2 border-white z-10">
                                     <BadgeCheck className="w-5 h-5 text-white" />
                                 </div>
                             )}
@@ -413,10 +417,10 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         <span className="text-gray-500">({vendor.reviewCount || 0} reviews)</span>
                                     </div>
                                 )}
-                                
-                                 {vendor.averageRating > 0 && (
+
+                                {vendor.averageRating > 0 && (
                                     <span className="text-gray-400">•</span>
-                                 )}
+                                )}
                                 {vendor.pricingStartingFrom > 0 && (
                                     <>
                                         <span className="text-gray-600">Starting from <span className="font-bold text-gray-900">AED {vendor.pricingStartingFrom}</span></span>
@@ -432,16 +436,24 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="w-full justify-start border-b border-b-secondary bg-white p-0 h-auto rounded-none shadow-sm">
-                        <TabsTrigger value="overview" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="w-full justify-start bg-transparent p-1 h-auto gap-2 border-b border-gray-100 pb-4">
+                        <TabsTrigger
+                            value="overview"
+                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                        >
                             <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
                         </TabsTrigger>
-                        <TabsTrigger value="gallery" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                        <TabsTrigger
+                            value="gallery"
+                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                        >
                             <ImageIcon className="w-4 h-4 mr-2" /> Gallery
                         </TabsTrigger>
-                        <TabsTrigger value="packages" className="border-0 data-[state=active]:border-b-5 data-[state=active]:border-secondary data-[state=active]:text-white rounded-lg px-6 py-3 cursor-pointer">
+                        <TabsTrigger
+                            value="packages"
+                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                        >
                             <Box className="w-4 h-4 mr-2" /> Packages
                         </TabsTrigger>
                     </TabsList>
@@ -452,7 +464,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                             {/* Main Content */}
                             <div className="lg:col-span-2 space-y-6">
                                 {/* Vendor Profile - EDITABLE */}
-                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center justify-between mb-5">
                                         <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
                                             <Building2 className="w-5 h-5 text-blue-600" />
@@ -503,7 +515,8 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                 </div>
 
                                 {/* Subscription Details */}
-                                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded p-6 border border-indigo-200">
+                                <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl p-8 border border-indigo-100 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100 rounded-full blur-2xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
                                     <div className="flex items-center justify-between mb-5">
                                         <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
                                             <PackageIcon className="w-5 h-5 text-blue-600" />
@@ -661,7 +674,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
 
 
                                 {vendor.allFeatures && vendor.allFeatures.length > 0 && (
-                                    <div className="bg-white shadow p-6 border border-gray-100">
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300">
                                         <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
                                             <Tag className="w-5 h-5 text-indigo-600" />
                                             Features & Benefits
@@ -720,7 +733,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                 }
 
 
-                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center justify-between mb-5">
                                         <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
                                             <FileText className="w-5 h-5 text-blue-600" />
@@ -772,7 +785,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                             {/* Sidebar */}
                             < div className="space-y-6" >
                                 {/* Contact */}
-                                < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
+                                < div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300" >
                                     <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-5 flex items-center gap-2">
                                         <User className="w-5 h-5 text-blue-600" />
                                         Contact Information
@@ -796,7 +809,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                 </div >
 
                                 {/* Location */}
-                                < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
+                                < div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300" >
                                     <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         <MapPin className="w-5 h-5 text-blue-600" />
                                         Location

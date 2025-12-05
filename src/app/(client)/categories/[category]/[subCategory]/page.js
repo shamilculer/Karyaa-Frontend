@@ -7,6 +7,12 @@ import PageTitle from "@/app/(client)/components/common/PageTitle";
 import VendorsListWrapper from "@/app/(client)/components/common/vendorsList/VendorListWrapper";
 import { getSubcategoryDetails } from "@/app/actions/public/categories";
 import Image from "next/image";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata({ params }) {
+  const { subCategory } = await params;
+  return await getMetaData("subcategory", subCategory);
+}
 
 const SubCategoryPage = async ({ params, searchParams }) => {
   let { subCategory } = await params;

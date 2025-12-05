@@ -6,6 +6,11 @@ import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "../components/common/PageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "gallery");
+}
 
 const GalleryPage = async ({ searchParams }) => {
   const params = await searchParams;

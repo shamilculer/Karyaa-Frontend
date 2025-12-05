@@ -14,6 +14,11 @@ import HowItWorksServer from "./components/sections/HowItWorksServer";
 import AdbannerWrapper from "./components/features/adBanner/AdBannerWrapper";
 import BlogPosts from "./components/common/BlogPosts";
 import TestimonialsServer from "./components/sections/TestimonialsServer";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "home");
+}
 
 const initialBlogParams = { page: 1, limit: 3 };
 

@@ -10,6 +10,11 @@ import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "../components/common/CategoriesList/CategoriesList";
 import PageTitle from "../components/common/PageTitle";
 
+export const metadata = {
+  title: "My Saved Vendors | Karyaa",
+  description: "View your shortlisted vendors and plan your event with ease.",
+};
+
 // ===============================================
 // SAVED VENDORS CONTENT (Server Component)
 // ===============================================

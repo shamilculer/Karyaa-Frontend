@@ -3,6 +3,11 @@
 import { Suspense } from "react";
 import PageTitle from "../components/common/PageTitle";
 import IdeasContent from "./IdeasContent";
+import { getMetaData } from "@/lib/seo";
+
+export async function generateMetadata() {
+  return await getMetaData("static", "ideas");
+}
 
 // This route uses server-only cookies via apiFetch; force dynamic rendering so Next
 // doesn't attempt to statically prerender it and error on cookie usage.

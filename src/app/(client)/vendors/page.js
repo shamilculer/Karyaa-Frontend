@@ -6,6 +6,11 @@ import PageSearchBar from "../components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "../components/common/PageTitle";
 import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
 
+export const metadata = {
+  title: "Search Vendors | Karyaa",
+  description: "Find and filter the best event vendors in the UAE. Search by category, location, price, and more.",
+};
+
 const VendorsPage = async ({ searchParams }) => {
 
   const filters = await searchParams;
