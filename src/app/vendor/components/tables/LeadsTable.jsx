@@ -318,7 +318,7 @@ export default function LeadsTable({ controls = true }) {
                             View Details
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                        <DropdownMenuLabel className="bg-gray-300">Change Status</DropdownMenuLabel>
                         {STATUS_OPTIONS.map(status => (
                             <DropdownMenuItem
                                 key={status}
@@ -360,8 +360,7 @@ export default function LeadsTable({ controls = true }) {
             header: ({ table }) => (
                 <div className="flex items-center justify-center">
                     <Checkbox
-                        checked={table.getIsAllPageRowsSelected()}
-                        indeterminate={table.getIsSomePageRowsSelected() ? true : undefined || undefined}
+                        checked={table.getIsSomePageRowsSelected() ? "indeterminate" : table.getIsAllPageRowsSelected()}
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all"
                     />

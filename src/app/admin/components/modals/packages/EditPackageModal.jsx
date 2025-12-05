@@ -255,6 +255,7 @@ export default function EditPackageModal({ vendorId, packageData, onUpdate }) {
                                                 label="Upload cover image"
                                                 folderPath={`vendor-packages/${vendorId}`}
                                                 errors={form.formState.errors}
+                                                role="admin"
                                             />
                                         </FormControl>
                                         <FormMessage />

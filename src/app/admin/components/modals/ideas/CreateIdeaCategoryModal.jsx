@@ -6,14 +6,14 @@ import * as React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 // ➡️ Import Dialog and DialogTrigger
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     DialogFooter,
     DialogTrigger // ⬅️ The component for the button
-} from "@/components/ui/dialog"; 
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 // ➡️ Renaming the component to reflect it includes the whole Dialog structure
 export function CreateIdeaCategoryModal({ onCreationSuccess }) {
-    
+
     // State to force the Dialog to close after successful submission
     const [open, setOpen] = useState(false);
 
@@ -48,7 +48,7 @@ export function CreateIdeaCategoryModal({ onCreationSuccess }) {
         }
 
         setIsSubmitting(true);
-        
+
         const res = await createIdeaCategoryAction({
             name: trimmedName,
             coverImage: formData.coverImage || "",
@@ -58,10 +58,10 @@ export function CreateIdeaCategoryModal({ onCreationSuccess }) {
 
         if (res.success) {
             toast.success(res.message);
-            reset(); 
+            reset();
             setOpen(false); // Manually close the Dialog using local state
             if (onCreationSuccess) {
-                onCreationSuccess(); 
+                onCreationSuccess();
             }
         } else {
             toast.error(res.message || "An error occurred during creation.");
@@ -71,12 +71,12 @@ export function CreateIdeaCategoryModal({ onCreationSuccess }) {
     return (
         // ➡️ The Dialog component now manages the 'open' state, which is required
         <Dialog open={open} onOpenChange={setOpen}>
-            
+
             {/* 1. The Dialog Trigger (Your Round Button) */}
             <DialogTrigger asChild>
                 <Button
                     type="button"
-                    variant="default" 
+                    variant="default"
                     size="icon"
                     className="w-16 h-16 rounded-full mb-5"
                     title="Create New Category"
@@ -92,10 +92,10 @@ export function CreateIdeaCategoryModal({ onCreationSuccess }) {
                         Create New Idea Category
                     </DialogTitle>
                 </DialogHeader>
-                
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="grid gap-6 py-6">
-                        
+
                         {/* Name Input Field */}
                         <div className="space-y-2">
                             <Label htmlFor="name" className="text-base">Category Name</Label>
@@ -130,28 +130,29 @@ export function CreateIdeaCategoryModal({ onCreationSuccess }) {
                                 allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
                                 folderPath="idea-categories"
                                 multiple={false}
+                                role="admin"
                             />
                             {errors.coverImage && <p className="text-red-500 text-sm mt-1">{errors.coverImage.message}</p>}
                         </div>
-                        
+
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => { reset(); setOpen(false); }} 
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => { reset(); setOpen(false); }}
                             disabled={isSubmitting}
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             disabled={isSubmitting || !currentName?.trim()}
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Creating...
                                 </>
                             ) : (

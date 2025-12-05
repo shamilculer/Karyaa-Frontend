@@ -159,12 +159,13 @@ const SubscriptionData = () => {
     const durationUnit = bundle.duration?.unit;
     const bonusValue = bundle.bonusPeriod?.value;
     const bonusUnit = bundle.bonusPeriod?.unit;
-    
-    let durationText = durationValue && durationUnit 
-        ? `${durationValue} ${durationUnit.replace(/s$/, '')}${durationValue !== 1 ? 's' : ''}` 
+
+    let durationText = durationValue && durationUnit
+        ? `${durationValue} ${durationUnit.replace(/s$/, '')}${durationValue !== 1 ? 's' : ''}`
         : 'N/A';
 
-    if (bonusValue > 0) {
+    // Add bonus period if it exists and has a value
+    if (bonusValue && bonusValue > 0 && bonusUnit) {
         durationText += ` + ${bonusValue} ${bonusUnit.replace(/s$/, '')}${bonusValue !== 1 ? 's' : ''}`;
     }
 
@@ -173,11 +174,11 @@ const SubscriptionData = () => {
             {/* Status Card */}
             <div className='bg-white rounded-lg border border-gray-200 p-6'>
                 <h4 className="text-base font-semibold text-gray-900 mb-4">Current Status</h4>
-                
+
                 <div className='mb-6'>
                     <StatusBadge status={status} isActive={isSubscriptionActive} />
                 </div>
-                
+
                 <div>
                     <InfoRow
                         icon={Calendar}
@@ -195,7 +196,7 @@ const SubscriptionData = () => {
             {/* Bundle Details Card */}
             <div className='lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6'>
                 <h4 className="text-base font-semibold text-gray-900 mb-4 pb-4 border-b border-gray-200">Bundle Details</h4>
-                
+
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
@@ -204,7 +205,7 @@ const SubscriptionData = () => {
                         </div>
                         <p className="text-sm font-semibold text-gray-900">{bundle.name || 'Custom Plan'}</p>
                     </div>
-                    
+
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
                             <Tag className="w-4 h-4" />
@@ -212,7 +213,7 @@ const SubscriptionData = () => {
                         </div>
                         <p className="text-sm font-semibold text-gray-900">{bundle.price ? `${bundle.price} AED` : 'Custom'}</p>
                     </div>
-                    
+
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
                             <Calendar className="w-4 h-4" />
@@ -223,7 +224,7 @@ const SubscriptionData = () => {
                 </div>
 
                 <h5 className="text-sm font-semibold text-gray-900 mb-3">Plan Features</h5>
-                
+
                 <div className="space-y-2">
                     {bundle.features && bundle.features.length > 0 ? (
                         bundle.features.map((feature, index) => (

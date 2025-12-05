@@ -233,6 +233,7 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
                 multiple={true}
                 errors={errors}
                 onSuccess={handleImageUpload}
+                role="admin"
               />
             </div>
           </div>

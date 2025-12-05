@@ -19,10 +19,15 @@ const SingleVendorManagePage = async ({ params }) => {
     redirect('/admin/vendor-management');
   }
 
-  // Extract all subcategories from categories
+  // Extract all subcategories from categories and ensure parentCategory is attached
   const allSubcategories = allCategoriesResult.success
     ? allCategoriesResult.categories.reduce((acc, cat) => {
-      return acc.concat(cat.subCategories || []);
+      // Attach parent category ID to each subcategory for filtering
+      const subs = (cat.subCategories || []).map(sub => ({
+        ...sub,
+        parentCategory: cat._id
+      }));
+      return acc.concat(subs);
     }, [])
     : [];
 

@@ -16,7 +16,7 @@ const CreateAccountPage = () => {
       </div>
       <div className="w-full bg-body lg:w-1/3 min-h-screen flex flex-col justify-center px-5 sm:px-10 max-xl:z-10">
         <div className="max-xl:flex flex-col items-center justify-center">
-          <div className="xl:hidden">
+          <div className="lg:hidden">
             <Image
               src="../logo.svg"
               alt="Karyaa"

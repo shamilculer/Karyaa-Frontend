@@ -385,8 +385,7 @@ export default function LeadsDataTable({ controls = true }) {
             header: ({ table }) => (
                 <div className="flex items-center justify-center">
                     <Checkbox
-                        checked={table.getIsAllPageRowsSelected()}
-                        indeterminate={table.getIsSomePageRowsSelected() ? true : undefined}
+                        checked={table.getIsSomePageRowsSelected() ? "indeterminate" : table.getIsAllPageRowsSelected()}
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all"
                     />
@@ -450,7 +449,7 @@ export default function LeadsDataTable({ controls = true }) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="bg-white">
-                                    <DropdownMenuLabel>Change Status To</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="bg-gray-600">Change Status To</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     {STATUS_OPTIONS.map(status => (
                                         <DropdownMenuItem

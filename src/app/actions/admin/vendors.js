@@ -3,10 +3,10 @@
 import { apiFetch } from "@/lib/api"
 
 // --- 1. GET ALL VENDORS (Admin - Paginated/Filtered) ---
-export const getAllVendorsAction = async ({ 
-    page = 1, 
-    limit = 15, 
-    search = "", 
+export const getAllVendorsAction = async ({
+    page = 1,
+    limit = 15,
+    search = "",
     vendorStatus = "",
     city = "",
     expiryStatus = "",
@@ -14,7 +14,7 @@ export const getAllVendorsAction = async ({
     sortBy = "createdAt",
     sortOrder = "desc"
 } = {}) => {
-    
+
     const queryParams = new URLSearchParams();
     queryParams.append('page', String(page));
     queryParams.append('limit', String(limit));
@@ -102,9 +102,9 @@ export const updateVendorStatusAction = async (id, vendorStatus) => {
     }
 
     if (!['approved', 'pending', 'rejected', 'expired'].includes(vendorStatus)) {
-        return { 
-            success: false, 
-            message: "Invalid status. Must be 'approved', 'pending', 'rejected', or 'expired'" 
+        return {
+            success: false,
+            message: "Invalid status. Must be 'approved', 'pending', 'rejected', or 'expired'"
         };
     }
 
@@ -147,27 +147,27 @@ export const updateVendorDurationAction = async (id, customDuration) => {
     }
 
     // Validate customDuration structure
-if (customDuration) {
+    if (customDuration) {
         if (typeof customDuration.value !== 'number' || !customDuration.unit) {
-            return { 
-                success: false, 
-                message: "customDuration must include 'value' (number) and 'unit'" 
+            return {
+                success: false,
+                message: "customDuration must include 'value' (number) and 'unit'"
             };
         }
 
         if (!['days', 'months', 'years'].includes(customDuration.unit)) {
-            return { 
-                success: false, 
-                message: "unit must be 'days', 'months', or 'years'" 
+            return {
+                success: false,
+                message: "unit must be 'days', 'months', or 'years'"
             };
         }
 
         // Validate bonusPeriod if provided
         if (customDuration.bonusPeriod && customDuration.bonusPeriod.unit) {
             if (!['days', 'months', 'years'].includes(customDuration.bonusPeriod.unit)) {
-                return { 
-                    success: false, 
-                    message: "bonusPeriod unit must be 'days', 'months', or 'years'" 
+                return {
+                    success: false,
+                    message: "bonusPeriod unit must be 'days', 'months', or 'years'"
                 };
             }
         }
@@ -212,9 +212,9 @@ export const updateVendorFeaturesAction = async (id, customFeatures) => {
     }
 
     if (!Array.isArray(customFeatures)) {
-        return { 
-            success: false, 
-            message: "customFeatures must be an array of strings" 
+        return {
+            success: false,
+            message: "customFeatures must be an array of strings"
         };
     }
 
@@ -313,9 +313,9 @@ export const updateVendorDocumentsAction = async (id, documentData) => {
     ].some(field => field !== undefined && field !== null);
 
     if (!hasAnyField) {
-        return { 
-            success: false, 
-            message: "At least one document field must be provided." 
+        return {
+            success: false,
+            message: "At least one document field must be provided."
         };
     }
 
@@ -412,9 +412,9 @@ export const getVendorGalleryAction = async (id) => {
 // --- 11. ADD VENDOR GALLERY ITEM ---
 export const addVendorGalleryItemAction = async (id, galleryData) => {
     if (!id) return { success: false, message: "Vendor ID is required." };
-    
+
     const { url, isFeatured, orderIndex } = galleryData;
-    
+
     if (!url) {
         return { success: false, message: "Image URL is required." };
     }
@@ -427,7 +427,7 @@ export const addVendorGalleryItemAction = async (id, galleryData) => {
             auth: true,
             body: JSON.stringify({ url, isFeatured, orderIndex }),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -441,7 +441,7 @@ export const addVendorGalleryItemAction = async (id, galleryData) => {
 // --- 12. UPDATE VENDOR GALLERY ITEM ---
 export const updateVendorGalleryItemAction = async (id, itemId, updateData) => {
     if (!id || !itemId) return { success: false, message: "IDs required." };
-    
+
     const endpoint = `/admin/vendors/${id}/gallery/${itemId}`;
     try {
         const response = await apiFetch(endpoint, {
@@ -450,7 +450,7 @@ export const updateVendorGalleryItemAction = async (id, itemId, updateData) => {
             auth: true,
             body: JSON.stringify(updateData),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -492,7 +492,7 @@ export const addVendorGalleryItemsAction = async (vendorId, items) => {
             auth: true,
             body: JSON.stringify({ items }),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -518,7 +518,7 @@ export const deleteVendorGalleryItemsAction = async (vendorId, itemIds) => {
             auth: true,
             body: JSON.stringify({ itemIds }),
         });
-        
+
         if (response.success) {
             return { success: true, message: response.message };
         } else {
@@ -548,7 +548,7 @@ export const getVendorPackagesAction = async (id) => {
 // --- 17. ADD VENDOR PACKAGE ---
 export const addVendorPackageAction = async (id, packageData) => {
     if (!id) return { success: false, message: "Vendor ID is required." };
-    
+
     const {
         coverImage,
         name,
@@ -558,9 +558,9 @@ export const addVendorPackageAction = async (id, packageData) => {
         services,
         includes
     } = packageData;
-    
+
     // Validate required fields
-    if (!coverImage || !name || !description || !services?.length || 
+    if (!coverImage || !name || !description || !services?.length ||
         priceStartingFrom === undefined || priceStartingFrom === null) {
         return {
             success: false,
@@ -576,7 +576,7 @@ export const addVendorPackageAction = async (id, packageData) => {
             auth: true,
             body: JSON.stringify(packageData),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -590,7 +590,7 @@ export const addVendorPackageAction = async (id, packageData) => {
 // --- 18. UPDATE VENDOR PACKAGE ---
 export const updateVendorPackageAction = async (id, packageId, packageData) => {
     if (!id || !packageId) return { success: false, message: "IDs required." };
-    
+
     const endpoint = `/admin/vendors/${id}/packages/${packageId}`;
     try {
         const response = await apiFetch(endpoint, {
@@ -599,7 +599,7 @@ export const updateVendorPackageAction = async (id, packageId, packageData) => {
             auth: true,
             body: JSON.stringify(packageData),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -631,7 +631,7 @@ export const deleteVendorPackageAction = async (id, packageId) => {
 // --- 20. ADD ADMIN COMMENT ---
 export const addAdminCommentAction = async (vendorId, message) => {
     if (!vendorId || !message) return { success: false, message: "Vendor ID and message are required." };
-    
+
     const endpoint = `/admin/vendors/${vendorId}/comments`;
     try {
         const response = await apiFetch(endpoint, {
@@ -640,7 +640,7 @@ export const addAdminCommentAction = async (vendorId, message) => {
             auth: true,
             body: JSON.stringify({ message }),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -654,7 +654,7 @@ export const addAdminCommentAction = async (vendorId, message) => {
 // --- 21. UPDATE ADMIN COMMENT ---
 export const updateAdminCommentAction = async (vendorId, commentId, message) => {
     if (!vendorId || !commentId || !message) return { success: false, message: "Vendor ID, comment ID, and message are required." };
-    
+
     const endpoint = `/admin/vendors/${vendorId}/comments/${commentId}`;
     try {
         const response = await apiFetch(endpoint, {
@@ -663,7 +663,7 @@ export const updateAdminCommentAction = async (vendorId, commentId, message) => 
             auth: true,
             body: JSON.stringify({ message }),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -677,7 +677,7 @@ export const updateAdminCommentAction = async (vendorId, commentId, message) => 
 // --- 22. DELETE ADMIN COMMENT ---
 export const deleteAdminCommentAction = async (vendorId, commentId) => {
     if (!vendorId || !commentId) return { success: false, message: "IDs required." };
-    
+
     const endpoint = `/admin/vendors/${vendorId}/comments/${commentId}`;
     try {
         const response = await apiFetch(endpoint, { method: "DELETE", role: "admin", auth: true });
@@ -696,12 +696,12 @@ export const deleteAdminCommentAction = async (vendorId, commentId) => {
 // --- 23. ADD ADDITIONAL DOCUMENT ---
 export const addAdditionalDocumentAction = async (vendorId, documentData) => {
     if (!vendorId) return { success: false, message: "Vendor ID is required." };
-    
+
     const { documentName, documentUrl } = documentData;
     if (!documentName || !documentUrl) {
         return { success: false, message: "Document name and URL are required." };
     }
-    
+
     const endpoint = `/admin/vendors/${vendorId}/additional-documents`;
     try {
         const response = await apiFetch(endpoint, {
@@ -710,7 +710,7 @@ export const addAdditionalDocumentAction = async (vendorId, documentData) => {
             auth: true,
             body: JSON.stringify({ documentName, documentUrl }),
         });
-        
+
         if (response.success) {
             return { success: true, data: response.data, message: response.message };
         } else {
@@ -724,7 +724,7 @@ export const addAdditionalDocumentAction = async (vendorId, documentData) => {
 // --- 24. DELETE ADDITIONAL DOCUMENT ---
 export const deleteAdditionalDocumentAction = async (vendorId, documentId) => {
     if (!vendorId || !documentId) return { success: false, message: "IDs required." };
-    
+
     const endpoint = `/admin/vendors/${vendorId}/additional-documents/${documentId}`;
     try {
         const response = await apiFetch(endpoint, { method: "DELETE", role: "admin", auth: true });
@@ -732,6 +732,23 @@ export const deleteAdditionalDocumentAction = async (vendorId, documentId) => {
             return { success: true, data: response.data, message: response.message };
         } else {
             return { success: false, message: response.message || "Failed to delete document." };
+        }
+    } catch (error) {
+        return { success: false, message: error.message || "An unexpected error occurred." };
+    }
+};
+
+// --- 25. DELETE VENDOR ---
+export const deleteVendorAction = async (id) => {
+    if (!id) return { success: false, message: "Vendor ID is required." };
+
+    const endpoint = `/admin/vendors/${id}`;
+    try {
+        const response = await apiFetch(endpoint, { method: "DELETE", role: "admin", auth: true });
+        if (response.success) {
+            return { success: true, message: response.message || "Vendor deleted successfully." };
+        } else {
+            return { success: false, message: response.message || "Failed to delete vendor." };
         }
     } catch (error) {
         return { success: false, message: error.message || "An unexpected error occurred." };

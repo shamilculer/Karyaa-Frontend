@@ -153,7 +153,7 @@ function InterestsByPackage() {
                                 axisLine={false}
                                 tickFormatter={(value) => value.length > 15 ? value.slice(0, 15) + "..." : value}
                             />
-                            <YAxis hide={true} />
+                            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel />}

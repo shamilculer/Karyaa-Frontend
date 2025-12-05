@@ -1,59 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader2, X, ChevronLeft, Upload, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
-// Shadcn Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { Loader2, X } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
-
 import { createIdeaAction } from "@/app/actions/admin/ideas";
-import Image from "next/image";
+import { getIdeaCategories } from "@/app/actions/public/categories";
 
-const allowedCategories = [
-  "Engagement & Proposal Events",
-  "Baby Showers & Gender Reveals",
-  "Birthdays & Anniversaries",
-  "Graduation Celebrations",
-  "Corporate Events",
-  "Private Parties",
-  "Product Launches & Brand Events",
-  "Cultural & Festival Events",
-];
-
-// ✅ Zod Schema
+// Schema
 const ideaSchema = z.object({
-  title: z.string().min(3, "Title is required"),
-  description: z.string().min(10, "Description is too short"),
-  category: z.string().min(1, "Category is required"),
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  category: z.string().min(1, "Please select a category"),
   images: z.array(z.string()).optional(),
 });
 
 export default function AddIdeaPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [imageList, setImageList] = useState([]);
 
   const {
@@ -61,7 +46,6 @@ export default function AddIdeaPage() {
     handleSubmit,
     control,
     setValue,
-    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(ideaSchema),
@@ -73,176 +57,216 @@ export default function AddIdeaPage() {
     },
   });
 
-  // ✅ Handle image uploads (supports both single and multiple)
-  const handleImageUpload = (url) => {
-    // Handle both single URL and array of URLs
-    const newUrls = Array.isArray(url) ? url : [url];
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await getIdeaCategories();
+        if (res.success) {
+          setCategories(res.data);
+        } else {
+          toast.error("Failed to load categories");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Error loading categories");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const handleImageUpload = (urls) => {
+    const newUrls = Array.isArray(urls) ? urls : [urls];
     const updated = [...imageList, ...newUrls];
     setImageList(updated);
     setValue("images", updated);
   };
 
-  // ✅ Remove image
   const removeImage = (url) => {
     const updated = imageList.filter((img) => img !== url);
     setImageList(updated);
     setValue("images", updated);
   };
 
-  // ✅ Submit
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    const payload = { ...data, images: imageList };
-    const res = await createIdeaAction(payload);
-    setIsSubmitting(false);
+    try {
+      const payload = {
+        ...data,
+        gallery: imageList,
+      };
 
-    if (res.success) {
-      toast.success(res.message || "Idea created successfully!");
-      reset();
-      setImageList([]);
-      router.push("/admin/content-moderation/ideas");
-    } else {
-      toast.error(res.message || "Failed to create idea.");
+      const result = await createIdeaAction(payload);
+
+      if (result.success) {
+        toast.success("Idea created successfully");
+        router.push("/admin/content-moderation/ideas");
+      } else {
+        toast.error(result.message || "Failed to create idea");
+      }
+    } catch (error) {
+      console.error("Error creating idea:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-10">
-      <Card className="shadow-md border rounded-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-primary">
-            Add New Idea
-          </CardTitle>
-        </CardHeader>
+    <div className="container max-w-5xl mx-auto py-8 px-4">
+      <div className="mb-8 flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="rounded-full hover:bg-slate-100"
+        >
+          <ChevronLeft className="w-6 h-6 text-slate-600" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Add New Idea</h1>
+          <p className="text-slate-500 mt-1">Create a new inspiration idea for users</p>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            {/* Title */}
-            <div className="space-y-2">
-              <label className="font-medium text-sm">Title</label>
-              <Input
-                placeholder="Enter idea title"
-                {...register("title")}
-                className={errors.title && "border-red-500"}
-              />
-              {errors.title && (
-                <p className="text-red-500 text-sm">{errors.title.message}</p>
-              )}
-            </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic Information</CardTitle>
+                <CardDescription>
+                  Enter the core details about this idea
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Title</label>
+                  <Input
+                    placeholder="e.g., Modern Living Room Design"
+                    {...register("title")}
+                    className={errors.title ? "border-red-500" : ""}
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-red-500">{errors.title.message}</p>
+                  )}
+                </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <label className="font-medium text-sm">Description</label>
-              <Textarea
-                placeholder="Write about this idea..."
-                {...register("description")}
-                className={`h-56 ${errors.description && "border-red-500"}`}
-              />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Description</label>
+                  <Textarea
+                    placeholder="Describe the idea, style, and key elements..."
+                    className={`min-h-[150px] ${errors.description ? "border-red-500" : ""}`}
+                    {...register("description")}
+                  />
+                  {errors.description && (
+                    <p className="text-sm text-red-500">{errors.description.message}</p>
+                  )}
+                </div>
 
-            {/* Category (SELECT) */}
-            <div className="space-y-2">
-              <label className="font-medium text-sm">Category</label>
-              <Controller
-                control={control}
-                name="category"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger
-                      className={`w-full ${errors.category && "border-red-500"}`}
-                    >
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allowedCategories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.category && (
-                <p className="text-red-500 text-sm">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Category</label>
+                  <Controller
+                    control={control}
+                    name="category"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isLoadingCategories}
+                      >
+                        <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+                          <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Select a category"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat._id} value={cat._id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.category && (
+                    <p className="text-sm text-red-500">{errors.category.message}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Gallery Upload */}
-            <div className="space-y-3">
-              <label className="font-medium text-sm">Gallery Images</label>
+          {/* Right Column - Images */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gallery Images</CardTitle>
+                <CardDescription>
+                  Upload images for this idea
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {imageList.map((url, index) => (
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden border bg-slate-50 group">
+                      <Image
+                        src={url}
+                        alt={`Idea image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(url)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
 
-              <div className="flex flex-wrap gap-4">
-                {imageList.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="relative w-28 h-28 border rounded-lg overflow-hidden group"
-                  >
-                    <Image
-                      src={img}
-                      width={112}
-                      height={112}
-                      alt={`Idea Image ${idx + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(img)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-
-                <div className="w-28 h-28 flex items-center justify-center border rounded-lg bg-gray-50 hover:bg-gray-100">
+                <div className="mt-4">
                   <ControlledFileUpload
                     control={control}
-                    name="upload"
-                    label="Upload"
-                    folderPath="admin/ideas/gallery"
+                    name="images"
+                    label="Upload Images"
+                    folderPath="ideas/gallery"
                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
-                    errors={errors}
                     onSuccess={(url) => handleImageUpload(url)}
                     multiple={true}
                     isPublic={false}
+                    role="admin"
                   />
                 </div>
-              </div>
-            </div>
-          </CardContent>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
-          <CardFooter className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                "Create Idea"
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+        <div className="flex items-center justify-end gap-4 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting} className="min-w-[120px]">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create Idea"
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

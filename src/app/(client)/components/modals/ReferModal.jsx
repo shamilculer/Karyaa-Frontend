@@ -4,6 +4,7 @@ import {
     Dialog,
     DialogContent,
     DialogTrigger,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,6 +45,7 @@ export default function ReferModal({ children, triggerText = "Refer & Earn" }) {
                 <DialogContent
                     className="max-h-[75vh] sm:max-h-[60vh] xl:max-h-[90vh] flex p-0 md:max-w-3xl xl:!max-w-6xl max-w-[95%] rounded-xl overflow-hidden bg-[#fffef9]"
                 >
+                    <DialogTitle className="sr-only">Refer a Friend</DialogTitle>
                     <div className="w-1/2 bg-[url('/new-banner-7.jpg')] bg-center bg-cover min-h-72 max-md:hidden">
                     </div>
                     <ScrollArea className="w-1/2 px-3 md:px-6  flex-1 overflow-y-auto">

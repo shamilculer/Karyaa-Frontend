@@ -20,7 +20,13 @@ const sections = [
     label: "Hero Section",
     description: "Main banner with headline and description",
     fields: [
-      { name: "heading", label: "Heading", type: "text", placeholder: "YOUR PERFECT EVENT STARTS HERE." },
+      {
+        name: "heading",
+        label: "Heading",
+        type: "textarea",
+        placeholder: "Your Perfect Event Starts Here.\nPlan. Connect. Celebrate.",
+        description: "Press Enter to create a new line in your heading"
+      },
       { name: "description", label: "Description", type: "textarea", placeholder: "Plan your next celebration in the perfect venue..." },
     ]
   },
@@ -111,6 +117,7 @@ const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, f
 
         try {
           const result = await uploadFile(file, {
+            role: 'admin',
             folder: `admin/landing-page/${sectionKey}`,
             isPublic: false
           });
@@ -443,8 +450,11 @@ const LandingPageEditor = () => {
               value={value}
               onChange={(e) => handleFieldChange(section.key, field.name, e.target.value)}
               placeholder={field.placeholder}
-              className="h-32 resize-none"
+              className={`${field.name === 'heading' ? 'h-20' : 'h-32'} resize-none`}
             />
+            {field.description && (
+              <p className="!text-xs text-gray-600">{field.description}</p>
+            )}
           </div>
         );
 
@@ -537,16 +547,16 @@ const LandingPageEditor = () => {
                     <Button
                       key={section.key}
                       variant={activeSection === section.key ? "default" : "ghost"}
-                      className="w-full justify-start rounded-lg h-14"
+                      className="w-full justify-start rounded-lg h-auto min-h-14 py-3"
                       onClick={() => setActiveSection(section.key)}
                     >
                       <div className="flex items-center gap-3 w-full">
-                        {section.key === "hero-section" && <ImageIcon className="h-4 w-4" />}
-                        {section.key === "testimonials" && <List className="h-4 w-4" />}
-                        {!["hero-section", "testimonials"].includes(section.key) && <Type className="h-4 w-4" />}
+                        {section.key === "hero-section" && <ImageIcon className="h-4 w-4 shrink-0" />}
+                        {section.key === "testimonials" && <List className="h-4 w-4 shrink-0" />}
+                        {!["hero-section", "testimonials"].includes(section.key) && <Type className="h-4 w-4 shrink-0" />}
                         <div className="text-left flex-1">
-                          <div className="text-sm font-medium">{section.label}</div>
-                          <div className="text-xs text-muted-foreground">{section.description}</div>
+                          <div className="text-sm font-medium whitespace-normal break-words">{section.label}</div>
+                          <div className="text-xs text-muted-foreground whitespace-normal break-words">{section.description}</div>
                         </div>
                       </div>
                     </Button>

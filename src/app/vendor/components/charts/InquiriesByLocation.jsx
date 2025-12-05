@@ -147,7 +147,7 @@ function InquiriesByLocation() {
                                 axisLine={false}
                                 width={100}
                             />
-                            <XAxis type="number" hide />
+                            <XAxis type="number" hide domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel />}

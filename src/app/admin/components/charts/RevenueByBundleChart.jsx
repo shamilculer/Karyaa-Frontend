@@ -94,7 +94,7 @@ function RevenueByBundleChart() {
                             Revenue by Bundle
                         </CardTitle>
                         <CardDescription className="text-xs text-gray-500">
-                            Total ₹{totalRevenue.toLocaleString()} revenue across all bundles
+                            Total AED {totalRevenue.toLocaleString()} revenue across all bundles
                         </CardDescription>
                     </div>
                 </div>
@@ -132,7 +132,8 @@ function RevenueByBundleChart() {
                             axisLine={false}
                             tickMargin={10}
                             className="text-xs"
-                            tickFormatter={(value) => `₹${value.toLocaleString()}`}
+                            tickFormatter={(value) => `AED ${value.toLocaleString()}`}
+                            domain={['dataMin', (dataMax) => dataMax * 1.15]}
                         />
                         <ChartTooltip
                             cursor={{ fill: "hsl(210 40% 96.1%)" }}
@@ -141,7 +142,7 @@ function RevenueByBundleChart() {
                                     nameKey="bundle"
                                     hideLabel
                                     indicator="dot"
-                                    formatter={(value) => `₹${value.toLocaleString()}`}
+                                    formatter={(value) => `AED ${value.toLocaleString()}`}
                                 />
                             }
                         />

@@ -395,7 +395,7 @@ const VendorPage = async ({ params }) => {
 
           {/* ✅ Right Column - STICKY SIDEBAR (4 columns on large screens) */}
           <aside
-            className="lg:col-span-4 order-1 lg:order-2 z-60"
+            className="lg:col-span-4 order-1 lg:order-2 z-901"
             style={{
               position: 'sticky',
               top: '80px',

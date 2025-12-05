@@ -61,7 +61,7 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
         try {
             const result = await uploadFile(file, {
                 folder: 'admin/profiles',
-                isPublic: true
+                role: 'admin'
             })
 
             if (result?.url) {

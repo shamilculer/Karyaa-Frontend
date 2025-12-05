@@ -110,7 +110,7 @@ export default function Step03_Review({ isLastStep }) {
                         onChange={handleCheckboxChange}
                     />
                     <label htmlFor="consent" className="text-sm text-gray-700">
-                        I confirm that all information provided is accurate and I agree to the{" "}
+                        I confirm that all information provided is accurate and I agree to the
                         <a href="/terms-and-conditions" target="_blank" className="text-indigo-600 underline">
                             Vendor Terms and Conditions
                         </a>

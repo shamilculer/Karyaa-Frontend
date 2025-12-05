@@ -140,7 +140,7 @@ export default function ReferralsCardLayout({ controls = true }) {
             if (response.error) {
                 // In a real application, you'd show a toast notification here
                 console.error("Status Update Failed:", response.error);
-                setError(response.error); 
+                setError(response.error);
             } else {
                 // Clear selections and refetch to ensure pagination/filters are respected
                 setSelectedItems(new Set());
@@ -170,7 +170,7 @@ export default function ReferralsCardLayout({ controls = true }) {
                 setSelectedItems(new Set());
                 // Reset to page 1 if the current page might become empty
                 if (currentPage !== 1 && totalItems - ids.length <= (currentPage - 1) * pageSize) {
-                     setCurrentPage(1);
+                    setCurrentPage(1);
                 } else {
                     await fetchReferrals();
                 }
@@ -320,8 +320,7 @@ export default function ReferralsCardLayout({ controls = true }) {
             {controls && !loading && !error && data.length > 0 && (
                 <div className="mb-4 flex items-center gap-2 px-2">
                     <Checkbox
-                        checked={selectedItems.size === data.length && data.length > 0}
-                        indeterminate={(selectedItems.size > 0 && selectedItems.size < data.length) ? "true" : undefined}
+                        checked={selectedItems.size > 0 && selectedItems.size < data.length ? "indeterminate" : (selectedItems.size === data.length && data.length > 0)}
                         onCheckedChange={handleSelectAll}
                         aria-label="Select all"
                     />
@@ -412,7 +411,7 @@ export default function ReferralsCardLayout({ controls = true }) {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48 bg-white">
                                                 {/* REMOVED: View Details option */}
-                                                
+
                                                 <DropdownMenuLabel>Update Status To</DropdownMenuLabel> {/* MODIFIED: Changed label */}
                                                 <DropdownMenuSeparator />
                                                 {STATUS_OPTIONS.map(status => (
@@ -429,14 +428,14 @@ export default function ReferralsCardLayout({ controls = true }) {
                                                         {updatingStatus && status === referral.status && selectedRowCount <= 1 && <Loader2 className="ml-2 h-3 w-3 animate-spin" />}
                                                     </DropdownMenuItem>
                                                 ))}
-                                                
+
                                                 {/* NEW: Individual Delete Option */}
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
                                                     onClick={() => {
                                                         // Select only the current item and open the delete confirmation dialog
-                                                        setSelectedItems(new Set([referral._id])); 
-                                                        setDeleteDialogOpen(true); 
+                                                        setSelectedItems(new Set([referral._id]));
+                                                        setDeleteDialogOpen(true);
                                                     }}
                                                     className="text-red-600 cursor-pointer"
                                                     disabled={updatingStatus || deletingReferrals}

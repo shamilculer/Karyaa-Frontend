@@ -50,7 +50,6 @@ export default function AddBannerPage() {
     { label: "Hero Section", value: "Hero Section" },
     { label: "Homepage Carousel", value: "Homepage Carousel" },
     { label: "Karyaa Recommends", value: "Karyaa Recommends" },
-    { label: "Contact Page", value: "Contact" },
     { label: "Ideas Page", value: "Ideas" },
     { label: "Gallery Page", value: "Gallery" },
     { label: "Blog Page", value: "Blog Page" },

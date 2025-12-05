@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function CookieConsent() {
     const [showConsent, setShowConsent] = useState(false);
@@ -63,13 +64,13 @@ export default function CookieConsent() {
                                 </h3>
                                 <p className="text-[var(--color-text)] !text-sm md:text-base leading-relaxed">
                                     We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.
-                                    By clicking "Accept All", you consent to our use of cookies.{" "}
-                                    <a
-                                        href="/privacy-policy"
+                                    By clicking "Accept All", you consent to our use of cookies.
+                                    <Link
+                                        href="/cookies-policy"
                                         className="text-primary hover:text-secondary underline underline-offset-2 transition-colors font-medium"
                                     >
                                         Learn more
-                                    </a>
+                                    </Link>
                                 </p>
                             </div>
 

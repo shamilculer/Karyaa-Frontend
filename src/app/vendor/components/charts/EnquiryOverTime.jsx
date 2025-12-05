@@ -161,7 +161,7 @@ const EnquiryOverTime = () => {
                                 </linearGradient>
                             </defs>
 
-                            <CartesianGrid vertical={true} stroke="#ccccccff"  strokeDasharray="2 2" />
+                            <CartesianGrid vertical={true} stroke="#ccccccff" strokeDasharray="2 2" />
                             <XAxis
                                 dataKey="time"
                                 tickLine={false}
@@ -169,7 +169,7 @@ const EnquiryOverTime = () => {
                                 tickMargin={8}
                                 tickFormatter={(value) => value.slice(0, 10)}
                             />
-                            <YAxis hide={true} />
+                            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={{ stroke: 'var(--color-enquiries)', strokeDasharray: '2 2' }}
                                 content={

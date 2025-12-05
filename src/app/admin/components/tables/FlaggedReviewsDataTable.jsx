@@ -217,7 +217,7 @@ const FlaggedReviewsDataTable = () => {
                                 {/* User Avatar and Name */}
                                 <div className="flex items-center space-x-2 text-sm mt-5">
                                     <Avatar className="w-10 h-10">
-                                        <AvatarImage src={review.user?.profileImage} alt={`${review.user?.username} avatar`} />
+                                        <AvatarImage className="size-full object-cover" src={review.user?.profileImage} alt={`${review.user?.username} avatar`} />
                                         <AvatarFallback>{getInitials(review.user?.username)}</AvatarFallback>
                                     </Avatar>
                                     <div>

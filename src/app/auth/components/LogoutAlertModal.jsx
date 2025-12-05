@@ -29,6 +29,7 @@ const LogoutAlertModal = ({ isMobile = false }) => {
         try {
             await logoutUser();
             logout();
+            localStorage.clear();
             router.push('/auth/login');
         } catch (error) {
             console.error('Logout error:', error);
@@ -49,7 +50,7 @@ const LogoutAlertModal = ({ isMobile = false }) => {
                 ) : (
                     // For desktop dropdown - use DropdownMenuItem
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <LogOut className='w-4 h-4 mr-2' /> 
+                        <LogOut className='w-4 h-4 mr-2' />
                         Logout
                     </DropdownMenuItem>
                 )}

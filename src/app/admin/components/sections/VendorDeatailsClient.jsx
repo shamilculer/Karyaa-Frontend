@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -33,8 +34,9 @@ import AdditionalDocumentsSection from './AdditionalDocumentsSection';
 import AdminCommentsSection from './AdminCommentsSection';
 import GalleryToolbar from './GalleryToolbar';
 import EditPackageModal from '../modals/packages/EditPackageModal';
-import { DocumentEditModal } from '../modals/documents/DocumentEditModal';
 import ViewPackageModal from '@/app/vendor/components/modals/packages/ViewPackageModal';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import DeletePackageModal from '../modals/packages/DeletePackageModal';
 
 const OCCASIONS = [
 { value: "baby-shower", label: "Baby Shower" },
@@ -51,7 +53,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
     const [vendor, setVendor] = useState(vendorData);
     const [activeTab, setActiveTab] = useState("overview");
     const [isUpdating, setIsUpdating] = useState(false);
-    const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [isEditingSubscription, setIsEditingSubscription] = useState(false);
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
@@ -725,9 +726,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                             <FileText className="w-5 h-5 text-blue-600" />
                                             Verification Documents
                                         </h3>
-                                        <Button variant="outline" size="sm" onClick={() => setIsDocumentModalOpen(true)} className="shadow-sm">
-                                            <Edit className="w-3.5 h-3.5 mr-1.5" />Edit
-                                        </Button>
                                     </div>
 
                                     <div className="space-y-3">
@@ -889,7 +887,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                                 }`}
                                             onClick={() => bulkMode && toggleSelection(item._id)}
                                         >
-                                            <img src={item.url} alt={item.caption || "Gallery"} className="w-full h-full object-cover" />
+                                            <Image src={item.url} alt={item.caption || "Gallery"} fill className="w-full h-full object-cover" />
 
                                             {bulkMode && (
                                                 <div className="absolute top-2 right-2 z-10">
@@ -1010,13 +1008,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                     </TabsContent >
                 </Tabs >
             </div >
-
-            <DocumentEditModal
-                isOpen={isDocumentModalOpen}
-                onClose={() => setIsDocumentModalOpen(false)}
-                vendor={vendor}
-                onUpdate={(updatedData) => setVendor(prev => ({ ...prev, ...updatedData }))}
-            />
         </div >
     );
 };

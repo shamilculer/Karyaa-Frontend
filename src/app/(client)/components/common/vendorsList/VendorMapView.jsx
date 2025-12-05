@@ -51,7 +51,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
     const vendorId = vendor._id || vendor.id;
 
     return (
-        <div className="w-[240px] xl:w-[320px] rounded overflow-hidden bg-white">
+        <div className="w-[240px] lg:w-[320px] rounded overflow-hidden bg-white">
             <div className="relative group">
                 {vendor.isRecommended && (
                     <Badge className="absolute top-3 left-3 z-10 bg-white text-primary font-semibold text-sm flex items-center gap-1">

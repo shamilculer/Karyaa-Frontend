@@ -113,8 +113,8 @@ export function AddCategoryModal({ onOpenChange, open }) {
                             errors={errors}
                             allowedMimeType={CATEGORY_IMAGE_MIME_TYPES}
                             folderPath={S3_FOLDER_PATH}
+                            role="admin"
                         />
-                        {/* Errors are handled within ControlledFileUpload, but this ensures top-level visibility if needed */}
                         {errors.coverImage && errors.coverImage.type !== 'required' && (
                             <p className="text-sm text-red-500">{errors.coverImage.message}</p>
                         )}

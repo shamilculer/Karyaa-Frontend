@@ -36,7 +36,7 @@ export const DocumentEditModal = ({ vendor, isOpen, onClose, onUpdate }) => {
 
         // Build the update payload based on vendor type
         const updatePayload = {};
-        
+
         if (!vendor.isInternational) {
             // UAE vendor fields
             if (data.tradeLicenseCopy !== vendor.tradeLicenseCopy) {
@@ -126,6 +126,7 @@ export const DocumentEditModal = ({ vendor, isOpen, onClose, onUpdate }) => {
                                         errors={errors}
                                         allowedMimeType={['application/pdf', 'image/jpeg', 'image/png']}
                                         folderPath="vendors/documents/trade-license"
+                                        role="admin"
                                     />
                                 </div>
 
@@ -156,6 +157,7 @@ export const DocumentEditModal = ({ vendor, isOpen, onClose, onUpdate }) => {
                                         errors={errors}
                                         allowedMimeType={['application/pdf', 'image/jpeg', 'image/png']}
                                         folderPath="vendors/documents/emirates-id"
+                                        role="admin"
                                     />
                                 </div>
                             </div>
@@ -175,6 +177,7 @@ export const DocumentEditModal = ({ vendor, isOpen, onClose, onUpdate }) => {
                                         errors={errors}
                                         allowedMimeType={['application/pdf', 'image/jpeg', 'image/png']}
                                         folderPath="vendors/documents/business-license"
+                                        role="admin"
                                     />
                                 </div>
 
@@ -189,6 +192,7 @@ export const DocumentEditModal = ({ vendor, isOpen, onClose, onUpdate }) => {
                                         errors={errors}
                                         allowedMimeType={['application/pdf', 'image/jpeg', 'image/png']}
                                         folderPath="vendors/documents/passport-id"
+                                        role="admin"
                                     />
                                 </div>
                             </div>

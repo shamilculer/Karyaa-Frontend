@@ -165,7 +165,7 @@ const TotalRevenueChart = () => {
               strokeDasharray="3 3"
             />
 
-            <YAxis hide={true} domain={['dataMin', 'dataMax']} />
+            <YAxis hide={true} domain={['dataMin', (dataMax) => dataMax * 1.15]} />
 
             <XAxis
               dataKey="time"
@@ -181,7 +181,7 @@ const TotalRevenueChart = () => {
                 <ChartTooltipContent
                   indicator="line"
                   nameKey="revenue"
-                  formatter={(value) => `₹${value.toLocaleString()}`}
+                  formatter={(value) => `AED ${value.toLocaleString()}`}
                 />
               }
             />
@@ -205,7 +205,7 @@ const TotalRevenueChart = () => {
           />
         </div>
         <div className="leading-none text-muted-foreground">
-          Total revenue in the {timeframeLabel}: ₹{totalRevenue.toLocaleString()}
+          Total revenue in the {timeframeLabel}: AED {totalRevenue.toLocaleString()}
         </div>
       </CardFooter>
     </Card>

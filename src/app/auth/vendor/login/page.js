@@ -6,7 +6,7 @@ import VendorLoginForm from "../../components/forms/vendor/VendorLoginForm";
 const UserLoginPage = () => {
   return (
     <section className="flex !my-0">
-      <div className="max-xl:!hidden w-2/3 min-h-screen bg-secondary relative">
+      <div className="max-lg:!hidden w-2/3 min-h-screen bg-secondary relative">
         <Image
           fill
           alt="Create Account in Karyaa"
@@ -15,7 +15,7 @@ const UserLoginPage = () => {
         />
       </div>
 
-      <div className="w-full xl:w-1/3 min-h-screen flex flex-col justify-center px-4 sm:px-10">
+      <div className="w-full lg:w-1/3 min-h-screen flex flex-col justify-center px-4 sm:px-10">
 
        <div>
          <Image

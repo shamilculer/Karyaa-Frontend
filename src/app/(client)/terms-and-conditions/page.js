@@ -19,7 +19,7 @@ const TermsAndConditionsPage = async () => {
             Terms and Conditions
           </h1>
           <p className="text-gray-600">
-            Last updated:{" "}
+            Last updated:
             {result.success && result.data?.updatedAt
               ? new Date(result.data.updatedAt).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -35,9 +35,9 @@ const TermsAndConditionsPage = async () => {
             <div
               className="prose prose-lg max-w-none
                 prose-headings:text-gray-900 
-                prose-h1:text-3xl prose-h1:font-bold prose-h1:mb-4
-                prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4
-                prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3
+                prose-h1:!text-3xl prose-h1:font-bold prose-h1:mb-4
+                prose-h2:!text-2xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4
+                prose-h3:!text-xl prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3
                 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
                 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
                 prose-strong:text-gray-900 prose-strong:font-semibold

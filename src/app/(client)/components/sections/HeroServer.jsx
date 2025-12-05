@@ -1,11 +1,16 @@
 import React from "react";
 import Hero from "./Hero";
 import { getActiveBanners } from "@/app/actions/public/adBanner";
+import { getPublicContentByKeyAction } from "@/app/actions/public/pages";
 
 export default async function HeroServer() {
   try {
-    // Fetch Ad Banners for Hero Section
-    const bannerResult = await getActiveBanners("Hero Section");
+    // Fetch Ad Banners and Hero Content in parallel
+    const [bannerResult, contentResult] = await Promise.all([
+      getActiveBanners("Hero Section"),
+      getPublicContentByKeyAction("hero-section")
+    ]);
+
     let bannerImages = [];
 
     if (bannerResult.success && bannerResult.data?.length > 0) {
@@ -17,6 +22,15 @@ export default async function HeroServer() {
       }));
     }
 
+    // Parse hero content if available
+    let heroContent = {};
+
+    if (contentResult.success && contentResult.data?.content) {
+      heroContent = typeof contentResult.data.content === 'string'
+        ? JSON.parse(contentResult.data.content)
+        : contentResult.data.content;
+    }
+
     // Logic: 
     // 1. If < 6 banners, fill with defaults
     // 2. If >= 6 banners, show ONLY banners
@@ -24,7 +38,9 @@ export default async function HeroServer() {
 
     const finalData = {
       images: bannerImages,
-      shouldMergeDefaults
+      shouldMergeDefaults,
+      heading: heroContent.heading,
+      description: heroContent.description
     };
 
     return <Hero data={finalData} />;

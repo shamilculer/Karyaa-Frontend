@@ -444,8 +444,7 @@ const BlogsTable = ({ controls = true }) => {
                             <TableRow>
                                 <TableHead className="w-12">
                                     <Checkbox
-                                        checked={isAllSelected}
-                                        indeterminate={isSomeSelected || undefined}
+                                        checked={isSomeSelected ? "indeterminate" : isAllSelected}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -473,7 +472,7 @@ const BlogsTable = ({ controls = true }) => {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            
+
                             {!isLoading && !apiError && data.map((row) => {
                                 const isPublished = row.status === "published"
                                 return (

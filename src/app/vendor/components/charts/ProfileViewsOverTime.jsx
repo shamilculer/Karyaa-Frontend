@@ -139,7 +139,7 @@ const ProfileViewsOverTime = () => {
                                     <stop offset="95%" stopColor="var(--color-views)" stopOpacity={0.1} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid vertical={true} stroke="#ccccccff"  strokeDasharray="2 2" />
+                            <CartesianGrid vertical={true} stroke="#ccccccff" strokeDasharray="2 2" />
                             <XAxis
                                 dataKey="time"
                                 tickLine={false}
@@ -147,7 +147,7 @@ const ProfileViewsOverTime = () => {
                                 tickMargin={8}
                                 tickFormatter={(value) => value.slice(0, 10)}
                             />
-                            <YAxis hide={true} />
+                            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={{ stroke: 'var(--color-views)', strokeDasharray: '2 2' }}
                                 content={<ChartTooltipContent indicator="line" nameKey="views" />}

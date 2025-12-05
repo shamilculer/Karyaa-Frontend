@@ -5,15 +5,15 @@ export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import Hero from "./components/sections/Hero";
+import HeroServer from "./components/sections/HeroServer";
 import PageSearchBar from "./components/common/PageSearchBar/PageSearchBar";
 import CategoryList from "./components/common/CategoriesList/CategoriesList";
 import VendorsCarousel from "./components/common/VendorsCarousel";
-import WhyChooseUs from "./components/sections/WhyChooseUs";
-import HowItWorks from "./components/sections/HowItWorks";
+import WhyChooseUsServer from "./components/sections/WhyChooseUsServer";
+import HowItWorksServer from "./components/sections/HowItWorksServer";
 import AdbannerWrapper from "./components/features/adBanner/AdBannerWrapper";
 import BlogPosts from "./components/common/BlogPosts";
-import Testimonials from "./components/sections/Testimonials";
+import TestimonialsServer from "./components/sections/TestimonialsServer";
 
 const initialBlogParams = { page: 1, limit: 3 };
 
@@ -22,7 +22,7 @@ export default function LandingPage() {
     <div>
       <div>
         <section className="!m-0">
-          <Hero />
+          <HeroServer />
         </section>
 
         <section className="container !mt-0 md:!mt-10">
@@ -40,9 +40,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <WhyChooseUs />
+        <WhyChooseUsServer />
 
-        <HowItWorks />
+        <HowItWorksServer />
 
         <section>
           <div className="w-full">
@@ -81,7 +81,7 @@ export default function LandingPage() {
             </h6>
             <h2 className="uppercase text-center">What people say about us</h2>
           </div>
-          <Testimonials />
+          <TestimonialsServer />
         </section>
       </div>
     </div>

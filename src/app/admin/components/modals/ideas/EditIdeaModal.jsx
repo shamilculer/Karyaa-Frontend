@@ -277,6 +277,7 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
                                 multiple={true}
                                 errors={errors}
                                 onSuccess={handleImageUpload}
+                                role="admin"
                             />
                         </div>
                     </div>

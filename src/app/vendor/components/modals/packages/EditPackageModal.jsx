@@ -183,7 +183,6 @@ export default function EditPackageModal({ packageData, onUpdate }) {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 md:space-y-8">
 
-                            {/* ... (Other FormFields are unchanged) ... */}
                             {/* Name */}
                             <FormField
                                 control={form.control}
@@ -246,10 +245,11 @@ export default function EditPackageModal({ packageData, onUpdate }) {
                                             <ControlledFileUpload
                                                 control={form.control}
                                                 name="coverImage"
-                                                allowedMimeType={["image/png", "image/jpeg", "image/webp"]}
-                                                label="Upload cover image"
-                                                folderPath={`vendor-packages/${vendor?._id}`}
+                                                label="Upload Cover Image"
                                                 errors={form.formState.errors}
+                                                allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                                                folderPath="vendors/packages"
+                                                role="vendor"
                                             />
                                         </FormControl>
                                         <FormMessage />

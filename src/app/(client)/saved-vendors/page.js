@@ -27,7 +27,7 @@ async function SavedVendorsContent({ categorySlug }) {
             : "You haven't saved any vendors yet."}
         </h3>
         <Button asChild>
-          <Link href="/vendors">Explore Vendors</Link>
+          <Link href="/categories">Explore Vendors</Link>
         </Button>
       </section>
     );

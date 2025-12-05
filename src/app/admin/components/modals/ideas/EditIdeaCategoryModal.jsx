@@ -16,7 +16,7 @@ import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 
 export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess }) {
-    
+
     const { handleSubmit, control, setValue, watch, formState: { errors } } = useForm({
         defaultValues: {
             name: category?.name || "",
@@ -32,8 +32,8 @@ export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess
     }, [category, setValue]);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
-    const currentCoverImage = watch("coverImage"); 
+
+    const currentCoverImage = watch("coverImage");
     const currentName = watch("name");
 
     const onSubmit = async (formData) => {
@@ -41,7 +41,7 @@ export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess
             toast.error("Category ID is missing. Cannot update.");
             return;
         }
-        
+
         const trimmedName = formData.name.trim();
 
         if (!trimmedName) {
@@ -50,7 +50,7 @@ export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess
         }
 
         setIsSubmitting(true);
-        
+
         const res = await updateIdeaCategoryAction({
             id: category._id,
             name: trimmedName,
@@ -79,11 +79,11 @@ export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess
                         Edit Idea Category
                     </DialogTitle>
                 </DialogHeader>
-                
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Main form area with padding */}
                     <div className="grid gap-6 py-6">
-                        
+
                         {/* 1. Name Input Field */}
                         <div className="space-y-2">
                             <Label htmlFor="name" className="text-base">Category Name</Label>
@@ -131,29 +131,30 @@ export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess
                                 allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
                                 folderPath="idea-categories"
                                 multiple={false}
+                                role="admin"
                             />
                             {errors.coverImage && <p className="text-red-500 text-sm mt-1">{errors.coverImage.message}</p>}
                         </div>
-                        
+
                     </div>
-                    
+
                     {/* Footer for action buttons */}
                     <DialogFooter>
-                        <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => setOpen(false)} 
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
                             disabled={isSubmitting}
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             disabled={isSubmitting || !currentName?.trim()}
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Saving...
                                 </>
                             ) : (

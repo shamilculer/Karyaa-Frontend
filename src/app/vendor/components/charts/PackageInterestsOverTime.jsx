@@ -169,7 +169,7 @@ const PackageInterestsOverTime = () => {
                                 tickMargin={8}
                                 tickFormatter={(value) => value.slice(0, 10)}
                             />
-                            <YAxis hide={true} />
+                            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={{ stroke: 'var(--color-interests)', strokeDasharray: '2 2' }}
                                 content={

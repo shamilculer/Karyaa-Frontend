@@ -257,7 +257,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`name-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-2/3 mx-auto"></div>
@@ -316,7 +316,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`rating-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-20 mx-auto"></div>
@@ -335,7 +335,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`price-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
@@ -354,7 +354,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`city-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-16 mx-auto"></div>
@@ -369,7 +369,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`occasions-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
@@ -407,7 +407,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`category-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-24 mx-auto"></div>
@@ -440,7 +440,7 @@ const CompareTable = ({ initialVendors }) => {
                             {compareList.map((vendor, index) => (
                                 <TableCell
                                     key={`subcategory-${index}`}
-                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px]"
+                                    className="p-4 border-l border-l-gray-300 text-center min-w-[230px] break-words"
                                 >
                                     {loadingSlots[index] ? (
                                         <div className="h-6 bg-gray-200 animate-pulse rounded w-32 mx-auto"></div>

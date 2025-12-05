@@ -134,7 +134,7 @@ const VendorFilterModal = ({ mainCategory, isSubPage }) => {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-[#F2F4FF] border border-gray-300 text-primary hover:bg-gray-200 !p-4 md:!px-6">
-                    <ListFilter className="mr-1 h-4 w-4" />{" "}
+                    <ListFilter className="mr-1 h-4 w-4" />
                     <span className="leading-0 mt-0.5 font-heading max-md:hidden">Filter</span>
                 </Button>
             </DialogTrigger>

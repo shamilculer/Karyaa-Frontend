@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { toggleSavedVendor } from "@/app/actions/user/user";
@@ -20,6 +20,11 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
 
     // 1. State for the current saved status
     const [isSaved, setIsSaved] = useState(isInitialSaved);
+
+    // Sync state with prop when it changes (e.g. after server revalidation)
+    useEffect(() => {
+        setIsSaved(isInitialSaved);
+    }, [isInitialSaved]);
 
     // 2. State for handling pending transitions (loading state)
     const [isPending, startTransition] = useTransition();
@@ -101,7 +106,7 @@ export default function VendorSaveButton({ vendorId, isInitialSaved, isVendorPag
             absolute top-3 right-3 z-10 transition-colors duration-200 
             ${isSaved
                 ? 'text-red-500'
-                : 'hover:text-red-500 hover:border-red-700'
+                : 'hover:!text-red-500 hover:border-red-700'
             }
         `;
     }

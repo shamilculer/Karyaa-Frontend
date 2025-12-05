@@ -112,6 +112,7 @@ export const AddSubcategoryModal = ({ isOpen, onOpenChange, categoryId, category
                             errors={addForm.formState.errors}
                             allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
                             folderPath="subcategory_images"
+                            role="admin"
                         />
                         {addForm.formState.errors.coverImage && (
                             <p className="text-red-500 text-sm">Image is required.</p>
@@ -249,6 +250,7 @@ export const EditSubcategoryModal = ({ isOpen, onOpenChange, subcategory, onSucc
                             errors={editForm.formState.errors}
                             allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
                             folderPath="subcategory_images"
+                            role="admin"
                         />
                         {editForm.formState.errors.coverImage && (
                             <p className="text-red-500 text-sm">Image is required.</p>

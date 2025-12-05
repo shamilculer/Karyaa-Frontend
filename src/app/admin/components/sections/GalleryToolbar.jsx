@@ -44,7 +44,7 @@ export default function GalleryToolbar({
                 try {
                     const result = await uploadFile(file, {
                         folder: `vendors/${vendorId}/gallery`,
-                        isPublic: true
+                        role: "admin"
                     });
 
                     if (result?.url) {

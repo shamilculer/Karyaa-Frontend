@@ -155,7 +155,7 @@ const VendorLoginForm = () => {
             {/* Sign up link */}
             <div className="w-full text-center mt-4 text-sm text-gray-600">
                 <p className="!text-sm">
-                    Don't have a vendor account?{" "}
+                    Don't have a vendor account?
                     <Link 
                         href="/auth/vendor/register" 
                         className="text-[#2F4A9D] font-medium hover:underline"

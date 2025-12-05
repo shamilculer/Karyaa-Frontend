@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Loader2, Mail, Phone, MapPin, Calendar, Users, MessageSquare, Hash } from "lucide-react"
-import { IconCircleFilled } from "@tabler/icons-react"
+import { IconCircleFilled, IconConfetti } from "@tabler/icons-react"
 import { updateLeadStatus, deleteLead } from "@/app/actions/vendor/leads"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -249,7 +249,7 @@ export default function LeadDetailsModal({ lead, open, onOpenChange, onUpdate })
                                     {lead.eventType && (
                                         <div className="flex items-start gap-3">
                                             <div className="w-4 h-4 flex items-center justify-center mt-0.5">
-                                                <span className="text-lg">🎉</span>
+                                                <IconConfetti className="w-4 h-4 text-muted-foreground mt-1.5" />
                                             </div>
                                             <div>
                                                 <p className="!text-sm text-muted-foreground">Event Type</p>

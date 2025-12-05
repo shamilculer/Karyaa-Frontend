@@ -44,6 +44,9 @@ import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import { AvatarFallback } from "@radix-ui/react-avatar"
+import { getInitials } from "@/utils"
 
 export const description = "Support Ticket Management Table"
 
@@ -443,13 +446,11 @@ const TicketsTable = ({ controls = true }) => {
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
                                                 {row.submittedBy?.ownerProfileImage && (
-                                                    <Image
-                                                        src={row.submittedBy.ownerProfileImage}
-                                                        alt={row.submittedBy.ownerName || "User"}
-                                                        width={30}
-                                                        height={30}
-                                                        className="object-cover rounded-full"
-                                                    />
+
+                                                    <Avatar className="rounded-full size-8 overflow-hidden">
+                                                        <AvatarImage src={row.submittedBy.ownerProfileImage} alt={row.submittedBy.ownerName || "User"} className="w-full object-cover" />
+                                                        <AvatarFallback>{getInitials(row.submittedBy?.ownerName)}</AvatarFallback>
+                                                    </Avatar>
                                                 )}
                                                 <span className="truncate max-w-[150px]">
                                                     {row.submittedBy?.ownerName || row.contactEmail || "Guest User"}

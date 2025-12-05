@@ -169,14 +169,14 @@ const UserGrowthChart = () => {
                             strokeDasharray="3 3"
                         />
 
-                        <YAxis hide={true} domain={[0, 'auto']} />
+                        <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
 
                         <XAxis
                             dataKey="time"
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => value.length > 4 ? value.slice(0, 3) : value}
+                            tickFormatter={(value) => value}
                             className="text-xs text-muted-foreground"
                         />
                         <ChartTooltip
@@ -190,7 +190,7 @@ const UserGrowthChart = () => {
                         />
                         <Area
                             dataKey="users"
-                            type="natural"
+                            type="monotone"
                             fill="url(#fillUsers)"
                             fillOpacity={0.4}
                             stroke="var(--color-users)"
@@ -201,10 +201,16 @@ const UserGrowthChart = () => {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex items-center gap-2 font-medium leading-none">
-                    {isPositiveTrend ? "Up" : "Down"} by {percentageChange}% vs. previous period
-                    <TrendingUp
-                        className={`h-4 w-4 transition-transform duration-300 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`}
-                    />
+                    {percentageChange !== "N/A" ? (
+                        <>
+                            {isPositiveTrend ? "Up" : "Down"} by {Math.abs(percentageChange)}% vs. previous period
+                            <TrendingUp
+                                className={`h-4 w-4 transition-transform duration-300 ${isPositiveTrend ? "text-green-500" : "text-red-500"} ${!isPositiveTrend ? 'rotate-180' : ''}`}
+                            />
+                        </>
+                    ) : (
+                        <span className="text-muted-foreground">No previous data for comparison</span>
+                    )}
                 </div>
                 <div className="leading-none text-muted-foreground">
                     Total new users in the {timeframeLabel}: {totalUsers.toLocaleString()}

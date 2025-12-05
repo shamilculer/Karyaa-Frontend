@@ -82,7 +82,7 @@ export default function DeletePackageModal({
                         {packageName && (
                             <span className="font-semibold"> "{packageName}"</span>
                         )}
-                        {" "}and remove all associated data from our servers.
+                        and remove all associated data from our servers.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

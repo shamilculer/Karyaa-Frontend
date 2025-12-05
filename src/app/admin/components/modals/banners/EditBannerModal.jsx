@@ -390,49 +390,6 @@ export default function EditBannerModal({
                                 </div>
                             </div>
 
-                            {/* Display Mode Selection */}
-                            {/* <div className="md:col-span-2 space-y-3 pt-4 border-t">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                    Display Mode
-                                </Label>
-                                <div className="space-y-3">
-                                    <div className="flex items-start space-x-3">
-                                        <input
-                                            type="radio"
-                                            id="edit-displayMode-standard"
-                                            value="standard"
-                                            {...register("displayMode")}
-                                            className="mt-1"
-                                        />
-                                        <div className="flex-1">
-                                            <Label htmlFor="edit-displayMode-standard" className="font-medium cursor-pointer">
-                                                Standard (Fixed Height)
-                                            </Label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Desktop: 1920x400px | Mobile: 800x512px - Image will be cropped to fit
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start space-x-3">
-                                        <input
-                                            type="radio"
-                                            id="edit-displayMode-auto"
-                                            value="auto"
-                                            {...register("displayMode")}
-                                            className="mt-1"
-                                        />
-                                        <div className="flex-1">
-                                            <Label htmlFor="edit-displayMode-auto" className="font-medium cursor-pointer">
-                                                Full View (Auto Height)
-                                            </Label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Any aspect ratio (e.g., 1080x1080px) - Full image will be shown
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
-
                             {/* Schedule & Mobile */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
@@ -509,6 +466,7 @@ export default function EditBannerModal({
                                             ]}
                                             folderPath="ad-banners/mobile"
                                             errors={errors}
+                                            role="admin"
                                         />
                                     </div>
                                     <p className="text-xs text-gray-500">
@@ -545,6 +503,7 @@ export default function EditBannerModal({
                                             ]}
                                             folderPath="ad-banners"
                                             errors={errors}
+                                            role="admin"
                                         />
                                     </div>
                                     <p className="text-xs text-gray-500 flex items-center gap-2">

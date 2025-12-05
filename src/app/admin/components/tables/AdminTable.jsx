@@ -53,9 +53,20 @@ import { format } from "date-fns"
 import { useAdminStore } from "@/store/adminStore"
 import { getInitials } from "@/utils"
 
-import { getAllAdminsAction, toggleAdminStatusAction } from "@/app/actions/admin/admin"
+import { getAllAdminsAction, toggleAdminStatusAction, deleteAdminAction } from "@/app/actions/admin/admin"
 
 import { AdminManagementModal } from "../modals/admin/AdminManagementModal";
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export const description = "Admins Management Table with API Integration and RBAC"
 
@@ -280,23 +291,58 @@ export default function AdminsTable({ controls = true }) {
 
     // --- Action Handlers (Mocked for now) ---
     const handleStatusChange = async (adminId) => {
-
+        const toastId = toast.loading(`Sending request to change status for admin`);
         try {
-            toast.loading(`Sending request to change status for admin`);
             const res = await toggleAdminStatusAction(adminId);
 
             if (res.success) {
+                toast.dismiss(toastId);
                 toast.success(res.message);
                 fetchData();
             } else {
+                toast.dismiss(toastId);
                 toast.error(res.message);
             }
         } catch (error) {
+            toast.dismiss(toastId);
             console.error("Status toggle failed:", error);
             toast.error("An unexpected error occurred during status update.");
         }
     };
 
+
+    // 3. 🎯 DELETE CONFIRMATION STATE
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+    const [adminToDelete, setAdminToDelete] = useState(null);
+
+    const confirmDelete = (admin) => {
+        setAdminToDelete(admin);
+        setIsDeleteAlertOpen(true);
+    }
+
+    const handleDelete = async () => {
+        if (!adminToDelete) return;
+
+        const toastId = toast.loading(`Deleting ${adminToDelete.fullName}...`);
+        try {
+            const res = await deleteAdminAction(adminToDelete._id);
+
+            if (res.success) {
+                toast.dismiss(toastId);
+                toast.success(res.message);
+                setIsDeleteAlertOpen(false);
+                setAdminToDelete(null);
+                fetchData();
+            } else {
+                toast.dismiss(toastId);
+                toast.error(res.message);
+            }
+        } catch (error) {
+            toast.dismiss(toastId);
+            console.error("Delete failed:", error);
+            toast.error("An unexpected error occurred during deletion.");
+        }
+    }
 
     const headers = [
         "Full Name",
@@ -319,6 +365,7 @@ export default function AdminsTable({ controls = true }) {
 
     return (
         <div className="w-full">
+            {/* ... Existing Search & Filter Controls ... */}
             {controls && (
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
                     <div className="relative w-full md:w-2/5 lg:max-w-md">
@@ -499,7 +546,7 @@ export default function AdminsTable({ controls = true }) {
                                                             View Details / Manage
                                                         </DropdownMenuItem>
 
-                                                        {/* Conditional Actions remain below for redundancy/alternative paths */}
+                                                        {/* Conditional Actions */}
                                                         {canModify && (
                                                             <>
                                                                 <DropdownMenuSeparator />
@@ -509,10 +556,19 @@ export default function AdminsTable({ controls = true }) {
                                                                     </DropdownMenuItem>
                                                                 )}
                                                                 {row.isActive && (
-                                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, false)} className="text-red-600">
+                                                                    <DropdownMenuItem onClick={() => handleStatusChange(row._id, false)} className="text-yellow-600">
                                                                         Deactivate Admin
                                                                     </DropdownMenuItem>
                                                                 )}
+
+                                                                {/* DELETE ACTION */}
+                                                                <DropdownMenuItem
+                                                                    onClick={() => confirmDelete(row)}
+                                                                    className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                                                                >
+                                                                    Delete Admin
+                                                                </DropdownMenuItem>
+
                                                                 <DropdownMenuSeparator />
                                                             </>
                                                         )}
@@ -550,7 +606,7 @@ export default function AdminsTable({ controls = true }) {
                 />
             )}
 
-            {/* 3. 🎯 NEW: Render the Admin Management Modal */}
+            {/* 3. 🎯 Render the Admin Management Modal */}
             {selectedAdmin && (
                 <AdminManagementModal
                     isOpen={isDetailsModalOpen}
@@ -561,6 +617,26 @@ export default function AdminsTable({ controls = true }) {
                     fetchData={fetchData}
                 />
             )}
+
+            {/* 4. 🎯 Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete
+                            <span className="font-bold text-red-600"> {adminToDelete?.fullName}'s </span>
+                            account and remove their data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setAdminToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                            Delete Administrator
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

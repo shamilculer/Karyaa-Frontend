@@ -28,6 +28,12 @@ const CMS = () => {
       description: "Hero, features, CTA sections",
       type: "section",
     },
+    "contact-page": {
+      name: "Contact Page",
+      icon: FileText,
+      description: "Banner and content sections",
+      type: "section",
+    },
     "privacy-policy": {
       name: "Privacy Policy",
       icon: FileText,
@@ -84,6 +90,8 @@ const CMS = () => {
   const getEditUrl = (page) => {
     if (page.key === "landing-page") {
       return `/admin/content-moderation/content/landing-page`;
+    } else if (page.key === "contact-page") {
+      return `/admin/content-moderation/content/contact-page`;
     } else if (page.type === "page") {
       return `/admin/content-moderation/content/${page.key}`;
     } else if (page.type === "faq") {
@@ -101,6 +109,7 @@ const CMS = () => {
       "faq-vendor": "/faq",
       "faq-customer": "/faq",
       "landing-page": "/",
+      "contact-page": "/contact",
     };
     return previewUrls[page.key] || `/${page.key}`;
   };
@@ -198,8 +207,8 @@ const CMS = () => {
                   size="sm"
                   disabled={!page.content}
                 >
-                  <Link 
-                    href={getPreviewUrl(page)} 
+                  <Link
+                    href={getPreviewUrl(page)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -53,30 +53,36 @@ const Testimonials = ({ testimonials: propTestimonials } = {}) => {
         }}
         className="w-full pb-8"
       >
-        {testimonials.map((t, idx) => (
-          <SwiperSlide key={t.id || idx}>
-            <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
-              <Image
-                width={240}
-                height={240}
-                className="w-full md:w-60 h-72 object-cover rounded-lg"
-                src={t.img}
-                alt={t.name}
-              />
-              <div className="flex flex-col h-full justify-center p-5">
-                <div>
-                  <div className="flex items-center gap-1">
-                    {[...Array(t.rating || 5)].map((_, i) => (
-                      <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
-                    ))}
+        {testimonials.map((t, idx) => {
+          const imageSrc = t.img || t.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400";
+
+          return (
+            <SwiperSlide key={t.id || idx}>
+              <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
+                {imageSrc && (
+                  <Image
+                    width={240}
+                    height={240}
+                    className="w-full md:w-60 h-72 object-cover rounded-lg"
+                    src={imageSrc}
+                    alt={t.name || "Testimonial"}
+                  />
+                )}
+                <div className="flex flex-col h-full justify-center p-5">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(t.rating || 5)].map((_, i) => (
+                        <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
+                      ))}
+                    </div>
+                    <p className="text-gray-500 mt-4">{t.text}</p>
                   </div>
-                  <p className="text-gray-500 mt-4">{t.text}</p>
+                  <p className="mt-4 font-medium">{t.name}</p>
                 </div>
-                <p className="mt-4 font-medium">{t.name}</p>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
 
       {/* Navigation Buttons - BELOW Swiper */}

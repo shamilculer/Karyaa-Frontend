@@ -508,6 +508,39 @@ const EditProfilePage = () => {
                               errors={form.formState.errors}
                               allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                               folderPath="vendors/profiles"
+                              role="vendor"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="businessLogo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">Business Logo</FormLabel>
+                        <div className="space-y-4">
+                          {businessLogo && (
+                            <ImagePreview
+                              src={businessLogo}
+                              alt="Business Logo"
+                              label="Current Logo"
+                              onRemove={() => field.onChange('')}
+                            />
+                          )}
+                          <FormControl>
+                            <ControlledFileUpload
+                              control={form.control}
+                              name="businessLogo"
+                              label={businessLogo ? "Change Logo" : "Upload Logo"}
+                              errors={form.formState.errors}
+                              allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                              folderPath="vendors/logos"
+                              role="vendor"
                             />
                           </FormControl>
                         </div>
@@ -520,7 +553,7 @@ const EditProfilePage = () => {
 
               {activeTab === "business" && (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
                       name="businessName"
@@ -528,7 +561,7 @@ const EditProfilePage = () => {
                         <FormItem>
                           <FormLabel className="text-xs font-medium">Business Name *</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Your Business Name" className="p-4 bg-[#f0f0f0] h-11 border-none" />
+                            <Input {...field} placeholder="Enter business name" className="p-4 bg-[#f0f0f0] h-11 border-none" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -540,49 +573,9 @@ const EditProfilePage = () => {
                       name="tagline"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-medium">Tagline (max 120 characters)</FormLabel>
+                          <FormLabel className="text-xs font-medium">Tagline</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="A catchy tagline for your business" className="p-4 bg-[#f0f0f0] h-11 border-none" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="businessDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-medium">Business Description * (50-1500 characters)</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              rows={5}
-                              placeholder="Describe your business, services, and what makes you unique..."
-                              className="p-4 bg-[#f0f0f0] border-none"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="pricingStartingFrom"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-medium">Starting Price (AED)</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="number"
-                              value={field.value === 0 ? "" : field.value}
-                              onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
-                              placeholder="0"
-                              className="p-4 bg-[#f0f0f0] h-11 border-none"
-                            />
+                            <Input {...field} placeholder="Short catchy phrase" className="p-4 bg-[#f0f0f0] h-11 border-none" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -592,34 +585,61 @@ const EditProfilePage = () => {
 
                   <FormField
                     control={form.control}
-                    name="businessLogo"
+                    name="businessDescription"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-medium">Business Logo *</FormLabel>
-                        <div className="space-y-4">
-                          {businessLogo && (
-                            <ImagePreview
-                              src={businessLogo}
-                              alt="Business Logo"
-                              label="Current Business Logo"
-                              onRemove={() => field.onChange('')}
-                            />
-                          )}
-                          <FormControl>
-                            <ControlledFileUpload
-                              control={form.control}
-                              name="businessLogo"
-                              label={businessLogo ? "Change Business Logo" : "Upload Business Logo"}
-                              errors={form.formState.errors}
-                              allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
-                              folderPath="vendors/logos"
-                            />
-                          </FormControl>
-                        </div>
+                        <FormLabel className="text-xs font-medium">Business Description *</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} placeholder="Describe your business..." className="p-4 bg-[#f0f0f0] min-h-[120px] border-none" />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="pricingStartingFrom"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium">Starting Price (AED)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                              className="p-4 bg-[#f0f0f0] h-11 border-none"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isInternational"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">International Vendor</FormLabel>
+                            <div className="text-sm text-gray-500">
+                              Check this if you are based outside UAE
+                            </div>
+                          </div>
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -729,6 +749,7 @@ const EditProfilePage = () => {
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
+                                  role="vendor"
                                 />
                               </FormControl>
                             </div>
@@ -773,6 +794,7 @@ const EditProfilePage = () => {
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
+                                  role="vendor"
                                 />
                               </FormControl>
                             </div>
@@ -806,6 +828,7 @@ const EditProfilePage = () => {
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
+                                  role="vendor"
                                 />
                               </FormControl>
                             </div>
@@ -836,6 +859,7 @@ const EditProfilePage = () => {
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
+                                  role="vendor"
                                 />
                               </FormControl>
                             </div>

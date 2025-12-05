@@ -50,13 +50,13 @@ import {
 import { useClientStore } from "@/store/clientStore";
 import { useS3Upload } from "@/hooks/useS3Upload";
 import { useRef } from "react";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
@@ -101,13 +101,12 @@ export default function ProfilePage() {
       setUser(result.user);
       resetProfile(result.user);
     } else {
-      setMessage({ type: "error", text: result.error });
+      toast.error(result.error);
     }
     setLoading(false);
   };
 
   const onUpdateProfile = async (data) => {
-    setMessage({ type: "", text: "" });
     const result = await updateUserProfile(data);
 
     if (result.success) {
@@ -124,23 +123,20 @@ export default function ProfilePage() {
         updatedAt: result.user?.updatedAt,
       });
       setIsEditing(false);
-      setMessage({ type: "success", text: result.message });
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      toast.success(result.message);
     } else {
-      setMessage({ type: "error", text: result.error });
+      toast.error(result.error);
     }
   };
 
   const onChangePassword = async (data) => {
-    setMessage({ type: "", text: "" });
     const result = await changePassword(data);
 
     if (result.success) {
       resetPassword();
-      setMessage({ type: "success", text: result.message });
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      toast.success(result.message);
     } else {
-      setMessage({ type: "error", text: result.error });
+      toast.error(result.error);
     }
   };
 
@@ -148,9 +144,9 @@ export default function ProfilePage() {
     const result = await deleteUserAccount(data.password);
 
     if (!result.success) {
-      setMessage({ type: "error", text: result.error });
+      toast.error(result.error);
     } else {
-      setMessage({ type: "success", text: result.message });
+      toast.success(result.message);
       setShowDeleteModal(false);
       setStoredUser(null);
 
@@ -181,17 +177,16 @@ export default function ProfilePage() {
 
         if (updateResult.success) {
           setStoredUser({ ...storedUser, profileImage: imageUrl });
-          setMessage({ type: "success", text: "Profile picture updated successfully" });
-          setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+          toast.success("Profile picture updated successfully");
         } else {
-          setMessage({ type: "error", text: updateResult.error });
+          toast.error(updateResult.error);
           // Revert on failure
           setUser(prev => ({ ...prev, profileImage: user.profileImage }));
         }
       }
     } catch (error) {
       console.error("Profile upload error:", error);
-      setMessage({ type: "error", text: "Failed to upload image" });
+      toast.error("Failed to upload image");
     } finally {
       // Reset input
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -231,28 +226,6 @@ export default function ProfilePage() {
     <section>
       <div className="max-w-6xl mx-auto px-4 pb-12">
         <div className="space-y-6">
-          {/* Message Alert */}
-          {message.text && (
-            <Alert
-              className={`${message.type === "success"
-                ? "bg-green-50 border-green-200"
-                : "bg-red-50 border-red-200"
-                } shadow-lg`}
-            >
-              {message.type === "success" ? (
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-              ) : (
-                <XCircle className="h-4 w-4 text-red-600" />
-              )}
-              <AlertDescription
-                className={
-                  message.type === "success" ? "text-green-800" : "text-red-800"
-                }
-              >
-                {message.text}
-              </AlertDescription>
-            </Alert>
-          )}
 
           {/* Profile Overview Card */}
           <Card className="border-0 overflow-hidden">
@@ -263,6 +236,7 @@ export default function ProfilePage() {
                     <AvatarImage
                       src={user?.profileImage}
                       alt={user?.username}
+                      className="size-full object-cover"
                     />
                     <AvatarFallback className="text-3xl bg-gradient-to-br from-indigo-400 to-purple-400 text-white font-bold">
                       {getInitials(user?.username)}

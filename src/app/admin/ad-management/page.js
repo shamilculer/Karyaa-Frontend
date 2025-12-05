@@ -126,7 +126,6 @@ const AdManagementPage = () => {
                   <SelectLabel>Static Pages</SelectLabel>
                   <SelectItem value="Hero Section">Hero Section</SelectItem>
                   <SelectItem value="Homepage Carousel">Homepage Carousel</SelectItem>
-                  <SelectItem value="Contact">Contact</SelectItem>
                   <SelectItem value="Ideas">Ideas</SelectItem>
                   <SelectItem value="Gallery">Gallery</SelectItem>
                   <SelectItem value="Blog Page">Blog Page</SelectItem>

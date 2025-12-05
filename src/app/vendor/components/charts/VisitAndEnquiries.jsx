@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect, useMemo } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
     Card,
     CardContent,
@@ -125,6 +125,7 @@ function VisitAndEnquiries() {
                                 axisLine={false}
                                 tickFormatter={(value) => value.slice(0, 10)}
                             />
+                            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent indicator="dashed" />}

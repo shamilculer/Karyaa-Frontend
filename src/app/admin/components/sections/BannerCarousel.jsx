@@ -264,6 +264,21 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                                     )}
                                 </div>
 
+                                <div className="mb-3">
+                                    <div className="flex flex-wrap gap-1">
+                                        {ad.placement && ad.placement.slice(0, 3).map((place, index) => (
+                                            <Badge key={index} variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-blue-50 text-blue-700 border-blue-200">
+                                                {place}
+                                            </Badge>
+                                        ))}
+                                        {ad.placement && ad.placement.length > 3 && (
+                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-gray-50 text-gray-600 border-gray-200">
+                                                +{ad.placement.length - 3}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {(ad.activeFrom || ad.activeUntil) && (
                                     <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100">
                                         <div className="flex justify-between">

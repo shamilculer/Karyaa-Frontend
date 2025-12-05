@@ -320,6 +320,7 @@ export const CreateAdminSchema = z.object({
   }),
   // For accessControl, it's optional on the form submission if adminLevel is 'admin'
   accessControl: AccessControlSchema.optional(),
+  profileImage: z.string().optional().or(z.literal("")), // Added optional profile image
 });
 
 export const bundleFormSchema = z.object({

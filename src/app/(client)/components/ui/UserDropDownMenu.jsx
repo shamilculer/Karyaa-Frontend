@@ -1,6 +1,4 @@
 "use client";
-
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +12,7 @@ import { DialogTrigger } from "@/components/ui/dialog";
 import ReferModal from "../modals/ReferModal";
 import { Heart, Gift, User as UserIcon } from "lucide-react";
 import LogoutAlertModal from "@/app/auth/components/LogoutAlertModal";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useClientStore } from "@/store/clientStore";
 
 export default function UserMenu({ isMobile = false }) {
@@ -31,8 +29,11 @@ export default function UserMenu({ isMobile = false }) {
                                     alt={user?.username || "user"}
                                     width={32}
                                     height={32}
-                                    className="size-full "
+                                    className="size-full object-cover"
                                 />
+                                <AvatarFallback>
+                                    {user?.username?.[0].toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                         </Button>
                     ) : (
@@ -43,7 +44,7 @@ export default function UserMenu({ isMobile = false }) {
                                     alt={user?.username || "user"}
                                     width={36}
                                     height={36}
-                                    className="size-full "
+                                    className="size-full object-cover"
                                 />
                             </Avatar>
                             <span className="text-sm font-semibold ml-0">
@@ -53,7 +54,7 @@ export default function UserMenu({ isMobile = false }) {
                     )}
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent className={isMobile ? "w-40" : "w-48"}>
+                <DropdownMenuContent className={isMobile ? "w-40 z-10001" : "w-48 z-10001"}>
 
                     {/* ---- Profile ---- */}
                     <DropdownMenuItem asChild>

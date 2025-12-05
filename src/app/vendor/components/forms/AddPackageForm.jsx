@@ -216,10 +216,11 @@ const AddPackageForm = () => {
                                     <ControlledFileUpload
                                         control={form.control}
                                         name="coverImage"
-                                        allowedMimeType={["image/png", "image/jpeg", "image/webp"]}
-                                        label="Upload cover image"
-                                        folderPath={`vendor-packages/${vendor?._id}`}
+                                        label="Upload Cover Image"
                                         errors={form.formState.errors}
+                                        allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                                        folderPath="vendors/packages"
+                                        role="vendor"
                                     />
                                 </FormControl>
                                 <FormMessage />

@@ -592,6 +592,7 @@ const EditBlogPage = () => {
                                 errors={errors}
                                 allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                                 folderPath="blogs/covers"
+                                role="admin"
                             />
                         </div>
                     </CardContent>

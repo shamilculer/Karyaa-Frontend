@@ -81,10 +81,11 @@ function BlogPostsFallback() {
 
 // --- Blog Card Component ---
 export const BlogCard = ({ blog }) => {
+
   const authorName =
     typeof blog.author === "object" && blog.author !== null
       ? blog.author.fullName
-      : blog.author;
+      : blog.author || "Karyaa Team";
 
   const displayDate = new Date(
     blog.publishedAt || blog.date

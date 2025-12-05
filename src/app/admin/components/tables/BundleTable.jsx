@@ -39,6 +39,7 @@ import {
     Loader2,
     Zap,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import CreateBundleModal from "../modals/bundles/CreateBundelModal"
 import EditBundleModal from "../modals/bundles/EditBundleModal"
@@ -437,9 +438,7 @@ const BundlesTable = ({ controls = true }) => {
                                 <TableHead className="w-12">
                                     {/* 🐞 FIX: Ensure indeterminate prop is correctly set */}
                                     <Checkbox
-                                        checked={isAllSelected}
-                                        // Pass undefined when false to avoid DOM warning (Received 'false' for non-boolean attribute 'indeterminate')
-                                        indeterminate={isSomeSelected ? true : undefined}
+                                        checked={isSomeSelected ? "indeterminate" : isAllSelected}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>

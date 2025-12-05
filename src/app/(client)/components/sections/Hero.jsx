@@ -27,14 +27,14 @@ const Hero = ({ data } = {}) => {
     "/new-banner-10.jpg",
     "/banner-4.jpg",
     "/new-banner-8.jpg",
-    "/banner-5.jpg",
-    "/banner-6.jpg",
+    "/new-banner-5.jpg",
+    "/new-banner-6.jpg",
     "/new-banner-7.jpg"
   ];
 
-  // Hardcoded heading and description
-  const heading = "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
-  const description = "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
+  // Hardcoded heading and description as fallback
+  const heading = data?.heading || "Your Perfect Event Starts Here. Plan. Connect. Celebrate.";
+  const description = data?.description || "Your one-stop marketplace to find venues, services, and everything in between for weddings, parties, and corporate events.";
 
   // Logic to determine final images
   let images = [];
@@ -66,7 +66,14 @@ const Hero = ({ data } = {}) => {
   return (
     <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
       <div className='w-full flex-center flex-col text-center px-4'>
-        <h1 className='text-center uppercase max-md:!text-[22px] !text-[30px] w-full sm:w-md md:w-xl leading-[1.2em]'>{heading}</h1>
+        <h1 className='text-center uppercase max-md:!text-[22px] !text-[30px] w-full leading-[1.2em]'>
+          {heading.split('\n').map((line, index) => (
+            <span key={index}>
+              {line}
+              {index < heading.split('\n').length - 1 && <br className="max-sm:hidden" />}
+            </span>
+          ))}
+        </h1>
         <p className="max-md:mt-2 max-md:!text-xs">{description}</p>
       </div>
 

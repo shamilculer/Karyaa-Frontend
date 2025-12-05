@@ -86,8 +86,8 @@ const VendorEmptyState = () => (
 
 // 📌 MAIN SERVER COMPONENT
 const VendorsList = async ({ showControls, filters, source = "category" }) => {
-  const authResult = await checkAuthStatus("user", true);
-  const savedVendorIds = [];
+  const authResult = await checkAuthStatus("user", false);
+  const savedVendorIds = authResult.user?.savedVendors || [];
 
   const requestFilters = {
     page: filters?.page || 1,
@@ -227,8 +227,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
         <div className="mt-6 px-0.5 space-y-2 w-full">
           <StarRating rating={vendor.averageRating} />
           <p className="font-medium mt-2 text-primary !text-xs">
-            Price Starting from{" "}
-            <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
+            Price Starting from{' '}<span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
           </p>
           <div className="w-full relative">
             <Link href={vendorUrl} className="!text-lg text-[#232536] font-heading !font-medium truncate">
@@ -314,7 +313,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
       <div className="mt-6 px-2 space-y-2 w-full">
         <StarRating rating={vendor.averageRating} />
         <p className="font-medium md:mt-2 text-primary !text-xs">
-          Price Starting from{" "}
+          Price Starting from{' '}
           <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
         </p>
         <div className="w-full relative">

@@ -1,68 +1,61 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Trash2, FileText, Download, Upload, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Trash2, FileText, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addAdditionalDocumentAction, deleteAdditionalDocumentAction } from "@/app/actions/admin/vendors";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useS3Upload } from "@/hooks/useS3Upload";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 export default function AdditionalDocumentsSection({ vendorId, documents = [], onUpdate }) {
-    const [documentName, setDocumentName] = useState("");
-    const fileInputRef = useRef(null);
-    const { uploadFile, uploading } = useS3Upload();
-    const [localUploading, setLocalUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleFileSelect = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            documentName: "",
+            documentUrl: "",
+        },
+    });
 
-        const trimmedName = documentName.trim();
-        if (!trimmedName) {
-            toast.error("Please enter a document name first");
-            if (fileInputRef.current) fileInputRef.current.value = '';
+    const onSubmit = async (data) => {
+        if (!data.documentUrl) {
+            toast.error("Please upload a document file");
             return;
         }
 
-        setLocalUploading(true);
-        const loadingToast = toast.loading("Uploading document...");
+        setIsSubmitting(true);
+        const loadingToast = toast.loading("Adding document...");
 
         try {
-            // Upload to S3
-            const result = await uploadFile(file, {
-                folder: `vendors/${vendorId}/documents`,
-                isPublic: true
-            });
-
-            if (!result?.url) {
-                throw new Error("Failed to get upload URL");
-            }
-
-            // Save to database
             const res = await addAdditionalDocumentAction(vendorId, {
-                documentName: trimmedName,
-                documentUrl: result.url
+                documentName: data.documentName,
+                documentUrl: data.documentUrl
             });
 
             if (res.success) {
                 toast.success("Document added successfully");
-                setDocumentName("");
+                reset();
                 if (onUpdate) onUpdate(res.data);
             } else {
                 toast.error(res.message || "Failed to add document");
             }
         } catch (error) {
             console.error("Error adding document:", error);
-            toast.error("Failed to upload document");
+            toast.error("Failed to add document");
         } finally {
             toast.dismiss(loadingToast);
-            setLocalUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
+            setIsSubmitting(false);
         }
     };
 
@@ -80,15 +73,6 @@ export default function AdditionalDocumentsSection({ vendorId, documents = [], o
         } catch (error) {
             toast.error("An error occurred");
         }
-    };
-
-    const handleUploadClick = () => {
-        const trimmedName = documentName.trim();
-        if (!trimmedName) {
-            toast.error("Please enter a document name first");
-            return;
-        }
-        fileInputRef.current?.click();
     };
 
     return (
@@ -151,48 +135,58 @@ export default function AdditionalDocumentsSection({ vendorId, documents = [], o
                 )}
 
                 {/* Upload Document Form */}
-                <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="space-y-2">
+                        <Label htmlFor="documentName">
                             Document Name <span className="text-red-500">*</span>
-                        </label>
+                        </Label>
                         <Input
+                            id="documentName"
                             placeholder="e.g., Insurance Certificate, Permit Copy"
-                            value={documentName}
-                            onChange={(e) => setDocumentName(e.target.value)}
-                            disabled={localUploading || uploading}
+                            {...register("documentName", {
+                                required: "Document name is required",
+                            })}
+                            disabled={isSubmitting}
                             className="bg-white"
+                        />
+                        {errors.documentName && (
+                            <p className="text-red-500 text-sm">{errors.documentName.message}</p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>
+                            Document File <span className="text-red-500">*</span>
+                        </Label>
+                        <ControlledFileUpload
+                            control={control}
+                            name="documentUrl"
+                            label="Upload Document"
+                            errors={errors}
+                            allowedMimeType={["application/pdf", "image/jpeg", "image/png", "image/webp"]}
+                            folderPath={`vendors/${vendorId}/documents`}
+                            role="admin"
                         />
                     </div>
 
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={handleFileSelect}
-                        disabled={localUploading || uploading}
-                    />
-
                     <Button
-                        type="button"
-                        onClick={handleUploadClick}
-                        disabled={localUploading || uploading}
+                        type="submit"
+                        disabled={isSubmitting}
                         size="sm"
                         className="w-full"
                     >
-                        {localUploading || uploading ? (
+                        {isSubmitting ? (
                             <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 Uploading...
                             </>
                         ) : (
                             <>
                                 <Upload className="w-4 h-4 mr-2" />
-                                Upload Document
+                                Add Document
                             </>
                         )}
                     </Button>
-                </div>
+                </form>
             </CardContent>
         </Card>
     );

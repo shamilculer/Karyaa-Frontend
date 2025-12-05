@@ -180,6 +180,7 @@ function EngagementMetricsChart() {
                             axisLine={false}
                             tickMargin={10}
                             className="text-xs"
+                            domain={[0, (dataMax) => dataMax * 1.15]}
                         />
                         <ChartTooltip
                             cursor={{ fill: "hsl(210 40% 96.1%)" }}

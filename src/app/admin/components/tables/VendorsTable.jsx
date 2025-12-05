@@ -20,6 +20,16 @@ import {
     DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
     Table,
     TableBody,
     TableCell,
@@ -43,11 +53,12 @@ import {
     PackageCheck,
     Globe,
     MapPin,
+    Trash2,
 } from "lucide-react"
 import Link from "next/link"
 
 import { getInitials } from "@/utils"
-import { getAllVendorsAction, updateVendorStatusAction } from "@/app/actions/admin/vendors"
+import { getAllVendorsAction, updateVendorStatusAction, deleteVendorAction } from "@/app/actions/admin/vendors"
 
 export const description = "Vendors Management Table with URL-based Filtering"
 
@@ -185,18 +196,18 @@ const TablePagination = ({
                 Page {pageIndex + 1} of {pageCount}
             </p>
             <div className="flex items-center space-x-2">
-                <Button 
-                    variant="outline" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => updateURLParams({ page: String(pageIndex) })} 
+                <Button
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() => updateURLParams({ page: String(pageIndex) })}
                     disabled={pageIndex === 0}
                 >
                     <ChevronLeft />
                 </Button>
-                <Button 
-                    variant="outline" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => updateURLParams({ page: String(pageIndex + 2) })} 
+                <Button
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() => updateURLParams({ page: String(pageIndex + 2) })}
                     disabled={pageIndex >= pageCount - 1 || pageCount === 0}
                 >
                     <ChevronRight />
@@ -217,9 +228,12 @@ export default function VendorsTable({ controls = true }) {
     const [totalPages, setTotalPages] = useState(0)
     const [apiError, setApiError] = useState(null)
     const [rowSelection, setRowSelection] = useState({})
-    
+
     // Local state for search input (for debouncing)
     const [searchInput, setSearchInput] = useState('')
+
+    // Delete confirmation state
+    const [deleteConfirm, setDeleteConfirm] = useState({ open: false, vendorId: null, vendorName: '' })
 
     // Read URL params
     const pageIndex = Number(searchParams.get('page') || '1') - 1
@@ -240,7 +254,7 @@ export default function VendorsTable({ controls = true }) {
     // Helper function to update URL parameters
     const updateURLParams = useCallback((updates) => {
         const params = new URLSearchParams(searchParams.toString())
-        
+
         Object.entries(updates).forEach(([key, value]) => {
             if (value) {
                 params.set(key, value)
@@ -351,21 +365,69 @@ export default function VendorsTable({ controls = true }) {
         }
     }
 
-    const handleBulkApprove = async () => {
+    const handleBulkAction = async (actionType) => {
         const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
         if (selectedIds.length === 0) {
             toast.error('No vendors selected.')
             return
         }
-        for (const id of selectedIds) {
-            try {
-                await updateVendorStatusAction(id, 'approved')
-            } catch (e) {
-                console.error('Bulk approve error', e)
-            }
+
+        // CONFIRMATION FOR DELETE
+        if (actionType === 'delete') {
+            setDeleteConfirm({ open: true, isBulk: true, count: selectedIds.length })
+            return;
         }
-        toast.success('Selected vendors approved.')
-        fetchData()
+
+        const actionLabel = actionType === 'approved' ? 'Approving' : 'Rejecting';
+        const toastId = toast.loading(`${actionLabel} ${selectedIds.length} vendors...`);
+
+        try {
+            for (const id of selectedIds) {
+                await updateVendorStatusAction(id, actionType)
+            }
+            toast.dismiss(toastId);
+            toast.success(`Selected vendors ${actionType === 'approved' ? 'approved' : 'rejected'}.`)
+            fetchData()
+            setRowSelection({}) // Clear selection
+        } catch (e) {
+            toast.dismiss(toastId);
+            console.error(`Bulk ${actionType} error`, e)
+            toast.error('An error occurred during bulk action.')
+        }
+    }
+
+    const executeBulkDelete = async () => {
+        const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
+        const toastId = toast.loading(`Deleting ${selectedIds.length} vendors...`);
+
+        try {
+            for (const id of selectedIds) {
+                await deleteVendorAction(id)
+            }
+            toast.dismiss(toastId);
+            toast.success('Selected vendors deleted successfully.')
+            setDeleteConfirm({ open: false, vendorId: null, vendorName: '', isBulk: false })
+            fetchData()
+            setRowSelection({}) // Clear selection
+        } catch (e) {
+            toast.dismiss(toastId);
+            console.error('Bulk delete error', e)
+            toast.error('An error occurred during bulk deletion.')
+        }
+    }
+
+    const handleDeleteVendor = async (id) => {
+        const toastId = toast.loading("Deleting vendor...");
+        const res = await deleteVendorAction(id)
+        if (res.success) {
+            toast.dismiss(toastId);
+            toast.success(res.message)
+            setDeleteConfirm({ open: false, vendorId: null, vendorName: '' })
+            fetchData()
+        } else {
+            toast.dismiss(toastId);
+            toast.error(res.message)
+        }
     }
 
     const headers = [
@@ -404,7 +466,19 @@ export default function VendorsTable({ controls = true }) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={handleBulkApprove}>Approve Selected</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleBulkAction('approved')}>
+                                        Approve Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleBulkAction('expired')}>
+                                        Mark as Expired
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleBulkAction('rejected')} className="text-red-600">
+                                        Reject Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleBulkAction('delete')} className="text-red-600 font-medium">
+                                        Delete Selected
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
@@ -463,34 +537,34 @@ export default function VendorsTable({ controls = true }) {
                         </DropdownMenu>
 
                         {/* Expiry Filter */}
-                    <DropdownMenu modal={false}>
-                        <DropdownMenuTrigger asChild>
-                            <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
-                                Expiry: {filterExpiryStatus === 'expiring-soon' ? 'Expiring Soon' : filterExpiryStatus === 'expired' ? 'Expired' : 'All'}
-                                <ChevronDown className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-48">
-                            <DropdownMenuLabel>Filter by Expiry Status</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => updateURLParams({ expiry: '', page: '1' })}>
-                                Show All
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuCheckboxItem
-                                checked={filterExpiryStatus === 'expiring-soon'}
-                                onCheckedChange={() => updateURLParams({ expiry: 'expiring-soon', page: '1' })}
-                            >
-                                Expiring Soon (3 months)
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem
-                                checked={filterExpiryStatus === 'expired'}
-                                onCheckedChange={() => updateURLParams({ expiry: 'expired', page: '1' })}
-                            >
-                                Expired
-                            </DropdownMenuCheckboxItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger asChild>
+                                <Button className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300">
+                                    Expiry: {filterExpiryStatus === 'expiring-soon' ? 'Expiring Soon' : filterExpiryStatus === 'expired' ? 'Expired' : 'All'}
+                                    <ChevronDown className="w-4 h-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-48">
+                                <DropdownMenuLabel>Filter by Expiry Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => updateURLParams({ expiry: '', page: '1' })}>
+                                    Show All
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuCheckboxItem
+                                    checked={filterExpiryStatus === 'expiring-soon'}
+                                    onCheckedChange={() => updateURLParams({ expiry: 'expiring-soon', page: '1' })}
+                                >
+                                    Expiring Soon (3 months)
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={filterExpiryStatus === 'expired'}
+                                    onCheckedChange={() => updateURLParams({ expiry: 'expired', page: '1' })}
+                                >
+                                    Expired
+                                </DropdownMenuCheckboxItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             )}
@@ -501,8 +575,7 @@ export default function VendorsTable({ controls = true }) {
                             <TableRow>
                                 <TableHead className="w-12">
                                     <Checkbox
-                                        checked={isAllSelected}
-                                        indeterminate={isSomeSelected || undefined}
+                                        checked={isSomeSelected ? "indeterminate" : isAllSelected}
                                         onCheckedChange={(value) => toggleAllRowsSelected(!!value)}
                                     />
                                 </TableHead>
@@ -536,7 +609,7 @@ export default function VendorsTable({ controls = true }) {
                                         />
                                     </TableCell>
                                     <TableCell className="text-sm text-gray-700 font-mono">{row.referenceId || "N/A"}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="max-width-[210px]">
                                         <HoverCard>
                                             <HoverCardTrigger asChild>
                                                 <div className="flex items-center gap-2 cursor-pointer">
@@ -597,6 +670,14 @@ export default function VendorsTable({ controls = true }) {
                                                 {row.vendorStatus !== 'rejected' && (
                                                     <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'rejected')} className="text-red-600">Reject Vendor</DropdownMenuItem>
                                                 )}
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => setDeleteConfirm({ open: true, vendorId: row._id, vendorName: row.businessName })}
+                                                    className="text-red-600 focus:text-red-600"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Delete Vendor
+                                                </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
@@ -624,6 +705,43 @@ export default function VendorsTable({ controls = true }) {
                     totalVendors={totalVendors}
                 />
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteConfirm.open} onOpenChange={(open) => !open && setDeleteConfirm({ open: false, vendorId: null, vendorName: '', isBulk: false })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div>
+                                {deleteConfirm.isBulk ? (
+                                    <p>
+                                        This will permanently delete <strong>{deleteConfirm.count} selected vendors</strong> and all their associated data.
+                                    </p>
+                                ) : (
+                                    <p>This will permanently delete <strong>{deleteConfirm.vendorName}</strong> and all associated data including:</p>
+                                )}
+
+                                <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
+                                    <li>Gallery items and images</li>
+                                    <li>Packages and cover images</li>
+                                    <li>Documents and files</li>
+                                    <li>Admin comments</li>
+                                </ul>
+                                <p className="mt-3">This action cannot be undone.</p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={deleteConfirm.isBulk ? executeBulkDelete : () => handleDeleteVendor(deleteConfirm.vendorId)}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {deleteConfirm.isBulk ? `Delete ${deleteConfirm.count} Vendors` : 'Delete Vendor'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

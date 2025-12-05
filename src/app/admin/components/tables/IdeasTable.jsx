@@ -265,8 +265,8 @@ export default function IdeasTable({ categories = [] }) {
             {pagination && pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
                     <p className="text-sm text-gray-600">
-                        Showing {((currentPage - 1) * limit) + 1} to{" "}
-                        {Math.min(currentPage * limit, pagination.totalCount)} of{" "}
+                        Showing {((currentPage - 1) * limit) + 1} to
+                        {Math.min(currentPage * limit, pagination.totalCount)} of
                         {pagination.totalCount} ideas
                     </p>
                     <div className="flex items-center gap-2">

@@ -14,7 +14,7 @@ import { Star, Trash } from 'lucide-react';
 import { useVendorStore } from '@/store/vendorStore';
 import { getReviewStats } from '@/app/actions/vendor/reviews';
 import { getAllVendorReviews } from '@/app/actions/shared/reviews';
-import { flagReviewForRemoval } from '@/app/actions/vendor/reviews';
+import { flagReviewForRemoval, unflagReview } from '@/app/actions/vendor/reviews';
 import { GlobalPagination } from '@/components/common/GlobalPagination';
 import { toast } from "sonner";
 
@@ -59,6 +59,9 @@ function ReviewsManagePageContent() {
 
     // ✅ Loading flag state
     const [flaggingId, setFlaggingId] = useState(null);
+
+    // ✅ Loading unflag state
+    const [unflaggingId, setUnflaggingId] = useState(null);
 
     const currentPage = Number(searchParams.get('page')) || 1;
     const limit = 6;
@@ -118,16 +121,16 @@ function ReviewsManagePageContent() {
     async function handleFlag(reviewId) {
         try {
             setFlaggingId(reviewId);
-    
+
             const res = await flagReviewForRemoval(reviewId);
-    
+
             if (res.error) {
                 toast.error(res.error || "Failed to flag review.");
                 return;
             }
-    
+
             toast.success("Review flagged successfully!");
-    
+
             // reflect UI instantly
             setReviews(prev =>
                 prev.map(r => r._id === reviewId
@@ -135,12 +138,41 @@ function ReviewsManagePageContent() {
                     : r
                 )
             );
-    
+
         } catch (error) {
             toast.error("Something went wrong!");
             console.error(error);
         } finally {
             setFlaggingId(null);
+        }
+    }
+
+    async function handleUnflag(reviewId) {
+        try {
+            setUnflaggingId(reviewId);
+
+            const res = await unflagReview(reviewId);
+
+            if (res.error) {
+                toast.error(res.error || "Failed to unflag review.");
+                return;
+            }
+
+            toast.success("Review flag removed successfully!");
+
+            // reflect UI instantly
+            setReviews(prev =>
+                prev.map(r => r._id === reviewId
+                    ? { ...r, flaggedForRemoval: false, status: "Approved" }
+                    : r
+                )
+            );
+
+        } catch (error) {
+            toast.error("Something went wrong!");
+            console.error(error);
+        } finally {
+            setUnflaggingId(null);
         }
     }
 
@@ -172,7 +204,7 @@ function ReviewsManagePageContent() {
                 <div className="w-full lg:w-1/5 flex-center flex-col gap-3">
                     {loadingStats ? (
                         <div className="text-lg text-gray-500">Loading stats...</div>
-                    ) :  (
+                    ) : (
                         <>
                             <div className="text-3xl font-heading font-medium">
                                 {stats.averageRating?.toFixed(1)}
@@ -229,7 +261,7 @@ function ReviewsManagePageContent() {
                                 <div className='w-full flex-between max-md:flex-col max-md:!items-start border-b gap-5 border-gray-300 pb-5'>
                                     <div className="flex items-center  gap-5">
                                         <Avatar className="size-12 md:size-16 rounded-full">
-                                            <AvatarImage src={review.user?.profileImage} />
+                                            <AvatarImage className="size-full object-cover" alt={`${review.user?.username} avatar`} src={review.user?.profileImage} />
                                             <AvatarFallback>{review.user?.username?.slice(0, 2)}</AvatarFallback>
                                         </Avatar>
                                         <div>
@@ -254,9 +286,20 @@ function ReviewsManagePageContent() {
 
                                         {/* Flag UI */}
                                         {review.flaggedForRemoval ? (
-                                            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                                                Flagged for Removal
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                                    Flagged for Removal
+                                                </span>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={unflaggingId === review._id}
+                                                    onClick={() => handleUnflag(review._id)}
+                                                    className="text-xs"
+                                                >
+                                                    {unflaggingId === review._id ? "Removing..." : "Remove Flag"}
+                                                </Button>
+                                            </div>
                                         ) : (
                                             <Button
                                                 size="icon"

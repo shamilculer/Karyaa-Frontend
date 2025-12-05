@@ -178,8 +178,8 @@ const CategoryMultiSelect = ({ options, value, onChange, placeholder, disabled, 
                                 onClick={() => toggleSelection(optionValue)}
                                 disabled={disabled}
                                 className={`px-3 py-1 text-sm rounded-full cursor-pointer transition-colors font-medium ${isItemSelected(optionValue)
-                                        ? "bg-primary text-white border-primary"
-                                        : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-gray-300 text-gray-700 border-gray-400 hover:bg-gray-200"
                                     }`}
                             >
                                 {nameToDisplay} {isItemSelected(optionValue) ? '×' : '+'}
@@ -326,8 +326,8 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                             onClick={() => setActiveTab(tab.id)}
                             type="button"
                             className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                                    ? "border-blue-600 text-blue-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                ? "border-blue-600 text-blue-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                         >
                             {tab.label}
@@ -421,6 +421,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                     errors={form.formState.errors}
                                                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                                                     folderPath="vendors/profiles"
+                                                    role="admin"
                                                 />
                                             </FormControl>
                                         </div>
@@ -526,6 +527,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                     errors={form.formState.errors}
                                                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                                                     folderPath="vendors/logos"
+                                                    role="admin"
                                                 />
                                             </FormControl>
                                         </div>
@@ -638,6 +640,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                             errors={form.formState.errors}
                                                             allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                                             folderPath="vendors/documents"
+                                                            role="admin"
                                                         />
                                                     </FormControl>
                                                 </div>
@@ -682,6 +685,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                             errors={form.formState.errors}
                                                             allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                                             folderPath="vendors/documents"
+                                                            role="admin"
                                                         />
                                                     </FormControl>
                                                 </div>
@@ -714,6 +718,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                             errors={form.formState.errors}
                                                             allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                                             folderPath="vendors/documents"
+                                                            role="admin"
                                                         />
                                                     </FormControl>
                                                 </div>
@@ -744,6 +749,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                             errors={form.formState.errors}
                                                             allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                                             folderPath="vendors/documents"
+                                                            role="admin"
                                                         />
                                                     </FormControl>
                                                 </div>
@@ -775,12 +781,82 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
 
                                 <FormField
                                     control={form.control}
+                                    name="address.street"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs font-medium">Street Address</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Street address" className="bg-gray-50" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.area"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs font-medium">Area/District</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Area or neighborhood" className="bg-gray-50" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.state"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs font-medium">State/Emirate</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="e.g., Dubai" className="bg-gray-50" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
                                     name="address.country"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="text-xs font-medium">Country *</FormLabel>
                                             <FormControl>
                                                 <Input {...field} className="bg-gray-50" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.zipCode"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs font-medium">Zip Code</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Zip/Postal code" className="bg-gray-50" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.googleMapLink"
+                                    render={({ field }) => (
+                                        <FormItem className="md:col-span-2">
+                                            <FormLabel className="text-xs font-medium">Google Maps Link</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="https://maps.google.com/..." className="bg-gray-50" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
