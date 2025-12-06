@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox"; // ✅ <-- SHADCN CHECKBOX
 
-
 // 🔥 Skeleton loader for suspense fallback
 function GallerySkeleton() {
   return (
@@ -21,7 +20,6 @@ function GallerySkeleton() {
     </div>
   );
 }
-
 
 // =============================
 //      Gallery Grid
@@ -126,7 +124,6 @@ function GalleryContent({ vendorId, refreshKey, bulkMode, selected, setSelected 
     </div>
   );
 }
-
 
 // =============================
 //          PAGE ROOT

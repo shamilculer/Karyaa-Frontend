@@ -110,7 +110,6 @@ export const updateLeadStatus = async (leadIds, status) => {
   }
 };
 
-
 export const deleteLead = async (leadIds) => {
   try {
     if (!leadIds || (Array.isArray(leadIds) && leadIds.length === 0)) {

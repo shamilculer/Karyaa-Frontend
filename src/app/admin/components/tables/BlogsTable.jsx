@@ -133,7 +133,6 @@ const BlogsTable = ({ controls = true }) => {
     const urlGlobalFilter = searchParams.get("search") || ""
     const urlStatusFilter = searchParams.get("status") || ""
 
-
     // ✅ Keep state for data, loading, error, and row selection
     const [data, setData] = useState(initialBlogData)
     const [isLoading, setIsLoading] = useState(true)
@@ -199,7 +198,6 @@ const BlogsTable = ({ controls = true }) => {
 
         return () => clearTimeout(handler);
     }, [searchQuery, handleGlobalFilterChange]);
-
 
     // ➡️ Re-use fetchData, but now it depends on URL state (urlPageIndex, urlPageSize, etc.)
     const fetchData = useCallback(async () => {
@@ -280,7 +278,6 @@ const BlogsTable = ({ controls = true }) => {
     // ✅ FIX: Only count current visible rows (unchanged)
     const selectedRowCount = data.filter(row => rowSelection[row._id]).length
 
-
     // ... (handleBlogDelete, handleBulkDelete, handleToggle, handleBulkToggle remain the same)
     const handleBlogDelete = async (ids) => {
         try {
@@ -327,7 +324,6 @@ const BlogsTable = ({ controls = true }) => {
         }
     };
 
-
     const handleBulkToggle = async (status) => {
         const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id]);
 
@@ -337,7 +333,6 @@ const BlogsTable = ({ controls = true }) => {
         }
 
         const res = await toggleBlogStatusAction({ ids: selectedIds, status });
-
 
         if (res.success) {
             toast.success(res.message);

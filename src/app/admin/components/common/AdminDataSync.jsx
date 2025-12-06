@@ -12,7 +12,7 @@ export function AdminDataSync({ currentAdminId }) {
 
     React.useEffect(() => {
         if (!currentAdminId) {
-            console.log("AdminDataSync: No admin ID found. Skipping sync.");
+
             return;
         }
 

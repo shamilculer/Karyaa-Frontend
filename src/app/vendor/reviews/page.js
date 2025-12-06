@@ -18,7 +18,6 @@ import { flagReviewForRemoval, unflagReview } from '@/app/actions/vendor/reviews
 import { GlobalPagination } from '@/components/common/GlobalPagination';
 import { toast } from "sonner";
 
-
 export default function ReviewsManagePage() {
     return (
         <Suspense
@@ -117,7 +116,6 @@ function ReviewsManagePageContent() {
         fetchReviews();
     }, [vendorId, currentPage, filterRating, searchTerm]);
 
-
     async function handleFlag(reviewId) {
         try {
             setFlaggingId(reviewId);
@@ -175,7 +173,6 @@ function ReviewsManagePageContent() {
             setUnflaggingId(null);
         }
     }
-
 
     const renderStars = (rating) => {
         const stars = [];

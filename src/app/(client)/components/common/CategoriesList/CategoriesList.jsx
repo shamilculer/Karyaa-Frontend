@@ -53,7 +53,6 @@ export default function CategoryList({ isSavedPage }) {
   );
 }
 
-
 export const CategoryGrid = async () => {
   return (
     <section className="container">

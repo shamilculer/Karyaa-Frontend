@@ -310,7 +310,6 @@ export default function AdminsTable({ controls = true }) {
         }
     };
 
-
     // 3. 🎯 DELETE CONFIRMATION STATE
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [adminToDelete, setAdminToDelete] = useState(null);

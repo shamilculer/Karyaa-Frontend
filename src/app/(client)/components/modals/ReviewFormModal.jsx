@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import ReviewForm from "../forms/ReviewForm";
 
-
 const ReviewFormModal = ({ vendorId }) => {
     const [isOpen, setIsOpen] = useState(false);
 

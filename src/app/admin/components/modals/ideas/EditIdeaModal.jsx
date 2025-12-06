@@ -98,7 +98,6 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
         }
     }, [idea, reset]);
 
-
     // ✅ Handle image uploads (reused)
     const handleImageUpload = (urls) => {
         const newUrls = Array.isArray(urls) ? urls : [urls];

@@ -65,8 +65,6 @@ export const loginVendor = async (data) => {
         path: '/',
     });
 
-    console.log(vendor);
-
     return {
       success: true,
       data: vendor,
@@ -130,7 +128,6 @@ export const getVendorProfile = async () => {
         };
     }
 }
-
 
 export const updateVendorProfile = async (vendorId, updateData) => {
     if (!vendorId) {

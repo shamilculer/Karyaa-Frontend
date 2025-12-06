@@ -13,6 +13,10 @@ const greatVibes = Great_Vibes({
   style: "normal",
 });
 
+export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://kaarya.ae'),
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

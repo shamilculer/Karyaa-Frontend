@@ -7,7 +7,6 @@ import BundlesTable from "../components/tables/BundleTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "../components/common/ErrorBoundary";
 
-
 // ---------------------------
 // Loading Skeleton Component
 // ---------------------------
@@ -24,7 +23,6 @@ function StatsSkeleton() {
   );
 }
 
-
 // -------------------------
 // Error Component (Inline)
 // -------------------------
@@ -36,7 +34,6 @@ function StatsError({ message }) {
     </div>
   );
 }
-
 
 // -------------------------
 // Async Stats Partial
@@ -81,7 +78,6 @@ async function Stats() {
     </div>
   );
 }
-
 
 // -------------------------
 // Main Page Component

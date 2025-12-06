@@ -109,8 +109,6 @@ export default function EditSeoModal({
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
 
-
-
                     <div className="space-y-2">
                         <Label htmlFor="metaTitle">Meta Title</Label>
                         <Input
@@ -162,9 +160,6 @@ export default function EditSeoModal({
                             Press Enter or comma to add tags
                         </p>
                     </div>
-
-
-
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>

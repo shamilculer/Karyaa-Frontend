@@ -134,35 +134,15 @@ const Subscribers = () => {
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem
-                                                onClick={() => console.log('Viewing details for:', subscriber.id)}
-                                                className="cursor-pointer"
-                                            >
-                                                <Eye className="mr-2 h-4 w-4" /> View Details
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                onClick={() => console.log('Cancelling subscription for:', subscriber.id)}
-                                                className="cursor-pointer text-red-600 focus:text-red-600"
-                                            >
-                                                <X className="mr-2 h-4 w-4" /> Cancel Subscription
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                            </TableRow>
+                                        </TableCell>
+                                    </TableRow>
                         ))}
-                    </TableBody>
-                </Table>
+                                </TableBody>
+                            </Table>
             </div>
 
-        </div>
-    )
+            </div>
+            )
 }
 
-export default Subscribers
+            export default Subscribers

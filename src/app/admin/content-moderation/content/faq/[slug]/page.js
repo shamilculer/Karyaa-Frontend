@@ -270,7 +270,6 @@ const FaqEditor = () => {
         )}
       </div>
 
-
       {/* Add padding to bottom to prevent content hiding under sticky bar */}
       {faqs.length > 0 && <div className="h-20" />}
     </div>

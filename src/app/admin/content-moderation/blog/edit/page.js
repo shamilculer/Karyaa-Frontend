@@ -42,7 +42,6 @@ import {
 import ControlledFileUpload from "@/components/common/ControlledFileUploads"
 import { getBlogPostAsAdmin, editBlogPost } from "@/app/actions/admin/blog"
 
-
 // Tiptap Editor Toolbar Component
 const EditorToolbar = ({ editor }) => {
     if (!editor) return null
@@ -372,7 +371,6 @@ const KeywordsInput = ({ value = [], onChange }) => {
         </div>
     )
 }
-
 
 const EditBlogPage = () => {
     const router = useRouter()

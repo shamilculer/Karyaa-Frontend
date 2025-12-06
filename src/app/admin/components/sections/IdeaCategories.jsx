@@ -8,7 +8,6 @@ import { EditIdeaCategoryModal } from "../modals/ideas/EditIdeaCategoryModal"
 import { CreateIdeaCategoryModal } from "../modals/ideas/CreateIdeaCategoryModal"
 import { getAllIdeaCategoriesAction } from "@/app/actions/public/ideas"
 
-
 const IdeaCategories = ({ categories: initialCategories }) => {
     const [hoveredId, setHoveredId] = useState(null);
     // 1. State for the categories array (to allow refreshing data)
@@ -17,7 +16,6 @@ const IdeaCategories = ({ categories: initialCategories }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     // 3. State to hold the data of the category being edited
     const [categoryToEdit, setCategoryToEdit] = useState(null);
-
 
     // Function to re-fetch the categories list and update state
     const refreshCategories = async () => {

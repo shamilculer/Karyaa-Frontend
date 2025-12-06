@@ -12,5 +12,4 @@ const AddPackagesPage = () => {
     )
 }
 
-
 export default AddPackagesPage 

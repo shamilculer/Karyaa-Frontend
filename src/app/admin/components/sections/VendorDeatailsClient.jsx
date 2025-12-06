@@ -253,7 +253,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
         return 'N/A';
     };
 
-
     const getTimeRemaining = (endDate) => {
         if (!endDate) return null;
 
@@ -671,8 +670,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                     )}
                                 </div>
 
-
-
                                 {vendor.allFeatures && vendor.allFeatures.length > 0 && (
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300">
                                         <h2 className="!text-xl uppercase font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -732,7 +729,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                 )
                                 }
 
-
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center justify-between mb-5">
                                         <h3 className="!text-xl uppercase font-semibold text-gray-900 flex items-center gap-2">
@@ -778,7 +774,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         />
                                     </div>
                                 </div>
-
 
                             </div >
 

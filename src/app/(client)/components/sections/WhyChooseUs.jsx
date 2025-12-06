@@ -5,8 +5,6 @@ import React from "react";
 
 export default function WhyChooseUs({ data } = {}) {
 
-  console.log(data)
-
   const title = data?.title || "Why choose us ?";
   const heading = data?.heading || "Why thousands trust us";
   const description = data?.description ||

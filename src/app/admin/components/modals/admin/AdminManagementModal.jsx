@@ -31,13 +31,11 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { getInitials } from "@/utils"
 
-
 import {
     deleteAdminAction,
     toggleAdminStatusAction,
     updateAdminPermissionsAction
 } from "@/app/actions/admin/admin"
-
 
 export function AdminManagementModal({ isOpen, onClose, admin, currentUserLevel, onStatusUpdate, onDeletion, fetchData, currentAdminId }) {
     const canManage = currentUserLevel === 'admin';
@@ -58,7 +56,6 @@ export function AdminManagementModal({ isOpen, onClose, admin, currentUserLevel,
         );
         setHasChanges(changesDetected);
     }, [pendingPermissions, admin.accessControl]);
-
 
     React.useEffect(() => {
         // Reset permissions when modal opens/changes admin
@@ -227,7 +224,6 @@ export function AdminManagementModal({ isOpen, onClose, admin, currentUserLevel,
                                 ))}
                             </div>
                         )}
-
 
                         {/* SAVE PERMISSIONS BUTTON */}
                         {canManage && hasChanges && admin.adminLevel !== 'admin' && ( // Prevent saving for Super Admins

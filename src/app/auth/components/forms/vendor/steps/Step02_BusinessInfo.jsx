@@ -203,7 +203,7 @@ export default function Step02_BusinessInfo() {
     }, [isMainCategorySelected, form]);
 
     const handleNext = (data) => {
-        console.log("SUCCESS: handleNext function was CALLED.");
+
         // We know it's already valid if it reaches here, so no need for Step2Schema.parse(data) again.
         updateFields(data);
         nextStep();

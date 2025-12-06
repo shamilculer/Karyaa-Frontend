@@ -108,7 +108,6 @@ const VendorFields = ({ control, index, onRemove, isMultiple }) => {
     );
 };
 
-
 // --- 3. MAIN FORM COMPONENT ---
 
 const ReferralForm = ({ onSuccess }) => { // Accept onSuccess prop
@@ -141,11 +140,11 @@ const ReferralForm = ({ onSuccess }) => { // Accept onSuccess prop
                     
                     // Check if onSuccess callback exists AND referralCode is present
                     if (onSuccess && response.newReferral?.referralCode) {
-                        console.log("Calling onSuccess with code:", response.newReferral.referralCode);
+
                         // Call the success callback with the referral code
                         onSuccess(response.newReferral.referralCode);
                     } else {
-                        console.log("Showing toast instead. onSuccess:", !!onSuccess, "code:", response.newReferral?.referralCode);
+
                         // Only show toast if callback is missing or code is missing
                         toast.success("Referral Submitted Successfully!", {
                             description: response.newReferral?.referralCode 

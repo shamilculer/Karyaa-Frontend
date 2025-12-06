@@ -51,7 +51,6 @@ export const popularSubCategories = [
     },
 ];
 
-
 export const vendors = [
   // {
   //   category: "Wedding",
@@ -211,8 +210,6 @@ export const vendors = [
   // },
 ];
 
-
-
 export const categories = [
     { name: "Entertainment", slug: "entertainment", img: "/categories/entertainment.webp" },
     { name: "Decor", slug: "decor", img: "/categories/decor.webp" },
@@ -223,8 +220,6 @@ export const categories = [
     { name: "Gifts", slug: "gifts", img: "/categories/gifts.webp" },
     { name: "Transportation", slug: "transportation", img: "/categories/transportation.webp" },
 ];
-
-
 
 export const blogPosts = [
     {
@@ -261,7 +256,6 @@ export const blogPosts = [
         slug: "maximize-your-visibility-a-vendors-guide-to-standing-out",
     },
 ];
-
 
 // categoriesMenu.js
 export const categoriesMenu = [
@@ -359,7 +353,6 @@ export const categoriesMenu = [
     ],
   },
 ];
-
 
 export const ideasData = [
   {
@@ -459,7 +452,6 @@ export const ideasData = [
     slug: "romantic-candlelit-dinner-party"
   }
 ];
-
 
 export const initialBlogParams = {
   page: "1",

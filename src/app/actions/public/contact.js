@@ -12,14 +12,12 @@ export const sendContactForm = async (data) => {
       }
     );
 
-    console.log(response);
-
     return {
         success: true,
         message: "Message sent successfully!",
     }
   } catch (error) {
-    console.log(error)
+
     return {
       success: false,
       error: error.message || "Failed to send the message. Please try again.",

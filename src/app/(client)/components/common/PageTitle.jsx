@@ -9,7 +9,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
     // Try to fetch placement-specific banner if placement is provided
     if (placement) {
         const result = await getActiveBanners(placement);
-        console.log(result)
+
         if (result.success && result.data && result.data.length > 0) {
             banners = result.data;
         }

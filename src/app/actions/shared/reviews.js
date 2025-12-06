@@ -63,7 +63,6 @@ export const getVendorReviews = async (vendorId, page = 1, limit = 10, ratingFil
     }
 };
 
-
 /**
  * Server Action to fetch ALL (paginated + filtered + searchable)
  * vendor reviews across any status.
@@ -164,8 +163,6 @@ export const getAllVendorReviews = async (
     }
 };
 
-
-
 /**
  * Server Action to submit a new review for a vendor.
  * This action handles the 'review already added' error returned by the backend.
@@ -197,8 +194,6 @@ export const createReview = async (vendorId, reviewData) => {
         };
 
     } catch (error) {
-
-        console.log(error)
 
         return {
             error: error || "An unexpected error occurred while submitting your review.",

@@ -291,7 +291,7 @@ export default function VendorsTable({ controls = true }) {
                 isInternational: filterIsInternational,
             })
             if (result.success) {
-                console.log(result.data)
+
                 setData(result.data || [])
                 setTotalVendors(result.pagination?.total || 0)
                 setTotalPages(result.pagination?.pages || 0)

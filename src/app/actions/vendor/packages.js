@@ -45,7 +45,7 @@ export async function updatePackage(packageId, data) {
       package: response.package, // Return updated package data
     };
   } catch (error) {
-    console.log(error);
+
     return {
       success: false,
       message: "Something went wrong, please try again",
@@ -76,7 +76,7 @@ export async function deletePackage(packageId) {
       message: response.message || "Package deleted successfully",
     };
   } catch (error) {
-    console.log(error);
+
     return {
       success: false,
       message: "Something went wrong, please try again",

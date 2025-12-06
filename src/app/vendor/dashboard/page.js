@@ -44,7 +44,6 @@ const VendorDashboardPage = () => {
         </div>
       </div>
 
-
       <div className="w-full my-16">
         <div className="w-full flex-between mb-5">
           <div>
@@ -73,7 +72,6 @@ const VendorDashboardPage = () => {
             <Link href="/vendor/gallery">Manage Gallery</Link>
           </Button>
         </div>
-
 
         <DashboardGallery />
       </div>

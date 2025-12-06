@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator";
 
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { createIdeaAction } from "@/app/actions/admin/ideas";
-import { getIdeaCategories } from "@/app/actions/public/categories";
+import { getAllIdeaCategoriesAction } from "@/app/actions/public/ideas";
 
 // Schema
 const ideaSchema = z.object({
@@ -60,7 +60,7 @@ export default function AddIdeaPage() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const res = await getIdeaCategories();
+        const res = await getAllIdeaCategoriesAction();
         if (res.success) {
           setCategories(res.data);
         } else {

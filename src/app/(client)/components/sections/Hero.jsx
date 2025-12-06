@@ -62,7 +62,6 @@ const Hero = ({ data } = {}) => {
     images = normalizedIncoming;
   }
 
-
   return (
     <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
       <div className='w-full flex-center flex-col text-center px-4'>

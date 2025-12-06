@@ -56,7 +56,6 @@ export const getAllAdminsAction = async ({
   }
 };
 
-
 export const toggleAdminStatusAction = async (adminId) => {
     if (!adminId) {
         return {
@@ -98,7 +97,6 @@ export const toggleAdminStatusAction = async (adminId) => {
         };
     }
 };
-
 
 export const deleteAdminAction = async (adminId) => {
     if (!adminId) {
@@ -199,8 +197,6 @@ export const updateAdminProfileAction = async (profileData) => {
             auth: true,
             body: JSON.stringify(profileData),
         });
-
-        console.log(response);
 
         if (response.success) {
             revalidatePath("/admin/settings");

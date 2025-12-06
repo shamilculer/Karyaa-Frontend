@@ -88,8 +88,6 @@ function VendorSideBar() {
     const pathname = usePathname();
     const { setOpenMobile } = useSidebar();
 
-    console.log(vendor)
-
     // Close sidebar on mobile when navigating
     const handleLinkClick = () => {
         setOpenMobile(false);

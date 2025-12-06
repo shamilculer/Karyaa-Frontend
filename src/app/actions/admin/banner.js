@@ -151,7 +151,6 @@ export const updateBannerAction = async (id, formData) => {
       body: JSON.stringify(formData),
     });
 
-
     if (response.success) {
       return {
         success: true,

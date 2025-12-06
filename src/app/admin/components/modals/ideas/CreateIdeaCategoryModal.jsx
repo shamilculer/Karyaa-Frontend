@@ -22,7 +22,6 @@ import { toast } from "sonner";
 import { createIdeaCategoryAction } from "@/app/actions/admin/ideas";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
-
 // ➡️ Renaming the component to reflect it includes the whole Dialog structure
 export function CreateIdeaCategoryModal({ onCreationSuccess }) {
 

@@ -126,7 +126,6 @@ export const CategoryCard = ({
   );
 };
 
-
 export const CategoryGridCard = ({ category }) => {
   const imgSrc = category.coverImage || category.img || '/placeholder-category.jpg';
   

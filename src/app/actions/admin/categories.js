@@ -21,7 +21,7 @@ export const getCategoryDetails = async () => {
             categories: response.categories
         };
     } catch (error) {
-        console.log(error);
+
         return {
             success: false,
             message: "An unexpected error occurred. Please try again later."
@@ -55,7 +55,7 @@ export const getSingleCategoryDetails = async (slug) => {
             category: response.category
         };
     } catch (error) {
-        console.log(error);
+
         return {
             success: false,
             message: "An unexpected error occurred while fetching category details."
@@ -143,7 +143,7 @@ export const updateCategory = async (slug, formData) => {
             category: response.category
         };
     } catch (error) {
-        console.log(error);
+
         return {
             success: false,
             message: "An unexpected error occurred while updating category."
@@ -178,7 +178,7 @@ export const deleteCategory = async (slug) => {
         message: response.message || "Category deleted successfully"
       };
     } catch (error) {
-      console.log(error);
+
       return {
         success: false,
         message: "An unexpected error occurred while deleting category."

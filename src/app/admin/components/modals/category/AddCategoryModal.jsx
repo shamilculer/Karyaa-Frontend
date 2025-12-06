@@ -38,7 +38,6 @@ const formSchema = z.object({
 const CATEGORY_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const S3_FOLDER_PATH = "category-images";
 
-
 export function AddCategoryModal({ onOpenChange, open }) {
     const router = useRouter()
     const form = useForm({

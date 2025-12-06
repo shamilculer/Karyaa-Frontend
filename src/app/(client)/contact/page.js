@@ -11,7 +11,6 @@ export async function generateMetadata() {
     return await getMetaData("static", "contact");
 }
 
-
 const ContactPage = async () => {
     // Fetch contact page content
     const contentResult = await getContentByKeyAction("contact-page")

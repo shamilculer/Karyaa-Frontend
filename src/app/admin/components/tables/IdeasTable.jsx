@@ -135,7 +135,6 @@ export default function IdeasTable({ categories = [] }) {
         return () => clearTimeout(timer);
     }, [localSearchTerm, searchTerm, pathname, router, createQueryString]);
 
-
     const handleDeleteIdea = async (id) => {
         try {
             if (!confirm("Are you sure you want to delete this idea?")) return;

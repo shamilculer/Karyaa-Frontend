@@ -65,7 +65,6 @@ const formSchema = z.object({
     features: z.array(z.string().min(1, "Feature cannot be empty")).optional(),
 });
 
-
 const EditBundleModal = ({ open, setOpen, bundle, onSuccess }) => {
     // Helper to correctly handle input for maxVendors (null for unlimited)
     const handleMaxVendorsChange = (e, field) => {
@@ -415,7 +414,6 @@ const EditBundleModal = ({ open, setOpen, bundle, onSuccess }) => {
                                         )}
                                     />
                                 </div>
-
 
                                 {/* Checkboxes Group */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">

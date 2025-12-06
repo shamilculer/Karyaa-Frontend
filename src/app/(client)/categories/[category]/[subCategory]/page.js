@@ -1,6 +1,5 @@
 // Subcategory pages fetch server data and may rely on cookies; force dynamic rendering.
 
-
 import CategoryList from "@/app/(client)/components/common/CategoriesList/CategoriesList";
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "@/app/(client)/components/common/PageTitle";
@@ -19,7 +18,6 @@ const SubCategoryPage = async ({ params, searchParams }) => {
   const filters = await searchParams || {};
 
   const subCategoryData = await getSubcategoryDetails(subCategory);
-
 
   return (
     <div>

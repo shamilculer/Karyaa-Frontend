@@ -27,7 +27,7 @@ export default function MasonryGrid({ items }) {
 
     useEffect(() => {
         setMounted(true);
-        console.log('MasonryGrid received items:', items);
+
     }, [items]);
 
     const openGallery = (index = 0) => {

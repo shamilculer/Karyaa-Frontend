@@ -32,7 +32,7 @@ const CategoriesContent = () => {
       setIsLoading(true);
       setError(null);
       const response = await getCategoryDetails();
-      console.log(response);
+
       if (response.success) {
         setCategories(response.categories);
       } else {

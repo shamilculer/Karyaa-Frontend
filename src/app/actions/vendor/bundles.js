@@ -57,7 +57,6 @@ export const getAllActiveBundles = async () => {
   }
 };
 
-
 export const sendBundleEnquiryAction = async (bundleId) => {
     try {
         const responseData = await apiFetch('/bundles/enquiry', {

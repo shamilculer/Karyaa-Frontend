@@ -5,7 +5,6 @@ import { getContentByKeyAction } from "@/app/actions/public/content";
 export default async function TestimonialsServer() {
   try {
     const result = await getContentByKeyAction("testimonials");
-    console.log("[TestimonialsServer] getContentByKeyAction result:", result);
 
     let testimonials = null;
     if (result?.success && result.data?.content) {

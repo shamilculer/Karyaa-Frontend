@@ -14,7 +14,6 @@ const STEPS = [
   { component: Step03_Review, title: "Review & Submit" },
 ];
 
-
 export default function VendorMultiStepForm() {
   // Use the merged store
   const { formData, currentStepIndex } = useVendorFormStore();

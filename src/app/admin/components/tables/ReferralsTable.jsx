@@ -183,7 +183,6 @@ export default function ReferralsCardLayout({ controls = true }) {
         }
     };
 
-
     const handleSelectItem = (id) => {
         const newSelected = new Set(selectedItems);
         if (newSelected.has(id)) {

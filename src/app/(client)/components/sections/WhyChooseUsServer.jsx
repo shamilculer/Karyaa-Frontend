@@ -5,7 +5,6 @@ import { getContentByKeyAction } from "@/app/actions/public/content";
 export default async function WhyChooseUsServer() {
   try {
     const result = await getContentByKeyAction("why-choose-us");
-    console.log("[WhyChooseUsServer] getContentByKeyAction result:", result);
 
     let data = null;
     if (result?.success && result.data?.content) {

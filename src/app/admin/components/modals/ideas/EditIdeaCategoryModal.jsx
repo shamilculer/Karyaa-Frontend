@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { updateIdeaCategoryAction } from "@/app/actions/admin/ideas";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
-
 export function EditIdeaCategoryModal({ open, setOpen, category, onUpdateSuccess }) {
 
     const { handleSubmit, control, setValue, watch, formState: { errors } } = useForm({

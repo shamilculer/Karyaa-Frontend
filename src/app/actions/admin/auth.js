@@ -13,8 +13,6 @@ export const loginAdmin = async (data) => {
       body: data,
     });
 
-    console.log(response)
-
     const { accessToken, refreshToken, admin } = response;
 
     // Set httpOnly cookies in Next.js
@@ -52,7 +50,6 @@ export const loginAdmin = async (data) => {
     };
   }
 };
-
 
 export const createAdminAction = async (formData) => {
     const data = Object.fromEntries(formData.entries());
@@ -124,7 +121,6 @@ export const createAdminAction = async (formData) => {
         };
     }
 };
-
 
 export async function syncCurrentAdminDataAction(adminId) {
     if (!adminId) {

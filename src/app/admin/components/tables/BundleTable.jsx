@@ -169,7 +169,6 @@ const BundlesTable = ({ controls = true }) => {
         router.replace(`?${params.toString()}`, { scroll: false })
     }, [router, searchParams])
 
-
     const fetchData = useCallback(async () => {
         setIsLoading(true)
         setApiError(null)
@@ -254,7 +253,6 @@ const BundlesTable = ({ controls = true }) => {
         }
     };
 
-
     // --- Other action handlers (Delete/Toggle) remain similar but call fetchData/refetchBundles ---
     const handleBundleDelete = async (id) => {
         if (!confirm("Delete this bundle?")) return
@@ -312,7 +310,6 @@ const BundlesTable = ({ controls = true }) => {
             toast.error("Failed to toggle status")
         }
     }
-
 
     // --- Selection Logic (remains client-side) ---
     const toggleRowSelected = (id) => {

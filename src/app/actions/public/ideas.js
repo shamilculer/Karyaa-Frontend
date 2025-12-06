@@ -10,7 +10,6 @@ export const getAllIdeasAction = async ({
   role="user"
 } = {}) => {
 
-  console.log(category)
   const queryParams = new URLSearchParams();
   queryParams.append("page", String(page));
   queryParams.append("limit", String(limit));
@@ -23,7 +22,6 @@ export const getAllIdeasAction = async ({
     const response = await apiFetch(endpoint, {
       role: role,
     });
-
 
     if (response.success) {
       return {

@@ -130,8 +130,6 @@ const Reviews = ({ initialReviews, vendorId, totalPages: initialTotalPages, tota
 
 export default Reviews;
 
-
-
 const StarRating = ({ rating }) => {
     return (
         <div className="flex items-center text-yellow-500">

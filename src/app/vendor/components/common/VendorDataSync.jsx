@@ -12,7 +12,7 @@ export function VendorDataSync({ currentVendorId }) {
 
     React.useEffect(() => {
         if (!currentVendorId) {
-            console.log("VendorDataSync: No vendor ID found. Skipping sync.");
+
             return;
         }
 

@@ -94,8 +94,6 @@ export const getSingleVendor = async (identifier) => {
     }
 }
 
-
-
 /**
  * @desc Fetches full details for a list of vendors based on their slugs.
  * Calls: GET /api/vendors/compare?slugs=...
@@ -108,9 +106,7 @@ export async function getVendorsBySlugs(slugs) {
     try {
         const slugsParam = slugs.join(',');
 
-
         const responseData = await apiFetch(`/vendors/compare?slugs=${slugsParam}`);
-
 
         if (responseData.success) {
             return { success: true, data: responseData.data || [], error: null };

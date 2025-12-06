@@ -73,7 +73,6 @@ export async function loginUser(data) {
       body: data, // Auto-stringified by apiFetch
     });
 
-    console.log("resp--------------------------------------------", response);
     if (!response.success) {
       return {
         success: false,
@@ -162,10 +161,10 @@ export async function checkAuthStatus(role = "user", skipSavedVendors = false) {
 
         // Merge savedVendors into user object
         if (profileResponse?.user?.savedVendors) {
-          console.log("DEBUG: savedVendors from profile:", profileResponse.user.savedVendors);
+
           user.savedVendors = profileResponse.user.savedVendors;
         } else {
-          console.log("DEBUG: No savedVendors in profile response");
+
         }
       } catch (error) {
         console.error("Failed to fetch savedVendors:", error);
@@ -204,8 +203,6 @@ export async function getSavedVendors(categorySlug) {
       auth: true,
       role: "user",
     });
-
-    console.log(responseData)
 
     return {
       success: true,

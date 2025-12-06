@@ -5,7 +5,6 @@ import { getContentByKeyAction } from "@/app/actions/public/content";
 export default async function HowItWorksServer() {
   try {
     const result = await getContentByKeyAction("how-it-works");
-    console.log("[HowItWorksServer] getContentByKeyAction result:", result);
 
     let data = null;
     if (result?.success && result.data?.content) {

@@ -119,7 +119,6 @@ const EnquiryListItem = ({ enquiry }) => {
     );
 };
 
-
 // --- Main Card List Component ---
 function PackageEnquiry({ enquiries = sampleEnquiries }) {
     // 1. Group data by packageName

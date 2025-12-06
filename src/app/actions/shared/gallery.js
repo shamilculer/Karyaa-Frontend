@@ -62,7 +62,7 @@ export const getVendorGalleryItems = async (
  * @returns {Promise<{ success?: string, error?: string }>}
  */
 export const addVendorGalleryItems = async (vendorId, items = []) => {
-  console.log(vendorId);
+
   try {
     if (!vendorId || !Array.isArray(items) || items.length === 0) {
       return {
@@ -112,8 +112,6 @@ export const deleteVendorGalleryItems = async (ids) => {
       role: "vendor",
       auth: true,
     });
-
-    console.log(response);
 
     if (!response || response.error) {
       return { error: response?.error || "Failed to delete items" };

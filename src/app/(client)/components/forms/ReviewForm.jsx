@@ -48,7 +48,7 @@ const ReviewForm = ({ vendorId, closeModal }) => {
   const currentRating = watch("rating");
 
   const onSubmit = async (data) => {
-    console.log(data)
+
     try {
       // Call the Server Action to create the review
       const response = await createReview(vendorId, {

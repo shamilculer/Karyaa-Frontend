@@ -30,7 +30,6 @@ const Footer = () => {
     const fetchCtas = async () => {
       try {
         const res = await getContentByKeyAction("cta-sections")
-        console.log(res)
 
         // parse if string
         if (res?.success && res.data?.content) {
@@ -49,7 +48,6 @@ const Footer = () => {
 
     fetchCtas()
   }, [])
-
 
   const leftHeading =
     ctaSections?.cta1_heading || "List your services and get discovered";

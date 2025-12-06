@@ -1,7 +1,6 @@
 "use server";
 import { apiFetch } from "@/lib/api";
 
-
 const buildQueryString = (params) => {
     if (!params) return '';
     const query = new URLSearchParams();
@@ -12,7 +11,6 @@ const buildQueryString = (params) => {
     }
     return query.toString();
 };
-
 
 export const getReferralsAction = async (params = {}) => {
     try {
@@ -84,7 +82,6 @@ export const updateReferralStatusAction = async (data) => {
         };
     }
 };
-
 
 export const deleteReferralsAction = async (data) => {
     try {

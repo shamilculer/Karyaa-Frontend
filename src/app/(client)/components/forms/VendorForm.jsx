@@ -54,7 +54,6 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
             ...data,
         };
 
-
         try {
             const response = await postLead(submissionData);
 

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from 'sonner'
 import { User, Mail, Phone, Lock, Loader2, Edit, Camera } from 'lucide-react'
 import { updateAdminProfileAction, updateAdminPasswordAction } from '@/app/actions/admin/admin'
-import { getInitials } from '@/utils'
+import { getInitials, formatDate } from '@/utils'
 import { useAdminStore } from '@/store/adminStore'
 import LogoutAlertModal from "../components/modals/shared/LogoutAlertModal"
 import { useS3Upload } from '@/hooks/useS3Upload'
@@ -225,7 +225,7 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
                         </div>
 
                         <LogoutAlertModal />
-                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -368,7 +368,7 @@ const AdminSettingsClient = ({ admin: initialAdmin }) => {
                                 <span className="font-medium">••••••••</span>
                             </div>
                             <p className="text-xs text-gray-500">
-                                Last updated: {new Date((admin || initialAdmin)?.updatedAt || Date.now()).toLocaleDateString()}
+                                Last updated: {formatDate((admin || initialAdmin)?.updatedAt || Date.now())}
                             </p>
                         </div>
 

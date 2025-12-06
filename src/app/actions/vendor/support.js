@@ -16,7 +16,7 @@ export const postTicket = async (data) => {
     });
 
     if (!response.success) {
-      console.log(response)
+
       const errData = response.message;
       throw new Error(errData?.message || "Failed to submit support ticket.");
     }

@@ -31,7 +31,7 @@ const BundleCard = ({ bundle, selectedId }) => {
             const enquiryResponse = await sendBundleEnquiryAction(bundleId);
 
             if (!enquiryResponse.success) {
-                console.log(enquiryResponse)
+
                 toast.error(enquiryResponse.message || "Something went wrong! Please try again.");
                 return
             }
@@ -41,7 +41,6 @@ const BundleCard = ({ bundle, selectedId }) => {
             toast.error("Something went wrong! Please try again.");
         }
     }
-
 
     // Format duration display - Monthly pricing for Add-ons
     // const durationUnit = bundle.duration?.unit || 'months';

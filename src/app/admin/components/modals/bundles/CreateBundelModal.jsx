@@ -36,7 +36,6 @@ import { createBundleAction } from "@/app/actions/admin/bundle"
 import { bundleFormSchema } from "@/lib/schema"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-
 const CreateBundleModal = ({ onSuccess }) => {
     const [open, setOpen] = useState(false);
 
@@ -164,7 +163,6 @@ const CreateBundleModal = ({ onSuccess }) => {
                                     )}
                                 />
 
-
                                 {/* --- SECTION 2: PRICING & DURATION --- */}
                                 <h4 className="text-lg border-b border-gray-400 pb-2">Pricing & Duration</h4>
 
@@ -237,7 +235,6 @@ const CreateBundleModal = ({ onSuccess }) => {
                                     />
                                 </div>
 
-
                                 {/* --- Bonus Period --- */}
                                 <h4 className="text-base">Bonus Period (Optional)</h4>
                                 <div className="grid md:grid-cols-2 items-start gap-4">
@@ -285,7 +282,6 @@ const CreateBundleModal = ({ onSuccess }) => {
                                         )}
                                     />
                                 </div>
-
 
                                 {/* --- SECTION 3: CONFIGURATION --- */}
                                 <h4 className="font-semibold text-lg border-b border-gray-400 pb-2">Configuration</h4>
@@ -358,7 +354,6 @@ const CreateBundleModal = ({ onSuccess }) => {
                                     />
                                 </div>
 
-
                                 {/* Checkboxes Group */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                                     {/* Is Popular */}
@@ -419,7 +414,6 @@ const CreateBundleModal = ({ onSuccess }) => {
                                         )}
                                     />
                                 </div>
-
 
                                 {/* --- SECTION 4: FEATURES --- */}
                                 <h4 className="font-semibold text-lg border-b border-gray-400 pb-2 flex justify-between items-center">

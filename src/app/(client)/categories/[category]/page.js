@@ -1,6 +1,5 @@
 // Category pages fetch server-side data (category details) and may access cookies via shared helpers.
 
-
 import { SubCategoryCarouselWrapper } from "../../components/common/SubCategories";
 import PageSearchBar from "../../components/common/PageSearchBar/PageSearchBar";
 import Image from "next/image";

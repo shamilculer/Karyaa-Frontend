@@ -59,15 +59,15 @@ const TicketForm = ({ setIsOpen }) => {
     });
 
     async function onFormSubmit(data) {
-        console.log("Submitting Ticket Data:", data);
+
         const response = await postTicket(data);
-        
+
         // ✨ This is the correct client-side redirect handler ✨
         if (response?.__redirect) {
             window.location.href = response.redirectTo;
             return;
         }
-        
+
         if (response.success) {
             toast.success(response.message, { position: "top-center" });
             form.reset({ contactEmail: data.contactEmail });

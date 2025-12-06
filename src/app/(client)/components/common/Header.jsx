@@ -11,7 +11,6 @@ import {
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-
 import UserMenu from "../ui/UserDropDownMenu"; // This is your client component
 import { checkAuthStatus } from "../../../actions/user/user";
 import { getCategoriesWithVendors } from "@/app/actions/public/categories";

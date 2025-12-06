@@ -233,7 +233,6 @@ const TicketsTable = ({ controls = true }) => {
     const handleCategoryChange = createFilterHandler(setCategoryFilter);
     const handlePriorityChange = createFilterHandler(setPriorityFilter);
 
-
     const headers = [
         "Subject",
         "Submitted By",
@@ -276,7 +275,6 @@ const TicketsTable = ({ controls = true }) => {
         }
     }
 
-
     const handleDeleteTicket = async (ticketId) => {
         const confirmDelete = confirm("Are you sure you want to delete this ticket permanently?")
         if (!confirmDelete) return
@@ -296,7 +294,6 @@ const TicketsTable = ({ controls = true }) => {
 
         setDeletingTicketId(null)
     }
-
 
     return (
         <div className="w-full">
@@ -493,7 +490,6 @@ const TicketsTable = ({ controls = true }) => {
                                                     <DropdownMenuItem onClick={() => handleViewDetails(row)}>
                                                         View Details
                                                     </DropdownMenuItem>
-
 
                                                     <DropdownMenuItem
                                                         disabled={deletingTicketId === row._id}
