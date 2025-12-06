@@ -5,8 +5,8 @@ import { apiFetch } from "@/lib/api";
 export const getActiveBanners = async (placement) => {
     try {
         const queryString = placement ? `?placement=${encodeURIComponent(placement)}` : '';
-        
-        const response = await apiFetch(`/banners/${queryString}`);
+
+        const response = await apiFetch(`/banners/${queryString}`, { cache: 'no-store' });
 
         if (!response.success) {
             return {

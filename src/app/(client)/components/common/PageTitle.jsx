@@ -9,6 +9,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
     // Try to fetch placement-specific banner if placement is provided
     if (placement) {
         const result = await getActiveBanners(placement);
+        console.log(result)
         if (result.success && result.data && result.data.length > 0) {
             banners = result.data;
         }
@@ -131,7 +132,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
                     <>
                         <div className="absolute inset-0 bg-black opacity-30 w-full h-full pointer-events-none"></div>
                         <div className="relative z-10 text-white text-center pointer-events-none">
-                            {displayTitle && <h1 className="!text-white !text-4xl lg:!text-[55px]">{displayTitle}</h1>}
+                            {displayTitle && (bannerToShow.showTitle !== false) && <h1 className="!text-white !text-4xl lg:!text-[55px]">{displayTitle}</h1>}
                             {displayTagline && (
                                 <p className="mt-2 !text-sm max-md:text-xs">{displayTagline}</p>
                             )}

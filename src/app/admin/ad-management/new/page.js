@@ -591,6 +591,7 @@ export default function AddBannerPage() {
                     ]}
                     folderPath="ad-banners/mobile"
                     errors={errors}
+                    role="admin"
                   />
                 </div>
                 <p className="text-xs text-gray-500">

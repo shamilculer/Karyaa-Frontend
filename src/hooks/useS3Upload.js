@@ -35,7 +35,7 @@ export function useS3Upload() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to upload file to S3');
+                throw new Error('Failed to upload file');
             }
 
             // Use the URL returned from server action or construct it
