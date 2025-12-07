@@ -28,14 +28,14 @@ const MobileSheetWrapper = ({ isAuthenticated, user, categories }) => {
 
     return (
         // Pass the open state and the setter to the Sheet component
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet open={open} onOpenChange={setOpen} >
             <SheetTrigger asChild>
                 <Button variant="ghost" className="!p-0 w-1/3 flex justify-start">
                     <Menu />
                 </Button>
             </SheetTrigger>
 
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex flex-col z-10005">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>
                         {/* Close sheet on logo click */}

@@ -17,14 +17,11 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
 
     // If we have banners
     if (banners.length > 0) {
-        // Check if any banner uses auto display mode
-        const isAutoHeight = banners.some(b => b.displayMode === 'auto');
-
         // If multiple banners, show slider
         if (banners.length > 1) {
             return (
-                <section className={`!m-0 relative flex-center px-4 overflow-hidden ${isAutoHeight ? 'w-full' : 'h-64 md:h-[400px]'}`}>
-                    <PageTitleSlider banners={banners} defaultTitle={title} defaultTagline={tagline} isAutoHeight={isAutoHeight} />
+                <section className="!m-0 relative w-full overflow-hidden">
+                    <PageTitleSlider banners={banners} defaultTitle={title} defaultTagline={tagline} />
                 </section>
             );
         }
@@ -44,7 +41,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         const isVideo = bannerToShow.mediaType === 'video';
 
         return (
-            <section className={`!m-0 relative flex-center px-4 ${isAuto ? 'w-full' : 'h-64 md:h-[400px]'}`}>
+            <section className={`!m-0 relative w-full ${isAuto ? '' : 'h-64 md:h-[400px]'}`}>
                 <Link href={destinationLink} className={isAuto ? "block w-full" : "absolute inset-0 w-full h-full"}>
                     {isVideo ? (
                         // Video rendering
@@ -131,11 +128,13 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
                 {showOverlay && (
                     <>
                         <div className="absolute inset-0 bg-black opacity-30 w-full h-full pointer-events-none"></div>
-                        <div className="relative z-10 text-white text-center pointer-events-none">
-                            {displayTitle && (bannerToShow.showTitle !== false) && <h1 className="!text-white !text-4xl lg:!text-[55px]">{displayTitle}</h1>}
-                            {displayTagline && (
-                                <p className="mt-2 !text-sm max-md:text-xs">{displayTagline}</p>
-                            )}
+                        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                            <div className="text-white text-center px-4">
+                                {displayTitle && (bannerToShow.showTitle !== false) && <h1 className="!text-white !text-4xl lg:!text-[55px]">{displayTitle}</h1>}
+                                {displayTagline && (
+                                    <p className="mt-2 !text-sm max-md:text-xs">{displayTagline}</p>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}
