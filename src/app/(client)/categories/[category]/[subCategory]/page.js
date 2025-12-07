@@ -4,7 +4,7 @@ import CategoryList from "@/app/(client)/components/common/CategoriesList/Catego
 import PageSearchBar from "@/app/(client)/components/common/PageSearchBar/PageSearchBar";
 import PageTitle from "@/app/(client)/components/common/PageTitle";
 import VendorsListWrapper from "@/app/(client)/components/common/vendorsList/VendorListWrapper";
-import { getSubcategoryDetails } from "@/app/actions/public/categories";
+import { getSubcategoryDetails, getCategoryDetails } from "@/app/actions/public/categories";
 import Image from "next/image";
 import { getMetaData } from "@/lib/seo";
 
@@ -14,15 +14,16 @@ export async function generateMetadata({ params }) {
 }
 
 const SubCategoryPage = async ({ params, searchParams }) => {
-  let { subCategory } = await params;
+  let { category, subCategory } = await params;
   const filters = await searchParams || {};
 
   const subCategoryData = await getSubcategoryDetails(subCategory);
+  const categoryData = await getCategoryDetails(category);
 
   return (
     <div>
       <PageTitle
-        placement={`Subcategory: ${subCategoryData?.parentCategory?.name} > ${subCategoryData?.name}`}
+        placement={`Subcategory: ${categoryData?.name} > ${subCategoryData?.name}`}
         imgUrl={subCategoryData?.coverImage}
         title={subCategoryData?.name}
       />
