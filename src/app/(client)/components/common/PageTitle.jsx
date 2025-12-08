@@ -53,10 +53,11 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
                             loop
                             muted
                             playsInline
+                            preload="metadata"
                             poster={bannerToShow.imageUrl}
                             className={isAuto ? "w-full h-auto" : "w-full h-full object-cover"}
                         >
-                            <source src={bannerToShow.videoUrl} type="video/mp4" />
+                            <source src={`${bannerToShow.videoUrl}#t=0.01`} type="video/mp4" />
                             {/* Fallback to image if video fails */}
                             {isAuto ? (
                                 <Image

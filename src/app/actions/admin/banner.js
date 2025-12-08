@@ -75,26 +75,37 @@ export const createBannerAction = async (formData) => {
   }
 
   // minimal validation
-  if (!formData.name || !formData.imageUrl || !formData.placement?.length) {
+  if (!formData.name || !formData.placement?.length) {
     return {
       success: false,
-      message: "Name, Image URL, and Placement are required.",
+      message: "Name and Placement are required.",
+    };
+  }
+
+  // Image URL is only required for image banners
+  if (formData.mediaType === "image" && !formData.imageUrl) {
+    return {
+      success: false,
+      message: "Image URL is required for image banners.",
+    };
+  }
+
+  // Video URL is required for video banners
+  if (formData.mediaType === "video" && !formData.videoUrl) {
+    return {
+      success: false,
+      message: "Video URL is required for video banners.",
     };
   }
 
   if (formData.isVendorSpecific && !formData.vendor) {
     return {
       success: false,
-      message: "Vendor must be selected.",
+      message: "Vendor must be selected when 'Link to Vendor Profile' is enabled.",
     };
   }
 
-  if (!formData.isVendorSpecific && !formData.customUrl) {
-    return {
-      success: false,
-      message: "Custom URL is required for non-vendor banners.",
-    };
-  }
+  // Custom URL validation removed - it's now optional
 
   const endpoint = `/admin/ad-banner/new`;
 

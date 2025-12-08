@@ -53,10 +53,11 @@ export default function PageTitleSlider({ banners, defaultTitle, defaultTagline 
                                         loop
                                         muted
                                         playsInline
+                                        preload="metadata"
                                         poster={banner.imageUrl}
                                         className={isAuto ? "w-full h-auto" : "w-full h-full object-cover"}
                                     >
-                                        <source src={banner.videoUrl} type="video/mp4" />
+                                        <source src={`${banner.videoUrl}#t=0.01`} type="video/mp4" />
                                         {/* Fallback to image if video fails */}
                                         {isAuto ? (
                                             <Image

@@ -10,9 +10,7 @@ export default async function HeroServer() {
       getActiveBanners("Hero Section"),
       getPublicContentByKeyAction("hero-section")
     ]);
-    
-    console.log(bannerResult)
-    
+        
     let bannerImages = [];
     if (bannerResult.success && bannerResult.data?.length > 0) {
       bannerImages = bannerResult.data.map(b => ({

@@ -68,12 +68,13 @@ const Hero = ({ data } = {}) => {
   const MediaContent = ({ item, idx }) => {
     const content = item.mediaType === 'video' && item.videoUrl ? (
       <video
-        src={item.videoUrl}
+        src={`${item.videoUrl}#t=0.01`}
         poster={item.src}
         autoPlay
         loop
         muted
         playsInline
+        preload="metadata"
         className="h-full w-full object-cover rounded-2xl shadow-lg"
       />
     ) : (
@@ -106,12 +107,12 @@ const Hero = ({ data } = {}) => {
         </h1>
         <p className="max-md:mt-2 max-md:!text-xs">{description}</p>
       </div>
-      
+
       <div className="w-full max-w-[1600px] relative">
         {/* Gradient overlays */}
         <div className="pointer-events-none absolute top-0 left-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-r from-white/85 to-transparent z-10"></div>
         <div className="pointer-events-none absolute top-0 right-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-l from-white/85 to-transparent z-10"></div>
-        
+
         <Swiper
           modules={[Navigation, Autoplay, Pagination, EffectCoverflow]}
           effect={'coverflow'}
@@ -193,7 +194,7 @@ const Hero = ({ data } = {}) => {
             </SwiperSlide>
           ))}
         </Swiper>
-        
+
         <div className="w-full flex-center gap-2 md:gap-4 mt-4">
           <Button className="hero_slider-prev bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-secondary">
             <ChevronLeft className="text-secondary" />

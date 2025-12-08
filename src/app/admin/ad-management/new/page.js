@@ -91,21 +91,31 @@ export default function AddBannerPage() {
   const activeFrom = watch("activeFrom");
   const activeUntil = watch("activeUntil");
   const placement = watch("placement");
+  const mediaType = watch("mediaType");
 
-  const isHeroOrCarousel = placement && placement.some(p =>
-    p.includes("Hero Section") || p.includes("Homepage Carousel")
-  );
+  // Check if placement includes any non-Hero/Carousel placement that needs page title
+  // These placements need page titles: Ideas, Gallery, Blog Page, Categories, Subcategories
+  const hasPageTitlePlacement = placement && placement.some(p => {
+    // Exclude Hero Section and Homepage Carousel
+    if (p.includes("Hero Section") || p.includes("Homepage Carousel")) {
+      return false;
+    }
+    // Include everything else (Ideas, Gallery, Blog Page, Categories, Subcategories)
+    return true;
+  });
 
-  // Auto-hide title/tagline/overlay for Hero or Carousel placements
+  // Auto-set title/tagline/overlay defaults based on placement
   useEffect(() => {
-    if (isHeroOrCarousel) {
-      setValue("showTitle", false);
-      setValue("showOverlay", false);
-    } else {
+    if (hasPageTitlePlacement) {
+      // Has page title placements - enable overlay and title by default
       setValue("showTitle", true);
       setValue("showOverlay", true);
+    } else {
+      // Only Hero/Carousel - disable overlay and title by default
+      setValue("showTitle", false);
+      setValue("showOverlay", false);
     }
-  }, [isHeroOrCarousel, setValue]);
+  }, [hasPageTitlePlacement, setValue]);
 
   const getIdealSizeText = (currentPlacement) => {
     if (!currentPlacement || currentPlacement.length === 0) return "Recommended: 1920x400px";
@@ -161,14 +171,7 @@ export default function AddBannerPage() {
       return;
     }
 
-    // Validate vendor if vendor-specific
-    if (data.isVendorSpecific && !data.vendor) {
-      toast.error("Please select a vendor");
-      return;
-    }
-
-    // Custom URL is optional now
-    // if (!data.isVendorSpecific && !data.customUrl) { ... }
+    // Vendor and Custom URL are now optional - no validation needed
 
     // Validate dates
     if (data.activeFrom && data.activeUntil && new Date(data.activeFrom) > new Date(data.activeUntil)) {
@@ -277,37 +280,6 @@ export default function AddBannerPage() {
                 </div>
               </div>
 
-              {/* Banner Upload Section */}
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  Banner Image
-                  <Badge variant="outline" className="text-xs">
-                    {getIdealSizeText(watch("placement"))}
-                  </Badge>
-                </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <ControlledFileUpload
-                    control={control}
-                    name="imageUrl"
-                    label="Click to upload or drag and drop"
-                    allowedMimeType={[
-                      "image/png",
-                      "image/jpg",
-                      "image/jpeg",
-                      "image/webp",
-                    ]}
-                    folderPath="ad-banners"
-                    errors={errors}
-                    role="admin"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 flex items-center gap-2">
-                  <CheckCircle2 className="w-3 h-3" />
-                  Supported formats: PNG, JPG, JPEG, WEBP (Max 5MB)
-                </p>
-              </div>
-
               {/* Media Type Selection */}
               <div className="space-y-3 pt-4 border-t">
                 <Label className="text-sm font-semibold text-gray-700">
@@ -337,8 +309,42 @@ export default function AddBannerPage() {
                   </label>
                 </div>
               </div>
-              {/* Conditional Video Upload */}
-              {watch("mediaType") === "video" && (
+
+              {/* Conditional Image Upload - Only for Image Banners */}
+              {mediaType === "image" && (
+                <div className="space-y-3 pt-4">
+                  <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Banner Image
+                    <Badge variant="outline" className="text-xs">
+                      {getIdealSizeText(watch("placement"))}
+                    </Badge>
+                  </Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <ControlledFileUpload
+                      control={control}
+                      name="imageUrl"
+                      label="Click to upload or drag and drop"
+                      allowedMimeType={[
+                        "image/png",
+                        "image/jpg",
+                        "image/jpeg",
+                        "image/webp",
+                      ]}
+                      folderPath="ad-banners"
+                      errors={errors}
+                      role="admin"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 flex items-center gap-2">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Supported formats: PNG, JPG, JPEG, WEBP (Max 5MB)
+                  </p>
+                </div>
+              )}
+
+              {/* Conditional Video Upload - Only for Video Banners */}
+              {mediaType === "video" && (
                 <div className="space-y-3 pt-4">
                   <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                     <Upload className="w-4 h-4" />
@@ -363,7 +369,7 @@ export default function AddBannerPage() {
                   </div>
                   <p className="text-xs text-gray-500 flex items-center gap-2">
                     <CheckCircle2 className="w-3 h-3" />
-                    Supported formats: MP4, WebM (Max 20MB). Image will be used as poster/fallback.
+                    Supported formats: MP4, WebM (Max 20MB). First frame will be used as poster.
                   </p>
                 </div>
               )}
@@ -371,7 +377,7 @@ export default function AddBannerPage() {
           </Card>
 
           {/* Page Title & Tagline Card */}
-          {!isHeroOrCarousel && (
+          {hasPageTitlePlacement && (
             <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
                 <div className="flex items-center gap-3">
@@ -569,31 +575,34 @@ export default function AddBannerPage() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-4 border-t">
-                <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <Smartphone className="w-4 h-4" />
-                  Mobile Banner Image (Optional)
-                </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <ControlledFileUpload
-                    control={control}
-                    name="mobileImageUrl"
-                    label="Upload mobile version (optional)"
-                    allowedMimeType={[
-                      "image/png",
-                      "image/jpg",
-                      "image/jpeg",
-                      "image/webp",
-                    ]}
-                    folderPath="ad-banners/mobile"
-                    errors={errors}
-                    role="admin"
-                  />
+              {/* Mobile Banner - Only for Image Banners */}
+              {mediaType === "image" && (
+                <div className="space-y-3 pt-4 border-t">
+                  <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Smartphone className="w-4 h-4" />
+                    Mobile Banner Image (Optional)
+                  </Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <ControlledFileUpload
+                      control={control}
+                      name="mobileImageUrl"
+                      label="Upload mobile version (optional)"
+                      allowedMimeType={[
+                        "image/png",
+                        "image/jpg",
+                        "image/jpeg",
+                        "image/webp",
+                      ]}
+                      folderPath="ad-banners/mobile"
+                      errors={errors}
+                      role="admin"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    If not provided, the desktop image will be used on mobile devices.
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500">
-                  If not provided, the desktop image will be used on mobile devices.
-                </p>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -654,7 +663,7 @@ export default function AddBannerPage() {
                     <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                       Select Vendor
                       <Badge variant="outline" className="text-xs">
-                        Required
+                        Optional
                       </Badge>
                     </Label>
                     <VendorSelectField

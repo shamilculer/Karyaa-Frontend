@@ -40,12 +40,13 @@ export default function AdBanner({ vendorAds }) {
             >
               {isVideo ? (
                 <video
-                  src={ad.videoUrl}
+                  src={`${ad.videoUrl}#t=0.01`}
                   poster={ad.imageUrl} // Use image as fallback/poster
                   autoPlay
                   muted
                   loop
                   playsInline
+                  preload="metadata"
                   className={cn(
                     "w-full object-cover transition-transform duration-1000",
                     isStandard ? "h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]" : "h-auto min-h-[200px]"

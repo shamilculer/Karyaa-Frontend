@@ -226,19 +226,35 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
 
                     return (
                         <div className="group relative rounded-xl overflow-hidden shadow-sm border border-gray-200 bg-white hover:shadow-md transition-shadow" key={ad._id}>
-                            <div className="relative aspect-[16/9] w-full overflow-hidden">
-                                <Image
-                                    src={ad.imageUrl}
-                                    alt={ad.name}
-                                    fill
-                                    className="object-cover"
-                                    priority={false}
-                                />
+                            <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+                                {ad.mediaType === "video" && ad.videoUrl ? (
+                                    <video
+                                        src={`${ad.videoUrl}#t=0.01`}
+                                        controls
+                                        preload="metadata"
+                                        className="w-full h-full object-cover"
+                                    >
+                                        Your browser does not support the video tag.
+                                    </video>
+                                ) : ad.imageUrl ? (
+                                    <Image
+                                        src={ad.imageUrl}
+                                        alt={ad.name}
+                                        fill
+                                        className="object-cover"
+                                        priority={false}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                        <span>No media available</span>
+                                    </div>
+                                )}
 
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                                {/* Hover overlay with action buttons */}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 pointer-events-none">
                                     <Button
                                         size="sm"
-                                        className="bg-white text-black hover:bg-gray-100"
+                                        className="bg-white text-black hover:bg-gray-100 pointer-events-auto"
                                         onClick={() => openEditModal(ad)}
                                     >
                                         <FileEdit className="w-4 h-4 mr-2" /> Edit
@@ -247,6 +263,7 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                                     <Button
                                         size="sm"
                                         variant="destructive"
+                                        className="pointer-events-auto"
                                         onClick={() => openDeleteDialog(ad._id, ad.name)}
                                         disabled={isDeleting}
                                     >
@@ -316,10 +333,10 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                         </div>
                     );
                 })}
-            </div>
+            </div >
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+            < AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -349,10 +366,10 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog >
 
             {/* Edit Banner Modal */}
-            <EditBannerModal
+            < EditBannerModal
                 open={editModal.open}
                 onOpenChange={(open) => setEditModal({ open, banner: open ? editModal.banner : null })}
                 banner={editModal.banner}
@@ -360,37 +377,39 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
             />
 
             {/* Pagination Controls */}
-            {!loading && banners.length > 0 && (
-                <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                    <div className="text-sm text-gray-600">
-                        Showing {banners.length} of {totalBanners} banner{totalBanners !== 1 ? 's' : ''}
-                        {totalPages > 1 && ` (Page ${page} of ${totalPages})`}
-                    </div>
-                    {totalPages > 1 && (
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(page - 1)}
-                                disabled={page === 1}
-                            >
-                                Previous
-                            </Button>
-                            <div className="text-sm text-gray-600">
-                                Page {page} of {totalPages}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(page + 1)}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </Button>
+            {
+                !loading && banners.length > 0 && (
+                    <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                        <div className="text-sm text-gray-600">
+                            Showing {banners.length} of {totalBanners} banner{totalBanners !== 1 ? 's' : ''}
+                            {totalPages > 1 && ` (Page ${page} of ${totalPages})`}
                         </div>
-                    )}
-                </div>
-            )}
+                        {totalPages > 1 && (
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePageChange(page - 1)}
+                                    disabled={page === 1}
+                                >
+                                    Previous
+                                </Button>
+                                <div className="text-sm text-gray-600">
+                                    Page {page} of {totalPages}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePageChange(page + 1)}
+                                    disabled={page >= totalPages}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
         </>
     );
 };

@@ -60,7 +60,6 @@ export default function EditBannerModal({
     const [placementOptions, setPlacementOptions] = useState([
         { label: "Hero Section", value: "Hero Section" },
         { label: "Homepage Carousel", value: "Homepage Carousel" },
-        { label: "Contact Page", value: "Contact" },
         { label: "Ideas Page", value: "Ideas" },
         { label: "Gallery Page", value: "Gallery" },
         { label: "Blog Page", value: "Blog Page" },
@@ -219,15 +218,29 @@ export default function EditBannerModal({
     };
 
     const selectedPlacement = watch("placement") || [];
-    const isHeroOrCarousel = selectedPlacement.some(p => p === "Hero Section" || p === "Homepage Carousel");
 
-    // Auto-hide/disable title fields for Hero/Carousel
+    // Check if placement includes any non-Hero/Carousel placement that needs page title
+    const hasPageTitlePlacement = selectedPlacement.some(p => {
+        // Exclude Hero Section and Homepage Carousel
+        if (p.includes("Hero Section") || p.includes("Homepage Carousel")) {
+            return false;
+        }
+        // Include everything else (Ideas, Gallery, Blog Page, Categories, Subcategories)
+        return true;
+    });
+
+    // Auto-set title/tagline/overlay defaults based on placement
     useEffect(() => {
-        if (isHeroOrCarousel) {
+        if (hasPageTitlePlacement) {
+            // Has page title placements - enable overlay and title by default
+            setValue("showTitle", true);
+            setValue("showOverlay", true);
+        } else {
+            // Only Hero/Carousel - disable overlay and title by default
             setValue("showTitle", false);
             setValue("showOverlay", false);
         }
-    }, [isHeroOrCarousel, setValue]);
+    }, [hasPageTitlePlacement, setValue]);
 
     const getIdealSizeText = () => {
         if (selectedPlacement.includes("Hero Section")) return "Recommended: 1920x1080px (Desktop), 1080x1920px (Mobile)";
@@ -293,39 +306,39 @@ export default function EditBannerModal({
                                     </div>
                                 </div>
 
-                                {/* Image Upload */}
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                        <ImageIcon className="w-4 h-4" />
-                                        {watch("mediaType") === "video" ? "Video Poster / Fallback Image" : "Banner Image"}
-                                        <Badge variant="outline" className="text-xs">
-                                            {getIdealSizeText()}
-                                        </Badge>
-                                    </Label>
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-                                        <ControlledFileUpload
-                                            control={control}
-                                            name="imageUrl"
-                                            label={watch("mediaType") === "video" ? "Upload poster image" : "Upload banner image"}
-                                            allowedMimeType={[
-                                                "image/png",
-                                                "image/jpg",
-                                                "image/jpeg",
-                                                "image/webp",
-                                            ]}
-                                            folderPath="ad-banners"
-                                            errors={errors}
-                                            role="admin"
-                                        />
+                                {/* Image Upload - Only for Image Banners */}
+                                {watch("mediaType") === "image" && (
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <ImageIcon className="w-4 h-4" />
+                                            Banner Image
+                                            <Badge variant="outline" className="text-xs">
+                                                {getIdealSizeText()}
+                                            </Badge>
+                                        </Label>
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                            <ControlledFileUpload
+                                                control={control}
+                                                name="imageUrl"
+                                                label="Upload banner image"
+                                                allowedMimeType={[
+                                                    "image/png",
+                                                    "image/jpg",
+                                                    "image/jpeg",
+                                                    "image/webp",
+                                                ]}
+                                                folderPath="ad-banners"
+                                                errors={errors}
+                                                role="admin"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                            Main banner image displayed on the website.
+                                        </p>
                                     </div>
-                                    <p className="text-xs text-gray-500">
-                                        {watch("mediaType") === "video"
-                                            ? "Displayed while video loads or on unsupported devices."
-                                            : "Main banner image displayed on the website."}
-                                    </p>
-                                </div>
+                                )}
 
-                                {/* Video Upload - Conditional */}
+                                {/* Video Upload - Only for Video Banners */}
                                 {watch("mediaType") === "video" && (
                                     <div className="space-y-3 pt-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -351,6 +364,9 @@ export default function EditBannerModal({
                                                 role="admin"
                                             />
                                         </div>
+                                        <p className="text-xs text-gray-500">
+                                            Supported formats: MP4, WebM (Max 20MB). First frame will be used as poster.
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -412,7 +428,7 @@ export default function EditBannerModal({
                             </div>
 
                             {/* Page Title & Tagline */}
-                            {!isHeroOrCarousel && (
+                            {hasPageTitlePlacement && (
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
                                         <div className="h-8 w-1 bg-orange-500 rounded-full" />
