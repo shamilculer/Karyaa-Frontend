@@ -10,39 +10,41 @@ export default async function HeroServer() {
       getActiveBanners("Hero Section"),
       getPublicContentByKeyAction("hero-section")
     ]);
-
+    
+    console.log(bannerResult)
+    
     let bannerImages = [];
-
     if (bannerResult.success && bannerResult.data?.length > 0) {
       bannerImages = bannerResult.data.map(b => ({
         src: b.imageUrl,
+        videoUrl: b.mediaType === 'video' ? b.videoUrl : null,
+        mediaType: b.mediaType || 'image',
         link: b.isVendorSpecific && b.vendorSlug
           ? `/vendors/${b.vendorSlug}`
-          : b.customUrl
+          : b.customUrl || null
       }));
     }
-
+    
     // Parse hero content if available
     let heroContent = {};
-
     if (contentResult.success && contentResult.data?.content) {
       heroContent = typeof contentResult.data.content === 'string'
         ? JSON.parse(contentResult.data.content)
         : contentResult.data.content;
     }
-
+    
     // Logic: 
     // 1. If < 6 banners, fill with defaults
     // 2. If >= 6 banners, show ONLY banners
     const shouldMergeDefaults = bannerImages.length < 6;
-
+    
     const finalData = {
       images: bannerImages,
       shouldMergeDefaults,
       heading: heroContent.heading,
       description: heroContent.description
     };
-
+    
     return <Hero data={finalData} />;
   } catch (err) {
     console.error("[HeroServer] error:", err);

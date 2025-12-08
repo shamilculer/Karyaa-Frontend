@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, Pagination, EffectCoverflow } from "swiper/modules";
@@ -7,7 +6,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import 'swiper/css/effect-coverflow';
-
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -42,25 +40,58 @@ const Hero = ({ data } = {}) => {
   // 1. Check if we have incoming images from props (banners)
   const incomingImages = Array.isArray(data?.images) ? data.images : [];
 
-  // 2. Normalize incoming images to object structure { src, link }
+  // 2. Normalize incoming images to object structure { src, link, videoUrl, mediaType }
   const normalizedIncoming = incomingImages.map(img => {
-    if (typeof img === 'string') return { src: img, link: null };
-    return img; // Already an object { src, link }
+    if (typeof img === 'string') return { src: img, link: null, videoUrl: null, mediaType: 'image' };
+    return {
+      src: img.src,
+      link: img.link,
+      videoUrl: img.videoUrl || null,
+      mediaType: img.mediaType || 'image'
+    };
   });
 
   // 3. Apply logic based on count
   if (normalizedIncoming.length === 0) {
     // No banners -> Use all defaults
-    images = defaultImages.map(src => ({ src, link: null }));
+    images = defaultImages.map(src => ({ src, link: null, videoUrl: null, mediaType: 'image' }));
   } else if (data?.shouldMergeDefaults) {
     // Less than 6 banners -> Fill with defaults to reach 6
     const needed = Math.max(0, 6 - normalizedIncoming.length);
-    const defaultsToAdd = defaultImages.slice(0, needed).map(src => ({ src, link: null }));
+    const defaultsToAdd = defaultImages.slice(0, needed).map(src => ({ src, link: null, videoUrl: null, mediaType: 'image' }));
     images = [...normalizedIncoming, ...defaultsToAdd];
   } else {
     // 6 or more banners -> Use ONLY banners
     images = normalizedIncoming;
   }
+
+  const MediaContent = ({ item, idx }) => {
+    const content = item.mediaType === 'video' && item.videoUrl ? (
+      <video
+        src={item.videoUrl}
+        poster={item.src}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="h-full w-full object-cover rounded-2xl shadow-lg"
+      />
+    ) : (
+      <img
+        src={item.src}
+        alt={`slide-${idx}`}
+        className="h-full w-full object-cover rounded-2xl shadow-lg"
+      />
+    );
+
+    return item.link ? (
+      <Link href={item.link} className="block w-full h-full">
+        {content}
+      </Link>
+    ) : (
+      content
+    );
+  };
 
   return (
     <div className='h-auto md:h-[600px] lg:h-[680px] py-8 md:py-0 flex-center flex-col gap-4 lg:gap-8'>
@@ -75,12 +106,12 @@ const Hero = ({ data } = {}) => {
         </h1>
         <p className="max-md:mt-2 max-md:!text-xs">{description}</p>
       </div>
-
+      
       <div className="w-full max-w-[1600px] relative">
-        {/* Gradient overlays - moved outside and positioned relative to the container */}
+        {/* Gradient overlays */}
         <div className="pointer-events-none absolute top-0 left-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-r from-white/85 to-transparent z-10"></div>
         <div className="pointer-events-none absolute top-0 right-0 h-[calc(100%-60px)] w-28 md:w-52 bg-gradient-to-l from-white/85 to-transparent z-10"></div>
-
+        
         <Swiper
           modules={[Navigation, Autoplay, Pagination, EffectCoverflow]}
           effect={'coverflow'}
@@ -156,38 +187,25 @@ const Hero = ({ data } = {}) => {
           }}
           className="hero-swiper relative"
         >
-          {images.map((item, idx) => {
-            const Wrapper = item.link ? Link : "div";
-            const wrapperProps = item.link ? { href: item.link } : {};
-
-            return (
-              <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
-                <Wrapper {...wrapperProps} className="block w-full h-full">
-                  <img
-                    src={item.src}
-                    alt={`slide-${idx}`}
-                    className="h-full w-full object-cover rounded-2xl shadow-lg"
-                  />
-                </Wrapper>
-              </SwiperSlide>
-            );
-          })}
+          {images.map((item, idx) => (
+            <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
+              <MediaContent item={item} idx={idx} />
+            </SwiperSlide>
+          ))}
         </Swiper>
-
+        
         <div className="w-full flex-center gap-2 md:gap-4 mt-4">
           <Button className="hero_slider-prev bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-secondary">
             <ChevronLeft className="text-secondary" />
           </Button>
-
           {/* pagination dots */}
           <div className="hero_slider-pagination !w-fit hidden md:flex gap-2" style={{ transform: "translateX(0%) !important" }}></div>
-
           <Button className="hero_slider-next bg-white h-8 w-8 md:h-10 md:w-10 text-2xl rounded-full p-0 hover:bg-gray-100 transition border border-secondary">
             <ChevronRight className="text-secondary" />
           </Button>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
