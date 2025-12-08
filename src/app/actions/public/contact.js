@@ -12,15 +12,12 @@ export const sendContactForm = async (data) => {
       }
     );
 
-    return {
-        success: true,
-        message: "Message sent successfully!",
-    }
+    // Return the actual response from the API
+    return response;
   } catch (error) {
-
     return {
       success: false,
-      error: error.message || "Failed to send the message. Please try again.",
+      message: error.message || "Failed to send the message. Please try again.",
     };
   }
 };

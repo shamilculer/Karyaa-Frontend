@@ -316,7 +316,6 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
 
                     <div className="relative flex items-start gap-8 z-10">
                         <div className="relative flex-shrink-0 group">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl opacity-75 group-hover:opacity-100 transition duration-200 blur"></div>
                             <Avatar className="w-32 h-32 rounded-2xl border-4 border-white shadow-2xl relative">
                                 <AvatarImage className="object-cover rounded-xl" src={vendor.businessLogo} />
                                 <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl">
@@ -335,6 +334,13 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                 <div className="flex-1 min-w-0">
                                     <h1 className="!text-3xl font-bold text-gray-900 mb-1">{vendor.businessName}</h1>
                                     {vendor.tagline && <p className="!text-sm text-gray-600 italic">{vendor.tagline}</p>}
+                                    {vendor.referenceId && (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-300 font-mono text-xs px-2 py-0.5">
+                                                ID: {vendor.referenceId}
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Badge className={`${getStatusColor(vendor.vendorStatus)} border-0 font-semibold px-4 py-1.5 text-sm uppercase tracking-wide`}>
@@ -439,19 +445,19 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                     <TabsList className="w-full justify-start bg-transparent p-1 h-auto gap-2 border-b border-gray-100 pb-4">
                         <TabsTrigger
                             value="overview"
-                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                            className="data-[state=active]:bg-primary bg-gray-200 data-[state=active]:text-white data-[state=active]:shadow-none border border-transparent data-[state=active]:border-secondary px-6 py-2.5 transition-all duration-200 data-[state=active]:border-b-4"
                         >
                             <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
                         </TabsTrigger>
                         <TabsTrigger
                             value="gallery"
-                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                            className="data-[state=active]:bg-primary bg-gray-200 data-[state=active]:text-white data-[state=active]:shadow-none border border-transparent data-[state=active]:border-secondary px-6 py-2.5 transition-all duration-200 data-[state=active]:border-b-4"
                         >
                             <ImageIcon className="w-4 h-4 mr-2" /> Gallery
                         </TabsTrigger>
                         <TabsTrigger
                             value="packages"
-                            className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none border border-transparent data-[state=active]:border-indigo-100 rounded-full px-6 py-2.5 transition-all duration-200"
+                            className="data-[state=active]:bg-primary bg-gray-200 data-[state=active]:text-white data-[state=active]:shadow-none border border-transparent data-[state=active]:border-secondary px-6 py-2.5 transition-all duration-200 data-[state=active]:border-b-4"
                         >
                             <Box className="w-4 h-4 mr-2" /> Packages
                         </TabsTrigger>

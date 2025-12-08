@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
+import { subscribeToNewsletterAction } from "@/app/actions/public/newsletter";
 
 export default function NewsletterField() {
   const [email, setEmail] = useState("");
@@ -10,7 +11,7 @@ export default function NewsletterField() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic email validation
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address");
@@ -20,19 +21,15 @@ export default function NewsletterField() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with your actual API endpoint
-      // const response = await fetch("/api/newsletter/subscribe", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email }),
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Successfully subscribed to newsletter!");
-      setEmail("");
-      
+      const result = await subscribeToNewsletterAction({ email });
+
+      if (result.success) {
+        toast.success(result.message || "Successfully subscribed to newsletter!");
+        setEmail("");
+      } else {
+        toast.error(result.error || "Failed to subscribe. Please try again.");
+      }
+
     } catch (error) {
       console.error("Newsletter subscription error:", error);
       toast.error("Failed to subscribe. Please try again.");

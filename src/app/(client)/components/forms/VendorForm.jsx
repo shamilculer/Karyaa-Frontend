@@ -188,11 +188,11 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                             <FormItem>
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting} >
                                     <FormControl>
-                                        <SelectTrigger className="rounded-none border-gray-400 lg:h-10 w-full">
+                                        <SelectTrigger className="rounded-none border-gray-400 h-10 w-full bg-white">
                                             <SelectValue placeholder="Event Type (Optional)" />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent className="z-100">
+                                    <SelectContent>
                                         <SelectGroup>
                                             <SelectItem value="wedding">Wedding</SelectItem>
                                             <SelectItem value="birthday">Birthday/Party</SelectItem>
@@ -237,11 +237,11 @@ const VendorForm = ({ vendorInfo, user, setIsOpen }) => {
                             <FormItem>
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                                     <FormControl>
-                                        <SelectTrigger className="rounded-none border-gray-400 h-10 w-full max-lg:!text-xs">
+                                        <SelectTrigger className="rounded-none border-gray-400 h-10 w-full bg-white max-lg:!text-xs">
                                             <SelectValue placeholder="Expected guests (Optional)" />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent className="z-100">
+                                    <SelectContent>
                                         <SelectGroup>
                                             <SelectItem value="1-25">1-25 guests</SelectItem>
                                             <SelectItem value="26-50">26-50 guests</SelectItem>

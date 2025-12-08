@@ -44,13 +44,13 @@ const VendorLoginForm = () => {
         setErrorMessage("");
         try {
             const result = await loginVendor(data);
-            
+
             if (!result.success) {
                 setErrorMessage(result.error || "Login failed. Please try again.");
                 return;
             }
             setVendor(result.data);
-            
+
             // Redirect to vendor dashboard
             router.push("/vendor/dashboard");
         } catch (err) {
@@ -132,14 +132,14 @@ const VendorLoginForm = () => {
                     )}
 
                     {/* Forgot Password Link */}
-                    {/* <div className="text-right">
-                        <Link 
-                            href="/auth/vendor/forgot-password" 
+                    <div className="text-right">
+                        <Link
+                            href="/vendor/forgot-password"
                             className="text-sm text-[#2F4A9D] hover:underline"
                         >
                             Forgot password?
                         </Link>
-                    </div> */}
+                    </div>
 
                     {/* Sign in Button */}
                     <Button
@@ -156,8 +156,8 @@ const VendorLoginForm = () => {
             <div className="w-full text-center mt-4 text-sm text-gray-600">
                 <p className="!text-sm">
                     Don't have a vendor account?
-                    <Link 
-                        href="/auth/vendor/register" 
+                    <Link
+                        href="/auth/vendor/register"
                         className="text-[#2F4A9D] font-medium hover:underline"
                     >
                         Register now
@@ -168,7 +168,7 @@ const VendorLoginForm = () => {
             {/* Additional Info */}
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
                 <p className="!text-xs text-blue-800">
-                    <strong>Note:</strong> Your account must be approved by an administrator 
+                    <strong>Note:</strong> Your account must be approved by an administrator
                     before you can access the vendor dashboard.
                 </p>
             </div>

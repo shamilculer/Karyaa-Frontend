@@ -134,15 +134,27 @@ const Subscribers = () => {
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                        </TableCell>
-                                    </TableRow>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                <span className="sr-only">Open menu</span>
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                                            <DropdownMenuItem>Edit Subscription</DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-red-600">Cancel Subscription</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                                </TableBody>
-                            </Table>
+                    </TableBody>
+                </Table>
             </div>
 
-            </div>
-            )
+        </div>
+    )
 }
 
-            export default Subscribers
+export default Subscribers

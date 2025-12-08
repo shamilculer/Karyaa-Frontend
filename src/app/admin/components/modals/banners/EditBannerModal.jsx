@@ -38,6 +38,7 @@ import {
     Type,
     Calendar as CalendarIcon,
     Smartphone,
+    Video,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -180,6 +181,12 @@ export default function EditBannerModal({
             return;
         }
 
+        // Validate video
+        if (data.mediaType === "video" && !data.videoUrl) {
+            toast.error("Please upload a video file");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -250,22 +257,104 @@ export default function EditBannerModal({
                 <FormProvider {...methods}> <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0"> {/* Scrollable Content */}
                     <ScrollArea className="flex-1 h-[calc(90vh-185px)] px-6">
                         <div className="space-y-11 py-4 pr-4">
-                            {/* Banner Preview */}
-                            {banner?.imageUrl && (
-                                <div className="space-y-2">
-                                    <Label className="text-sm uppercase font-semibold text-gray-700">
-                                        Current Banner
+                            {/* Media Type & Uploads */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-1 bg-purple-500 rounded-full" />
+                                    <h3 className="!text-base !tracking-wide uppercase font-semibold">Media & Assets</h3>
+                                </div>
+
+                                {/* Media Type Selection */}
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold text-gray-700">
+                                        Media Type
                                     </Label>
-                                    <div className="relative w-full aspect-[16/5] rounded-lg overflow-hidden border-2 border-gray-200">
-                                        <Image
-                                            src={banner.imageUrl}
-                                            alt={banner.name}
-                                            fill
-                                            className="object-cover"
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <label className="relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                            <input
+                                                type="radio"
+                                                value="image"
+                                                {...register("mediaType")}
+                                                className="peer sr-only"
+                                            />
+                                            <ImageIcon className="w-8 h-8 mb-2 text-gray-500 peer-checked:text-blue-500" />
+                                            <span className="font-semibold text-gray-700 peer-checked:text-blue-700">Image Banner</span>
+                                        </label>
+
+                                        <label className="relative flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                            <input
+                                                type="radio"
+                                                value="video"
+                                                {...register("mediaType")}
+                                                className="peer sr-only"
+                                            />
+                                            <Video className="w-8 h-8 mb-2 text-gray-500 peer-checked:text-blue-500" />
+                                            <span className="font-semibold text-gray-700 peer-checked:text-blue-700">Video Banner</span>
+                                        </label>
                                     </div>
                                 </div>
-                            )}
+
+                                {/* Image Upload */}
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                        <ImageIcon className="w-4 h-4" />
+                                        {watch("mediaType") === "video" ? "Video Poster / Fallback Image" : "Banner Image"}
+                                        <Badge variant="outline" className="text-xs">
+                                            {getIdealSizeText()}
+                                        </Badge>
+                                    </Label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        <ControlledFileUpload
+                                            control={control}
+                                            name="imageUrl"
+                                            label={watch("mediaType") === "video" ? "Upload poster image" : "Upload banner image"}
+                                            allowedMimeType={[
+                                                "image/png",
+                                                "image/jpg",
+                                                "image/jpeg",
+                                                "image/webp",
+                                            ]}
+                                            folderPath="ad-banners"
+                                            errors={errors}
+                                            role="admin"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        {watch("mediaType") === "video"
+                                            ? "Displayed while video loads or on unsupported devices."
+                                            : "Main banner image displayed on the website."}
+                                    </p>
+                                </div>
+
+                                {/* Video Upload - Conditional */}
+                                {watch("mediaType") === "video" && (
+                                    <div className="space-y-3 pt-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <div className="p-1 bg-red-100 rounded text-red-600">
+                                                <Video className="w-3 h-3" />
+                                            </div>
+                                            Video File
+                                            <Badge variant="outline" className="text-xs">
+                                                MP4/WebM (Max 20MB)
+                                            </Badge>
+                                        </Label>
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                            <ControlledFileUpload
+                                                control={control}
+                                                name="videoUrl"
+                                                label="Upload video file"
+                                                allowedMimeType={[
+                                                    "video/mp4",
+                                                    "video/webm",
+                                                ]}
+                                                folderPath="ad-banners/videos"
+                                                errors={errors}
+                                                role="admin"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Basic Details */}
                             <div className="space-y-4 ">

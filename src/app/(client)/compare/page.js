@@ -32,8 +32,11 @@ const ErrorState = ({ message }) => (
 
 // --- Main Server Component ---
 const ComparePage = async ({ searchParams }) => {
+    // Await searchParams as it's a Promise in Next.js 15+
+    const params = await searchParams;
+
     // 1. READ SLUGS from URL
-    const urlSlugs = searchParams.vendors || searchParams.vendor;
+    const urlSlugs = params.vendors || params.vendor;
     let vendorSlugs = [];
 
     if (urlSlugs) {

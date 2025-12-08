@@ -14,7 +14,7 @@ export default function AdBanner({ vendorAds }) {
       spaceBetween={0}
       loop
       autoplay
-      className="overflow-hidden group/carousel border-b-2 border-primary/5 shadow-2xl"
+      className="overflow-hidden group/carousel border-b-2 border-primary/5"
       navigationInside
     >
       {vendorAds.map((ad) => {
@@ -41,7 +41,7 @@ export default function AdBanner({ vendorAds }) {
                 loop
                 playsInline
                 className={cn(
-                  "w-full object-cover transition-transform duration-1000 group-hover:scale-105 will-change-transform",
+                  "w-full object-cover transition-transform duration-1000",
                   isStandard ? "h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]" : "h-auto min-h-[200px]"
                 )}
               />
@@ -53,19 +53,13 @@ export default function AdBanner({ vendorAds }) {
                   width={1920}
                   height={1080}
                   className={cn(
-                    "w-full object-cover transition-transform duration-1000 group-hover:scale-105 will-change-transform",
+                    "w-full object-cover transition-transform duration-1000",
                     isStandard ? "h-full" : "h-auto"
                   )}
                   priority={true}
                 />
               </div>
             )}
-
-            {/* Premium Gradient Overlay - Stronger at bottom for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90 pointer-events-none" />
-
-            {/* Subtle top gradient for header visibility if needed */}
-            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/50 to-transparent opacity-60 pointer-events-none" />
 
             {/* Content Overlay */}
             {ad.showOverlay && (ad.title || ad.tagline) && (
