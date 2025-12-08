@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { requestUserPasswordReset } from '@/app/actions/user/password';
+import { requestVendorPasswordReset } from '@/app/actions/vendor/password';
 
 export default function ForgotPasswordForm({ type = 'user' }) {
   const [email, setEmail] = useState('');
@@ -14,29 +16,28 @@ export default function ForgotPasswordForm({ type = 'user' }) {
     setLoading(true);
     setMessage(null);
 
-    const endpoint = type === 'vendor'
-      ? '/vendors/auth/forgot-password'
-      : '/user/auth/forgot-password';
-
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const action = type === 'vendor' ? requestVendorPasswordReset : requestUserPasswordReset;
 
-      const data = await response.json();
+      const response = await action(email);
 
-      setMessage({
-        type: response.ok ? 'success' : 'error',
-        text: data.message || 'Something went wrong'
-      });
-
-      if (response.ok) setEmail('');
+      if (response.success) {
+        setMessage({
+          type: 'success',
+          text: response.message
+        });
+        setEmail('');
+      } else {
+        setMessage({
+          type: 'error',
+          text: response.message || 'Failed to send reset email.'
+        });
+      }
     } catch (error) {
+      console.error("Forgot Password Error:", error);
       setMessage({
         type: 'error',
-        text: 'Failed to send reset email. Please try again.'
+        text: `Error: ${error.message || 'Failed to request reset.'}`
       });
     } finally {
       setLoading(false);

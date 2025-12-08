@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
+import { resetUserPassword } from '@/app/actions/user/password';
+import { resetVendorPassword } from '@/app/actions/vendor/password';
 
 export default function ResetPasswordForm({ type = 'user' }) {
   const router = useRouter();
@@ -33,28 +35,20 @@ export default function ResetPasswordForm({ type = 'user' }) {
 
     setLoading(true);
 
-    const endpoint = type === 'vendor'
-      ? '/vendors/auth/reset-password'
-      : '/user/auth/reset-password';
-
     const loginPath = type === 'vendor'
       ? '/vendor/login'
       : '/auth/login';
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password }),
-      });
+      const action = type === 'vendor' ? resetVendorPassword : resetUserPassword;
 
-      const data = await response.json();
+      const response = await action(token, password);
 
-      if (response.ok) {
+      if (response.success) {
         // Success - redirect to login
         router.push(`${loginPath}?reset=success`);
       } else {
-        setError(data.message || 'Failed to reset password');
+        setError(response.message || 'Failed to reset password');
       }
     } catch (error) {
       setError('Failed to reset password. Please try again.');
