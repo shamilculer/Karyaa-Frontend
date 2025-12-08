@@ -18,6 +18,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 
 import BannerCarouselContainer from "../components/sections/BannerCarousel";
+import KaryaaRecommendsHeading from "../components/sections/KaryaaRecommendsHeading";
+import RecommendedVendorsTable from "../components/tables/RecommendedVendorsTable";
 import Link from "next/link";
 
 const AdManagementPage = () => {
@@ -86,7 +88,7 @@ const AdManagementPage = () => {
   return (
     <div className="mb-10 dashboard-container space-y-8">
 
-      {/* Filters */}
+      {/* Banner Management Section */}
       <div className="p-7 bg-white border border-gray-200 space-y-5">
         <span className="uppercase text-sidebar-foreground tracking-widest">
           Ad Banner Management
@@ -121,7 +123,7 @@ const AdManagementPage = () => {
               </SelectTrigger>
               <SelectContent className="bg-white">
                 <SelectItem value="all">All Placements</SelectItem>
-                
+
                 <SelectGroup>
                   <SelectLabel>Static Pages</SelectLabel>
                   <SelectItem value="Hero Section">Hero Section</SelectItem>
@@ -164,6 +166,23 @@ const AdManagementPage = () => {
             status={status}
             placement={placement}
           />
+        </div>
+      </div>
+
+      {/* Karyaa Recommends Section */}
+      <div className="p-7 bg-white border border-gray-200 space-y-5">
+        <span className="uppercase text-sidebar-foreground tracking-widest">
+          Karyaa Recommends
+        </span>
+
+        <div className="space-y-5">
+          {/* Heading Editor */}
+          <KaryaaRecommendsHeading />
+
+          {/* Recommended Vendors Table */}
+          <div>
+            <RecommendedVendorsTable />
+          </div>
         </div>
       </div>
     </div>

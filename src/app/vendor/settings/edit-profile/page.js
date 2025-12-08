@@ -616,29 +616,6 @@ const EditProfilePage = () => {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="isInternational"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">International Vendor</FormLabel>
-                            <div className="text-sm text-gray-500">
-                              Check this if you are based outside UAE
-                            </div>
-                          </div>
-                          <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={field.onChange}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
                   </div>
 
                   <FormField

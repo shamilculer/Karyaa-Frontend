@@ -165,7 +165,7 @@ const TotalRevenueChart = () => {
               strokeDasharray="3 3"
             />
 
-            <YAxis hide={true} domain={['dataMin', (dataMax) => dataMax * 1.15]} />
+            <YAxis hide={true} domain={[0, (dataMax) => dataMax * 1.15]} />
 
             <XAxis
               dataKey="time"

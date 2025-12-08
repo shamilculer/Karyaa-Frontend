@@ -513,10 +513,10 @@ const BlogsTable = ({ controls = true }) => {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem>
-                                                        <Link href={`/blog/${row.slug}`}>View Post</Link>
+                                                        <Link className="w-full" href={`/blog/${row.slug}`}>View Post</Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem>
-                                                        <Link href={`/admin/content-moderation/blog/edit?id=${row._id}`}>Edit Post</Link>
+                                                        <Link className="w-full" href={`/admin/content-moderation/blog/edit?id=${row._id}`}>Edit Post</Link>
                                                     </DropdownMenuItem>
                                                     {row.status === "draft" && (
                                                         <DropdownMenuItem onClick={() => handleToggle(row._id, "published")} >Publish</DropdownMenuItem>

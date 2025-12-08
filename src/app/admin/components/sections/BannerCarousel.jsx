@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,12 +43,21 @@ const BannerErrorFallback = ({ error }) => (
 );
 
 const BannerCarouselContainer = ({ search, status, placement }) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState({});
     const [deleteDialog, setDeleteDialog] = useState({ open: false, bannerId: null, bannerName: "" });
     const [editModal, setEditModal] = useState({ open: false, banner: null });
+
+    // Pagination state
+    const [totalBanners, setTotalBanners] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = 15;
 
     const effectivePlacement = placement || "Homepage Carousel";
 
@@ -60,18 +70,26 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                 search: search || "",
                 status: status === "all" ? "" : status,
                 placement: effectivePlacement === "all" ? "" : effectivePlacement,
+                page,
+                limit: pageSize,
             });
 
             if (!result.success) {
                 setError(result.message);
                 setBanners([]);
+                setTotalBanners(0);
+                setTotalPages(0);
             } else {
                 setBanners(result.data || []);
+                setTotalBanners(result.pagination?.total || 0);
+                setTotalPages(result.pagination?.pages || 0);
                 setError(null);
             }
         } catch (err) {
             setError(err.message || "An unexpected error occurred");
             setBanners([]);
+            setTotalBanners(0);
+            setTotalPages(0);
         } finally {
             setLoading(false);
         }
@@ -79,7 +97,7 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
 
     useEffect(() => {
         fetchAds();
-    }, [search, status, placement, effectivePlacement]);
+    }, [search, status, placement, effectivePlacement, page]);
 
     // Optimistic status toggle
     const handleToggleStatus = async (bannerId, currentStatus) => {
@@ -178,6 +196,13 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                 banner._id === updatedBanner._id ? updatedBanner : banner
             )
         );
+    };
+
+    // Handle page change
+    const handlePageChange = (newPage) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", newPage.toString());
+        router.replace(`?${params.toString()}`, { scroll: false });
     };
 
     if (loading) {
@@ -333,6 +358,39 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                 banner={editModal.banner}
                 onSuccess={handleEditSuccess}
             />
+
+            {/* Pagination Controls */}
+            {!loading && banners.length > 0 && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                    <div className="text-sm text-gray-600">
+                        Showing {banners.length} of {totalBanners} banner{totalBanners !== 1 ? 's' : ''}
+                        {totalPages > 1 && ` (Page ${page} of ${totalPages})`}
+                    </div>
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(page - 1)}
+                                disabled={page === 1}
+                            >
+                                Previous
+                            </Button>
+                            <div className="text-sm text-gray-600">
+                                Page {page} of {totalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(page + 1)}
+                                disabled={page >= totalPages}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     );
 };

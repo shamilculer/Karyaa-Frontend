@@ -9,6 +9,8 @@ export const getAllBannersAction = async ({
   search = "",
   status = "",
   placement = "",
+  page = 1,
+  limit = 15,
   sortBy = "createdAt",
   sortOrder = "desc",
 } = {}) => {
@@ -19,6 +21,8 @@ export const getAllBannersAction = async ({
   if (search) queryParams.append("search", search);
   if (status) queryParams.append("status", status);
   if (placement) queryParams.append("placement", placement);
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", limit.toString());
   queryParams.append("sortBy", sortBy);
   queryParams.append("sortOrder", sortOrder);
 
@@ -33,13 +37,19 @@ export const getAllBannersAction = async ({
     if (response.success) {
       return {
         success: true,
-        data: response.data.data, // full array returned from controller
+        data: response.data.data || response.data, // handle both formats
+        pagination: response.data.pagination || {
+          total: response.data.data?.length || 0,
+          page: parseInt(page),
+          pages: 1,
+        },
         message: "Ad Banners fetched successfully.",
       };
     } else {
       return {
         success: false,
         data: null,
+        pagination: null,
         message: response.message || "Failed to fetch ad banners.",
       };
     }
@@ -48,6 +58,7 @@ export const getAllBannersAction = async ({
     return {
       success: false,
       data: null,
+      pagination: null,
       message: error.message || "An unexpected network error occurred.",
     };
   }

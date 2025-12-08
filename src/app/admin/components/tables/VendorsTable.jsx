@@ -658,7 +658,7 @@ export default function VendorsTable({ controls = true }) {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
-                                                    <Link href={`/admin/vendor-management/${row._id}`}>View Details</Link>
+                                                    <Link className="w-full" href={`/admin/vendor-management/${row._id}`}>View Details</Link>
                                                 </DropdownMenuItem>
                                                 {row.vendorStatus === 'pending' && (
                                                     <DropdownMenuItem onClick={() => handleStatusChange(row._id, 'approved')}>Approve Vendor</DropdownMenuItem>
