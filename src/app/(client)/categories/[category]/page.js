@@ -11,6 +11,7 @@ import Link from "next/link";
 import BlogPosts from "../../components/common/BlogPosts";
 import { initialBlogParams } from "@/utils";
 import { getMetaData } from "@/lib/seo";
+import KaryaaRecommendsHeading from "../../components/common/KaryaaRecommendsHeading";
 
 export async function generateMetadata({ params }) {
   const { category } = await params;
@@ -53,9 +54,7 @@ const CategoryPage = async ({ params, searchParams }) => {
       <section className="container !mt-5">
         <div className="relative">
           <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
-            <h2 className=" font-semibold uppercase">
-              KARYAA Recommends
-            </h2>
+            <KaryaaRecommendsHeading />
           </div>
 
           <VendorsListWrapper showControls={false} filters={{ mainCategory: category, isRecommended: true, ...filters }} />
@@ -103,7 +102,7 @@ const CategoryPage = async ({ params, searchParams }) => {
             <div className="text-center space-y-2">
               <h4 className="text-2xl">Discover your vibe</h4>
               <p className="text-[#6A6A6A]">
-                We’ll help you find venues, décor, and experiences that match
+                We'll help you find venues, décor, and experiences that match
                 your personality.
               </p>
             </div>

@@ -62,6 +62,14 @@ const sections = [
     ]
   },
   {
+    key: "karyaa-recommends-heading",
+    label: "Karyaa Recommends Heading",
+    description: "Global heading for recommended vendors section",
+    fields: [
+      { name: "heading", label: "Section Heading", type: "text", placeholder: "KARYAA Recommends", description: "This heading will appear on the landing page, categories page, and individual category pages" }
+    ]
+  },
+  {
     key: "cta-sections",
     label: "Call to Action Sections",
     description: "Final conversion sections",

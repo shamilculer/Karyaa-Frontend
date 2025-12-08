@@ -60,7 +60,6 @@ export default function EditBannerModal({
     const [placementOptions, setPlacementOptions] = useState([
         { label: "Hero Section", value: "Hero Section" },
         { label: "Homepage Carousel", value: "Homepage Carousel" },
-        { label: "Karyaa Recommends", value: "Karyaa Recommends" },
         { label: "Contact Page", value: "Contact" },
         { label: "Ideas Page", value: "Ideas" },
         { label: "Gallery Page", value: "Gallery" },
@@ -169,11 +168,11 @@ export default function EditBannerModal({
             return;
         }
 
-        // Validate custom URL if not vendor-specific
-        if (!data.isVendorSpecific && !data.customUrl) {
-            toast.error("Please provide a custom URL");
-            return;
-        }
+        // Custom URL is now optional
+        // if (!data.isVendorSpecific && !data.customUrl) {
+        //     toast.error("Please provide a custom URL");
+        //     return;
+        // }
 
         // Validate dates
         if (data.activeFrom && data.activeUntil && new Date(data.activeFrom) > new Date(data.activeUntil)) {
@@ -667,13 +666,11 @@ export default function EditBannerModal({
                                                 <Link2 className="w-4 h-4" />
                                                 Custom Destination URL
                                                 <Badge variant="outline" className="text-xs">
-                                                    Required
+                                                    Optional
                                                 </Badge>
                                             </Label>
                                             <Input
-                                                {...register("customUrl", {
-                                                    required: !isVendorSpecific ? "Custom URL is required" : false,
-                                                })}
+                                                {...register("customUrl")}
                                                 placeholder="https://example.com/campaign"
                                                 className="h-11"
                                             />

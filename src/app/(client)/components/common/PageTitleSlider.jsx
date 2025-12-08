@@ -31,7 +31,7 @@ export default function PageTitleSlider({ banners, defaultTitle, defaultTagline 
                 const destinationLink =
                     banner.isVendorSpecific && banner.vendorSlug
                         ? `/vendors/${banner.vendorSlug}`
-                        : banner.customUrl || "#";
+                        : banner.customUrl;
 
                 const displayTitle = banner.title || defaultTitle;
                 const displayTagline = banner.tagline || defaultTagline;
@@ -39,10 +39,13 @@ export default function PageTitleSlider({ banners, defaultTitle, defaultTagline 
                 const isAuto = banner.displayMode === 'auto';
                 const isVideo = banner.mediaType === 'video';
 
+                const Wrapper = destinationLink ? Link : "div";
+                const wrapperProps = destinationLink ? { href: destinationLink } : {};
+
                 return (
                     <SwiperSlide key={banner._id}>
                         <div className={`relative w-full ${isAuto ? '' : 'h-64 md:h-[400px]'}`}>
-                            <Link href={destinationLink} className={`block ${isAuto ? 'w-full' : 'absolute inset-0 w-full h-full'}`}>
+                            <Wrapper {...wrapperProps} className={`block ${isAuto ? 'w-full' : 'absolute inset-0 w-full h-full'}`}>
                                 {isVideo ? (
                                     // Video rendering
                                     <video
@@ -122,7 +125,7 @@ export default function PageTitleSlider({ banners, defaultTitle, defaultTagline 
                                         )}
                                     </>
                                 )}
-                            </Link>
+                            </Wrapper>
 
                             {/* Conditional Overlay */}
                             {showOverlay && (

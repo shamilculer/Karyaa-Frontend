@@ -31,7 +31,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         const destinationLink =
             bannerToShow.isVendorSpecific && bannerToShow.vendorSlug
                 ? `/vendors/${bannerToShow.vendorSlug}`
-                : bannerToShow.customUrl || "#";
+                : bannerToShow.customUrl;
 
         // Determine title and tagline to show
         const displayTitle = bannerToShow.title || title;
@@ -40,9 +40,12 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         const isAuto = bannerToShow.displayMode === 'auto';
         const isVideo = bannerToShow.mediaType === 'video';
 
+        const Wrapper = destinationLink ? Link : "div";
+        const wrapperProps = destinationLink ? { href: destinationLink } : {};
+
         return (
             <section className={`!m-0 relative w-full ${isAuto ? '' : 'h-64 md:h-[400px]'}`}>
-                <Link href={destinationLink} className={isAuto ? "block w-full" : "absolute inset-0 w-full h-full"}>
+                <Wrapper {...wrapperProps} className={isAuto ? "block w-full" : "absolute inset-0 w-full h-full"}>
                     {isVideo ? (
                         // Video rendering
                         <video
@@ -122,7 +125,7 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
                             )}
                         </>
                     )}
-                </Link>
+                </Wrapper>
 
                 {/* Conditional Overlay */}
                 {showOverlay && (

@@ -156,25 +156,22 @@ const Hero = ({ data } = {}) => {
           }}
           className="hero-swiper relative"
         >
-          {images.map((item, idx) => (
-            <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
-              {item.link ? (
-                <Link href={item.link} className="block w-full h-full">
+          {images.map((item, idx) => {
+            const Wrapper = item.link ? Link : "div";
+            const wrapperProps = item.link ? { href: item.link } : {};
+
+            return (
+              <SwiperSlide key={idx} className="!w-64 sm:!w-[400px] lg:!w-3xl xl:!w-5xl !h-64 sm:!h-64 md:!h-80 lg:!h-[420px] !relative">
+                <Wrapper {...wrapperProps} className="block w-full h-full">
                   <img
                     src={item.src}
                     alt={`slide-${idx}`}
                     className="h-full w-full object-cover rounded-2xl shadow-lg"
                   />
-                </Link>
-              ) : (
-                <img
-                  src={item.src}
-                  alt={`slide-${idx}`}
-                  className="h-full w-full object-cover rounded-2xl shadow-lg"
-                />
-              )}
-            </SwiperSlide>
-          ))}
+                </Wrapper>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
 
         <div className="w-full flex-center gap-2 md:gap-4 mt-4">

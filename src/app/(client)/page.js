@@ -15,6 +15,7 @@ import AdbannerWrapper from "./components/features/adBanner/AdBannerWrapper";
 import BlogPosts from "./components/common/BlogPosts";
 import TestimonialsServer from "./components/sections/TestimonialsServer";
 import { getMetaData } from "@/lib/seo";
+import KaryaaRecommendsHeading from "./components/common/KaryaaRecommendsHeading";
 
 export async function generateMetadata() {
   return await getMetaData("static", "home");
@@ -39,7 +40,7 @@ export default function LandingPage() {
         <section className="container">
           <div className="relative">
             <div className="flex justify-between items-center max-lg:items-end mb-6 md:mb-8">
-              <h2 className="uppercase">KARYAA Recommends</h2>
+              <KaryaaRecommendsHeading />
             </div>
             <VendorsCarousel sourceType="recommended" filter={{ isRecommended: true }} />
           </div>

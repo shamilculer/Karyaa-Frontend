@@ -18,7 +18,7 @@ export default async function HeroServer() {
         src: b.imageUrl,
         link: b.isVendorSpecific && b.vendorSlug
           ? `/vendors/${b.vendorSlug}`
-          : b.customUrl || "#"
+          : b.customUrl
       }));
     }
 

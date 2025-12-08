@@ -23,7 +23,7 @@ const Header = async () => {
     const categories = categoriesResponse.categories || [];
 
     return (
-        <header className="sticky top-0 bg-[#FFFEF9] z-[1000]">
+        <header className="sticky top-0 bg-[#FFF6F9] z-[1000]">
 
             {/* -------------------- Desktop Header (Unchanged) -------------------- */}
             <div className="hidden lg:flex w-full py-4 h-[80px] border-b border-gray-300 items-center">

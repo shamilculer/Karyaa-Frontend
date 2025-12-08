@@ -9,6 +9,7 @@ import { CategoryGrid } from "../components/common/CategoriesList/CategoriesList
 import PageTitle from "../components/common/PageTitle";
 import VendorsListWrapper from "../components/common/vendorsList/VendorListWrapper";
 import { getMetaData } from "@/lib/seo";
+import KaryaaRecommendsHeading from "../components/common/KaryaaRecommendsHeading";
 
 export async function generateMetadata() {
   return await getMetaData("static", "categories");
@@ -32,7 +33,7 @@ const CategoriesPage = () => {
       <section className="container !mt-5">
         <div className="relative">
           <div className="flex max-md:flex-col md:justify-between items-center gap-5 mb-8">
-            <h2 className=" font-semibold uppercase">KARYAA Recommends</h2>
+            <KaryaaRecommendsHeading />
           </div>
 
           <VendorsListWrapper

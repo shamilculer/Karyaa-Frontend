@@ -52,7 +52,6 @@ export default function AddBannerPage() {
   const [placementOptions, setPlacementOptions] = useState([
     { label: "Hero Section", value: "Hero Section" },
     { label: "Homepage Carousel", value: "Homepage Carousel" },
-    { label: "Karyaa Recommends", value: "Karyaa Recommends" },
     { label: "Ideas Page", value: "Ideas" },
     { label: "Gallery Page", value: "Gallery" },
     { label: "Blog Page", value: "Blog Page" },
@@ -168,11 +167,8 @@ export default function AddBannerPage() {
       return;
     }
 
-    // Validate custom URL if not vendor-specific
-    if (!data.isVendorSpecific && !data.customUrl) {
-      toast.error("Please provide a custom URL");
-      return;
-    }
+    // Custom URL is optional now
+    // if (!data.isVendorSpecific && !data.customUrl) { ... }
 
     // Validate dates
     if (data.activeFrom && data.activeUntil && new Date(data.activeFrom) > new Date(data.activeUntil)) {
@@ -678,13 +674,11 @@ export default function AddBannerPage() {
                       <Link2 className="w-4 h-4" />
                       Custom Destination URL
                       <Badge variant="outline" className="text-xs">
-                        Required
+                        Optional
                       </Badge>
                     </Label>
                     <Input
-                      {...register("customUrl", {
-                        required: !isVendorSpecific ? "Custom URL is required" : false,
-                      })}
+                      {...register("customUrl")}
                       placeholder="https://example.com/campaign"
                       className="h-11 border-gray-300 focus:ring-2 focus:ring-purple-500"
                     />

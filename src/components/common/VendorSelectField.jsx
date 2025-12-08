@@ -14,8 +14,8 @@ import Image from "next/image";
 // Setting a reasonable limit for the combobox dropdown
 const SEARCH_LIMIT = 50;
 
-export const VendorSelectField = ({ 
-    name = "vendor", 
+export const VendorSelectField = ({
+    name = "vendor",
     placeholder = "Search and select a vendor...",
     valueKey = "slug", // Can be "slug" or "_id"
     required = false,
@@ -23,7 +23,7 @@ export const VendorSelectField = ({
 }) => {
     const { setValue, watch } = useFormContext();
     const selectedValue = watch(name); // Get current value from form
-    
+
     const [open, setOpen] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState("");
     const [options, setOptions] = React.useState(initialVendor ? [initialVendor] : []);
@@ -105,8 +105,8 @@ export const VendorSelectField = ({
     }, [searchValue, open]);
 
     // Find the selected vendor (check options first, then fall back to initialVendorData)
-    const selectedVendor = options.find(option => option[valueKey] === selectedValue) || 
-                           (initialVendorData?.[valueKey] === selectedValue ? initialVendorData : null);
+    const selectedVendor = options.find(option => option[valueKey] === selectedValue) ||
+        (initialVendorData?.[valueKey] === selectedValue ? initialVendorData : null);
 
     return (
         <div className="space-y-2">
@@ -126,12 +126,12 @@ export const VendorSelectField = ({
                             </div>
                         ) : selectedVendor ? (
                             <div className="flex items-center gap-3">
-                                <Image 
-                                    src={selectedVendor.businessLogo} 
-                                    width={40} 
-                                    height={40} 
-                                    alt={selectedVendor.businessName} 
-                                    className="object-cover rounded-full size-10" 
+                                <Image
+                                    src={selectedVendor.businessLogo}
+                                    width={40}
+                                    height={40}
+                                    alt={selectedVendor.businessName}
+                                    className="object-cover rounded-full size-10"
                                 />
                                 <span className="truncate">{selectedVendor.businessName}</span>
                             </div>
@@ -161,7 +161,7 @@ export const VendorSelectField = ({
                             {/* Empty State */}
                             {!isLoading && options.length === 0 && (
                                 <CommandEmpty>
-                                    {searchValue 
+                                    {searchValue
                                         ? `No vendors found matching "${searchValue}"`
                                         : "Start typing to search vendors"
                                     }
@@ -208,12 +208,12 @@ export const VendorSelectField = ({
                                             selectedValue === option[valueKey] ? "opacity-100" : "opacity-0"
                                         )}
                                     />
-                                    <Image 
-                                        src={option.businessLogo} 
-                                        width={40} 
-                                        height={40} 
-                                        alt={option.businessName} 
-                                        className="object-cover rounded-full size-10 mr-3" 
+                                    <Image
+                                        src={option.businessLogo}
+                                        width={40}
+                                        height={40}
+                                        alt={option.businessName}
+                                        className="object-cover rounded-full size-10 mr-3"
                                     />
                                     <div className="flex flex-col">
                                         <span className="font-medium">{option.businessName}</span>
