@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getContentByKeyAction, upsertContentAction, saveLandingPageAction } from "@/app/actions/admin/pages";
+import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
 
 const sections = [
   {
@@ -27,7 +28,7 @@ const sections = [
         placeholder: "Your Perfect Event Starts Here.\nPlan. Connect. Celebrate.",
         description: "Press Enter to create a new line in your heading"
       },
-      { name: "description", label: "Description", type: "textarea", placeholder: "Plan your next celebration in the perfect venue..." },
+      { name: "description", label: "Description", type: "richtext", placeholder: "Plan your next celebration in the perfect venue..." },
     ]
   },
   {
@@ -35,8 +36,8 @@ const sections = [
     label: "Why Choose Us",
     description: "Highlight your unique value proposition",
     fields: [
-      { name: "heading", label: "Heading", type: "text", placeholder: "Why thousands trust us" },
-      { name: "description", label: "Description", type: "textarea", placeholder: "Explain what makes you special..." },
+      { name: "heading", label: "Heading", type: "textarea", placeholder: "Why thousands trust us" },
+      { name: "description", label: "Description", type: "richtext", placeholder: "Explain what makes you special..." },
       { name: "image", label: "Feature Image", type: "image" },
       { name: "cta_text", label: "CTA Button Text", type: "text", placeholder: "Get Started" },
       { name: "cta_link", label: "CTA Button Link", type: "text", placeholder: "/vendors" }
@@ -47,8 +48,8 @@ const sections = [
     label: "How It Works",
     description: "Step-by-step guide for your users",
     fields: [
-      { name: "heading", label: "Heading", type: "text", placeholder: "Plan Your Event in 3 Easy Steps" },
-      { name: "description", label: "Description", type: "textarea", placeholder: "Describe the process..." },
+      { name: "heading", label: "Heading", type: "textarea", placeholder: "Plan Your Event in 3 Easy Steps" },
+      { name: "description", label: "Description", type: "richtext", placeholder: "Describe the process..." },
       { name: "image", label: "Process Image", type: "image" }
     ]
   },
@@ -57,7 +58,7 @@ const sections = [
     label: "Testimonials",
     description: "Customer reviews and feedback",
     fields: [
-      { name: "heading", label: "Section Heading", type: "text", placeholder: "WHAT PEOPLE SAY ABOUT US" },
+      { name: "heading", label: "Section Heading", type: "textarea", placeholder: "WHAT PEOPLE SAY ABOUT US" },
       { name: "testimonials", label: "Testimonials", type: "testimonial-list" }
     ]
   },
@@ -66,11 +67,11 @@ const sections = [
     label: "Call to Action Sections",
     description: "Final conversion sections",
     fields: [
-      { name: "cta1_heading", label: "CTA 1 - Heading", type: "text", placeholder: "LIST YOUR SERVICES AND GET DISCOVERED" },
+      { name: "cta1_heading", label: "CTA 1 - Heading", type: "textarea", placeholder: "LIST YOUR SERVICES AND GET DISCOVERED" },
       { name: "cta1_button_text", label: "CTA 1 - Button Text", type: "text", placeholder: "Join As a Vendor" },
       { name: "cta1_button_link", label: "CTA 1 - Button Link", type: "text", placeholder: "/auth/vendor/register" },
       { name: "cta1_image", label: "CTA 1 - Image", type: "image" },
-      { name: "cta2_heading", label: "CTA 2 - Heading", type: "text", placeholder: "LET THE WORLD KNOW OUR VENDORS" },
+      { name: "cta2_heading", label: "CTA 2 - Heading", type: "textarea", placeholder: "LET THE WORLD KNOW OUR VENDORS" },
       { name: "cta2_button_text", label: "CTA 2 - Button Text", type: "text", placeholder: "Refer & Earn" },
       { name: "cta2_button_link", label: "CTA 2 - Button Link", type: "text", placeholder: "Leave empty to open Refer & Earn modal", description: "Leave empty to open Refer & Earn modal" },
       { name: "cta2_image", label: "CTA 2 - Image", type: "image" }
@@ -252,69 +253,101 @@ const TestimonialListField = ({ value, onChange }) => {
       </div>
 
       {testimonials.map((testimonial, idx) => (
-        <Card key={idx} className="bg-gray-50">
-          <CardHeader className="pb-3">
+        <Card key={idx} className="bg-[#fafafa] !p-5">
+          <CardHeader className="!pb-0 border-b border-gray-300 px-0">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm">Testimonial {idx + 1}</CardTitle>
+              <CardTitle className="!text-sm uppercase">Testimonial {idx + 1}</CardTitle>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => removeTestimonial(idx)}
-                className="h-8 w-8 text-red-500 hover:text-red-700"
+                className="h-8 w-8 border rounded-full border-red-500 text-red-500 hover:text-red-700"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <Label htmlFor={`testimonial-name-${idx}`}>Customer Name</Label>
-              <Input
-                id={`testimonial-name-${idx}`}
-                placeholder="Customer Name"
-                value={testimonial.name}
-                onChange={(e) => updateTestimonial(idx, "name", e.target.value)}
-              />
+          <CardContent className="space-y-6 p-0">
+            {/* Grid layout for name and rating */}
+            <div className="grid grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor={`testimonial-name-${idx}`}>Customer Name</Label>
+                <Input
+                  id={`testimonial-name-${idx}`}
+                  placeholder="Customer Name"
+                  value={testimonial.name}
+                  onChange={(e) => updateTestimonial(idx, "name", e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`testimonial-rating-${idx}`}>Rating</Label>
+                <Select
+                  value={testimonial.rating.toString()}
+                  onValueChange={(val) => updateTestimonial(idx, "rating", parseInt(val))}
+                >
+                  <SelectTrigger className="!h-11" id={`testimonial-rating-${idx}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[5, 4, 3, 2, 1].map(num => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num} Stars
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
+            {/* Testimonial text */}
+            <div className="space-y-2">
               <Label htmlFor={`testimonial-text-${idx}`}>Testimonial Text</Label>
               <Textarea
                 id={`testimonial-text-${idx}`}
                 placeholder="Testimonial text..."
                 value={testimonial.text}
                 onChange={(e) => updateTestimonial(idx, "text", e.target.value)}
-                className="h-24 resize-none"
+                className="h-20 resize-none"
               />
             </div>
 
-            <div>
-              <ImageUploadField
-                value={testimonial.image}
-                onChange={(val) => updateTestimonial(idx, "image", val)}
-                label="Customer Photo"
-                sectionKey="testimonial"
-                fieldName={`image_${idx}`}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor={`testimonial-rating-${idx}`}>Rating</Label>
-              <Select
-                value={testimonial.rating.toString()}
-                onValueChange={(val) => updateTestimonial(idx, "rating", parseInt(val))}
-              >
-                <SelectTrigger id={`testimonial-rating-${idx}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[5, 4, 3, 2, 1].map(num => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} Stars
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Customer photo with smaller preview */}
+            <div className="space-y-2">
+              <Label>Customer Photo</Label>
+              {testimonial.image ? (
+                <div className="flex items-start gap-3">
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                    <Image
+                      src={testimonial.image}
+                      alt="Customer"
+                      className="w-full h-full object-cover"
+                      width={96}
+                      height={96}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateTestimonial(idx, "image", "")}
+                      className="h-8"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Remove Photo
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <ImageUploadField
+                  value={testimonial.image}
+                  onChange={(val) => updateTestimonial(idx, "image", val)}
+                  label=""
+                  sectionKey="testimonial"
+                  fieldName={`image_${idx}`}
+                />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -450,7 +483,7 @@ const LandingPageEditor = () => {
               value={value}
               onChange={(e) => handleFieldChange(section.key, field.name, e.target.value)}
               placeholder={field.placeholder}
-              className={`${field.name === 'heading' ? 'h-20' : 'h-32'} resize-none`}
+              className={`${field.name.includes('heading') ? 'h-20' : 'h-32'} resize-none`}
             />
             {field.description && (
               <p className="!text-xs text-gray-600">{field.description}</p>
@@ -489,6 +522,21 @@ const LandingPageEditor = () => {
           />
         );
 
+      case "richtext":
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={`${section.key}-${field.name}`}>{field.label}</Label>
+            <SimpleTiptapEditor
+              value={value}
+              onChange={(val) => handleFieldChange(section.key, field.name, val)}
+              placeholder={field.placeholder}
+            />
+            {field.description && (
+              <p className="!text-xs text-gray-600">{field.description}</p>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
@@ -497,7 +545,7 @@ const LandingPageEditor = () => {
   return (
     <div className="dashboard-container !pt-0 bg-gray-50 ">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">

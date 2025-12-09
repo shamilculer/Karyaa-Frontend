@@ -746,17 +746,34 @@ const EditBlogPage = () => {
 
             {/* Tiptap Editor Styles */}
             <style jsx global>{`
-                .ProseMirror { outline: none; }
-                .ProseMirror p { margin: 0.75rem 0; }
-                .ProseMirror h1 { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
-                .ProseMirror h2 { font-size: 1.5rem; font-weight: bold; margin: 0.875rem 0; }
-                .ProseMirror h3 { font-size: 1.25rem; font-weight: bold; margin: 0.75rem 0; }
-                .ProseMirror ul, .ProseMirror ol { padding-left: 1.5rem; margin: 0.75rem 0; }
-                .ProseMirror blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
-                .ProseMirror code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; }
+                .ProseMirror { 
+                    outline: none; 
+                    min-height: 400px;
+                }
+                .ProseMirror p { 
+                    margin: 1rem 0; 
+                    min-height: 1.5em;
+                }
+                .ProseMirror p:empty::before {
+                    content: '';
+                    display: inline-block;
+                }
+                .ProseMirror h1 { font-size: 3rem; font-weight: bold; margin: 2rem 0 1rem; }
+                .ProseMirror h2 { font-size: 2.25rem; font-weight: bold; margin: 1.5rem 0 0.75rem; }
+                .ProseMirror h3 { font-size: 1.875rem; font-weight: bold; margin: 1.25rem 0 0.625rem; }
+                .ProseMirror ul, .ProseMirror ol { 
+                    padding-left: 1.5rem; 
+                    margin: 1rem 0; 
+                    list-style-position: outside;
+                }
+                .ProseMirror ul { list-style-type: disc; }
+                .ProseMirror ol { list-style-type: decimal; }
+                .ProseMirror li { margin: 0.5rem 0; }
+                .ProseMirror blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; color: #6b7280; margin: 1rem 0; font-style: italic; }
+                .ProseMirror code { background-color: #f3f4f6; padding: 0.25rem 0.375rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem; }
                 .ProseMirror pre { background-color: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; }
                 .ProseMirror pre code { background: none; color: inherit; padding: 0; }
-                .ProseMirror img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0; }
+                .ProseMirror img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0; display: block; }
                 .ProseMirror a { color: #3b82f6; text-decoration: underline; }
             `}</style>
         </div>

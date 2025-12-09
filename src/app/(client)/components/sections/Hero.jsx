@@ -105,7 +105,16 @@ const Hero = ({ data } = {}) => {
             </span>
           ))}
         </h1>
-        <p className="max-md:mt-2 max-md:!text-xs">{description}</p>
+        <div
+          className="prose prose-sm max-w-none max-md:mt-2 max-md:!text-xs
+            prose-p:text-gray-700 prose-p:leading-relaxed prose-p:my-2 prose-p:min-h-[1.5em]
+            prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+            prose-strong:font-semibold
+            prose-ul:list-disc prose-ul:pl-5 prose-ul:my-2 prose-ul:[list-style-position:outside]
+            prose-ol:list-decimal prose-ol:pl-5 prose-ol:my-2 prose-ol:[list-style-position:outside]
+            prose-li:my-1"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       <div className="w-full max-w-[1600px] relative">

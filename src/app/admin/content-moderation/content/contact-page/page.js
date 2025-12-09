@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getContentByKeyAction, upsertContentAction } from "@/app/actions/admin/pages";
+import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
 
 const ContactPageEditor = () => {
     const router = useRouter();
@@ -88,7 +89,7 @@ const ContactPageEditor = () => {
     return (
         <div className="dashboard-container !pt-0 bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-10">
+            <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-50">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -176,24 +177,22 @@ const ContactPageEditor = () => {
                             <CardContent className="space-y-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="contentHeading">Content Heading</Label>
-                                    <Input
+                                    <Textarea
                                         id="contentHeading"
-                                        type="text"
                                         value={content.contentHeading}
                                         onChange={(e) => handleFieldChange("contentHeading", e.target.value)}
                                         placeholder="Contact Us Today for Personalized Support and Assistance"
+                                        className="h-16 resize-none"
                                     />
-                                    <p className="!text-xs text-gray-600">Main heading in the content section</p>
+                                    <p className="!text-xs text-gray-600">Main heading in the content section (press Enter for new lines)</p>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="contentDescription">Content Description</Label>
-                                    <Textarea
-                                        id="contentDescription"
+                                    <SimpleTiptapEditor
                                         value={content.contentDescription}
-                                        onChange={(e) => handleFieldChange("contentDescription", e.target.value)}
+                                        onChange={(val) => handleFieldChange("contentDescription", val)}
                                         placeholder="Lorem ipsum dolor sit amet consectetur. Convallis est urna adipiscin fringilla nulla diam lorem non mauris."
-                                        className="h-32 resize-none"
                                     />
                                     <p className="!text-xs text-gray-600">Description text displayed below the heading</p>
                                 </div>

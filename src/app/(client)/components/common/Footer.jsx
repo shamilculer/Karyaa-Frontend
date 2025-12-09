@@ -125,7 +125,12 @@ const Footer = () => {
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="flex-center flex-col text-center space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
-                {leftHeading}
+                {leftHeading.split('\n').map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    {index < leftHeading.split('\n').length - 1 && <br />}
+                  </span>
+                ))}
               </h2>
               <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">
                 <Link href={leftButtonLink}>{leftButtonText}</Link>
@@ -140,7 +145,12 @@ const Footer = () => {
             <div className="absolute inset-0 bg-black/40 w-full h-full"></div>
             <div className="text-center flex-center flex-col space-y-3 lg:space-y-5 px-6 sm:px-10 z-10">
               <h2 className="text-[26px] sm:text-2xl lg:!text-4xl uppercase !text-white font-bold leading-tight sm:w-lg">
-                {rightHeading}
+                {rightHeading.split('\n').map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    {index < rightHeading.split('\n').length - 1 && <br />}
+                  </span>
+                ))}
               </h2>
               {rightButtonLink ? (
                 <Button asChild className="bg-white text-primary px-4 py-2 text-sm sm:text-base">

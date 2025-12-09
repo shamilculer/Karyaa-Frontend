@@ -30,69 +30,84 @@ const defaultTestimonials = [
   },
 ];
 
-const Testimonials = ({ testimonials: propTestimonials } = {}) => {
+const Testimonials = ({ testimonials: propTestimonials, heading = "What people say about us" } = {}) => {
   const testimonials = Array.isArray(propTestimonials) && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
   return (
-    <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
-      <Swiper
-        modules={[Navigation, Autoplay]}
-        spaceBetween={20}
-        slidesPerView={2}
-        loop={true}
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
-        }}
-        navigation={{
-          prevEl: ".testimonials-prev",
-          nextEl: ".testimonials-next",
-        }}
-        breakpoints={{
-          320: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
-          1024: { slidesPerView: 2, spaceBetween: 20 },
-        }}
-        className="w-full pb-8"
-      >
-        {testimonials.map((t, idx) => {
-          const imageSrc = t.img || t.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400";
+    <div className="w-full flex-center flex-col space-y-10">
+      <div className="w-full flex-center flex-col">
+        <h6 className="uppercase max-md:text-sm !font-medium">
+          TESTIMONIALS
+        </h6>
+        <h2 className="uppercase text-center">
+          {heading.split('\n').map((line, index) => (
+            <span key={index}>
+              {line}
+              {index < heading.split('\n').length - 1 && <br />}
+            </span>
+          ))}
+        </h2>
+      </div>
+      <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
+        <Swiper
+          modules={[Navigation, Autoplay]}
+          spaceBetween={20}
+          slidesPerView={2}
+          loop={true}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+          }}
+          navigation={{
+            prevEl: ".testimonials-prev",
+            nextEl: ".testimonials-next",
+          }}
+          breakpoints={{
+            320: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
+            1024: { slidesPerView: 2, spaceBetween: 20 },
+          }}
+          className="w-full pb-8"
+        >
+          {testimonials.map((t, idx) => {
+            const imageSrc = t.img || t.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400";
 
-          return (
-            <SwiperSlide key={t.id || idx}>
-              <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
-                {imageSrc && (
-                  <Image
-                    width={240}
-                    height={240}
-                    className="w-full md:w-60 h-72 object-cover rounded-lg"
-                    src={imageSrc}
-                    alt={t.name || "Testimonial"}
-                  />
-                )}
-                <div className="flex flex-col h-full justify-center p-5">
-                  <div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(t.rating || 5)].map((_, i) => (
-                        <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
-                      ))}
+            return (
+              <SwiperSlide key={t.id || idx}>
+                <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
+                  {imageSrc && (
+                    <Image
+                      width={240}
+                      height={240}
+                      className="w-full md:w-60 h-72 object-cover rounded-lg"
+                      src={imageSrc}
+                      alt={t.name || "Testimonial"}
+                    />
+                  )}
+                  <div className="flex flex-col h-full justify-center p-5">
+                    <div>
+                      <div className="flex items-center gap-1">
+                        {[...Array(t.rating || 5)].map((_, i) => (
+                          <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
+                        ))}
+                      </div>
+                      <p className="text-gray-500 mt-4">{t.text}</p>
                     </div>
-                    <p className="text-gray-500 mt-4">{t.text}</p>
+                    <p className="mt-4 font-medium">{t.name}</p>
                   </div>
-                  <p className="mt-4 font-medium">{t.name}</p>
                 </div>
-              </div>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
 
-      {/* Navigation Buttons - BELOW Swiper */}
-      <div className="flex gap-4 mt-4">
-        <Button className="testimonials-prev bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
-          <ChevronLeft className="text-secondary" />
-        </Button>
-        <Button className="testimonials-next bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
-          <ChevronRight className="text-secondary" />
-        </Button>
+        {/* Navigation Buttons - BELOW Swiper */}
+        <div className="flex gap-4 mt-4">
+          <Button className="testimonials-prev bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
+            <ChevronLeft className="text-secondary" />
+          </Button>
+          <Button className="testimonials-next bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
+            <ChevronRight className="text-secondary" />
+          </Button>
+        </div>
       </div>
     </div>
   );

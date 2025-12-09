@@ -57,8 +57,24 @@ const ContactPage = async () => {
             <section className="container">
                 <div className="w-full flex-center max-md:flex-col gap-20">
                     <div className="w-full md:w-1/2 space-y-6 md:space-y-10">
-                        <h3 className="uppercase">{pageContent.contentHeading}</h3>
-                        <p className="mr-16">{pageContent.contentDescription}</p>
+                        <h3 className="uppercase">
+                            {pageContent.contentHeading.split('\n').map((line, index) => (
+                                <span key={index}>
+                                    {line}
+                                    {index < pageContent.contentHeading.split('\n').length - 1 && <br />}
+                                </span>
+                            ))}
+                        </h3>
+                        <div
+                            className="prose prose-sm max-w-none mr-16
+                                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:my-2 prose-p:min-h-[1.5em]
+                                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                                prose-strong:font-semibold
+                                prose-ul:list-disc prose-ul:pl-5 prose-ul:my-2 prose-ul:[list-style-position:outside]
+                                prose-ol:list-decimal prose-ol:pl-5 prose-ol:my-2 prose-ol:[list-style-position:outside]
+                                prose-li:my-1"
+                            dangerouslySetInnerHTML={{ __html: pageContent.contentDescription }}
+                        />
                         <div className="space-y-8">
                             <Link href="" className="flex items-center gap-4">
                                 <PhoneCall size={25} />
@@ -72,7 +88,7 @@ const ContactPage = async () => {
 
                             <Link href="" className="flex items-center gap-4">
                                 <MapPin size={25} />
-                                <span className="font-medium text-xl">{pageContent.location}</span>
+                                <span className="font-medium text-xl" style={{ whiteSpace: "pre-line" }}>{pageContent.location}</span>
                             </Link>
                         </div>
                     </div>

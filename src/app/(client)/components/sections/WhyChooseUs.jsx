@@ -27,8 +27,24 @@ export default function WhyChooseUs({ data } = {}) {
         </div>
         <div className="w-full lg:w-[45%] flex flex-col items-start gap-4 lg:gap-5">
           <h6 className="uppercase !font-medium max-lg:!text-sm">{title}</h6>
-          <h2>{heading}</h2>
-          <p style={{ whiteSpace: "pre-line" }}>{description}</p>
+          <h2>
+            {heading.split('\n').map((line, index) => (
+              <span key={index}>
+                {line}
+                {index < heading.split('\n').length - 1 && <br />}
+              </span>
+            ))}
+          </h2>
+          <div
+            className="prose prose-sm max-w-none
+              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:my-2 prose-p:min-h-[1.5em]
+              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+              prose-strong:font-semibold
+              prose-ul:list-disc prose-ul:pl-5 prose-ul:my-2 prose-ul:[list-style-position:outside]
+              prose-ol:list-decimal prose-ol:pl-5 prose-ol:my-2 prose-ol:[list-style-position:outside]
+              prose-li:my-1"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
           <Button asChild>
             <Link href={ctaLink}>{ctaText}</Link>
           </Button>

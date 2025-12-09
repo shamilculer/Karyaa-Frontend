@@ -7,9 +7,17 @@ export default async function TestimonialsServer() {
     const result = await getContentByKeyAction("testimonials");
 
     let testimonials = null;
+    let heading = "What people say about us";
+
     if (result?.success && result.data?.content) {
       try {
         const parsed = typeof result.data.content === "string" ? JSON.parse(result.data.content) : result.data.content;
+
+        // Extract heading if available
+        if (parsed?.heading) {
+          heading = parsed.heading;
+        }
+
         // Accept array or object with `testimonials` key
         if (Array.isArray(parsed)) {
           testimonials = parsed;
@@ -21,7 +29,7 @@ export default async function TestimonialsServer() {
       }
     }
 
-    return <Testimonials testimonials={testimonials} />;
+    return <Testimonials testimonials={testimonials} heading={heading} />;
   } catch (err) {
     console.error("[TestimonialsServer] error calling getContentByKeyAction:", err);
     return <Testimonials />;

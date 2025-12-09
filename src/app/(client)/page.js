@@ -81,12 +81,6 @@ export default function LandingPage() {
         </section>
 
         <section className="container space-y-10 !mb-0">
-          <div className="w-full flex-center flex-col">
-            <h6 className="uppercase max-md:text-sm !font-medium">
-              TESTIMONIALs
-            </h6>
-            <h2 className="uppercase text-center">What people say about us</h2>
-          </div>
           <TestimonialsServer />
         </section>
       </div>
