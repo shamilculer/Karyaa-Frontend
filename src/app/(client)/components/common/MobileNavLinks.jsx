@@ -3,12 +3,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 import {
     NavigationMenu,
     NavigationMenuLink,
@@ -22,6 +18,8 @@ import {
  */
 const MobileNavLinks = ({ categories, setOpen }) => {
     const router = useRouter();
+    const [openCategories, setOpenCategories] = useState("");
+    const [openSubcategories, setOpenSubcategories] = useState({});
 
     const handleLinkClick = (href) => {
         // Use router.push to navigate
@@ -30,58 +28,152 @@ const MobileNavLinks = ({ categories, setOpen }) => {
         setOpen(false);
     };
 
+    const toggleCategories = (e) => {
+        e.stopPropagation();
+        setOpenCategories(openCategories === "categories" ? "" : "categories");
+    };
+
+    const toggleSubcategory = (e, categorySlug) => {
+        e.stopPropagation();
+        setOpenSubcategories(prev => ({
+            ...prev,
+            [categorySlug]: !prev[categorySlug]
+        }));
+    };
+
     return (
-        <NavigationMenu className="w-full max-w-full justify-start">
-            <NavigationMenuList className="w-full flex flex-col items-start gap-6">
-                
+        <NavigationMenu className="w-full min-w-full justify-start">
+            <NavigationMenuList className="w-[280px] flex flex-col items-start gap-0">
+
                 {/* Home Link */}
-                <NavigationMenuItem onClick={() => handleLinkClick("/")}>
+                <NavigationMenuItem className="w-full border-b border-gray-200" onClick={() => handleLinkClick("/")}>
                     <NavigationMenuLink
                         asChild
-                        className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                        className="text-lg font-semibold hover:bg-gray-50 cursor-pointer transition-colors"
                     >
-                        {/* Prevent default navigation here since handleLinkClick does the navigation */}
-                        <Link href="/" onClick={(e) => e.preventDefault()}>Home</Link>
+                        <Link
+                            href="/"
+                            onClick={(e) => e.preventDefault()}
+                            className="block w-full py-3 px-6 rounded-sm"
+                        >
+                            Home
+                        </Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 {/* Categories Accordion */}
-                <Accordion
-                    type="single"
-                    collapsible
-                    className="w-full"
-                >
-                    <AccordionItem value="item-1" className="w-full border-b-0">
-                        
-                        {/* Categories Header Link */}
-                        <AccordionTrigger
-                            className="w-full text-base hover:underline hover:text-secondary cursor-pointer p-0 gap-10"
-                            // Use handleLinkClick to navigate and close the sheet
-                            onClick={() => handleLinkClick("/categories")} 
+                <div className="w-full border-b border-gray-200">
+                    <div className="flex items-center justify-between w-full py-3 px-6 hover:bg-gray-50 transition-colors rounded-sm">
+                        <Link
+                            href="/categories"
+                            className="text-lg font-semibold hover:text-secondary flex-1"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleLinkClick("/categories");
+                            }}
                         >
-                            <Link href="/categories" className="!no-underline text-lg !font-body font-semibold mt-1" onClick={(e) => e.preventDefault()}>
-                                Categories
-                            </Link>
-                        </AccordionTrigger>
-                        
-                        {/* Categories Content (Sub-links) */}
-                        <AccordionContent className="w-full pl-4 space-y-2 mt-4">
+                            Categories
+                        </Link>
+                        <button
+                            onClick={toggleCategories}
+                            className="p-1.5 hover:bg-gray-200 rounded-md transition-all ml-2"
+                            aria-label="Toggle categories"
+                        >
+                            <ChevronDown
+                                className={`size-5 transition-transform duration-200 ${openCategories === "categories" ? "rotate-180" : ""
+                                    }`}
+                            />
+                        </button>
+                    </div>
+
+                    {/* Categories Content (Sub-links with subcategories) */}
+                    {openCategories === "categories" && (
+                        <div className="w-full bg-gray-50/50 border-t border-gray-200">
                             {categories.map((cat, index) => (
-                                <NavigationMenuItem key={index} className="w-full list-none">
-                                    <NavigationMenuLink
-                                        asChild
-                                        className="text-base font-medium hover:underline hover:text-secondary cursor-pointer p-0"
-                                        onClick={() => handleLinkClick(`/categories/${cat.slug}`)} // Navigate and close
-                                    >
-                                        <Link href={`/categories/${cat.slug}`} onClick={(e) => e.preventDefault()}>
-                                            {cat.name}
-                                        </Link>
-                                    </NavigationMenuLink>
-                                </NavigationMenuItem>
+                                <div
+                                    key={index}
+                                    className={`w-full ${index !== categories.length - 1 ? 'border-b border-gray-200' : ''}`}
+                                >
+                                    {/* Category with subcategories - use accordion pattern */}
+                                    {cat.subCategories && cat.subCategories.length > 0 ? (
+                                        <div className="w-full">
+                                            <div className="flex items-center justify-between w-full py-2.5 px-6 hover:bg-gray-100 transition-colors">
+                                                <Link
+                                                    href={`/categories/${cat.slug}`}
+                                                    className="text-base font-medium hover:text-secondary flex-1"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleLinkClick(`/categories/${cat.slug}`);
+                                                    }}
+                                                >
+                                                    {cat.name}
+                                                </Link>
+                                                <button
+                                                    onClick={(e) => toggleSubcategory(e, cat.slug)}
+                                                    className="p-1.5 hover:bg-gray-200 rounded-md transition-all ml-2"
+                                                    aria-label={`Toggle ${cat.name} subcategories`}
+                                                >
+                                                    <ChevronDown
+                                                        className={`size-4 transition-transform duration-200 ${openSubcategories[cat.slug] ? "rotate-180" : ""
+                                                            }`}
+                                                    />
+                                                </button>
+                                            </div>
+
+                                            {/* Subcategories */}
+                                            {openSubcategories[cat.slug] && (
+                                                <div className="bg-white border-t border-gray-200">
+                                                    {cat.subCategories.map((subcat, subIndex) => (
+                                                        <NavigationMenuItem
+                                                            key={subIndex}
+                                                            className={`w-full list-none ${subIndex !== cat.subCategories.length - 1 ? 'border-b border-gray-100' : ''
+                                                                }`}
+                                                        >
+                                                            <NavigationMenuLink
+                                                                asChild
+                                                                className="text-sm font-normal hover:bg-gray-50 cursor-pointer transition-colors"
+                                                            >
+                                                                <Link
+                                                                    href={`/categories/${cat.slug}/${subcat.slug}`}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        handleLinkClick(`/categories/${cat.slug}/${subcat.slug}`);
+                                                                    }}
+                                                                    className="block w-full py-2 pl-12 pr-6"
+                                                                >
+                                                                    {subcat.name}
+                                                                </Link>
+                                                            </NavigationMenuLink>
+                                                        </NavigationMenuItem>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        /* Category without subcategories */
+                                        <NavigationMenuItem className="w-full list-none">
+                                            <NavigationMenuLink
+                                                asChild
+                                                className="text-base font-medium hover:bg-gray-100 cursor-pointer transition-colors"
+                                            >
+                                                <Link
+                                                    href={`/categories/${cat.slug}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleLinkClick(`/categories/${cat.slug}`);
+                                                    }}
+                                                    className="block w-full py-2.5 px-6"
+                                                >
+                                                    {cat.name}
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        </NavigationMenuItem>
+                                    )}
+                                </div>
                             ))}
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                        </div>
+                    )}
+                </div>
 
                 {/* Other Main Links */}
                 {[
@@ -90,12 +182,22 @@ const MobileNavLinks = ({ categories, setOpen }) => {
                     { href: "/blog", name: "Blog" },
                     { href: "/contact", name: "Contact" }
                 ].map((item, index) => (
-                    <NavigationMenuItem key={index} onClick={() => handleLinkClick(item.href)}>
+                    <NavigationMenuItem
+                        key={index}
+                        className="w-full border-b border-gray-200"
+                        onClick={() => handleLinkClick(item.href)}
+                    >
                         <NavigationMenuLink
                             asChild
-                            className="text-lg font-semibold hover:underline hover:text-secondary cursor-pointer p-0"
+                            className="text-lg font-semibold hover:bg-gray-50 cursor-pointer transition-colors"
                         >
-                            <Link href={item.href} onClick={(e) => e.preventDefault()}>{item.name}</Link>
+                            <Link
+                                href={item.href}
+                                onClick={(e) => e.preventDefault()}
+                                className="block w-full py-3 px-6 rounded-sm"
+                            >
+                                {item.name}
+                            </Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}

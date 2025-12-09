@@ -46,7 +46,7 @@ const MobileSheetWrapper = ({ isAuthenticated, user, categories }) => {
                 </SheetHeader>
 
                 {/* Pass categories data and the state setter (setOpen) to the links component */}
-                <div className="p-6 pt-3 w-full flex-grow overflow-y-auto">
+                <div className="py-3 w-[280px] flex-grow overflow-y-auto">
                     <MobileNavLinks categories={categories} setOpen={setOpen} />
                 </div>
 
