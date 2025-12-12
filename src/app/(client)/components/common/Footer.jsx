@@ -105,7 +105,7 @@ const Footer = () => {
 
   const socialLinks = [
     { href: "https://wa.me/971508806209?text=Hello%20I%20want%20to%20know%20more%20about%20your%20service", icon: <IconBrandWhatsapp />, label: "WhatsApp" },
-    { href: "#", icon: <IconPhone />, label: "Phone" },
+    { href: "tel:+971508806209", icon: <IconPhone />, label: "Phone" },
     { href: "https://www.facebook.com/share/1JqhwFJQE4/?mibextid=wwXIfr", icon: <IconBrandFacebook />, label: "Facebook" },
     { href: "https://www.instagram.com/karyaa_uae?igsh=MWtrcTB6M2l4dm5uaw%3D%3D&utm_source=qr", icon: <IconBrandInstagram />, label: "Instagram" },
     { href: "https://www.tiktok.com/@karyaa_uae?_t=ZS-8yEf86IaZma&_r=1", icon: <IconBrandTiktok />, label: "TikTok" },

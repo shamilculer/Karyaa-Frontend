@@ -147,7 +147,7 @@ const PermissionsSelector = ({ adminLevel, control, setValue, getValues }) => {
             {isSuperAdmin ? (
                 <Badge className="bg-blue-500 text-white p-2">Admin has full, unrestricted access.</Badge>
             ) : (
-                <ScrollArea className="h-[150px] w-full pr-4">
+                <ScrollArea className="h-[180px] w-full pr-4">
                     <div className="grid grid-cols-2 gap-3">
                         {Object.keys(defaultPermissions).map(key => (
                             <Controller

@@ -238,6 +238,7 @@ export default function Step02_BusinessInfo() {
                                     allowedMimeType={["image/jpeg", "image/png"]}
                                     folderPath={FOLDER_PATH}
                                     isPublic={true}
+                                    aspectRatio={1}
                                 />
                             </FormControl>
                             <FormMessage />

@@ -48,7 +48,7 @@ import { toast } from "sonner";
 
 export default function AddBannerPage() {
   const router = useRouter();
-  const [isVendorSpecific, setIsVendorSpecific] = useState(true);
+  const [isVendorSpecific, setIsVendorSpecific] = useState(false);
   const [placementOptions, setPlacementOptions] = useState([
     { label: "Hero Section", value: "Hero Section" },
     { label: "Homepage Carousel", value: "Homepage Carousel" },
@@ -64,7 +64,7 @@ export default function AddBannerPage() {
       placement: ["Homepage Carousel"],
       vendor: "",
       customUrl: "",
-      isVendorSpecific: true,
+      isVendorSpecific: false,
       status: "Active",
       title: "",
       tagline: "",
@@ -117,17 +117,43 @@ export default function AddBannerPage() {
     }
   }, [hasPageTitlePlacement, setValue]);
 
-  const getIdealSizeText = (currentPlacement) => {
-    if (!currentPlacement || currentPlacement.length === 0) return "Recommended: 1920x400px";
+  const getAspectRatio = (currentPlacement) => {
+    if (!currentPlacement || currentPlacement.length === 0) return 4 / 1; // Default to Page Title ratio
 
     if (currentPlacement.some(p => p.includes("Hero Section"))) {
-      return "Recommended: 1920x1080px (Desktop), 1080x1920px (Mobile)";
+      return undefined;
     }
     if (currentPlacement.some(p => p.includes("Homepage Carousel"))) {
-      return "Recommended: 1300x500px (Standard)";
+      return 3 / 1;
+    }
+    // Page Titles
+    return 4 / 1;
+  };
+
+  const getMobileAspectRatio = (currentPlacement) => {
+    if (!currentPlacement || currentPlacement.length === 0) return 3 / 1;
+
+    if (currentPlacement.some(p => p.includes("Hero Section"))) {
+      return 9 / 16;
+    }
+    if (currentPlacement.some(p => p.includes("Homepage Carousel"))) {
+      return 16 / 9;
+    }
+    // Page Titles
+    return 3 / 1;
+  };
+
+  const getIdealSizeText = (currentPlacement) => {
+    if (!currentPlacement || currentPlacement.length === 0) return "Recommended: 1920x400px (4:1)";
+
+    if (currentPlacement.some(p => p.includes("Hero Section"))) {
+      return "Recommended: 1024x420px";
+    }
+    if (currentPlacement.some(p => p.includes("Homepage Carousel"))) {
+      return "Recommended: 1300x500px (3:1)";
     }
     // For Page Titles (Contact, Ideas, Gallery, etc.)
-    return "Recommended: 1920x400px (Desktop), 800x260px (Mobile). Content centered.";
+    return "Recommended: 1920x400px (4:1)";
   };
 
   useEffect(() => {
@@ -334,6 +360,7 @@ export default function AddBannerPage() {
                       folderPath="ad-banners"
                       errors={errors}
                       role="admin"
+                      aspectRatio={getAspectRatio(watch("placement"))}
                     />
                   </div>
                   <p className="text-xs text-gray-500 flex items-center gap-2">
@@ -596,6 +623,7 @@ export default function AddBannerPage() {
                       folderPath="ad-banners/mobile"
                       errors={errors}
                       role="admin"
+                      aspectRatio={getMobileAspectRatio(watch("placement"))}
                     />
                   </div>
                   <p className="text-xs text-gray-500">

@@ -47,7 +47,7 @@ const renderInputField = (form, name, label, placeholder, type = "text") => (
     />
 );
 
-export default function Step01_BasicInfo() {
+export default function Step01_BasicInfo({ customHeading, customTagline }) {
     const { formData, updateFields, nextStep } = useVendorFormStore();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -107,9 +107,23 @@ export default function Step01_BasicInfo() {
     return (
         <>
             <div className='mb-8 space-y-5'>
-                <h1 className="text-primary !capitalize leading-[1.2em]">Welcome to the UAE's premier events vendor platform.</h1>
-                <p>Whether you offer catering, photography, décor, entertainment, or any other event service – this is where your business gets discovered!</p>
-                <p>Our simple, 3-step registration ensures only verified and trusted vendors join our network.</p>
+                {customHeading ? (
+                    <>
+                        <h1 className="text-primary !capitalize leading-[1.2em]">{customHeading}</h1>
+                        {customTagline && (
+                            <div
+                                className="prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: customTagline }}
+                            />
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <h1 className="text-primary !capitalize leading-[1.2em]">Welcome to the UAE's premier events vendor platform.</h1>
+                        <p>Whether you offer catering, photography, décor, entertainment, or any other event service – this is where your business gets discovered!</p>
+                        <p>Our simple, 3-step registration ensures only verified and trusted vendors join our network.</p>
+                    </>
+                )}
             </div>
 
             <Form {...form}>

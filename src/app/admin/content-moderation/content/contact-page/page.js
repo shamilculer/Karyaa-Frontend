@@ -11,17 +11,28 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getContentByKeyAction, upsertContentAction } from "@/app/actions/admin/pages";
 import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
+import { useForm, Controller } from "react-hook-form";
 
 const ContactPageEditor = () => {
     const router = useRouter();
-    const [content, setContent] = useState({
-        bannerHeading: "",
-        bannerTagline: "",
-        contentHeading: "",
-        contentDescription: "",
-        primaryPhone: "",
-        mainEmail: "",
-        location: ""
+    const {
+        control,
+        watch,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            bannerHeading: "",
+            bannerTagline: "",
+            bannerImage: "",
+            contentHeading: "",
+            contentDescription: "",
+            primaryPhone: "",
+            mainEmail: "",
+            location: ""
+        },
     });
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -40,15 +51,14 @@ const ContactPageEditor = () => {
                     ? JSON.parse(result.data.content)
                     : result.data.content;
 
-                setContent({
-                    bannerHeading: parsedContent.bannerHeading || "",
-                    bannerTagline: parsedContent.bannerTagline || "",
-                    contentHeading: parsedContent.contentHeading || "",
-                    contentDescription: parsedContent.contentDescription || "",
-                    primaryPhone: parsedContent.primaryPhone || "",
-                    mainEmail: parsedContent.mainEmail || "",
-                    location: parsedContent.location || ""
-                });
+                setValue("bannerHeading", parsedContent.bannerHeading || "");
+                setValue("bannerTagline", parsedContent.bannerTagline || "");
+                setValue("bannerImage", parsedContent.bannerImage || "");
+                setValue("contentHeading", parsedContent.contentHeading || "");
+                setValue("contentDescription", parsedContent.contentDescription || "");
+                setValue("primaryPhone", parsedContent.primaryPhone || "");
+                setValue("mainEmail", parsedContent.mainEmail || "");
+                setValue("location", parsedContent.location || "");
             }
         } catch (error) {
             console.error("Error loading content:", error);
@@ -58,19 +68,14 @@ const ContactPageEditor = () => {
         }
     };
 
-    const handleFieldChange = (fieldName, value) => {
-        setContent(prev => ({
-            ...prev,
-            [fieldName]: value
-        }));
-    };
 
-    const handleSave = async () => {
+
+    const onSubmit = async (data) => {
         setSaving(true);
         try {
             const result = await upsertContentAction("contact-page", {
                 type: "section",
-                content: JSON.stringify(content)
+                content: JSON.stringify(data)
             });
 
             if (result.success) {
@@ -115,7 +120,7 @@ const ContactPageEditor = () => {
                                 <Eye className="h-4 w-4 mr-2" />
                                 Preview
                             </Button>
-                            <Button onClick={handleSave} disabled={saving}>
+                            <Button type="submit" form="contact-page-form" disabled={saving}>
                                 {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                                 {saving ? "Saving..." : "Save Changes"}
                             </Button>
@@ -129,7 +134,7 @@ const ContactPageEditor = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <div className="pt-10 max-w-4xl mx-auto">
+                <form id="contact-page-form" onSubmit={handleSubmit(onSubmit)} className="pt-10 max-w-4xl mx-auto">
                     <div className="space-y-6">
                         {/* Banner Section */}
                         <Card>
@@ -142,26 +147,50 @@ const ContactPageEditor = () => {
                             <CardContent className="space-y-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="bannerHeading">Banner Heading</Label>
-                                    <Input
-                                        id="bannerHeading"
-                                        type="text"
-                                        value={content.bannerHeading}
-                                        onChange={(e) => handleFieldChange("bannerHeading", e.target.value)}
-                                        placeholder="Contact Us"
+                                    <Controller
+                                        name="bannerHeading"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                id="bannerHeading"
+                                                type="text"
+                                                placeholder="Contact Us"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Main heading displayed in the banner</p>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="bannerTagline">Banner Tagline</Label>
-                                    <Textarea
-                                        id="bannerTagline"
-                                        value={content.bannerTagline}
-                                        onChange={(e) => handleFieldChange("bannerTagline", e.target.value)}
-                                        placeholder="Have a question, need support, or want to partner with us? Let's talk."
-                                        className="h-20 resize-none"
+                                    <Controller
+                                        name="bannerTagline"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Textarea
+                                                {...field}
+                                                id="bannerTagline"
+                                                placeholder="Have a question, need support, or want to partner with us? Let's talk."
+                                                className="h-20 resize-none"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Subtitle or description displayed below the heading</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Banner Image</Label>
+                                    <ControlledFileUpload
+                                        control={control}
+                                        name="bannerImage"
+                                        label="Upload Banner Image"
+                                        errors={errors}
+                                        allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                                        folderPath="pages/contact"
+                                        role="admin"
+                                    />
+                                    <p className="!text-xs text-gray-600">Banner background image (recommended: 1920x1080)</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -177,22 +206,33 @@ const ContactPageEditor = () => {
                             <CardContent className="space-y-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="contentHeading">Content Heading</Label>
-                                    <Textarea
-                                        id="contentHeading"
-                                        value={content.contentHeading}
-                                        onChange={(e) => handleFieldChange("contentHeading", e.target.value)}
-                                        placeholder="Contact Us Today for Personalized Support and Assistance"
-                                        className="h-16 resize-none"
+                                    <Controller
+                                        name="contentHeading"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Textarea
+                                                {...field}
+                                                id="contentHeading"
+                                                placeholder="Contact Us Today for Personalized Support and Assistance"
+                                                className="h-16 resize-none"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Main heading in the content section (press Enter for new lines)</p>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="contentDescription">Content Description</Label>
-                                    <SimpleTiptapEditor
-                                        value={content.contentDescription}
-                                        onChange={(val) => handleFieldChange("contentDescription", val)}
-                                        placeholder="Lorem ipsum dolor sit amet consectetur. Convallis est urna adipiscin fringilla nulla diam lorem non mauris."
+                                    <Controller
+                                        name="contentDescription"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <SimpleTiptapEditor
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                placeholder="Lorem ipsum dolor sit amet consectetur. Convallis est urna adipiscin fringilla nulla diam lorem non mauris."
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Description text displayed below the heading</p>
                                 </div>
@@ -210,36 +250,51 @@ const ContactPageEditor = () => {
                             <CardContent className="space-y-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="primaryPhone">Phone Number</Label>
-                                    <Input
-                                        id="primaryPhone"
-                                        type="text"
-                                        value={content.primaryPhone}
-                                        onChange={(e) => handleFieldChange("primaryPhone", e.target.value)}
-                                        placeholder="+971 XX XXX XXXX"
+                                    <Controller
+                                        name="primaryPhone"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                id="primaryPhone"
+                                                type="text"
+                                                placeholder="+971 XX XXX XXXX"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Primary contact phone number</p>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="mainEmail">Email Address</Label>
-                                    <Input
-                                        id="mainEmail"
-                                        type="email"
-                                        value={content.mainEmail}
-                                        onChange={(e) => handleFieldChange("mainEmail", e.target.value)}
-                                        placeholder="contact@example.com"
+                                    <Controller
+                                        name="mainEmail"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                id="mainEmail"
+                                                type="email"
+                                                placeholder="contact@example.com"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Primary contact email address</p>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="location">Location/Address</Label>
-                                    <Textarea
-                                        id="location"
-                                        value={content.location}
-                                        onChange={(e) => handleFieldChange("location", e.target.value)}
-                                        placeholder="123 Business Street, Dubai, UAE"
-                                        className="h-24 resize-none"
+                                    <Controller
+                                        name="location"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Textarea
+                                                {...field}
+                                                id="location"
+                                                placeholder="123 Business Street, Dubai, UAE"
+                                                className="h-24 resize-none"
+                                            />
+                                        )}
                                     />
                                     <p className="!text-xs text-gray-600">Physical address or location</p>
                                 </div>
@@ -248,13 +303,13 @@ const ContactPageEditor = () => {
 
                         {/* Save Button at Bottom */}
                         <div className="flex justify-end pb-10">
-                            <Button onClick={handleSave} disabled={saving} size="lg">
+                            <Button type="submit" disabled={saving} size="lg">
                                 {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                                 {saving ? "Saving..." : "Save All Changes"}
                             </Button>
                         </div>
                     </div>
-                </div>
+                </form>
             )}
         </div>
     );

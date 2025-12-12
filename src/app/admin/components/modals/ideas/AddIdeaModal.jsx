@@ -76,8 +76,17 @@ export default function AddIdeaModal({ open, onOpenChange, categories = [], onSu
 
   // ✅ Handle image uploads
   const handleImageUpload = (urls) => {
+    // Ensure we handle both single and array of URLs
     const newUrls = Array.isArray(urls) ? urls : [urls];
-    const updated = [...imageList, ...newUrls];
+
+    // Filter out any null/undefined values just in case
+    const validUrls = newUrls.filter(url => url);
+
+    console.log('[AddIdeaModal] Received uploaded URLs:', validUrls.length, validUrls);
+
+    if (validUrls.length === 0) return;
+
+    const updated = [...imageList, ...validUrls];
     setImageList(updated);
     setValue("images", updated);
     setValue("upload", []);

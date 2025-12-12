@@ -56,7 +56,7 @@ const VendorSupportPage = () => {
             {faqs.map((faq, idx) => (
               <AccordionItem key={idx} value={`item-${idx + 1}`} className="border-b border-gray-300">
                 <AccordionTrigger className="max-md:!text-lg">{faq.question}</AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 text-balance">
+                <AccordionContent className="flex flex-col gap-4">
                   <p>{faq.answer}</p>
                 </AccordionContent>
               </AccordionItem>

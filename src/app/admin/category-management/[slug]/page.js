@@ -202,6 +202,7 @@ const SingleCategoryManage = () => {
                       "image/jpg",
                     ]}
                     folderPath="categories"
+                    role="admin"
                   />
                 )}
               </div>

@@ -492,14 +492,6 @@ const EditProfilePage = () => {
                       <FormItem>
                         <FormLabel className="text-xs font-medium">Owner Profile Image</FormLabel>
                         <div className="space-y-4">
-                          {ownerProfileImage && (
-                            <ImagePreview
-                              src={ownerProfileImage}
-                              alt="Owner Profile"
-                              label="Current Profile Image"
-                              onRemove={() => field.onChange('')}
-                            />
-                          )}
                           <FormControl>
                             <ControlledFileUpload
                               control={form.control}
@@ -509,6 +501,7 @@ const EditProfilePage = () => {
                               allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                               folderPath="vendors/profiles"
                               role="vendor"
+                              aspectRatio={1}
                             />
                           </FormControl>
                         </div>
@@ -524,14 +517,6 @@ const EditProfilePage = () => {
                       <FormItem>
                         <FormLabel className="text-xs font-medium">Business Logo</FormLabel>
                         <div className="space-y-4">
-                          {businessLogo && (
-                            <ImagePreview
-                              src={businessLogo}
-                              alt="Business Logo"
-                              label="Current Logo"
-                              onRemove={() => field.onChange('')}
-                            />
-                          )}
                           <FormControl>
                             <ControlledFileUpload
                               control={form.control}
@@ -541,6 +526,7 @@ const EditProfilePage = () => {
                               allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                               folderPath="vendors/logos"
                               role="vendor"
+                              aspectRatio={1}
                             />
                           </FormControl>
                         </div>

@@ -34,6 +34,12 @@ const CMS = () => {
       description: "Banner and content sections",
       type: "section",
     },
+    "auth-pages": {
+      name: "Auth Pages",
+      icon: FileText,
+      description: "Login and registration pages",
+      type: "section",
+    },
     "privacy-policy": {
       name: "Privacy Policy",
       icon: FileText,
@@ -52,17 +58,17 @@ const CMS = () => {
       description: "Terms of service",
       type: "page",
     },
-    "faq-vendor": {
-      name: "FAQ - Vendors",
+    "faq-page": {
+      name: "FAQ Page",
       icon: FileText,
-      description: "Vendor frequently asked questions",
+      description: "Customer and vendor FAQs with page title",
       type: "faq",
     },
-    "faq-customer": {
-      name: "FAQ - Customers",
+    "refer-modal": {
+      name: "Refer & Earn Modal",
       icon: FileText,
-      description: "Customer frequently asked questions",
-      type: "faq",
+      description: "Refer modal content and background image",
+      type: "setting",
     },
   };
 
@@ -86,28 +92,29 @@ const CMS = () => {
     }
   };
 
-  // Get edit URL based on page type
   const getEditUrl = (page) => {
     if (page.key === "landing-page") {
       return `/admin/content-moderation/content/landing-page`;
     } else if (page.key === "contact-page") {
       return `/admin/content-moderation/content/contact-page`;
+    } else if (page.key === "auth-pages") {
+      return `/admin/content-moderation/content/auth-pages`;
+    } else if (page.key === "faq-page") {
+      return `/admin/content-moderation/content/faq`;
+    } else if (page.key === "refer-modal") {
+      return `/admin/content-moderation/content/refer-modal`;
     } else if (page.type === "page") {
       return `/admin/content-moderation/content/${page.key}`;
-    } else if (page.type === "faq") {
-      return `/admin/content-moderation/content/faq/${page.key}`;
     }
     return `/admin/content-moderation/content/edit/${page.key}`;
   };
 
-  // Get preview URL
   const getPreviewUrl = (page) => {
     const previewUrls = {
       "privacy-policy": "/privacy-policy",
       "cookie-policy": "/cookie-policy",
       "terms-and-conditions": "/terms-and-conditions",
-      "faq-vendor": "/faq",
-      "faq-customer": "/faq",
+      "faq-page": "/faq",
       "landing-page": "/",
       "contact-page": "/contact",
     };

@@ -1,9 +1,8 @@
-import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, Trash2, CheckSquare, XSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addVendorGalleryItemsAction } from "@/app/actions/admin/vendors";
-import { useS3Upload } from "@/hooks/useS3Upload";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 export default function GalleryToolbar({
     vendorId,
@@ -14,83 +13,7 @@ export default function GalleryToolbar({
     onDeleteSelected,
     clearSelection,
 }) {
-    const fileInputRef = useRef(null);
-    const { uploadFile, uploading } = useS3Upload();
-    const [localUploading, setLocalUploading] = useState(false);
 
-    const handleFileSelect = async (e) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        if (!vendorId) {
-            toast.error("Vendor ID missing — refresh and try again.");
-            return;
-        }
-
-        setLocalUploading(true);
-        const loadingToast = toast.loading("Uploading images...");
-
-        try {
-            const uploadedUrls = [];
-
-            // Upload files to S3
-            for (const file of files) {
-                // Validate type
-                if (!file.type.startsWith('image/')) {
-                    toast.error(`Skipping invalid file: ${file.name}`);
-                    continue;
-                }
-
-                try {
-                    const result = await uploadFile(file, {
-                        folder: `vendors/${vendorId}/gallery`,
-                        role: "admin"
-                    });
-
-                    if (result?.url) {
-                        uploadedUrls.push(result.url);
-                    }
-                } catch (err) {
-                    console.error(`Failed to upload ${file.name}:`, err);
-                    toast.error(`Failed to upload ${file.name}`);
-                }
-            }
-
-            if (uploadedUrls.length === 0) {
-                toast.dismiss(loadingToast);
-                setLocalUploading(false);
-                return;
-            }
-
-            // Save to database
-            toast.loading("Saving to gallery...", { id: loadingToast });
-
-            const payload = uploadedUrls.map((url) => ({
-                url,
-                type: "image",
-            }));
-
-            const res = await addVendorGalleryItemsAction(vendorId, payload);
-
-            toast.dismiss(loadingToast);
-
-            if (!res.success) {
-                toast.error(res.message || "Failed to save gallery items");
-            } else {
-                toast.success(`${payload.length} image(s) added!`);
-                onUploadComplete?.();
-            }
-        } catch (err) {
-            console.error("Gallery upload error:", err);
-            toast.dismiss(loadingToast);
-            toast.error("Failed to save gallery items");
-        } finally {
-            setLocalUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        }
-    };
 
     if (!vendorId) {
         return (
@@ -142,29 +65,53 @@ export default function GalleryToolbar({
 
             {/* RIGHT SECTION - UPLOAD */}
             <div>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileSelect}
-                    disabled={localUploading || uploading}
-                />
-                <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={localUploading || uploading}
-                >
-                    {localUploading || uploading ? (
-                        <>
-                            <Loader2 className="w-5 mr-2 animate-spin" /> Uploading...
-                        </>
-                    ) : (
-                        <>
-                            <Upload className="w-5 mr-2" /> Upload Images
-                        </>
+                <ControlledFileUpload
+                    value={[]}
+                    onChange={async (urls) => {
+                        if (!urls || urls.length === 0) return;
+                        if (!urls || urls.length === 0) return;
+
+                        const loadingToast = toast.loading(`Saving ${urls.length} image(s) to gallery...`);
+                        try {
+                            // Map all URLs to payload items
+                            const payload = urls.map(url => ({ url, type: "image" }));
+                            const res = await addVendorGalleryItemsAction(vendorId, payload);
+
+                            if (!res.success) {
+                                toast.error(res.message || "Failed to save gallery item");
+                            } else {
+                                toast.success("Image added to gallery");
+                                onUploadComplete?.();
+                            }
+                        } catch (err) {
+                            console.error("Gallery save error:", err);
+                            toast.error("Failed to save gallery item");
+                        } finally {
+                            toast.dismiss(loadingToast);
+                        }
+                    }}
+                    folderPath={`vendors/${vendorId}/gallery`}
+                    allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                    role="admin"
+                    enableCrop={true}
+                    multiple={true}
+                    customTrigger={({ onClick, disabled, uploading }) => (
+                        <Button
+                            onClick={onClick}
+                            disabled={disabled || uploading}
+                        >
+                            {(disabled || uploading) ? (
+                                <>
+                                    <Loader2 className="w-5 mr-2 animate-spin" /> Uploading...
+                                </>
+                            ) : (
+                                <>
+                                    <Upload className="w-5 mr-2" /> Upload Images
+                                </>
+                            )}
+                        </Button>
                     )}
-                </Button>
+                />
             </div>
         </div>
     );

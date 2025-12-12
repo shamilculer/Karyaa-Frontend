@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
       images: blogPost.coverImage ? [blogPost.coverImage] : [],
       type: 'article',
       publishedTime: blogPost.publishedAt || blogPost.createdAt,
-      authors: [blogPost.author?.username || 'Admin'],
+      authors: [blogPost.author?.fullName || blogPost.author?.username || 'Admin'],
     },
     twitter: {
       card: 'summary_large_image',
@@ -71,7 +71,7 @@ const BlogPostPage = async ({ params }) => {
   // 🧩 Handle author name safely
   const authorName =
     typeof blogPost.author === "object" && blogPost.author !== null
-      ? blogPost.author.username
+      ? (blogPost.author.fullName || blogPost.author.username)
       : blogPost.author;
 
   // 🗓️ Format publish date

@@ -10,15 +10,19 @@ let s3Client = null;
 
 function getS3Client() {
     if (!s3Client) {
-        if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY || !process.env.AWS_SECRET_ACCESS_KEY) {
+        const accessKeyId = process.env.AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY;
+        const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION;
+
+        if (!region || !accessKeyId || !secretAccessKey) {
             throw new Error("AWS credentials are not fully configured in environment variables.");
         }
 
         s3Client = new S3Client({
-            region: process.env.AWS_REGION,
+            region: region,
             credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey,
             },
         });
     }

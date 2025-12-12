@@ -49,11 +49,11 @@ export default function AdBanner({ vendorAds }) {
                   preload="metadata"
                   className={cn(
                     "w-full object-cover transition-transform duration-1000",
-                    isStandard ? "h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]" : "h-auto min-h-[200px]"
+                    isStandard ? "h-auto md:h-[500px]" : "h-auto min-h-auto"
                   )}
                 />
               ) : (
-                <div className={cn("relative w-full overflow-hidden", isStandard ? "h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]" : "h-auto")}>
+                <div className={cn("relative w-full overflow-hidden", isStandard ? "h-auto md:h-[500px]" : "h-auto")}>
                   <Image
                     src={ad.imageUrl}
                     alt={ad.name ?? "Vendor Advertisement"}

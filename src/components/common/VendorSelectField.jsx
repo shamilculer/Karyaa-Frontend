@@ -218,7 +218,7 @@ export const VendorSelectField = ({
                                     <div className="flex flex-col">
                                         <span className="font-medium">{option.businessName}</span>
                                         <span className="text-xs text-gray-500">
-                                            {valueKey === "slug" ? option.slug : option._id}
+                                            {option.referenceId || (valueKey === "slug" ? option.slug : option._id)}
                                         </span>
                                     </div>
                                 </CommandItem>

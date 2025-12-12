@@ -100,8 +100,17 @@ export default function EditIdeaModal({ open, onOpenChange, categories = [], ide
 
     // ✅ Handle image uploads (reused)
     const handleImageUpload = (urls) => {
+        // Ensure we handle both single and array of URLs
         const newUrls = Array.isArray(urls) ? urls : [urls];
-        const updated = [...imageList, ...newUrls];
+
+        // Filter out any null/undefined values
+        const validUrls = newUrls.filter(url => url);
+
+        console.log('[EditIdeaModal] Received uploaded URLs:', validUrls.length, validUrls);
+
+        if (validUrls.length === 0) return;
+
+        const updated = [...imageList, ...validUrls];
         setImageList(updated);
         setValue("images", updated);
         setValue("upload_new", []); // Reset upload field

@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 const FaqPage = async () => {
-  const result = await getBulkContentAction(["faq-customer", "faq-vendor"]);
+  const result = await getBulkContentAction(["faq-customer", "faq-vendor", "faq-page-title"]);
 
   const customerFaqs =
     result.success
@@ -25,10 +25,23 @@ const FaqPage = async () => {
     result.success
       ? result.data.find((item) => item.key === "faq-vendor")?.content || []
       : [];
+  const pageTitle =
+    result.success
+      ? result.data.find((item) => item.key === "faq-page-title")?.content
+      : null;
+
+  // Use custom page title if available, otherwise use defaults
+  const heading = pageTitle?.heading || "FAQ";
+  const tagline = pageTitle?.tagline || "Everything You Need to Know";
+  const bannerImage = pageTitle?.bannerImage;
 
   return (
     <div className="min-h-screen">
-      <PageTitle title="FAQ" tagline="Everything You Need to Know" />
+      <PageTitle
+        title={heading}
+        tagline={tagline}
+        {...(bannerImage && { imgUrl: bannerImage })}
+      />
 
       {/* Customer FAQs */}
       {customerFaqs.length > 0 && (
@@ -49,8 +62,11 @@ const FaqPage = async () => {
                   <AccordionTrigger className="max-md:!text-lg">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4 text-balance">
-                    <p>{faq.answer}</p>
+                  <AccordionContent className="flex flex-col gap-4">
+                    <div
+                      className="prose max-w-none"
+                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                    />
                   </AccordionContent>
                 </AccordionItem>
               ))}
@@ -78,8 +94,11 @@ const FaqPage = async () => {
                   <AccordionTrigger className="max-md:!text-lg">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4 text-balance">
-                    <p>{faq.answer}</p>
+                  <AccordionContent className="flex flex-col gap-4">
+                    <div
+                      className="prose max-w-none"
+                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                    />
                   </AccordionContent>
                 </AccordionItem>
               ))}

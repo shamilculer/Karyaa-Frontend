@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Save, Loader2, Eye, ImageIcon, Type, List, X, Upload } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Eye, X, ImageIcon, Type, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useS3Upload } from "@/hooks/useS3Upload";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getContentByKeyAction, upsertContentAction, saveLandingPageAction } from "@/app/actions/admin/pages";
 import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 const sections = [
   {
@@ -79,152 +79,7 @@ const sections = [
   }
 ];
 
-const ImageUploadField = ({ value, onChange, maxImages = 1, label, sectionKey, fieldName }) => {
-  const images = Array.isArray(value) ? value : (value ? [value] : []);
-  const isMultiple = maxImages > 1;
-  const { uploadFile, uploading } = useS3Upload();
-  const [localUploading, setLocalUploading] = useState(false);
-  const fileInputRef = React.useRef(null);
 
-  const removeImage = (index) => {
-    if (isMultiple) {
-      onChange(images.filter((_, i) => i !== index));
-    } else {
-      onChange("");
-    }
-  };
-
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    setLocalUploading(true);
-    const uploadedUrls = [];
-
-    try {
-      for (const file of files) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          toast.error(`Skipping invalid file: ${file.name}`);
-          continue;
-        }
-
-        // Validate file size
-        const maxSize = sectionKey === 'testimonial' ? 2097152 : 10485760; // 2MB for testimonials, 10MB for others
-        if (file.size > maxSize) {
-          toast.error(`${file.name} is too large. Max size is ${maxSize / (1024 * 1024)}MB`);
-          continue;
-        }
-
-        try {
-          const result = await uploadFile(file, {
-            role: 'admin',
-            folder: `admin/landing-page/${sectionKey}`,
-            isPublic: false
-          });
-
-          if (result?.url) {
-            uploadedUrls.push(result.url);
-          }
-        } catch (err) {
-          console.error(`Failed to upload ${file.name}:`, err);
-          toast.error(`Failed to upload ${file.name}`);
-        }
-      }
-
-      if (uploadedUrls.length > 0) {
-        if (isMultiple) {
-          const newImages = [...images, ...uploadedUrls].slice(0, maxImages);
-          onChange(newImages);
-          toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
-        } else {
-          onChange(uploadedUrls[0]);
-          toast.success("Image uploaded successfully!");
-        }
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-      toast.error("Failed to upload images");
-    } finally {
-      setLocalUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <Label>{label}</Label>
-
-      {/* Image Preview Grid */}
-      {images.length > 0 && (
-        <div className={`grid ${isMultiple ? 'grid-cols-5' : 'grid-cols-1'} gap-3`}>
-          {images.map((img, idx) => (
-            <div key={idx} className="relative group aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
-              <Image
-                src={img}
-                alt={`Upload ${idx + 1}`}
-                className="w-full h-full object-cover"
-                width={200}
-                height={200}
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  type="button"
-                  onClick={() => removeImage(idx)}
-                  className="h-8 w-8"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Upload Button */}
-      {(!isMultiple || images.length < maxImages) && (
-        <>
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*"
-            multiple={isMultiple}
-            onChange={handleFileSelect}
-            disabled={localUploading || uploading}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={localUploading || uploading}
-            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition duration-150 flex items-center justify-center gap-2"
-          >
-            {localUploading || uploading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Uploading...</span>
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4" />
-                <span>
-                  {isMultiple
-                    ? `Upload Images (${images.length}/${maxImages})`
-                    : "Upload Image"
-                  }
-                </span>
-              </>
-            )}
-          </button>
-        </>
-      )}
-    </div>
-  );
-};
 
 const TestimonialListField = ({ value, onChange }) => {
   const testimonials = Array.isArray(value) ? value : [];
@@ -302,12 +157,18 @@ const TestimonialListField = ({ value, onChange }) => {
 
             {/* Testimonial text */}
             <div className="space-y-2">
-              <Label htmlFor={`testimonial-text-${idx}`}>Testimonial Text</Label>
+              <div className="flex justify-between">
+                <Label htmlFor={`testimonial-text-${idx}`}>Testimonial Text</Label>
+                <span className={`text-xs ${testimonial.text.length >= 300 ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
+                  {testimonial.text.length}/300 characters
+                </span>
+              </div>
               <Textarea
                 id={`testimonial-text-${idx}`}
                 placeholder="Testimonial text..."
                 value={testimonial.text}
                 onChange={(e) => updateTestimonial(idx, "text", e.target.value)}
+                maxLength={300}
                 className="h-20 resize-none"
               />
             </div>
@@ -340,12 +201,14 @@ const TestimonialListField = ({ value, onChange }) => {
                   </div>
                 </div>
               ) : (
-                <ImageUploadField
+                <ControlledFileUpload
                   value={testimonial.image}
                   onChange={(val) => updateTestimonial(idx, "image", val)}
-                  label=""
-                  sectionKey="testimonial"
-                  fieldName={`image_${idx}`}
+                  label="Upload Customer Photo"
+                  folderPath="admin/landing-page/testimonials"
+                  allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
+                  role="admin"
+                  enableCrop={true}
                 />
               )}
             </div>
@@ -493,24 +356,26 @@ const LandingPageEditor = () => {
 
       case "image":
         return (
-          <ImageUploadField
+          <ControlledFileUpload
             value={value}
             onChange={(val) => handleFieldChange(section.key, field.name, val)}
             label={field.label}
-            sectionKey={section.key}
-            fieldName={field.name}
+            folderPath={`admin/landing-page/${section.key}`}
+            allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
+            role="admin"
           />
         );
 
       case "images":
         return (
-          <ImageUploadField
+          <ControlledFileUpload
             value={value}
             onChange={(val) => handleFieldChange(section.key, field.name, val)}
-            maxImages={field.maxImages || 5}
             label={field.label}
-            sectionKey={section.key}
-            fieldName={field.name}
+            folderPath={`admin/landing-page/${section.key}`}
+            allowedMimeType={['image/jpeg', 'image/png', 'image/webp']}
+            multiple={true}
+            role="admin"
           />
         );
 

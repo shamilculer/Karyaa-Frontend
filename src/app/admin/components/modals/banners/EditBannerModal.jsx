@@ -55,7 +55,7 @@ export default function EditBannerModal({
     banner,
     onSuccess
 }) {
-    const [isVendorSpecific, setIsVendorSpecific] = useState(banner?.isVendorSpecific ?? true);
+    const [isVendorSpecific, setIsVendorSpecific] = useState(banner?.isVendorSpecific ?? false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [placementOptions, setPlacementOptions] = useState([
         { label: "Hero Section", value: "Hero Section" },
@@ -72,7 +72,7 @@ export default function EditBannerModal({
             placement: banner?.placement || ["Homepage Carousel"],
             vendor: banner?.vendor?._id || banner?.vendor || "",
             customUrl: banner?.customUrl || "",
-            isVendorSpecific: banner?.isVendorSpecific ?? true,
+            isVendorSpecific: banner?.isVendorSpecific ?? false,
             status: banner?.status || "Active",
             title: banner?.title || "",
             tagline: banner?.tagline || "",
@@ -143,7 +143,7 @@ export default function EditBannerModal({
                 placement: banner.placement || ["Homepage Carousel"],
                 vendor: banner.vendor?._id || banner.vendor || "",
                 customUrl: banner.customUrl || "",
-                isVendorSpecific: banner.isVendorSpecific ?? true,
+                isVendorSpecific: banner.isVendorSpecific ?? false,
                 status: banner.status || "Active",
                 title: banner.title || "",
                 tagline: banner.tagline || "",
@@ -156,7 +156,7 @@ export default function EditBannerModal({
                 videoUrl: banner.videoUrl || "",
                 showTitle: banner.showTitle ?? true,
             });
-            setIsVendorSpecific(banner.isVendorSpecific ?? true);
+            setIsVendorSpecific(banner.isVendorSpecific ?? false);
         }
     }, [banner, reset]);
 
@@ -242,11 +242,37 @@ export default function EditBannerModal({
         }
     }, [hasPageTitlePlacement, setValue]);
 
+    const getAspectRatio = () => {
+        if (!selectedPlacement || selectedPlacement.length === 0) return 4 / 1;
+
+        if (selectedPlacement.some(p => p.includes("Hero Section"))) {
+            return undefined;
+        }
+        if (selectedPlacement.some(p => p.includes("Homepage Carousel"))) {
+            return 3 / 1;
+        }
+        // Page Titles
+        return 4 / 1;
+    };
+
+    const getMobileAspectRatio = () => {
+        if (!selectedPlacement || selectedPlacement.length === 0) return 3 / 1;
+
+        if (selectedPlacement.some(p => p.includes("Hero Section"))) {
+            return 9 / 16;
+        }
+        if (selectedPlacement.some(p => p.includes("Homepage Carousel"))) {
+            return 16 / 9;
+        }
+        // Page Titles
+        return 3 / 1;
+    };
+
     const getIdealSizeText = () => {
-        if (selectedPlacement.includes("Hero Section")) return "Recommended: 1920x1080px (Desktop), 1080x1920px (Mobile)";
-        if (selectedPlacement.includes("Homepage Carousel")) return "Recommended: 1300x500px (Standard)";
-        if (selectedPlacement.some(p => ["Contact", "Ideas", "Gallery", "Blog Page"].includes(p))) return "Recommended: 1920x400px (Desktop), 800x260px (Mobile)";
-        return "Recommended: Depends on layout (e.g. 1080x1080px for square)";
+        if (selectedPlacement.includes("Hero Section")) return "Recommended: 1024x420px";
+        if (selectedPlacement.includes("Homepage Carousel")) return "Recommended: 1300x500px (3:1)";
+        if (selectedPlacement.some(p => ["Contact", "Ideas", "Gallery", "Blog Page"].includes(p))) return "Recommended: 1920x400px (4:1)";
+        return "Recommended: Depends on layout (e.g. 4:1 for page headers)";
     };
 
     return (
@@ -330,6 +356,7 @@ export default function EditBannerModal({
                                                 folderPath="ad-banners"
                                                 errors={errors}
                                                 role="admin"
+                                                aspectRatio={getAspectRatio()}
                                             />
                                         </div>
                                         <p className="text-xs text-gray-500">
@@ -606,6 +633,7 @@ export default function EditBannerModal({
                                             folderPath="ad-banners/mobile"
                                             errors={errors}
                                             role="admin"
+                                            aspectRatio={getMobileAspectRatio()}
                                         />
                                     </div>
                                     <p className="text-xs text-gray-500">

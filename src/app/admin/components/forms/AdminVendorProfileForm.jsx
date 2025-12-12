@@ -37,14 +37,6 @@ const editProfileSchema = z.object({
     whatsAppNumber: z.string().min(1, "WhatsApp number is required"),
     pricingStartingFrom: z.number().min(0).optional(),
     isInternational: z.boolean(),
-    // UAE-specific fields
-    tradeLicenseNumber: z.string().optional(),
-    tradeLicenseCopy: z.string().optional(),
-    personalEmiratesIdNumber: z.string().optional(),
-    emiratesIdCopy: z.string().optional(),
-    // International-specific fields
-    businessLicenseCopy: z.string().optional(),
-    passportOrIdCopy: z.string().optional(),
     mainCategory: z.array(z.string()).min(1, "Select at least one category"),
     subCategories: z.array(z.string()),
     occasionsServed: z.array(z.string()),
@@ -63,17 +55,6 @@ const editProfileSchema = z.object({
     twitterLink: z.string().optional(),
     ownerProfileImage: z.string().optional(),
     businessLogo: z.string().optional(),
-}).refine((data) => {
-    // If UAE vendor, require UAE documents
-    if (!data.isInternational) {
-        return !!(data.tradeLicenseNumber && data.tradeLicenseCopy &&
-            data.personalEmiratesIdNumber && data.emiratesIdCopy);
-    }
-    // If international vendor, require international documents
-    return !!(data.businessLicenseCopy && data.passportOrIdCopy);
-}, {
-    message: "Required documents are missing",
-    path: ["documents"]
 });
 
 const ImagePreview = ({ src, alt, onRemove, label }) => {
@@ -209,12 +190,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
             whatsAppNumber: vendor.whatsAppNumber || "",
             pricingStartingFrom: vendor.pricingStartingFrom || 0,
             isInternational: vendor.isInternational || false,
-            tradeLicenseNumber: vendor.tradeLicenseNumber || "",
-            personalEmiratesIdNumber: vendor.personalEmiratesIdNumber || "",
-            tradeLicenseCopy: vendor.tradeLicenseCopy || "",
-            emiratesIdCopy: vendor.emiratesIdCopy || "",
-            businessLicenseCopy: vendor.businessLicenseCopy || "",
-            passportOrIdCopy: vendor.passportOrIdCopy || "",
             mainCategory: Array.isArray(vendor.mainCategory)
                 ? vendor.mainCategory.map(cat => typeof cat === 'object' ? cat._id : cat)
                 : [],
@@ -244,11 +219,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
     const selectedMainCategoryIds = form.watch('mainCategory');
     const ownerProfileImage = form.watch('ownerProfileImage');
     const businessLogo = form.watch('businessLogo');
-    const isInternational = form.watch('isInternational');
-    const tradeLicenseCopy = form.watch('tradeLicenseCopy');
-    const emiratesIdCopy = form.watch('emiratesIdCopy');
-    const businessLicenseCopy = form.watch('businessLicenseCopy');
-    const passportOrIdCopy = form.watch('passportOrIdCopy');
 
     const filteredSubCategories = subcategories.filter(sub =>
         selectedMainCategoryIds.includes(sub.parentCategory) ||
@@ -270,19 +240,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
             const result = await updateVendorDetailsAction(vendor._id, data);
 
             if (result.success) {
-
-                const documentData = {
-                    tradeLicenseCopy: data.tradeLicenseCopy,
-                    emiratesIdCopy: data.emiratesIdCopy,
-                    businessLicenseCopy: data.businessLicenseCopy,
-                    passportOrIdCopy: data.passportOrIdCopy,
-                    tradeLicenseNumber: data.tradeLicenseNumber,
-                    personalEmiratesIdNumber: data.personalEmiratesIdNumber,
-                };
-
-                // We can try updating documents as well
-                await updateVendorDocumentsAction(vendor._id, documentData);
-
                 if (onSuccess) onSuccess(result.data);
             } else {
                 setError(result.message || "Failed to update profile");
@@ -298,7 +255,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
     const tabs = [
         { id: "basic", label: "Basic Info" },
         { id: "business", label: "Business Details" },
-        { id: "documents", label: "Documents" },
         { id: "address", label: "Address & Social" }
     ];
 
@@ -405,14 +361,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                     <FormItem>
                                         <FormLabel className="text-xs font-medium">Owner Profile Image</FormLabel>
                                         <div className="space-y-4">
-                                            {ownerProfileImage && (
-                                                <ImagePreview
-                                                    src={ownerProfileImage}
-                                                    alt="Owner Profile"
-                                                    label="Current Profile Image"
-                                                    onRemove={() => field.onChange('')}
-                                                />
-                                            )}
                                             <FormControl>
                                                 <ControlledFileUpload
                                                     control={form.control}
@@ -422,6 +370,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                                                     folderPath="vendors/profiles"
                                                     role="admin"
+                                                    aspectRatio={1}
                                                 />
                                             </FormControl>
                                         </div>
@@ -511,14 +460,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                     <FormItem>
                                         <FormLabel className="text-xs font-medium">Business Logo *</FormLabel>
                                         <div className="space-y-4">
-                                            {businessLogo && (
-                                                <ImagePreview
-                                                    src={businessLogo}
-                                                    alt="Business Logo"
-                                                    label="Current Business Logo"
-                                                    onRemove={() => field.onChange('')}
-                                                />
-                                            )}
                                             <FormControl>
                                                 <ControlledFileUpload
                                                     control={form.control}
@@ -528,6 +469,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                     allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
                                                     folderPath="vendors/logos"
                                                     role="admin"
+                                                    aspectRatio={1}
                                                 />
                                             </FormControl>
                                         </div>

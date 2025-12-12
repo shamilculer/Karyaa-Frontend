@@ -14,7 +14,7 @@ const STEPS = [
   { component: Step03_Review, title: "Review & Submit" },
 ];
 
-export default function VendorMultiStepForm() {
+export default function VendorMultiStepForm({ customHeading, customTagline }) {
   // Use the merged store
   const { formData, currentStepIndex } = useVendorFormStore();
 
@@ -53,6 +53,8 @@ export default function VendorMultiStepForm() {
         // Pass necessary props
         currentStepIndex={currentStepIndex}
         isLastStep={isLastStep}
+        customHeading={customHeading}
+        customTagline={customTagline}
       />
 
     </div>

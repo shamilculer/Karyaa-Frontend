@@ -22,6 +22,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from "@/components/ui/checkbox";
 import Link from 'next/link';
 import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -31,6 +32,7 @@ import AdminVendorProfileForm from '../forms/AdminVendorProfileForm';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdditionalDocumentsSection from './AdditionalDocumentsSection';
+import VerificationDocumentsEditor from './VerificationDocumentsEditor';
 import AdminCommentsSection from './AdminCommentsSection';
 import GalleryToolbar from './GalleryToolbar';
 import EditPackageModal from '../modals/packages/EditPackageModal';
@@ -54,6 +56,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
     const [activeTab, setActiveTab] = useState("overview");
     const [isUpdating, setIsUpdating] = useState(false);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [isEditingDocuments, setIsEditingDocuments] = useState(false);
     const [isEditingSubscription, setIsEditingSubscription] = useState(false);
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
     const [isFeatureSubmitting, setIsFeatureSubmitting] = useState(false);
@@ -741,33 +744,54 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                             <FileText className="w-5 h-5 text-blue-600" />
                                             Verification Documents
                                         </h3>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        {!vendor.isInternational ? (
-                                            <>
-                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                                    <div><p className="text-sm font-medium text-gray-900">Trade License</p><p className="text-xs text-gray-600">{vendor.tradeLicenseNumber || "N/A"}</p></div>
-                                                    {vendor.tradeLicenseCopy && <a href={vendor.tradeLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
-                                                </div>
-                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                                    <div><p className="text-sm font-medium text-gray-900">Emirates ID</p><p className="text-xs text-gray-600">{vendor.personalEmiratesIdNumber || "N/A"}</p></div>
-                                                    {vendor.emiratesIdCopy && <a href={vendor.emiratesIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                                    <div><p className="text-sm font-medium text-gray-900">Business License</p><p className="text-xs text-gray-600">{vendor.businessLicenseCopy ? "Uploaded" : "Not uploaded"}</p></div>
-                                                    {vendor.businessLicenseCopy && <a href={vendor.businessLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
-                                                </div>
-                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                                    <div><p className="text-sm font-medium text-gray-900">Passport/ID</p><p className="text-xs text-gray-600">{vendor.passportOrIdCopy ? "Uploaded" : "Not uploaded"}</p></div>
-                                                    {vendor.passportOrIdCopy && <a href={vendor.passportOrIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
-                                                </div>
-                                            </>
+                                        {!isEditingDocuments && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setIsEditingDocuments(true)}
+                                                className="shadow-sm"
+                                            >
+                                                <Edit className="w-3.5 h-3.5 mr-1.5" />Edit
+                                            </Button>
                                         )}
                                     </div>
+
+                                    {isEditingDocuments ? (
+                                        <VerificationDocumentsEditor
+                                            vendor={vendor}
+                                            onSuccess={(updatedVendor) => {
+                                                setVendor(updatedVendor);
+                                                setIsEditingDocuments(false);
+                                            }}
+                                            onCancel={() => setIsEditingDocuments(false)}
+                                        />
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {!vendor.isInternational ? (
+                                                <>
+                                                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        <div><p className="text-sm font-medium text-gray-900">Trade License</p><p className="text-xs text-gray-600">{vendor.tradeLicenseNumber || "N/A"}</p></div>
+                                                        {vendor.tradeLicenseCopy && <a href={vendor.tradeLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                    </div>
+                                                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        <div><p className="text-sm font-medium text-gray-900">Emirates ID</p><p className="text-xs text-gray-600">{vendor.personalEmiratesIdNumber || "N/A"}</p></div>
+                                                        {vendor.emiratesIdCopy && <a href={vendor.emiratesIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        <div><p className="text-sm font-medium text-gray-900">Business License</p><p className="text-xs text-gray-600">{vendor.businessLicenseCopy ? "Uploaded" : "Not uploaded"}</p></div>
+                                                        {vendor.businessLicenseCopy && <a href={vendor.businessLicenseCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                    </div>
+                                                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        <div><p className="text-sm font-medium text-gray-900">Passport/ID</p><p className="text-xs text-gray-600">{vendor.passportOrIdCopy ? "Uploaded" : "Not uploaded"}</p></div>
+                                                        {vendor.passportOrIdCopy && <a href={vendor.passportOrIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* Additional Documents Section */}
                                     <div className="mt-6 pt-6 border-t border-gray-200">

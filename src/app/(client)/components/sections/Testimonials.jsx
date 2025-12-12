@@ -32,6 +32,7 @@ const defaultTestimonials = [
 
 const Testimonials = ({ testimonials: propTestimonials, heading = "What people say about us" } = {}) => {
   const testimonials = Array.isArray(propTestimonials) && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
+
   return (
     <div className="w-full flex-center flex-col space-y-10">
       <div className="w-full flex-center flex-col">
@@ -47,11 +48,11 @@ const Testimonials = ({ testimonials: propTestimonials, heading = "What people s
           ))}
         </h2>
       </div>
-      <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
+      <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center px-4 md:px-0">
         <Swiper
           modules={[Navigation, Autoplay]}
-          spaceBetween={20}
-          slidesPerView={2}
+          spaceBetween={24}
+          slidesPerView={1}
           loop={true}
           autoplay={{
             delay: 5000,
@@ -62,36 +63,42 @@ const Testimonials = ({ testimonials: propTestimonials, heading = "What people s
             nextEl: ".testimonials-next",
           }}
           breakpoints={{
-            320: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
-            1024: { slidesPerView: 2, spaceBetween: 20 },
+            640: { slidesPerView: 1, spaceBetween: 20 },
+            768: { slidesPerView: 1, spaceBetween: 24 },
+            1124: { slidesPerView: 2, spaceBetween: 32 },
           }}
-          className="w-full pb-8"
+          className="w-full pb-8 !px-1"
         >
           {testimonials.map((t, idx) => {
             const imageSrc = t.img || t.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400";
 
             return (
-              <SwiperSlide key={t.id || idx}>
-                <div className="flex flex-col md:flex-row items-start md:gap-4 rounded-lg border border-gray-200">
+              <SwiperSlide key={t.id || idx} className="h-auto">
+                <div className="flex flex-col sm:flex-row items-center sm:items-stretch h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
                   {imageSrc && (
-                    <Image
-                      width={240}
-                      height={240}
-                      className="w-full md:w-60 h-72 object-cover rounded-lg"
-                      src={imageSrc}
-                      alt={t.name || "Testimonial"}
-                    />
+                    <div className="relative shrink-0 w-24 h-24 mt-6 sm:mt-0 sm:w-48 sm:h-auto rounded-full sm:rounded-none overflow-hidden border-2 border-gray-100 sm:border-0">
+                      <Image
+                        fill
+                        className="object-cover"
+                        src={imageSrc}
+                        alt={t.name || "Testimonial"}
+                      />
+                    </div>
                   )}
-                  <div className="flex flex-col h-full justify-center p-5">
-                    <div>
-                      <div className="flex items-center gap-1">
+                  <div className="flex flex-col flex-grow p-6 h-full text-center sm:text-left">
+                    <div className="flex-grow">
+                      <div className="flex items-center justify-center sm:justify-start gap-1 mb-3">
                         {[...Array(t.rating || 5)].map((_, i) => (
-                          <Star key={i} size={18} className="fill-yellow-500" stroke="0" />
+                          <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-gray-500 mt-4">{t.text}</p>
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-4 mb-4">
+                        {t.text}
+                      </p>
                     </div>
-                    <p className="mt-4 font-medium">{t.name}</p>
+                    <div className="mt-auto pt-4 border-t border-gray-50">
+                      <p className="font-semibold text-gray-900">{t.name}</p>
+                    </div>
                   </div>
                 </div>
               </SwiperSlide>
@@ -100,12 +107,12 @@ const Testimonials = ({ testimonials: propTestimonials, heading = "What people s
         </Swiper>
 
         {/* Navigation Buttons - BELOW Swiper */}
-        <div className="flex gap-4 mt-4">
-          <Button className="testimonials-prev bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
-            <ChevronLeft className="text-secondary" />
+        <div className="flex gap-4 mt-6">
+          <Button className="testimonials-prev bg-white h-12 w-12 rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 text-gray-700 transition-all p-0 flex items-center justify-center">
+            <ChevronLeft size={24} />
           </Button>
-          <Button className="testimonials-next bg-white h-10 w-10 text-2xl rounded-full border border-secondary hover:bg-gray-100 transition p-0">
-            <ChevronRight className="text-secondary" />
+          <Button className="testimonials-next bg-white h-12 w-12 rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 text-gray-700 transition-all p-0 flex items-center justify-center">
+            <ChevronRight size={24} />
           </Button>
         </div>
       </div>

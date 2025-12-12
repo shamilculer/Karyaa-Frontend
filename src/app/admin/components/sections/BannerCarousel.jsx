@@ -241,7 +241,7 @@ const BannerCarouselContainer = ({ search, status, placement }) => {
                                         src={ad.imageUrl}
                                         alt={ad.name}
                                         fill
-                                        className="object-cover"
+                                        className="object-contain"
                                         priority={false}
                                     />
                                 ) : (

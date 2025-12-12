@@ -38,7 +38,16 @@ const formSchema = z.object({
 const CATEGORY_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const S3_FOLDER_PATH = "category-images";
 
-export function AddCategoryModal({ onOpenChange, open }) {
+import { useState } from "react"
+
+export function AddCategoryModal({ onOpenChange: externalOnOpenChange, open: externalOpen }) {
+    const [internalOpen, setInternalOpen] = useState(false)
+
+    // Use external props if provided, otherwise internal state
+    const isControlled = externalOpen !== undefined
+    const open = isControlled ? externalOpen : internalOpen
+    const onOpenChange = isControlled ? externalOnOpenChange : setInternalOpen
+
     const router = useRouter()
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -63,7 +72,7 @@ export function AddCategoryModal({ onOpenChange, open }) {
                 reset()
 
                 // Navigate to the management page
-                router.push(`/category-management/${result.category.slug}`)
+                router.push(`/admin/category-management/${result.category.slug}`)
             } else {
                 toast.error("Category added, but missing slug for navigation. Please check the categories page.", { id: submissionToastId })
             }

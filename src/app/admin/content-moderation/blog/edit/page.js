@@ -718,7 +718,7 @@ const EditBlogPage = () => {
                 </Card>
 
                 {/* Action Buttons */}
-                <div className="flex bg-body items-center justify-end gap-4 sticky bottom-0 py-4 border-t border-t-gray-300">
+                <div className="flex bg-body items-center z-51 justify-end gap-4 sticky bottom-0 py-4 border-t border-t-gray-300">
                     <Button
                         type="button"
                         variant="outline"
