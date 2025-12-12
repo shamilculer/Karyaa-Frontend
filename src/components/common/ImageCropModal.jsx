@@ -462,7 +462,7 @@ export default function ImageCropModal({
                             </Label>
 
                             <div className="bg-muted/30 rounded-lg p-3 space-y-4">
-                                <div className="space-y-2">
+                                {/* <div className="space-y-2">
                                     <div className="flex justify-between text-xs">
                                         <span>Rotation</span>
                                         <span className="font-mono">{rotation}°</span>
@@ -474,7 +474,7 @@ export default function ImageCropModal({
                                         max={360}
                                         step={1}
                                     />
-                                </div>
+                                </div> */}
 
                                 <div className="flex gap-2">
                                     <Button

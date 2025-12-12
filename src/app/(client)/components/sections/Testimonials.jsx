@@ -74,7 +74,7 @@ const Testimonials = ({ testimonials: propTestimonials, heading = "What people s
 
             return (
               <SwiperSlide key={t.id || idx} className="h-auto">
-                <div className="flex flex-col sm:flex-row items-center sm:items-stretch h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <div className="flex flex-col sm:flex-row items-center sm:items-stretch md:h-[290px] bg-body rounded-xl border border-gray-300 overflow-hidden">
                   {imageSrc && (
                     <div className="relative shrink-0 w-24 h-24 mt-6 sm:mt-0 sm:w-48 sm:h-auto rounded-full sm:rounded-none overflow-hidden border-2 border-gray-100 sm:border-0">
                       <Image
@@ -92,12 +92,12 @@ const Testimonials = ({ testimonials: propTestimonials, heading = "What people s
                           <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-4 mb-4">
+                      <p className="text-gray-600 leading-relaxed !text-[15px] line-clamp-6 mb-4">
                         {t.text}
                       </p>
                     </div>
                     <div className="mt-auto pt-4 border-t border-gray-50">
-                      <p className="font-semibold text-gray-900">{t.name}</p>
+                      <p className="text-gray-900">{t.name}</p>
                     </div>
                   </div>
                 </div>

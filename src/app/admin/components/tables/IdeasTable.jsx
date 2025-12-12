@@ -389,8 +389,8 @@ const IdeaCard = ({ idea, onDelete, onEdit, deletingId }) => { // ⬅️ Receive
                             {format(new Date(idea.createdAt), "dd-MM-yyyy")}
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold mt-4 mb-2 line-clamp-2">{idea.title}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-4">{idea.description}</p>
+                    <h3 className="!text-xl font-bold mt-4 mb-2 line-clamp-2">{idea.title}</h3>
+                    <p className="!text-sm text-gray-600 line-clamp-4">{idea.description}</p>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-4 border-t border-t-gray-300 pt-4">
