@@ -37,7 +37,7 @@ const IdeaCategories = ({ categories: initialCategories }) => {
 
     return (
         <div className="w-full flex items-center gap-5 py-6 px-5">
-            <div className="w-[85%] relative">
+            <div className="flex-1 min-w-0 relative">
                 <Carousel
                     slidesPerView={6}
                     spaceBetween={30}
@@ -83,7 +83,7 @@ const IdeaCategories = ({ categories: initialCategories }) => {
                 </Carousel>
             </div>
 
-            <div className="w-[15%] flex-center">
+            <div className="w-auto flex-shrink-0 flex-center">
                 <CreateIdeaCategoryModal onCreationSuccess={refreshCategories} />
             </div>
 

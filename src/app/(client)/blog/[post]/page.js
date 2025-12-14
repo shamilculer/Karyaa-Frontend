@@ -12,7 +12,17 @@ import { CircleArrowRight } from "lucide-react";
 // Generate metadata for SEO
 export async function generateMetadata({ params }) {
   const { post } = await params;
-  const blogPost = await getBlogPost(post);
+  let blogPost = null;
+
+  try {
+    blogPost = await getBlogPost(post);
+  } catch (error) {
+    // If fetch fails (e.g. 404 or not published), fall back to default metadata
+    return {
+      title: 'Blog Not Found',
+      description: 'The requested blog post could not be found.',
+    };
+  }
 
   if (!blogPost) {
     return {
@@ -49,24 +59,45 @@ export async function generateMetadata({ params }) {
 
 const BlogPostPage = async ({ params }) => {
   const { post } = await params;
+  let blogPost = null;
+  let fetchError = null;
 
-  const blogPost = await getBlogPost(post);
-
-  const ctaUrl = blogPost.ctaLink?.trim();
-  const isExternal = ctaUrl?.startsWith("http");
+  try {
+    blogPost = await getBlogPost(post);
+  } catch (error) {
+    // Only log if it's NOT a "not published" error to avoid console noise
+    if (!error.message?.toLowerCase().includes("not published")) {
+      console.error("Failed to fetch blog post:", error.message);
+    }
+    fetchError = error.message;
+  }
 
   if (!blogPost) {
+    const isUnpublished = fetchError && fetchError.toLowerCase().includes("not published");
+
     return (
       <div className="min-h-screen flex items-center justify-center text-center px-4">
         <div>
-          <h2 className="text-2xl font-semibold mb-2">Blog not found</h2>
+          <h2 className="text-2xl font-semibold mb-2">
+            {isUnpublished ? "Blog Coming Soon" : "Blog not found"}
+          </h2>
           <p className="text-gray-600">
-            We couldn’t find the article you’re looking for.
+            {isUnpublished
+              ? "This article is currently being written or reviewed. Please check back later!"
+              : "We couldn’t find the article you’re looking for."}
           </p>
+          <div className="mt-6">
+            <Button asChild variant="outline">
+              <Link href="/blog">Back to Blog</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
+
+  const ctaUrl = blogPost.ctaLink?.trim();
+  const isExternal = ctaUrl?.startsWith("http");
 
   // 🧩 Handle author name safely
   const authorName =
@@ -88,12 +119,12 @@ const BlogPostPage = async ({ params }) => {
     <div className="min-h-screen  px-4 sm:px-6 lg:px-8">
       {/* ---- Blog Header ---- */}
       <section className="!mt-8 mb-16 space-y-6 max-w-6xl mx-auto">
-        <div>
-          <span className="font-medium uppercase text-primary text-[11px] md:text-sm tracking-widest">
+        <div className="w-full flex flex-col justify-center items-center">
+          <span className="font-medium uppercase text-primary text-[10px] md:text-xs tracking-widest">
             Blog / {blogPost.slug.replace(/-/g, " ")}
           </span>
 
-          <h1 className="text-3xl md:text-5xl font-semibold leading-tight mt-2 capitalize">
+          <h1 className="text-3xl md:text-5xl text-center font-semibold leading-tight mt-2 capitalize">
             {blogPost.title}
           </h1>
 

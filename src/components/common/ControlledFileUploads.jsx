@@ -23,6 +23,7 @@ export default function ControlledFileUpload({
     customTrigger, // New prop for custom UI
     value,
     onChange,
+    rules, // Validation rules
 }) {
     const { uploadFile, uploading, error: uploadError } = useS3Upload();
     const fileInputRef = useRef(null);
@@ -403,6 +404,7 @@ export default function ControlledFileUpload({
             <Controller
                 control={control}
                 name={name}
+                rules={rules}
                 render={({ field: { onChange, value } }) => renderUploadUI({ onChange, value })}
             />
         );

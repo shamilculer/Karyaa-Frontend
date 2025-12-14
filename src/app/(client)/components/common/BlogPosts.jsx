@@ -104,7 +104,7 @@ export const BlogCard = ({ blog }) => {
         <div className="text-xs">
           <span>By {authorName}</span> | <span>{displayDate}</span>
         </div>
-        <h3 className="!text-2xl max-md:!text-xl !font-medium">
+        <h3 className="!text-2xl max-md:!text-xl !font-medium line-clamp-3">
           {blog.title}
         </h3>
         <p className="text-gray-600 mt-2 line-clamp-2">

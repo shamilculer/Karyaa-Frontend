@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -248,6 +248,12 @@ const EditorToolbar = ({ editor }) => {
 
 // Rich text editor wrapper (hooks used at top-level of a component)
 const RichTextEditor = ({ value, onChange }) => {
+    const onChangeRef = useRef(onChange)
+
+    useEffect(() => {
+        onChangeRef.current = onChange
+    })
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -260,14 +266,21 @@ const RichTextEditor = ({ value, onChange }) => {
         ],
         content: value,
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML())
+            onChangeRef.current(editor.getHTML())
         },
         immediatelyRender: false,
     })
 
     useEffect(() => {
+        // Only update content if:
+        // 1. Editor is ready
+        // 2. Value is defined
+        // 3. Content is different
+        // 4. Editor is NOT focused (to avoid overwriting user input)
         if (editor && value !== undefined && editor.getHTML() !== value) {
-            editor.commands.setContent(value || '', false)
+            if (!editor.isFocused) {
+                editor.commands.setContent(value || '', false)
+            }
         }
     }, [editor, value])
 
@@ -453,8 +466,21 @@ const EditBlogPage = () => {
             return
         }
 
-        if (!data.content || data.content === "<p></p>") {
-            toast.error("Content is required")
+        // Check for empty content (allowing images/embeds)
+        const isContentEmpty = (html) => {
+            if (!html) return true
+            if (html === "<p></p>") return true
+
+            const tempDiv = document.createElement("div")
+            tempDiv.innerHTML = html
+            const text = tempDiv.textContent || tempDiv.innerText || ""
+            const hasMedia = tempDiv.querySelector("img, iframe, video")
+
+            return text.trim() === "" && !hasMedia
+        }
+
+        if (isContentEmpty(data.content)) {
+            toast.error("Blog content is missing. Please add some text or images.")
             return
         }
 
@@ -503,6 +529,20 @@ const EditBlogPage = () => {
         )
     }
 
+    const onInvalid = (errors) => {
+        const missingFields = []
+        if (errors.title) missingFields.push("Title")
+        if (errors.slug) missingFields.push("Slug")
+        if (errors.coverImage) missingFields.push("Cover Image")
+        if (errors.content) missingFields.push("Content")
+
+        if (missingFields.length > 0) {
+            toast.error(`Please fill in the following required fields: ${missingFields.join(", ")}`)
+        } else {
+            toast.error("Please fill in all required fields.")
+        }
+    }
+
     // Main Form Render (only runs if data is loaded)
     return (
         <div className="dashboard-container">
@@ -526,7 +566,7 @@ const EditBlogPage = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
                 {/* Basic Information */}
                 <Card>
                     <CardHeader>
