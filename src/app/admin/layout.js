@@ -38,7 +38,7 @@ export default function AdminLayout({ children }) {
             <SidebarProvider>
                 <AdminSidebar />
                 <main
-                    className="w-full lg:w-[calc(100% - var(--sidebar-width))]"
+                    className="w-full md:w-[calc(100% - var(--sidebar-width))] overflow-x-hidden"
                 >
                     <SidebarTrigger />
 

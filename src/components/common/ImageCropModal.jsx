@@ -262,11 +262,6 @@ export default function ImageCropModal({
                         height: (cropToUse.height / 100) * rotatedHeight,
                     };
 
-                    console.log('Processing image:', img.file.name);
-                    console.log('Percentage crop:', cropToUse);
-                    console.log('Natural dimensions:', { width: image.naturalWidth, height: image.naturalHeight });
-                    console.log('Rotated dimensions:', { width: rotatedWidth, height: rotatedHeight });
-                    console.log('Pixel crop:', pixelCrop);
 
                     const croppedBlob = await getCroppedImg(
                         img.src,
@@ -285,7 +280,8 @@ export default function ImageCropModal({
                 }
             }
 
-            console.log('Batch processing complete. Total files:', results.length);
+
+
             onCropComplete(results);
             onClose();
 

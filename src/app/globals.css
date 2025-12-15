@@ -132,12 +132,14 @@ section {
 .dashboard-container {
   width: 100%;
   max-width: 1250px;
-  margin-inline: auto;
   padding: 10px;
+
+  @media (min-width:1250px) {
+    margin-inline: auto;
+  }
 
   @media (max-width:1024px) {
     padding: 12px;
-    overflow-x: hidden;
   }
 }
 

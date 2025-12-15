@@ -95,28 +95,18 @@ export default function ControlledFileUpload({
     };
 
     const handleBatchCropComplete = async (processedFiles) => {
-        console.log('[ControlledFileUpload] Batch crop complete, received files:', processedFiles?.length);
         setCropModalOpen(false);
         setCropImages([]);
 
         if (!processedFiles || processedFiles.length === 0) {
-            console.log('[ControlledFileUpload] No processed files to upload');
             return;
         }
-
-        console.log('[ControlledFileUpload] Starting upload of', processedFiles.length, 'cropped files');
-
-        // Store all successful URLs to call onChange once at the end (if supported)
-        // OR rely on sequential updates. For React Hook Form, sequential updates might be tricky 
-        // if we read 'control.getValues(name)' and it hasn't re-rendered yet.
-        // BETTER APPROACH: Collect all URLs then update ONCE.
 
         const uploadedUrls = [];
 
         // Upload sequentially to avoid race conditions
         for (let i = 0; i < processedFiles.length; i++) {
             const file = processedFiles[i];
-            console.log(`[ControlledFileUpload] Uploading file ${i + 1}/${processedFiles.length}:`, file.name, 'Size:', file.size);
 
             // We pass 'null' as onChange because we want manually handle the update after ALL uploads
             const url = await uploadOneFile(file, null, true); // true = return URL only
@@ -124,8 +114,6 @@ export default function ControlledFileUpload({
                 uploadedUrls.push(url);
             }
         }
-
-        console.log('[ControlledFileUpload] All uploads complete. Total URLs:', uploadedUrls.length);
 
         if (uploadedUrls.length > 0) {
             // Update the form Value ONCE with all new URLs
@@ -141,46 +129,11 @@ export default function ControlledFileUpload({
                 const currentArray = Array.isArray(currentData) ? currentData : (currentData ? [currentData] : []);
                 const finalValue = [...currentArray, ...uploadedUrls];
 
-                console.log('[ControlledFileUpload] Updating form with final value:', finalValue);
                 if (pendingOnChange) pendingOnChange(finalValue);
-                if (onSuccess) onSuccess(finalValue); // Pass full array? OR just new ones? 
-                // The onSuccess usually expects the new value (full array) or just the result. 
-                // Based on previous code: "if (onSuccess) onSuccess(newValue);" -> It passes the FULL updated array.
-                // BUT for "onSuccess" prop in AddIdeaModal, it expects just the NEW URLs?
-                // Let's check AddIdeaModal: "const handleImageUpload = (urls) => { ... const updated = [...imageList, ...newUrls]; }"
-                // Wait, if AddIdeaModal expects just new URLs, then passing the FULL array (prev + new) would duplicate!
-
-                // Let's re-read AddIdeaModal usage of ControlledFileUpload.
-                // It uses "onSuccess={handleImageUpload}".
-                // And handleImageUpload appends: `const updated = [...imageList, ...newUrls];`
-
-                // ControlledFileUpload logic for multiple:
-                // `const newValue = [...currentArray, result.url]; onChange(newValue); if (onSuccess) onSuccess(newValue);`
-                // So currently it passes the WHOLE combined list to onSuccess.
-
-                // IF AddIdeaModal appends `urls` to `imageList`, and `urls` is the WHOLE list from the input?
-                // NO, `ControlledFileUpload` manages the input's own value. 
-                // AddIdeaModal uses `name="upload"` which is probably EMPTY initially.
-                // So `control.getValues("upload")` is empty.
-                // So `newValue` will be just the [url].
-                // But here we have multiple files.
-                // So `finalValue` will be [url1, url2, ...].
-                // So passing `finalValue` to `onSuccess` works perfectly for AddIdeaModal because it appends those to its own `imageList`.
-
-                // HOWEVER, we need to be careful if specific logic relies on receiving JUST the new items vs the full list.
-                // Standard pattern for this component seems to be: Update the component's value to the full list, and call success/change with full list.
-
-                // Special case for AddIdeaModal: the form field "upload" is cleared after upload!
-                // `setValue("upload", []);` inside handleImageUpload.
-                // So next time, currentData is []. Correct.
-
-                // So we should pass `uploadedUrls` if the component value was empty, or `current + uploadedUrls` if not.
-                // Basically `finalValue` is correct.
+                if (onSuccess) onSuccess(finalValue);
 
             } else {
-                // Single file mode - just take the last one? or first?
-                // Usually crop modal implies multiple check disabled? or single?
-                // If multiple=false, we only expect 1 file.
+                // Single file mode
                 const lastUrl = uploadedUrls[uploadedUrls.length - 1];
                 if (pendingOnChange) pendingOnChange(lastUrl);
                 if (onSuccess) onSuccess(lastUrl);

@@ -92,7 +92,7 @@ export const BlogCard = ({ blog }) => {
   ).toLocaleDateString("en-US");
 
   return (
-    <div className="rounded-lg space-y-5">
+    <div className="rounded-lg space-y-5 flex flex-col h-full">
       <Image
         width={300}
         height={288}
@@ -100,7 +100,7 @@ export const BlogCard = ({ blog }) => {
         alt={blog.title}
         className="w-full h-60 md:h-72 object-cover rounded-lg"
       />
-      <div className="space-y-2 lg:space-y-5">
+      <div className="space-y-2 lg:space-y-5 flex-1">
         <div className="text-xs">
           <span>By {authorName}</span> | <span>{displayDate}</span>
         </div>
@@ -112,7 +112,7 @@ export const BlogCard = ({ blog }) => {
             "Read the full blog post for more details."}
         </p>
       </div>
-      <Button asChild>
+      <Button asChild className="w-fit">
         <Link href={`/blog/${blog.slug}`}>Read More</Link>
       </Button>
     </div>
