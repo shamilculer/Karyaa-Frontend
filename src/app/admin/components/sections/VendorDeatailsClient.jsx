@@ -839,8 +839,39 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         <MapPin className="w-5 h-5 text-blue-600" />
                                         Location
                                     </h3>
-                                    <div>
-                                        <p className="text-sm text-gray-900 font-medium">{vendor.address?.city || 'N/A'}, {vendor.address?.country || 'UAE'}</p>
+                                    <div className="space-y-4">
+                                        {vendor.address?.streetAddress && (
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-0.5">Street Address</p>
+                                                <p className="text-sm font-medium text-gray-900">{vendor.address.streetAddress}</p>
+                                            </div>
+                                        )}
+                                        {vendor.address?.area && (
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-0.5">Area/District</p>
+                                                <p className="text-sm font-medium text-gray-900">{vendor.address.area}</p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-0.5">City</p>
+                                            <p className="text-sm font-medium text-gray-900">{vendor.address?.city || 'N/A'}</p>
+                                        </div>
+                                        {vendor.address?.state && (
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-0.5">State/Emirate</p>
+                                                <p className="text-sm font-medium text-gray-900">{vendor.address.state}</p>
+                                            </div>
+                                        )}
+                                        {vendor.address?.zipCode && (
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-0.5">Zip Code</p>
+                                                <p className="text-sm font-medium text-gray-900">{vendor.address.zipCode}</p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-0.5">Country</p>
+                                            <p className="text-sm font-medium text-gray-900">{vendor.address?.country || 'UAE'}</p>
+                                        </div>
                                     </div>
                                 </div >
 

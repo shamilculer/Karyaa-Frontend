@@ -35,7 +35,7 @@ const VendorLoginPage = async () => {
   }
 
   return (
-    <section className="flex h-screen w-screen overflow-hidden !m-0 p-0 fixed inset-0">
+    <section className="flex h-[100dvh] w-screen overflow-hidden !m-0 p-0 fixed inset-0">
       <div className="max-lg:!hidden w-2/3 h-full bg-secondary relative">
         <Image
           fill
@@ -46,7 +46,7 @@ const VendorLoginPage = async () => {
       </div>
 
       <div className="w-full lg:w-1/3 h-full overflow-y-auto">
-        <div className="flex flex-col justify-center min-h-full px-4 sm:px-10 py-5">
+        <div className="flex flex-col justify-center min-h-full px-4 sm:px-10 py-10">
           <div>
             <Image
               width={150}

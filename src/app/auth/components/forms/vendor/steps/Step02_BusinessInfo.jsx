@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { getCategories as fetchCategoriesAction } from "@/app/actions/public/categories";
 import { getBundleOptions } from "@/app/actions/vendor/bundles";
+import { Combobox } from "@/components/ui/combobox";
+import { countries } from "@/lib/countries";
 
 const OCCASION_OPTIONS = [
     { slug: "wedding", name: "Wedding" },
@@ -383,12 +385,24 @@ export default function Step02_BusinessInfo() {
 
                 {/* ✅ COUNTRY FIELD (Conditional) */}
                 {isInternational && (
-                    renderInputField({
-                        control: form.control,
-                        name: "address.country",
-                        label: "Country (Required for international vendors)",
-                        placeholder: "e.g., India, UK, KSA"
-                    })
+                    <FormField
+                        control={form.control}
+                        name="address.country"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs leading-0 font-medium">Country (Required for international vendors)</FormLabel>
+                                <FormControl>
+                                    <Combobox
+                                        options={countries}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Select your country"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 )}
 
                 {renderInputField({ control: form.control, name: "address.zipCode", label: "Zip Code (Optional)", placeholder: "00000" })}

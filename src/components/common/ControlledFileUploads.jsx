@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { useS3Upload } from '@/hooks/useS3Upload';
-import { Loader2, X, UploadCloud, Upload } from 'lucide-react';
+import { Loader2, X, UploadCloud, Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageCropModal from './ImageCropModal';
 
@@ -39,6 +39,16 @@ export default function ControlledFileUpload({
 
     const isImageFile = (file) => {
         return file && file.type.startsWith('image/');
+    };
+
+    const isImageUrl = (url) => {
+        if (!url) return false;
+        try {
+            const extension = url.split('.').pop().toLowerCase().split('?')[0];
+            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension);
+        } catch (e) {
+            return false;
+        }
     };
 
     const handleFileChange = async (e, onChange, value) => {
@@ -289,7 +299,16 @@ export default function ControlledFileUpload({
                     {Array.isArray(value) ? (
                         value.map((url, index) => (
                             <div key={index} className="group relative aspect-square rounded-xl overflow-hidden border bg-background shadow-sm hover:shadow-md transition-all">
-                                <img src={url} alt="Preview" className="w-full h-full object-contain" />
+                                {isImageUrl(url) ? (
+                                    <img src={url} alt="Preview" className="w-full h-full object-contain" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-4">
+                                        <FileText className="w-8 h-8 text-muted-foreground mb-2" />
+                                        <span className="text-xs text-muted-foreground text-center truncate w-full px-2">
+                                            {url.split('/').pop().split('?')[0]}
+                                        </span>
+                                    </div>
+                                )}
 
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <button
@@ -308,7 +327,16 @@ export default function ControlledFileUpload({
                     ) : (
                         value && typeof value === 'string' && (
                             <div className="group relative aspect-video rounded-xl overflow-hidden border bg-gray-200 shadow-sm hover:shadow-md transition-all">
-                                <img src={value} alt="Preview" className="w-full h-full object-contain" />
+                                {isImageUrl(value) ? (
+                                    <img src={value} alt="Preview" className="w-full h-full object-contain" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-4">
+                                        <FileText className="w-10 h-10 text-muted-foreground mb-2" />
+                                        <span className="text-sm text-muted-foreground text-center truncate w-full px-4">
+                                            {value.split('/').pop().split('?')[0]}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <button
                                         type="button"

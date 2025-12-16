@@ -35,7 +35,7 @@ const CreateAccountPage = async () => {
   }
 
   return (
-    <section className="flex h-screen w-screen overflow-hidden !m-0 p-0 fixed inset-0">
+    <section className="flex h-[100dvh] w-screen overflow-hidden !m-0 p-0 fixed inset-0">
       <div className="w-2/3 h-full bg-secondary relative max-lg:hidden">
         <Image
           fill
@@ -45,7 +45,7 @@ const CreateAccountPage = async () => {
         />
       </div>
       <div className="w-full bg-body lg:w-1/3 h-full overflow-y-auto max-xl:z-10">
-        <div className="flex flex-col justify-center min-h-full px-5 sm:px-10">
+        <div className="flex flex-col justify-center min-h-full px-5 sm:px-10 max-lg:py-10">
           <div className="max-xl:flex flex-col items-center justify-center">
             <div className="lg:hidden">
               <Image
