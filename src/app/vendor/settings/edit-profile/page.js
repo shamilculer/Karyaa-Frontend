@@ -697,13 +697,7 @@ const EditProfilePage = () => {
                           <FormItem>
                             <FormLabel className="text-xs font-medium">Trade License Copy *</FormLabel>
                             <div className="space-y-4">
-                              {tradeLicenseCopy && (
-                                <DocumentPreview
-                                  src={tradeLicenseCopy}
-                                  label="Trade License Document"
-                                  onRemove={() => field.onChange('')}
-                                />
-                              )}
+
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
@@ -742,13 +736,7 @@ const EditProfilePage = () => {
                           <FormItem>
                             <FormLabel className="text-xs font-medium">Emirates ID Copy *</FormLabel>
                             <div className="space-y-4">
-                              {emiratesIdCopy && (
-                                <DocumentPreview
-                                  src={emiratesIdCopy}
-                                  label="Emirates ID Document"
-                                  onRemove={() => field.onChange('')}
-                                />
-                              )}
+
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
@@ -776,13 +764,7 @@ const EditProfilePage = () => {
                           <FormItem>
                             <FormLabel className="text-xs font-medium">Business License Copy *</FormLabel>
                             <div className="space-y-4">
-                              {businessLicenseCopy && (
-                                <DocumentPreview
-                                  src={businessLicenseCopy}
-                                  label="Business License Document"
-                                  onRemove={() => field.onChange('')}
-                                />
-                              )}
+
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
@@ -807,13 +789,7 @@ const EditProfilePage = () => {
                           <FormItem>
                             <FormLabel className="text-xs font-medium">Passport or ID Copy *</FormLabel>
                             <div className="space-y-4">
-                              {passportOrIdCopy && (
-                                <DocumentPreview
-                                  src={passportOrIdCopy}
-                                  label="Passport/ID Document"
-                                  onRemove={() => field.onChange('')}
-                                />
-                              )}
+
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}

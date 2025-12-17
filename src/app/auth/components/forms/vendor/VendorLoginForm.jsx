@@ -134,7 +134,7 @@ const VendorLoginForm = () => {
                     {/* Forgot Password Link */}
                     <div className="text-right">
                         <Link
-                            href="/vendor/forgot-password"
+                            href="/auth/vendor/forgot-password"
                             className="text-sm text-[#2F4A9D] hover:underline"
                         >
                             Forgot password?

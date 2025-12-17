@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { useS3Upload } from '@/hooks/useS3Upload';
-import { Loader2, X, UploadCloud, Upload, FileText } from 'lucide-react';
+import { Loader2, X, UploadCloud, Upload, FileText, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageCropModal from './ImageCropModal';
 
@@ -45,10 +45,14 @@ export default function ControlledFileUpload({
         if (!url) return false;
         try {
             const extension = url.split('.').pop().toLowerCase().split('?')[0];
-            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension);
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension)) return true;
         } catch (e) {
-            return false;
+            // ignore
         }
+        // Fallback: if field is strictly for images, treat as image
+        if (allowedMimeType?.every(t => t.startsWith('image/'))) return true;
+
+        return false;
     };
 
     const handleFileChange = async (e, onChange, value) => {
@@ -231,6 +235,129 @@ export default function ControlledFileUpload({
                 disabled={localUploading || uploading}
             />
 
+            {/* Enhanced Preview Area */}
+            {!customTrigger && value && (
+                <div className={`grid gap-4 mb-4 ${multiple ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 max-w-[240px]'}`}>
+                    {Array.isArray(value) ? (
+                        value.map((url, index) => (
+                            <div key={index} className="group relative aspect-square rounded-xl overflow-hidden border bg-background shadow-sm hover:shadow-md transition-all">
+                                {isImageUrl(url) ? (
+                                    <>
+                                        <img src={url} alt="Preview" className="w-full h-full object-contain" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(url, onChange, value);
+                                                }}
+                                                className="h-8 w-8 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                                                <FileText className="w-4 h-4 text-blue-600" />
+                                            </div>
+                                            <span className="text-xs font-medium text-gray-700 truncate max-w-[100px]" title={url.split('/').pop().split('?')[0]}>
+                                                {url.split('/').pop().split('?')[0]}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            <a
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Download"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <Download className="w-4 h-4" />
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(url, onChange, value);
+                                                }}
+                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        value && typeof value === 'string' && (
+                            <div className={`${isImageUrl(value) ? 'group relative rounded-xl overflow-hidden border bg-gray-200 shadow-sm hover:shadow-md transition-all aspect-video w-full' : 'w-full'}`}>
+                                {isImageUrl(value) ? (
+                                    <>
+                                        <img src={value} alt="Preview" className="w-full h-full object-contain" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(value, onChange, value);
+                                                }}
+                                                className="h-9 w-9 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
+                                            >
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center justify-between w-full">
+                                        <div className="flex items-center space-x-3 overflow-hidden">
+                                            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
+                                                <FileText className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="!text-sm font-medium text-gray-900 truncate" title={value.split('/').pop().split('?')[0]}>
+                                                    {value.split('/').pop().split('?')[0]}
+                                                </p>
+                                                <p className="!text-xs text-gray-500">Document</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
+                                            <a
+                                                href={value}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Download"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <Download className="w-4 h-4" />
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(value, onChange, value);
+                                                }}
+                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Remove"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    )}
+                </div>
+            )}
+
             {/* Compact Dropzone */}
             {customTrigger ? (
                 <div>
@@ -293,67 +420,7 @@ export default function ControlledFileUpload({
                 <p className="text-xs font-medium text-destructive mt-1.5 ml-1">{errors[name].message}</p>
             )}
 
-            {/* Enhanced Preview Area */}
-            {!customTrigger && value && (
-                <div className={`grid gap-4 mt-4 ${multiple ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 max-w-[240px]'}`}>
-                    {Array.isArray(value) ? (
-                        value.map((url, index) => (
-                            <div key={index} className="group relative aspect-square rounded-xl overflow-hidden border bg-background shadow-sm hover:shadow-md transition-all">
-                                {isImageUrl(url) ? (
-                                    <img src={url} alt="Preview" className="w-full h-full object-contain" />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-4">
-                                        <FileText className="w-8 h-8 text-muted-foreground mb-2" />
-                                        <span className="text-xs text-muted-foreground text-center truncate w-full px-2">
-                                            {url.split('/').pop().split('?')[0]}
-                                        </span>
-                                    </div>
-                                )}
 
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemove(url, onChange, value);
-                                        }}
-                                        className="h-8 w-8 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        value && typeof value === 'string' && (
-                            <div className="group relative aspect-video rounded-xl overflow-hidden border bg-gray-200 shadow-sm hover:shadow-md transition-all">
-                                {isImageUrl(value) ? (
-                                    <img src={value} alt="Preview" className="w-full h-full object-contain" />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-4">
-                                        <FileText className="w-10 h-10 text-muted-foreground mb-2" />
-                                        <span className="text-sm text-muted-foreground text-center truncate w-full px-4">
-                                            {value.split('/').pop().split('?')[0]}
-                                        </span>
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemove(value, onChange, value);
-                                        }}
-                                        className="h-9 w-9 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        )
-                    )}
-                </div>
-            )}
 
             {/* Batch Crop Modal */}
             <ImageCropModal

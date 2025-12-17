@@ -6,7 +6,7 @@ const ROUTES = {
     userProtected: ['/profile', '/settings', '/dashboard', '/orders', '/saved-vendors'],
 
     // Vendor routes
-    vendorPublic: ['/auth/vendor/login', '/auth/vendor/register'],
+    vendorPublic: ['/auth/vendor/login', '/auth/vendor/register', '/auth/vendor/reset-password', '/auth/vendor/forgot-password'],
     vendorProtected: ['/vendor/'],
 
     // Admin routes

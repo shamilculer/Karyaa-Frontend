@@ -115,7 +115,7 @@ const ChangePasswordSection = () => {
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0"
                                 >
                                     {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -140,7 +140,7 @@ const ChangePasswordSection = () => {
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0"
                                 >
                                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
