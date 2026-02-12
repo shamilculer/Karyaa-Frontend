@@ -153,10 +153,14 @@ const formatDate = (dateString) => {
 };
 
 const ReviewCard = ({ review }) => {
-    const { user, rating, comment, createdAt } = review;
+    const { user, guestName, rating, comment, createdAt } = review;
 
-    const userInitials = getInitials(user.username)
-    const bgColor = getBgColor(user.username);
+    // Use user info if available, otherwise use guest info
+    const displayName = user?.username || guestName || "Guest User";
+    const profileImage = user?.profileImage || null;
+
+    const userInitials = getInitials(displayName);
+    const bgColor = getBgColor(displayName);
 
     return (
         <div>
@@ -167,8 +171,8 @@ const ReviewCard = ({ review }) => {
 
                     <Avatar className="size-16 rounded-full">
                         <AvatarImage
-                            src={user.profileImage}
-                            alt={user.username}
+                            src={profileImage}
+                            alt={displayName}
                             className="size-full object-cover mr-4 ring-2 ring-indigo-400/50"
                         />
                         <AvatarFallback className={`${bgColor} text-white font-bold flex items-center justify-center`} >{userInitials}</AvatarFallback>
@@ -176,7 +180,7 @@ const ReviewCard = ({ review }) => {
 
                     {/* Username and Date */}
                     <div>
-                        <p className="!text-lg font-bold text-gray-800 capitalize">{user.username}</p>
+                        <p className="!text-lg font-bold text-gray-800 capitalize">{displayName}</p>
                         <p className="!text-sm text-gray-500">
                             Reviewed on {formatDate(createdAt)}
                         </p>

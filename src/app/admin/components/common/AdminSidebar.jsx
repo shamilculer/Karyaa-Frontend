@@ -15,6 +15,7 @@ import {
     Headset,
     ChevronDown,
     Network,
+    Megaphone,
 } from "lucide-react";
 
 import {
@@ -97,6 +98,12 @@ const items = [
             { title: "Revenue Insights", url: "/admin/analytics-insights/revenue-insights" },
             { title: "Platform Analytics", url: "/admin/analytics-insights/platform-analytics" },
         ],
+    },
+    {
+        title: "Complaint Management",
+        url: "/admin/complaints",
+        icon: Megaphone,
+        accessKey: "complaintManagement",
     },
     {
         title: "Support and Tickets",

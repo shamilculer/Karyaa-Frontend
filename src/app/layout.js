@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         className={`${greatVibes.variable} antialiased`}
       >
         {children}
-        <Toaster />
+        <Toaster position="top-center" />
         <CookieConsent />
       </body>
     </html>

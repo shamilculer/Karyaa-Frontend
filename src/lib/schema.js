@@ -300,6 +300,7 @@ export const AccessControlSchema = z.object({
   reviewManagement: z.boolean().default(false),
   leadsManagement: z.boolean().default(false),
   analyticsInsights: z.boolean().default(false),
+  complaintManagement: z.boolean().default(false),
   supportTickets: z.boolean().default(false),
   adManagement: z.boolean().default(false),
   referralManagement: z.boolean().default(false),

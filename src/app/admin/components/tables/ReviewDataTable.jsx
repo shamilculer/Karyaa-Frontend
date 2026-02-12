@@ -256,29 +256,29 @@ const ReviewDataTable = () => {
                                 {/* User Avatar and Name */}
                                 <div className="flex items-center space-x-2 text-sm mt-5">
                                     <Avatar className="w-10 h-10">
-                                        <AvatarImage className="size-full object-cover" src={review.user?.profileImage} alt={`${review.user?.username} avatar`} />
-                                        <AvatarFallback>{getInitials(review.user?.username || "User")}</AvatarFallback>
+                                        <AvatarImage className="size-full object-cover" src={review.user?.profileImage} alt={`${review.user?.username || review.guestName} avatar`} />
+                                        <AvatarFallback>{getInitials(review.user?.username || review.guestName || "Guest")}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <HoverCard>
                                             <HoverCardTrigger asChild>
                                                 <p className="!font-medium font-heading text-gray-900 !leading-5 cursor-pointer hover:underline">
-                                                    {review.user?.username || "Unknown User"}
+                                                    {review.user?.username || review.guestName || "Guest User"}
                                                 </p>
                                             </HoverCardTrigger>
                                             <HoverCardContent className="w-80 bg-white">
                                                 <div className="space-y-1">
-                                                    <h4 className="text-sm font-semibold">User Details</h4>
+                                                    <h4 className="text-sm font-semibold">{review.user ? "User" : "Guest"} Details</h4>
                                                     <div className="text-sm">
-                                                        <span className="font-medium">Email:</span> {review.user?.emailAddress || "N/A"}
+                                                        <span className="font-medium">Email:</span> {review.user?.emailAddress || review.guestEmail || "N/A"}
                                                     </div>
                                                     <div className="text-sm">
-                                                        <span className="font-medium">Mobile:</span> {review.user?.mobileNumber || "N/A"}
+                                                        <span className="font-medium">Mobile:</span> {review.user?.mobileNumber || review.guestPhone || "N/A"}
                                                     </div>
                                                 </div>
                                             </HoverCardContent>
                                         </HoverCard>
-                                        <p className="!text-xs text-gray-500">Reviewer</p>
+                                        <p className="!text-xs text-gray-500">{review.user ? "Reviewer" : "Guest Reviewer"}</p>
                                     </div>
                                 </div>
 

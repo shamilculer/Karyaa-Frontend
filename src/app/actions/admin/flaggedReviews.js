@@ -49,7 +49,7 @@ export const adminUpdateReview = async (reviewId, data) => {
 
 export const deleteReview = async (reviewId) => {
     try {
-        const response = await apiFetch(`/reviews/${reviewId}`, {
+        const response = await apiFetch(`/reviews/admin/${reviewId}`, {
             method: "DELETE",
             auth: true,
             role: 'admin'

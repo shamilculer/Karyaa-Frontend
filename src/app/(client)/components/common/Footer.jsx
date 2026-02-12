@@ -9,6 +9,8 @@ import { getBrandDetailsAction } from "@/app/actions/public/brand";
 import { getContentByKeyAction } from "@/app/actions/public/content";
 import { useEffect, useState } from "react";
 import ReferModal from "../modals/ReferModal";
+import RaiseComplaintModal from "@/components/modals/RaiseComplaintModal";
+import ReviewVendorModal from "@/components/modals/ReviewVendorModal";
 import NewsletterField from "../ui/NewsLetterField";
 import { IconBrandFacebook, IconBrandInstagram, IconBrandLinkedin, IconBrandPinterest, IconBrandTiktok, IconBrandWhatsapp, IconBrandX, IconBrandYoutube, IconPhone } from "@tabler/icons-react";
 
@@ -192,6 +194,12 @@ const Footer = () => {
                       </Link>
                     </li>
                   ))}
+                  <li>
+                    <RaiseComplaintModal />
+                  </li>
+                  <li>
+                    <ReviewVendorModal />
+                  </li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -272,6 +280,12 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              <li>
+                <RaiseComplaintModal />
+              </li>
+              <li>
+                <ReviewVendorModal />
+              </li>
             </ul>
           </div>
 

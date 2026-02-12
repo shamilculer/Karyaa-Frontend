@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }) {
     const pathname = usePathname();
-
+    
     const showOverviewStats = [
         "/admin/dashboard",
         "/admin/category-management",
@@ -23,7 +23,8 @@ export default function AdminLayout({ children }) {
         "/admin/bundle-management",
         "/admin/admin-users",
         "/admin/settings",
-        "/admin/referrals-management"
+        "/admin/referrals-management",
+        "/admin/complaints"
     ].includes(pathname);
 
     return (

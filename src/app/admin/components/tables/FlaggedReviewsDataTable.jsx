@@ -217,12 +217,12 @@ const FlaggedReviewsDataTable = () => {
                                 {/* User Avatar and Name */}
                                 <div className="flex items-center space-x-2 text-sm mt-5">
                                     <Avatar className="w-10 h-10">
-                                        <AvatarImage className="size-full object-cover" src={review.user?.profileImage} alt={`${review.user?.username} avatar`} />
-                                        <AvatarFallback>{getInitials(review.user?.username)}</AvatarFallback>
+                                        <AvatarImage className="size-full object-cover" src={review.user?.profileImage} alt={`${review.user?.username || review.guestName} avatar`} />
+                                        <AvatarFallback>{getInitials(review.user?.username || review.guestName || "Guest")}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="!font-medium font-heading text-gray-900 !leading-5">{review.user?.username || 'Unknown User'}</p>
-                                        <p className="!text-xs text-gray-500">Reviewer</p>
+                                        <p className="!font-medium font-heading text-gray-900 !leading-5">{review.user?.username || review.guestName || 'Guest User'}</p>
+                                        <p className="!text-xs text-gray-500">{review.user ? "Reviewer" : "Guest Reviewer"}</p>
                                     </div>
                                 </div>
 

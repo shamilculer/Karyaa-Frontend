@@ -20,6 +20,7 @@ import VendorShareButton from "../../components/common/vendorsList/VendorShareBu
 import { getVendorReviews } from "@/app/actions/shared/reviews";
 import Reviews from "../../components/features/reviews/Reviews";
 import ReviewFormModal from "../../components/modals/ReviewFormModal";
+import ReviewVendorModal from "@/components/modals/ReviewVendorModal";
 import { Suspense } from "react";
 import { getVendorPackages } from "@/app/actions/public/packages";
 import {
@@ -345,8 +346,10 @@ const VendorPage = async ({ params }) => {
               <div id="reviews" className="scroll-mt-32">
                 <div className="flex justify-between items-center">
                   <h2 className="uppercase text-2xl font-bold">Reviews</h2>
-                  {authResult.isAuthenticated && (
+                  {authResult.isAuthenticated ? (
                     <ReviewFormModal vendorId={vendorData._id} />
+                  ) : (
+                    <ReviewVendorModal vendorId={vendorData._id} />
                   )}
                 </div>
 

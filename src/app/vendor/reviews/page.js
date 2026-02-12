@@ -258,11 +258,11 @@ function ReviewsManagePageContent() {
                                 <div className='w-full flex-between max-md:flex-col max-md:!items-start border-b gap-5 border-gray-300 pb-5'>
                                     <div className="flex items-center  gap-5">
                                         <Avatar className="size-12 md:size-16 rounded-full">
-                                            <AvatarImage className="size-full object-cover" alt={`${review.user?.username} avatar`} src={review.user?.profileImage} />
-                                            <AvatarFallback>{review.user?.username?.slice(0, 2)}</AvatarFallback>
+                                            <AvatarImage className="size-full object-cover" alt={`${review.user?.username || review.guestName} avatar`} src={review.user?.profileImage} />
+                                            <AvatarFallback>{(review.user?.username || review.guestName || "Guest")?.slice(0, 2)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <h5 className="text-base md:text-lg font-medium">{review.user?.username}</h5>
+                                            <h5 className="text-base md:text-lg font-medium">{review.user?.username || review.guestName || "Guest User"}</h5>
                                             <span className="!text-xs md:!text-sm text-gray-500">
                                                 {new Date(review.createdAt).toDateString()}
                                             </span>
