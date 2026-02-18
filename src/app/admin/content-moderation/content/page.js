@@ -70,6 +70,12 @@ const CMS = () => {
       description: "Refer modal content and background image",
       type: "setting",
     },
+    "story-page": {
+      name: "Story Page",
+      icon: FileText,
+      description: "Our Story timeline and banner",
+      type: "section",
+    },
   };
 
   useEffect(() => {
@@ -103,6 +109,8 @@ const CMS = () => {
       return `/admin/content-moderation/content/faq`;
     } else if (page.key === "refer-modal") {
       return `/admin/content-moderation/content/refer-modal`;
+    } else if (page.key === "story-page") {
+      return `/admin/content-moderation/content/story-page`;
     } else if (page.type === "page") {
       return `/admin/content-moderation/content/${page.key}`;
     }
@@ -117,19 +125,9 @@ const CMS = () => {
       "faq-page": "/faq",
       "landing-page": "/",
       "contact-page": "/contact",
+      "story-page": "/story",
     };
     return previewUrls[page.key] || `/${page.key}`;
-  };
-
-  const getStatusBadge = (content) => {
-    if (
-      !content.content ||
-      (typeof content.content === "string" && !content.content.trim()) ||
-      (Array.isArray(content.content) && content.content.length === 0)
-    ) {
-      return <Badge variant="destructive">Draft</Badge>;
-    }
-    return <Badge className="bg-green-500">Published</Badge>;
   };
 
   if (loading) {
@@ -153,78 +151,55 @@ const CMS = () => {
   });
 
   return (
-    <div className="dashboard-container space-y-8 mb-12">
+    <div className="dashboard-container space-y-6 mb-12">
       <div className="flex items-center justify-between">
-        <span className="text-sidebar-foreground font-semibold text-2xl uppercase tracking-widest">
-          Content Management
-        </span>
-        <div className="text-sm text-muted-foreground">
-          {displayPages.length} total pages
+        <div>
+          <span className="text-sidebar-foreground font-semibold !text-2xl uppercase tracking-widest">Content Management</span>
+          <p className="!text-sm text-gray-500">Manage static pages and content sections</p>
+        </div>
+        <div className="!text-sm font-medium text-gray-500 bg-gray-100 px-3 rounded-full">
+          {displayPages.length} pages
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-4">
         {displayPages.map((page) => {
           const Icon = page.icon;
           return (
-            <Card
+            <div
               key={page.key}
-              className="hover:shadow-lg transition-shadow space-y-0"
+              className="bg-white rounded-lg p-5 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 group border border-gray-300"
             >
-              <CardHeader className="pb-1">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">{page.name}</CardTitle>
-                      <CardDescription className="text-xs mt-1">
-                        {page.description}
-                      </CardDescription>
-                    </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-50 text-primary rounded-xl group-hover:bg-primary group-hover:text-white transition-colors duration-200">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-semibold text-gray-900 !text-lg">{page.name}</h3>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 font-medium text-xs px-2 py-0.5 capitalize">
+                      {page.type || 'Page'}
+                    </Badge>
                   </div>
-                  {/* {getStatusBadge(page)} */}
+                  <p className="text-gray-500 !text-sm">{page.description}</p>
                 </div>
-              </CardHeader>
+              </div>
 
-              {/* <CardContent className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    {page.updatedAt
-                      ? `Modified ${new Date(
-                          page.updatedAt
-                        ).toLocaleDateString()}`
-                      : "Not created yet"}
-                  </span>
-                </div>
-              </CardContent> */}
-
-              <CardFooter className="flex gap-2 pt-1">
-                <Button asChild className="flex-1" size="sm">
-                  <Link href={getEditUrl(page)}>
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Edit
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  disabled={!page.content}
-                >
-                  <Link
-                    href={getPreviewUrl(page)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+              <div className="flex items-center gap-3 pl-14 md:pl-0">
+                <Button asChild variant="outline" size="sm" disabled={!page.content} className="h-9 border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50">
+                  <Link href={getPreviewUrl(page)} target="_blank" rel="noopener noreferrer">
                     <Eye className="w-4 h-4 mr-2" />
                     Preview
                   </Link>
                 </Button>
-              </CardFooter>
-            </Card>
+                <Button asChild size="sm" className="h-9 bg-gray-900 hover:bg-black text-white shadow-sm px-5">
+                  <Link href={getEditUrl(page)}>
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Edit Content
+                  </Link>
+                </Button>
+              </div>
+            </div>
           );
         })}
       </div>

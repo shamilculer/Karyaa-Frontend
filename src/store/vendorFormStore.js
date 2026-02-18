@@ -6,7 +6,7 @@ const generateToken = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
+    Math.random().toString(36).substring(2, 15);
 
 // Use the structure derived from the Zod schemas and Mongoose model
 const initialFormData = {
@@ -45,11 +45,24 @@ const initialFormData = {
       latitude: undefined,
       longitude: undefined,
     },
-    googleMapLink: "",
+
   },
 
   serviceAreaCoverage: "",
   pricingStartingFrom: 0,
+
+  availability: {
+    type: '24/7',
+    days: [
+      { day: 'Monday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Tuesday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Wednesday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Thursday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Friday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Saturday', isOpen: true, open: '09:00', close: '17:00' },
+      { day: 'Sunday', isOpen: true, open: '09:00', close: '17:00' },
+    ],
+  },
 
   gallery: [], // ADDED: Array field
   packages: [], // ADDED: Array field

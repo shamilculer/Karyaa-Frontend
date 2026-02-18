@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PageTitleSlider from "./PageTitleSlider";
 
-async function PageTitle({ imgUrl, title, tagline, placement }) {
+async function PageTitle({ imgUrl, videoUrl, mediaType, title, tagline, placement }) {
     let banners = [];
 
     // Try to fetch placement-specific banner if placement is provided
@@ -146,18 +146,53 @@ async function PageTitle({ imgUrl, title, tagline, placement }) {
         );
     }
 
-    // Fallback to default background image if no banner
+    // Fallback to default background image/video if no banner
     return (
-        <section
-            className="!m-0 bg-cover bg-center h-64 md:h-[400px] flex-center relative px-4"
-            style={{ backgroundImage: `url(${imgUrl || "/new-banner-3.jpg"})` }}
-        >
-            <div className="absolute inset-0 bg-black opacity-50 w-full h-full"></div>
-            <div className="relative z-10 text-white text-center">
-                <h1 className="!text-white !text-4xl lg:!text-[55px]">{title}</h1>
-                {tagline && (
-                    <p className="mt-2 !text-sm max-md:text-xs">{tagline}</p>
+        <section className={`!m-0 relative w-full h-64 md:h-[400px]`}>
+            <div className="absolute inset-0 w-full h-full">
+                {videoUrl ? (
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="metadata"
+                        poster={imgUrl}
+                        className="w-full h-full object-cover"
+                    >
+                        <source src={`${videoUrl}#t=0.01`} type="video/mp4" />
+                        {/* Fallback to image if video fails or while loading */}
+                        <Image
+                            src={imgUrl || "/new-banner-3.jpg"}
+                            alt={title || "Banner"}
+                            fill
+                            className="object-cover"
+                            priority
+                            sizes="100vw"
+                        />
+                    </video>
+                ) : (
+                    <Image
+                        src={imgUrl || "/new-banner-3.jpg"}
+                        alt={title || "Banner"}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="100vw"
+                    />
                 )}
+            </div>
+
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black opacity-50 w-full h-full pointer-events-none"></div>
+
+            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                <div className="text-white text-center px-4">
+                    <h1 className="!text-white !text-4xl lg:!text-[55px] font-bold">{title}</h1>
+                    {tagline && (
+                        <p className="mt-2 text-sm md:text-base max-w-2xl mx-auto opacity-90">{tagline}</p>
+                    )}
+                </div>
             </div>
         </section>
     );

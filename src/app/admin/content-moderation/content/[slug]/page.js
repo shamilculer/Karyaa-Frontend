@@ -393,9 +393,9 @@ const PolicyPageEditor = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="!text-2xl uppercase !tracking-wide !text-primary/80 font-bold">
+            <span className="!text-xl uppercase !tracking-wide !text-primary/80 font-bold">
               {pageNames[slug]}
-            </h1>
+            </span>
             <p className="!text-sm text-gray-500">
               Edit your {pageNames[slug]?.toLowerCase()} content
             </p>
@@ -438,6 +438,14 @@ const PolicyPageEditor = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Save Button Footer */}
+      <div className="pt-6 mt-8 flex justify-end">
+        <Button onClick={handleSave} size="lg" disabled={saving} className="w-full md:w-auto min-w-[200px] shadow-lg">
+          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+          {saving ? "Saving Changes..." : "Save Changes"}
+        </Button>
+      </div>
 
       {/* Tiptap Editor Styles */}
       <style jsx global>{`

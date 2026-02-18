@@ -12,8 +12,10 @@ import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
+import "lightgallery/css/lg-video.css";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
+import lgVideo from "lightgallery/plugins/video";
 import { useMemo } from "react";
 
 export default function GalleryCarousel({ initialItems, hasMore: initialHasMore }) {
@@ -25,11 +27,20 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
   const lightGalleryRef = useRef(null);
 
   const gallery = useMemo(
-    () => items?.map(item => ({ 
-      src: item.url, 
-      thumb: item.url,
-      subHtml: `<h4>${item.vendor?.businessName || 'Gallery Image'}</h4>`
-    })) || [],
+    () => items?.map(item => {
+      const isVideo = item.mediaType === 'video';
+      return {
+        src: isVideo ? undefined : item.url,
+        thumb: item.thumbnail || item.url,
+        subHtml: `<h4>${item.vendor?.businessName || 'Gallery Image'}</h4>`,
+        ...(isVideo && {
+          video: {
+            source: [{ src: item.url, type: 'video/mp4' }],
+            attributes: { preload: false, controls: true }
+          }
+        })
+      };
+    }) || [],
     [items]
   );
 
@@ -41,9 +52,9 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
 
     try {
       const nextPage = page + 1;
-      const galleryData = await getAllGalleryItems({ 
-        page: nextPage, 
-        limit: 60 
+      const galleryData = await getAllGalleryItems({
+        page: nextPage,
+        limit: 60
       });
 
       if (galleryData.items && galleryData.items.length > 0) {
@@ -67,7 +78,7 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
   const handleSlideChange = (swiper) => {
     // Load more when user is near the end (3 slides before the last)
     const isNearEnd = swiper.activeIndex >= items.length - 3;
-    
+
     if (isNearEnd && hasMore && !loading) {
       loadMore();
     }
@@ -100,20 +111,38 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
           className="mt-8"
         >
           {items.map((item, index) => (
-            <div 
-              key={item._id} 
+            <div
+              key={item._id}
               className="relative w-full h-[350px] rounded-lg overflow-hidden cursor-pointer group"
               onClick={() => openGallery(index)}
             >
-              <Image
-                src={item.url}
-                alt={item.vendor?.businessName || "Gallery image"}
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority={index < 3}
-              />
-              
+              {item.mediaType === 'video' ? (
+                <>
+                  <video
+                    src={item.url}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                    muted
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
+                    <div className="bg-black/50 rounded-full p-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <Image
+                  src={item.url}
+                  alt={item.vendor?.businessName || "Gallery image"}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  priority={index < 3}
+                />
+              )}
+
               {/* Hover vendor info */}
               <Link
                 href={`/vendors/${item.vendor?.slug}`}
@@ -140,7 +169,7 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
                   </h4>
                 </div>
               </Link>
-              
+
               {/* Dark gradient overlay on hover */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/0 via-transparent to-transparent group-hover:from-black/80 group-hover:via-black/20 transition-all duration-300"></div>
             </div>
@@ -167,7 +196,7 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
       <LightGallery
         dynamic
         dynamicEl={gallery}
-        plugins={[lgThumbnail, lgZoom]}
+        plugins={[lgThumbnail, lgZoom, lgVideo]}
         onInit={(ref) => {
           lightGalleryRef.current = ref.instance;
         }}

@@ -14,6 +14,8 @@ import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { useForm, Controller } from "react-hook-form";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 const ContactPageEditor = () => {
     const router = useRouter();
     const {
@@ -92,16 +94,16 @@ const ContactPageEditor = () => {
     };
 
     return (
-        <div className="dashboard-container !pt-0 bg-gray-50">
+        <div className="dashboard-container !pt-0">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-50">
+            <div className="border-b border-gray-200 sticky left-0 top-0 z-50">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="!rounded-full bg-gray-300"
+                                className="!rounded-full bg-gray-100/50 hover:bg-gray-200/50 text-gray-700"
                                 onClick={() => router.push("/admin/content-moderation/content")}
                             >
                                 <ArrowLeft className="h-5 w-5" />
@@ -120,10 +122,7 @@ const ContactPageEditor = () => {
                                 <Eye className="h-4 w-4 mr-2" />
                                 Preview
                             </Button>
-                            <Button type="submit" form="contact-page-form" disabled={saving}>
-                                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                                {saving ? "Saving..." : "Save Changes"}
-                            </Button>
+
                         </div>
                     </div>
                 </div>
@@ -134,178 +133,199 @@ const ContactPageEditor = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <form id="contact-page-form" onSubmit={handleSubmit(onSubmit)} className="pt-10 max-w-4xl mx-auto">
+                <form id="contact-page-form" onSubmit={handleSubmit(onSubmit)} className="pt-10 max-w-6xl mx-auto pb-12">
                     <div className="space-y-6">
                         {/* Banner Section */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Banner Section</CardTitle>
-                                <CardDescription>
-                                    Configure the heading and tagline displayed in the contact page banner
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="bannerHeading">Banner Heading</Label>
-                                    <Controller
-                                        name="bannerHeading"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                id="bannerHeading"
-                                                type="text"
-                                                placeholder="Contact Us"
+                        <Accordion type="single" collapsible className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" defaultValue="banner-section">
+                            <AccordionItem value="banner-section" className="border-0">
+                                <AccordionTrigger className="px-6 py-4 hover:bg-gray-50/50 hover:no-underline">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className="text-lg font-semibold text-gray-800">Banner Section</span>
+                                        <span className="text-sm font-normal text-gray-500">Configure the heading and tagline displayed in the contact page banner</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 pt-2 space-y-6">
+                                    <div className="space-y-6 pt-2 border-t border-gray-100">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="bannerHeading">Banner Heading</Label>
+                                            <Controller
+                                                name="bannerHeading"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Input
+                                                        {...field}
+                                                        id="bannerHeading"
+                                                        type="text"
+                                                        placeholder="Contact Us"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Main heading displayed in the banner</p>
-                                </div>
+                                            <p className="!text-xs text-gray-600">Main heading displayed in the banner</p>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="bannerTagline">Banner Tagline</Label>
-                                    <Controller
-                                        name="bannerTagline"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Textarea
-                                                {...field}
-                                                id="bannerTagline"
-                                                placeholder="Have a question, need support, or want to partner with us? Let's talk."
-                                                className="h-20 resize-none"
+                                        <div className="space-y-2">
+                                            <Label htmlFor="bannerTagline">Banner Tagline</Label>
+                                            <Controller
+                                                name="bannerTagline"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Textarea
+                                                        {...field}
+                                                        id="bannerTagline"
+                                                        placeholder="Have a question, need support, or want to partner with us? Let's talk."
+                                                        className="h-20 resize-none"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Subtitle or description displayed below the heading</p>
-                                </div>
+                                            <p className="!text-xs text-gray-600">Subtitle or description displayed below the heading</p>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label>Banner Image</Label>
-                                    <ControlledFileUpload
-                                        control={control}
-                                        name="bannerImage"
-                                        label="Upload Banner Image"
-                                        errors={errors}
-                                        allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
-                                        folderPath="pages/contact"
-                                        role="admin"
-                                    />
-                                    <p className="!text-xs text-gray-600">Banner background image (recommended: 1920x1080)</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                        <div className="space-y-2">
+                                            <Label>Banner Image</Label>
+                                            <ControlledFileUpload
+                                                control={control}
+                                                name="bannerImage"
+                                                label="Upload Banner Image"
+                                                errors={errors}
+                                                allowedMimeType={["image/jpeg", "image/png", "image/webp"]}
+                                                folderPath="pages/contact"
+                                                role="admin"
+                                            />
+                                            <p className="!text-xs text-gray-600">Banner background image (recommended: 1920x1080)</p>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
 
                         {/* Content Section */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Page Content</CardTitle>
-                                <CardDescription>
-                                    Configure the heading and description in the main content area
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="contentHeading">Content Heading</Label>
-                                    <Controller
-                                        name="contentHeading"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Textarea
-                                                {...field}
-                                                id="contentHeading"
-                                                placeholder="Contact Us Today for Personalized Support and Assistance"
-                                                className="h-16 resize-none"
+                        <Accordion type="single" collapsible className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" defaultValue="content-section">
+                            <AccordionItem value="content-section" className="border-0">
+                                <AccordionTrigger className="px-6 py-4 hover:bg-gray-50/50 hover:no-underline">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className="text-lg font-semibold text-gray-800">Page Content</span>
+                                        <span className="text-sm font-normal text-gray-500">Configure the heading and description in the main content area</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 pt-2 space-y-6">
+                                    <div className="space-y-6 pt-2 border-t border-gray-100">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="contentHeading">Content Heading</Label>
+                                            <Controller
+                                                name="contentHeading"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Textarea
+                                                        {...field}
+                                                        id="contentHeading"
+                                                        placeholder="Contact Us Today for Personalized Support and Assistance"
+                                                        className="h-16 resize-none"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Main heading in the content section (press Enter for new lines)</p>
-                                </div>
+                                            <p className="!text-xs text-gray-600">Main heading in the content section (press Enter for new lines)</p>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="contentDescription">Content Description</Label>
-                                    <Controller
-                                        name="contentDescription"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <SimpleTiptapEditor
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                placeholder="Lorem ipsum dolor sit amet consectetur. Convallis est urna adipiscin fringilla nulla diam lorem non mauris."
+                                        <div className="space-y-2">
+                                            <Label htmlFor="contentDescription">Content Description</Label>
+                                            <Controller
+                                                name="contentDescription"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <SimpleTiptapEditor
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        placeholder="Lorem ipsum dolor sit amet consectetur. Convallis est urna adipiscin fringilla nulla diam lorem non mauris."
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Description text displayed below the heading</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                            <p className="!text-xs text-gray-600">Description text displayed below the heading</p>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
 
                         {/* Contact Details Section */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Contact Details</CardTitle>
-                                <CardDescription>
-                                    Configure the contact information displayed on the contact page
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="primaryPhone">Phone Number</Label>
-                                    <Controller
-                                        name="primaryPhone"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                id="primaryPhone"
-                                                type="text"
-                                                placeholder="+971 XX XXX XXXX"
+                        <Accordion type="single" collapsible className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" defaultValue="contact-details">
+                            <AccordionItem value="contact-details" className="border-0">
+                                <AccordionTrigger className="px-6 py-4 hover:bg-gray-50/50 hover:no-underline">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className="text-lg font-semibold text-gray-800">Contact Details</span>
+                                        <span className="text-sm font-normal text-gray-500">Configure the contact information displayed on the contact page</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 pt-2 space-y-6">
+                                    <div className="space-y-6 pt-2 border-t border-gray-100">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="primaryPhone">Phone Number</Label>
+                                            <Controller
+                                                name="primaryPhone"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Input
+                                                        {...field}
+                                                        id="primaryPhone"
+                                                        type="text"
+                                                        placeholder="+971 XX XXX XXXX"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Primary contact phone number</p>
-                                </div>
+                                            <p className="!text-xs text-gray-600">Primary contact phone number</p>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="mainEmail">Email Address</Label>
-                                    <Controller
-                                        name="mainEmail"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                id="mainEmail"
-                                                type="email"
-                                                placeholder="contact@example.com"
+                                        <div className="space-y-2">
+                                            <Label htmlFor="mainEmail">Email Address</Label>
+                                            <Controller
+                                                name="mainEmail"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Input
+                                                        {...field}
+                                                        id="mainEmail"
+                                                        type="email"
+                                                        placeholder="contact@example.com"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Primary contact email address</p>
-                                </div>
+                                            <p className="!text-xs text-gray-600">Primary contact email address</p>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="location">Location/Address</Label>
-                                    <Controller
-                                        name="location"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Textarea
-                                                {...field}
-                                                id="location"
-                                                placeholder="123 Business Street, Dubai, UAE"
-                                                className="h-24 resize-none"
+                                        <div className="space-y-2">
+                                            <Label htmlFor="location">Location/Address</Label>
+                                            <Controller
+                                                name="location"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Textarea
+                                                        {...field}
+                                                        id="location"
+                                                        placeholder="123 Business Street, Dubai, UAE"
+                                                        className="h-24 resize-none"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <p className="!text-xs text-gray-600">Physical address or location</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                            <p className="!text-xs text-gray-600">Physical address or location</p>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
 
                         {/* Save Button at Bottom */}
-                        <div className="flex justify-end pb-10">
-                            <Button type="submit" disabled={saving} size="lg">
-                                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                                {saving ? "Saving..." : "Save All Changes"}
+                        <div className="flex justify-end pb-10 mt-8">
+                            <Button type="submit" disabled={saving} size="lg" className="bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all min-w-[200px]">
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="w-5 h-5 mr-2" />
+                                        Save All Changes
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </div>

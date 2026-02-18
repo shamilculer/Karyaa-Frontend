@@ -79,9 +79,9 @@ const ReferModalEditor = () => {
     };
 
     return (
-        <div className="dashboard-container !pt-0 bg-gray-50">
+        <div className="dashboard-container !pt-0">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky left-0 top-0 z-50">
+            <div className="border-b border-gray-200 sticky left-0 top-0 z-50">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">

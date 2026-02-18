@@ -39,6 +39,7 @@ import EditPackageModal from '../modals/packages/EditPackageModal';
 import ViewPackageModal from '@/app/vendor/components/modals/packages/ViewPackageModal';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import DeletePackageModal from '../modals/packages/DeletePackageModal';
+import { formatAvailability, getGroupedAvailability, formatTime } from '@/lib/formatAvailability';
 
 const OCCASIONS = [
     { value: "baby-shower", label: "Baby Shower" },
@@ -767,7 +768,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         />
                                     ) : (
                                         <div className="space-y-3">
-                                            {!vendor.isInternational ? (
+                                            {(!vendor.isInternational || vendor.tradeLicenseCopy || vendor.personalEmiratesIdNumber || vendor.emiratesIdCopy) && (
                                                 <>
                                                     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                                                         <div><p className="text-sm font-medium text-gray-900">Trade License</p><p className="text-xs text-gray-600">{vendor.tradeLicenseNumber || "N/A"}</p></div>
@@ -778,7 +779,9 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                                         {vendor.emiratesIdCopy && <a href={vendor.emiratesIdCopy} target="_blank" rel="noreferrer"><Button variant="outline" size="sm" className="text-xs"><Download className="w-3.5 h-3.5 mr-1" />Download</Button></a>}
                                                     </div>
                                                 </>
-                                            ) : (
+                                            )}
+
+                                            {(vendor.isInternational || vendor.businessLicenseCopy || vendor.passportOrIdCopy) && (
                                                 <>
                                                     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                                                         <div><p className="text-sm font-medium text-gray-900">Business License</p><p className="text-xs text-gray-600">{vendor.businessLicenseCopy ? "Uploaded" : "Not uploaded"}</p></div>
@@ -811,7 +814,7 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                             < div className="space-y-6" >
                                 {/* Contact */}
                                 < div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300" >
-                                    <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                                    <h3 className="!text-lg uppercase font-semibold text-gray-900 mb-5 flex items-center gap-2">
                                         <User className="w-5 h-5 text-blue-600" />
                                         Contact Information
                                     </h3>
@@ -819,58 +822,82 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                         <div className="flex items-center gap-3 pb-4 border-b">
                                             <Avatar className="w-12 h-12 border-2 border-gray-100">
                                                 <AvatarImage src={vendor.ownerProfileImage} />
-                                                <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white">{getInitials(vendor.ownerName)}</AvatarFallback>
+                                                <AvatarFallback className="!text-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white">{getInitials(vendor.ownerName)}</AvatarFallback>
                                             </Avatar>
                                             <div><p className="text-sm font-semibold text-gray-900">{vendor.ownerName}</p><p className="text-xs text-gray-500">Business Owner</p></div>
                                         </div>
                                         <div className="space-y-3">
-                                            <div className="flex items-start gap-3 text-sm"><Mail className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">Email</p><a href={`mailto:${vendor.email}`} className="text-gray-900 hover:text-blue-600 break-all">{vendor.email}</a></div></div>
-                                            <div className="flex items-start gap-3 text-sm"><Phone className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">Phone</p><a href={`tel:${vendor.phoneNumber}`} className="text-gray-900 hover:text-blue-600">{vendor.phoneNumber}</a></div></div>
+                                            <div className="flex items-start gap-3 !text-sm"><Mail className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="!text-xs text-gray-500 mb-0.5">Email</p><a href={`mailto:${vendor.email}`} className="text-gray-900 hover:text-blue-600 break-all">{vendor.email}</a></div></div>
+                                            <div className="flex items-start gap-3 !text-sm"><Phone className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="!text-xs text-gray-500 mb-0.5">Phone</p><a href={`tel:${vendor.phoneNumber}`} className="text-gray-900 hover:text-blue-600">{vendor.phoneNumber}</a></div></div>
                                             {vendor.whatsAppNumber && (
-                                                <div className="flex items-start gap-3 text-sm"><MessageCircle className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="text-xs text-gray-500 mb-0.5">WhatsApp</p><a href={`https://wa.me/${vendor.whatsAppNumber}`} target="_blank" rel="noreferrer" className="text-gray-900 hover:text-blue-600">{vendor.whatsAppNumber}</a></div></div>
+                                                <div className="flex items-start gap-3 !text-sm"><MessageCircle className="w-4 h-4 text-gray-400 mt-0.5" /><div><p className="!text-xs text-gray-500 mb-0.5">WhatsApp</p><a href={`https://wa.me/${vendor.whatsAppNumber}`} target="_blank" rel="noreferrer" className="text-gray-900 hover:text-blue-600">{vendor.whatsAppNumber}</a></div></div>
                                             )}
+                                            <div className="flex items-start gap-3 !text-sm">
+                                                <Clock className="w-4 h-4 text-gray-400 mt-0.5" />
+                                                <div className="w-full">
+                                                    <p className="!text-xs text-gray-500 mb-0.5">Availability</p>
+                                                    {vendor.availability?.type === 'custom' && vendor.availability?.days?.length > 0 ? (
+                                                        <div className="flex flex-col gap-1 mt-1">
+                                                            {getGroupedAvailability(vendor.availability.days).map((group, idx) => (
+                                                                <div key={idx} className="flex justify-between text-xs text-gray-700">
+                                                                    <span className="font-medium">{group.label}</span>
+                                                                    <span>
+                                                                        {group.isOpen ? (
+                                                                            `${formatTime(group.open)} - ${formatTime(group.close)}`
+                                                                        ) : (
+                                                                            <span className="text-red-500">Closed</span>
+                                                                        )}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-gray-900">{formatAvailability(vendor.availability)}</p>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div >
 
                                 {/* Location */}
                                 < div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow duration-300" >
-                                    <h3 className="!text-xl uppercase font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <h3 className="!text-lg uppercase font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         <MapPin className="w-5 h-5 text-blue-600" />
                                         Location
                                     </h3>
                                     <div className="space-y-4">
                                         {vendor.address?.streetAddress && (
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-0.5">Street Address</p>
-                                                <p className="text-sm font-medium text-gray-900">{vendor.address.streetAddress}</p>
+                                                <p className="!text-xs text-gray-500 mb-0.5">Street Address</p>
+                                                <p className="!text-sm font-medium text-gray-900">{vendor.address.streetAddress}</p>
                                             </div>
                                         )}
                                         {vendor.address?.area && (
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-0.5">Area/District</p>
-                                                <p className="text-sm font-medium text-gray-900">{vendor.address.area}</p>
+                                                <p className="!text-xs text-gray-500 mb-0.5">Area/District</p>
+                                                <p className="!text-sm font-medium text-gray-900">{vendor.address.area}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-0.5">City</p>
-                                            <p className="text-sm font-medium text-gray-900">{vendor.address?.city || 'N/A'}</p>
+                                            <p className="!text-xs text-gray-500 mb-0.5">City</p>
+                                            <p className="!text-sm font-medium text-gray-900">{vendor.address?.city || 'N/A'}</p>
                                         </div>
                                         {vendor.address?.state && (
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-0.5">State/Emirate</p>
-                                                <p className="text-sm font-medium text-gray-900">{vendor.address.state}</p>
+                                                <p className="!text-xs text-gray-500 mb-0.5">State/Emirate</p>
+                                                <p className="!text-sm font-medium text-gray-900">{vendor.address.state}</p>
                                             </div>
                                         )}
                                         {vendor.address?.zipCode && (
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-0.5">Zip Code</p>
-                                                <p className="text-sm font-medium text-gray-900">{vendor.address.zipCode}</p>
+                                                <p className="!text-xs text-gray-500 mb-0.5">Zip Code</p>
+                                                <p className="!text-sm font-medium text-gray-900">{vendor.address.zipCode}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-0.5">Country</p>
-                                            <p className="text-sm font-medium text-gray-900">{vendor.address?.country || 'UAE'}</p>
+                                            <p className="!text-xs text-gray-500 mb-0.5">Country</p>
+                                            <p className="!text-sm font-medium text-gray-900">{vendor.address?.country || 'UAE'}</p>
                                         </div>
                                     </div>
                                 </div >
@@ -956,7 +983,18 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                                 }`}
                                             onClick={() => bulkMode && toggleSelection(item._id)}
                                         >
-                                            <Image src={item.url} alt={item.caption || "Gallery"} fill className="w-full h-full object-cover" />
+                                            {item.mediaType === 'video' ? (
+                                                <video
+                                                    src={item.url}
+                                                    className="w-full h-full object-cover"
+                                                    controls
+                                                    preload="metadata"
+                                                >
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : (
+                                                <Image src={item.url} alt={item.caption || "Gallery"} fill className="w-full h-full object-cover" />
+                                            )}
 
                                             {bulkMode && (
                                                 <div className="absolute top-2 right-2 z-10">

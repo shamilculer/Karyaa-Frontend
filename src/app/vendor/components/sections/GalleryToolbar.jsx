@@ -28,16 +28,27 @@ export default function GalleryToolBar({
     }
 
     setLocalUploading(true);
-    const loadingToast = toast.loading("Uploading images...");
+    const loadingToast = toast.loading("Uploading media...");
 
     try {
-      const uploadedUrls = [];
+      const uploadedItems = [];
+      const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+      const SUPPORTED_VIDEO_FORMATS = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
 
       // Upload files to S3
       for (const file of files) {
+        const isImage = file.type.startsWith('image/');
+        const isVideo = SUPPORTED_VIDEO_FORMATS.includes(file.type);
+
         // Validate type
-        if (!file.type.startsWith('image/')) {
-          toast.error(`Skipping invalid file: ${file.name}`);
+        if (!isImage && !isVideo) {
+          toast.error(`Unsupported file type: ${file.name}`);
+          continue;
+        }
+
+        // Validate video size
+        if (isVideo && file.size > MAX_VIDEO_SIZE) {
+          toast.error(`Video too large (max 50MB): ${file.name}`);
           continue;
         }
 
@@ -49,7 +60,10 @@ export default function GalleryToolBar({
           });
 
           if (result?.url) {
-            uploadedUrls.push(result.url);
+            uploadedItems.push({
+              url: result.url,
+              mediaType: isVideo ? 'video' : 'image'
+            });
           }
         } catch (err) {
           console.error(`Failed to upload ${file.name}:`, err);
@@ -57,7 +71,7 @@ export default function GalleryToolBar({
         }
       }
 
-      if (uploadedUrls.length === 0) {
+      if (uploadedItems.length === 0) {
         toast.dismiss(loadingToast);
         setLocalUploading(false);
         return;
@@ -66,19 +80,14 @@ export default function GalleryToolBar({
       // Save to database
       toast.loading("Saving to gallery...", { id: loadingToast });
 
-      const payload = uploadedUrls.map((url) => ({
-        url,
-        type: "image",
-      }));
-
-      const res = await addVendorGalleryItems(vendorId, payload);
+      const res = await addVendorGalleryItems(vendorId, uploadedItems);
 
       toast.dismiss(loadingToast);
 
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success(`${payload.length} image(s) added!`);
+        toast.success(`${uploadedItems.length} item(s) added!`);
         onUploadComplete?.();
       }
     } catch (err) {
@@ -145,7 +154,7 @@ export default function GalleryToolBar({
           type="file"
           ref={fileInputRef}
           className="hidden"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           onChange={handleFileSelect}
           disabled={localUploading || uploading}

@@ -15,6 +15,10 @@ export async function generateMetadata({ params }) {
 
 const SubCategoryPage = async ({ params, searchParams }) => {
   let { category, subCategory } = await params;
+
+  // Decode the subcategory slug to handle special characters (e.g., "table-&-chair")
+  subCategory = decodeURIComponent(subCategory);
+
   const filters = await searchParams || {};
 
   const subCategoryData = await getSubcategoryDetails(subCategory);

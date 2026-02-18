@@ -116,8 +116,8 @@ const ReviewVendorModal = ({ vendorId = null }) => {
                     </button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl">
-                <DialogHeader className={`bg-primary text-white -mx-6 -mt-6 p-4 border-b border-gray-300 ${isSuccess ? "rounded-b-none" : ""}`}>
+            <DialogContent className="sm:max-w-xl p-4 sm:p-6">
+                <DialogHeader className={`bg-primary text-white -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 p-4 border-b border-gray-300 rounded-t-lg ${isSuccess ? "rounded-b-none" : ""}`}>
                     <div className="w-full text-center relative">
                         <DialogTitle className="!text-lg !text-white uppercase font-bold mx-auto">Review a Vendor</DialogTitle>
                     </div>
@@ -135,8 +135,8 @@ const ReviewVendorModal = ({ vendorId = null }) => {
                     </div>
                 ) : (
                     <>
-                        <ScrollArea className="h-[60vh] px-3.5 [&>div>div[style]]:!pr-3">
-                            <div className="space-y-6 pt-2 pr-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                        <ScrollArea className="h-[60vh] md:px-3.5" type="always">
+                            <div className="space-y-6 pt-2 pr-2">
                                 <div className="text-center space-y-2 border-b pb-4 border-gray-100">
                                     <p className="!text-sm text-gray-600 px-4">
                                         Thank you so much for choosing Karyaa.
@@ -269,19 +269,19 @@ const ReviewVendorModal = ({ vendorId = null }) => {
                             </div>
                         </ScrollArea>
 
-                        <DialogFooter className="border-t pt-4 border-gray-300 flex justify-between">
+                        <DialogFooter className="border-t pt-4 border-gray-300 flex !flex-row justify-between gap-2">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => setOpen(false)}
-                                className="min-w-[120px]"
+                                className="flex-1 md:flex-none md:min-w-[120px] max-md:h-8"
                             >
                                 Close
                             </Button>
                             <Button
                                 type="button"
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="min-w-[200px] bg-primary hover:bg-primary/90"
+                                className="flex-1 md:flex-none md:min-w-[200px] max-md:h-8 bg-primary hover:bg-primary/90"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? (

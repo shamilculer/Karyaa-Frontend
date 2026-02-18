@@ -189,11 +189,7 @@ export const Step2Schema = z
       city: z.string().trim().min(1, "City is required."),
       state: z.string().trim().optional().or(z.literal("")),
       zipCode: z.string().trim().optional().or(z.literal("")),
-      googleMapLink: z
-        .string()
-        .url({ message: "Must be a valid Google Maps URL." })
-        .optional()
-        .or(z.literal("")),
+
       coordinates: z
         .object({
           latitude: z.number().optional(),
@@ -223,6 +219,18 @@ export const Step2Schema = z
       .url({ message: "Must be a valid Twitter URL." })
       .optional()
       .or(z.literal("")),
+
+    availability: z.object({
+      type: z.enum(['24/7', 'custom']).default('24/7'),
+      days: z.array(
+        z.object({
+          day: z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']),
+          isOpen: z.boolean(),
+          open: z.string(),
+          close: z.string(),
+        })
+      ).optional(),
+    }).optional(),
   })
   .superRefine((data, ctx) => {
     // ✅ Subcategory only required if main selected

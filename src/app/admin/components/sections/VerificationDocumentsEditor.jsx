@@ -33,19 +33,9 @@ export default function VerificationDocumentsEditor({ vendor, onSuccess, onCance
         setIsSaving(true);
         try {
             // Filter data based on vendor type to avoid validation errors
+            // We want to persist existing documents even if vendor type changes, 
+            // so we do NOT delete fields based on isInternational status.
             const filteredData = { ...data };
-
-            if (vendor.isInternational) {
-                // Remove UAE fields
-                delete filteredData.tradeLicenseNumber;
-                delete filteredData.tradeLicenseCopy;
-                delete filteredData.personalEmiratesIdNumber;
-                delete filteredData.emiratesIdCopy;
-            } else {
-                // Remove International fields
-                delete filteredData.businessLicenseCopy;
-                delete filteredData.passportOrIdCopy;
-            }
 
             const result = await updateVendorDocumentsAction(vendor._id, filteredData);
             if (result.success) {
@@ -64,7 +54,7 @@ export default function VerificationDocumentsEditor({ vendor, onSuccess, onCance
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            {!vendor.isInternational ? (
+            {(!vendor.isInternational || vendor.tradeLicenseCopy || vendor.personalEmiratesIdNumber || vendor.emiratesIdCopy) && (
                 <>
                     {/* UAE Vendor Documents */}
                     <div className="space-y-2">
@@ -74,7 +64,7 @@ export default function VerificationDocumentsEditor({ vendor, onSuccess, onCance
                         <Input
                             id="tradeLicenseNumber"
                             {...register("tradeLicenseNumber", {
-                                required: "Trade License Number is required",
+                                required: !vendor.isInternational ? "Trade License Number is required" : false,
                             })}
                             placeholder="Enter trade license number"
                             className="bg-white"
@@ -106,7 +96,7 @@ export default function VerificationDocumentsEditor({ vendor, onSuccess, onCance
                         <Input
                             id="personalEmiratesIdNumber"
                             {...register("personalEmiratesIdNumber", {
-                                required: "Emirates ID Number is required",
+                                required: !vendor.isInternational ? "Emirates ID Number is required" : false,
                             })}
                             placeholder="784-XXXX-XXXXXXX-X"
                             className="bg-white"
@@ -131,7 +121,9 @@ export default function VerificationDocumentsEditor({ vendor, onSuccess, onCance
                         />
                     </div>
                 </>
-            ) : (
+            )}
+
+            {(vendor.isInternational || vendor.businessLicenseCopy || vendor.passportOrIdCopy) && (
                 <>
                     {/* International Vendor Documents */}
                     <div className="space-y-2">

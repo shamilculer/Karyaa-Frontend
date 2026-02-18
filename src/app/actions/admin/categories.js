@@ -7,14 +7,14 @@ export const getCategoryDetails = async () => {
             role: "admin",
             auth: true
         });
-        
+
         if (!response.success) {
             return {
                 success: false,
                 message: response.message || "Something went wrong while getting category data. Please refresh the page!"
             };
         }
-        
+
         return {
             success: true,
             count: response.count,
@@ -42,14 +42,14 @@ export const getSingleCategoryDetails = async (slug) => {
             role: "admin",
             auth: true
         });
-        
+
         if (!response.success) {
             return {
                 success: false,
                 message: response.message || "Failed to fetch category details. Please try again."
             };
         }
-        
+
         return {
             success: true,
             category: response.category
@@ -80,19 +80,19 @@ export const addCategory = async (formData) => {
 
     try {
         const response = await apiFetch("/admin/manage-categories/new", {
-            method: "POST", 
+            method: "POST",
             role: "admin",
             auth: true,
             body: JSON.stringify(formData)
         });
-        
+
         if (!response.success) {
             return {
                 success: false,
                 message: response.message || "Failed to add category. Please check the data and try again."
             };
         }
-        
+
         return {
             success: true,
             message: response.message || "Category added successfully",
@@ -129,14 +129,14 @@ export const updateCategory = async (slug, formData) => {
             auth: true,
             body: JSON.stringify(formData)
         });
-        
+
         if (!response.success) {
             return {
                 success: false,
                 message: response.message || "Failed to update category. Please try again."
             };
         }
-        
+
         return {
             success: true,
             message: response.message || "Category updated successfully",
@@ -153,35 +153,64 @@ export const updateCategory = async (slug, formData) => {
 
 export const deleteCategory = async (slug) => {
     if (!slug) {
-      return {
-        success: false,
-        message: "Category slug is required"
-      };
-    }
-  
-    try {
-      const response = await apiFetch(`/admin/manage-categories/${slug}`, {
-        method: "DELETE",
-        role: "admin",
-        auth: true
-      });
-      
-      if (!response.success) {
         return {
-          success: false,
-          message: response.message || "Failed to delete category. Please try again."
+            success: false,
+            message: "Category slug is required"
         };
-      }
-      
-      return {
-        success: true,
-        message: response.message || "Category deleted successfully"
-      };
+    }
+
+    try {
+        const response = await apiFetch(`/admin/manage-categories/${slug}`, {
+            method: "DELETE",
+            role: "admin",
+            auth: true
+        });
+
+        if (!response.success) {
+            return {
+                success: false,
+                message: response.message || "Failed to delete category. Please try again."
+            };
+        }
+
+        return {
+            success: true,
+            message: response.message || "Category deleted successfully"
+        };
     } catch (error) {
 
-      return {
-        success: false,
-        message: "An unexpected error occurred while deleting category."
-      };
+        return {
+            success: false,
+            message: "An unexpected error occurred while deleting category."
+        };
+    }
+};
+
+export const recalculateVendorCounts = async () => {
+    try {
+        const response = await apiFetch("/admin/manage-categories/recalculate-vendor-counts", {
+            method: "POST",
+            role: "admin",
+            auth: true,
+        });
+
+        if (!response.success) {
+            return {
+                success: false,
+                message: response.message || "Failed to recalculate vendor counts.",
+            };
+        }
+
+        return {
+            success: true,
+            message: response.message || "Vendor counts recalculated successfully",
+            data: response.data,
+        };
+    } catch (error) {
+        console.error("Recalculate vendor counts error:", error);
+        return {
+            success: false,
+            message: "An unexpected error occurred while recalculating vendor counts.",
+        };
     }
 };

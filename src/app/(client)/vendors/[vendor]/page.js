@@ -38,9 +38,11 @@ import {
   IconClockFilled,
   IconMapPinFilled,
   IconPhone,
+  IconMail,
 } from "@tabler/icons-react";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import WhatsAppButton from "../../components/features/vendors/WhatsAppButton";
+import { formatAvailability, getGroupedAvailability } from "@/lib/formatAvailability";
 
 export async function generateMetadata({ params }) {
   const { vendor: vendorSlug } = await params;
@@ -122,6 +124,15 @@ const VendorPage = async ({ params }) => {
 
   const hasPackages = packages.length > 0;
 
+  const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   return (
     <div className="min-h-screen">
       <ProfileViewTracker vendorId={vendorData._id} />
@@ -164,7 +175,7 @@ const VendorPage = async ({ params }) => {
               {vendorData.tagline}
             </p>
             <div className="w-full flex flex-wrap items-center justify-between gap-x-7 gap-y-3 sm:gap-y-2 mt-3">
-              <div className="flex items-center flex-wrap gap-4">
+              <div className="flex items-center flex-wrap gap-x-6 gap-y-3 flex-1">
                 {/* Rating */}
                 <div className="flex items-center">
                   <Star className="fill-yellow-500 stroke-yellow-500" />
@@ -174,21 +185,26 @@ const VendorPage = async ({ params }) => {
                 </div>
 
                 {/* Location */}
-                <div className="flex-center gap-2 uppercase max-sm:text-sm text-gray-700">
-                  <IconMapPinFilled className="size-5" />
+                <div className="flex gap-2 max-sm:text-sm text-gray-700">
+                  <IconMapPinFilled className="size-5 flex-shrink-0 mt-0.5" />
                   <span>
-                    {vendorData.address.city}, {vendorData.address.country}
+                    {[
+                      vendorData.address?.street,
+                      vendorData.address?.area,
+                      vendorData.address?.city,
+                      vendorData.address?.state,
+                      vendorData.address?.country
+                    ].filter(Boolean).join(', ')}
                   </span>
                 </div>
 
-                <div className="flex-center gap-2 uppercase max-sm:text-sm text-gray-700">
-                  <IconClockFilled className="size-5" />
-                  <span>Open 24 Hours</span>
-                </div>
+
+
+
               </div>
 
               <Link
-                className="!font-medium font-heading flex items-center gap-1"
+                className="!font-medium font-heading flex items-center gap-1 whitespace-nowrap"
                 href={`/compare`}
               >
                 <Plus /> Compare
@@ -271,6 +287,14 @@ const VendorPage = async ({ params }) => {
                       </Link>
                     </Button>
 
+                    {vendorData?.email && (
+                      <Button asChild variant="ghost" className="p-0">
+                        <Link href={`mailto:${vendorData.email}`} target="_blank">
+                          <IconMail className="text-primary" />
+                        </Link>
+                      </Button>
+                    )}
+
                     {vendorData?.websiteLink && (
                       <Button asChild variant="ghost" className="p-0">
                         <Link href={vendorData.websiteLink} target="_blank">
@@ -309,10 +333,35 @@ const VendorPage = async ({ params }) => {
                     />
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-8">
                   <p className="text-gray-700 leading-relaxed">
                     {vendorData.businessDescription}
                   </p>
+                </div>
+
+                <div className="mt-8">
+                  <h3 className="!text-lg font-bold uppercase mb-3">Business Hours</h3>
+                  {vendorData.availability?.type === 'custom' && vendorData.availability?.days?.length > 0 ? (
+                    <div className="flex flex-col gap-2 text-sm max-w-2xl">
+                      {getGroupedAvailability(vendorData.availability.days).map((group, idx) => (
+                        <div key={idx} className="flex justify-between py-1 border-b border-dashed border-gray-200 text-gray-600">
+                          <span className="font-medium">{group.label}</span>
+                          <span>
+                            {group.isOpen ? (
+                              `${formatTime(group.open)} - ${formatTime(group.close)}`
+                            ) : (
+                              <span className="text-red-400">Closed</span>
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-green-600 font-medium">
+                      <IconClockFilled className="size-5" />
+                      <span>Open 24/7</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

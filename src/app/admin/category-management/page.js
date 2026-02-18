@@ -5,11 +5,12 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, Search, Plus, AlertCircle, RefreshCw } from "lucide-react";
+import { Eye, Search, Plus, AlertCircle, RefreshCw, Database, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { getCategoryDetails } from "@/app/actions/admin/categories";
+import { getCategoryDetails, recalculateVendorCounts } from "@/app/actions/admin/categories";
 import { AddCategoryModal } from "../components/modals/category/AddCategoryModal";
+import { toast } from "sonner";
 
 const CategoryManagementPage = () => {
   return (
@@ -26,6 +27,7 @@ const CategoriesContent = () => {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecalculating, setIsRecalculating] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -93,7 +95,38 @@ const CategoriesContent = () => {
           />
         </div>
 
-        <AddCategoryModal />
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              setIsRecalculating(true);
+              try {
+                const result = await recalculateVendorCounts();
+                if (result.success) {
+                  toast.success(`Vendor counts recalculated — ${result.data?.categoriesUpdated || 0} categories, ${result.data?.subcategoriesUpdated || 0} subcategories (${result.data?.totalApprovedVendors || 0} approved vendors)`);
+                  fetchCategories();
+                } else {
+                  toast.error(result.message || "Failed to recalculate vendor counts.");
+                }
+              } catch (err) {
+                toast.error("An unexpected error occurred.");
+              } finally {
+                setIsRecalculating(false);
+              }
+            }}
+            disabled={isRecalculating}
+            className="flex items-center gap-2 text-gray-700"
+          >
+            {isRecalculating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4" />
+            )}
+            {isRecalculating ? "Recalculating..." : "Sync Vendor Counts"}
+          </Button>
+          <AddCategoryModal />
+        </div>
       </div>
 
       {/* Categories Grid */}

@@ -9,19 +9,30 @@ import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
+import "lightgallery/css/lg-video.css";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
+import lgVideo from "lightgallery/plugins/video";
 
 export default function MasonryGrid({ items }) {
     const [mounted, setMounted] = useState(false);
     const lightGalleryRef = useRef(null);
 
     const gallery = useMemo(
-        () => items?.map(item => ({ 
-            src: item.url, 
-            thumb: item.url,
-            subHtml: `<h4>${item.vendor?.businessName || 'Gallery Image'}</h4>`
-        })) || [],
+        () => items?.map(item => {
+            const isVideo = item.mediaType === 'video';
+            return {
+                src: isVideo ? undefined : item.url,
+                thumb: item.thumbnail || item.url,
+                subHtml: `<h4>${item.vendor?.businessName || 'Gallery Image'}</h4>`,
+                ...(isVideo && {
+                    video: {
+                        source: [{ src: item.url, type: 'video/mp4' }],
+                        attributes: { preload: false, controls: true }
+                    }
+                })
+            };
+        }) || [],
         [items]
     );
 
@@ -69,21 +80,39 @@ export default function MasonryGrid({ items }) {
                             key={item._id}
                             className="break-inside-avoid mb-2"
                         >
-                            <div 
+                            <div
                                 className="relative rounded-xl overflow-hidden shadow-lg cursor-pointer group hover:shadow-2xl transition-all duration-300"
                                 onClick={() => openGallery(index)}
                             >
                                 <div className="relative w-full">
-                                    <Image
-                                        src={item.url}
-                                        alt={item.vendor?.businessName || "Gallery image"}
-                                        width={800}
-                                        height={600}
-                                        className="w-full h-auto object-cover"
-                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                                    />
+                                    {item.mediaType === 'video' ? (
+                                        <>
+                                            <video
+                                                src={item.url}
+                                                className="w-full h-auto object-cover"
+                                                preload="metadata"
+                                                muted
+                                            />
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <div className="bg-black/50 rounded-full p-3">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M8 5v14l11-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <Image
+                                            src={item.url}
+                                            alt={item.vendor?.businessName || "Gallery image"}
+                                            width={800}
+                                            height={600}
+                                            className="w-full h-auto object-cover"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                                        />
+                                    )}
                                 </div>
-                                
+
                                 {/* Hover vendor info */}
                                 <Link
                                     href={`/vendors/${item.vendor?.slug}`}
@@ -110,7 +139,7 @@ export default function MasonryGrid({ items }) {
                                         </h4>
                                     </div>
                                 </Link>
-                                
+
                                 {/* Dark gradient overlay on hover */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/0 via-transparent to-transparent group-hover:from-black/80 group-hover:via-black/20 rounded-xl transition-all duration-300"></div>
                             </div>
@@ -123,7 +152,7 @@ export default function MasonryGrid({ items }) {
             <LightGallery
                 dynamic
                 dynamicEl={gallery}
-                plugins={[lgThumbnail, lgZoom]}
+                plugins={[lgThumbnail, lgZoom, lgVideo]}
                 onInit={(ref) => {
                     lightGalleryRef.current = ref.instance;
                 }}

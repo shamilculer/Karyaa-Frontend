@@ -65,6 +65,10 @@ const Footer = () => {
 
   const aboutKaryaaLink = [
     {
+      text: "Our Story",
+      href: "/our-story"
+    },
+    {
       text: "Categories",
       href: "/categories"
     },
@@ -83,6 +87,10 @@ const Footer = () => {
     {
       text: "Gallery",
       href: "/gallery"
+    },
+    {
+      text: "Media Kit",
+      href: "/media-kit"
     },
   ]
 
@@ -194,12 +202,6 @@ const Footer = () => {
                       </Link>
                     </li>
                   ))}
-                  <li>
-                    <RaiseComplaintModal />
-                  </li>
-                  <li>
-                    <ReviewVendorModal />
-                  </li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -221,6 +223,13 @@ const Footer = () => {
                       </Link>
                     </li>
                   ))}
+
+                  <li>
+                    <RaiseComplaintModal />
+                  </li>
+                  <li>
+                    <ReviewVendorModal />
+                  </li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -280,12 +289,6 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
-              <li>
-                <RaiseComplaintModal />
-              </li>
-              <li>
-                <ReviewVendorModal />
-              </li>
             </ul>
           </div>
 
@@ -305,6 +308,13 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+
+              <li>
+                <RaiseComplaintModal />
+              </li>
+              <li>
+                <ReviewVendorModal />
+              </li>
             </ul>
           </div>
 
@@ -351,7 +361,7 @@ const Footer = () => {
           </p>
         </div>
       </section>
-    </footer>
+    </footer >
   )
 }
 

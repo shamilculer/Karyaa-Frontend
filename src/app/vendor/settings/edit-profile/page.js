@@ -14,6 +14,7 @@ import { getVendorProfile, updateVendorProfile } from '@/app/actions/vendor/auth
 import { getCategories } from '@/app/actions/public/categories';
 import { useVendorStore } from '@/store/vendorStore';
 import Image from 'next/image';
+import AvailabilityEditor from '@/components/common/AvailabilityEditor';
 
 const OCCASION_OPTIONS = [
   { slug: "wedding", name: "Wedding" },
@@ -65,6 +66,15 @@ const editProfileSchema = z.object({
   twitterLink: z.string().optional(),
   ownerProfileImage: z.string().optional(),
   businessLogo: z.string().optional(),
+  availability: z.object({
+    type: z.enum(['24/7', 'custom']).default('24/7'),
+    days: z.array(z.object({
+      day: z.string(),
+      isOpen: z.boolean(),
+      open: z.string(),
+      close: z.string()
+    })).optional()
+  }).optional(),
 }).refine((data) => {
   // If UAE vendor, require UAE documents
   if (!data.isInternational) {
@@ -241,6 +251,11 @@ const EditProfilePage = () => {
       twitterLink: "",
       ownerProfileImage: "",
       businessLogo: "",
+      availability: {
+        type: '24/7',
+        openingTime: '09:00',
+        closingTime: '17:00',
+      },
     },
     mode: "onBlur",
   });
@@ -286,6 +301,7 @@ const EditProfilePage = () => {
         const vendor = result.data;
         setVendorId(vendor._id);
 
+
         const formData = {
           ownerName: vendor.ownerName || "",
           email: vendor.email || "",
@@ -311,8 +327,8 @@ const EditProfilePage = () => {
             city: vendor.address?.city || "",
             state: vendor.address?.state || "",
             country: vendor.address?.country || "UAE",
+
             zipCode: vendor.address?.zipCode || "",
-            googleMapLink: vendor.address?.googleMapLink || ""
           },
           websiteLink: vendor.websiteLink || "",
           facebookLink: vendor.facebookLink || "",
@@ -320,6 +336,10 @@ const EditProfilePage = () => {
           twitterLink: vendor.twitterLink || "",
           ownerProfileImage: vendor.ownerProfileImage || "",
           businessLogo: vendor.businessLogo || "",
+          availability: vendor.availability || {
+            type: '24/7',
+            days: []
+          },
         };
 
         form.reset(formData);
@@ -604,6 +624,8 @@ const EditProfilePage = () => {
                     />
                   </div>
 
+
+
                   <FormField
                     control={form.control}
                     name="mainCategory"
@@ -668,14 +690,31 @@ const EditProfilePage = () => {
                       </FormItem>
                     )}
                   />
+
+
+                  <FormField
+                    control={form.control}
+                    name="availability"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <AvailabilityEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
 
               {activeTab === "documents" && (
                 <div className="space-y-6">
-                  {!isInternational ? (
-                    // UAE Vendor Documents
-                    <>
+                  {(!isInternational || tradeLicenseCopy || personalEmiratesIdNumber || emiratesIdCopy) && (
+                    <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
+                      <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">UAE Vendor Documents</h3>
                       <FormField
                         control={form.control}
                         name="tradeLicenseNumber"
@@ -753,10 +792,13 @@ const EditProfilePage = () => {
                           </FormItem>
                         )}
                       />
-                    </>
-                  ) : (
-                    // International Vendor Documents
-                    <>
+
+                    </div>
+                  )}
+
+                  {(isInternational || businessLicenseCopy || passportOrIdCopy) && (
+                    <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
+                      <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">International Vendor Documents</h3>
                       <FormField
                         control={form.control}
                         name="businessLicenseCopy"
@@ -806,7 +848,8 @@ const EditProfilePage = () => {
                           </FormItem>
                         )}
                       />
-                    </>
+
+                    </div>
                   )}
                 </div>
               )}
@@ -898,19 +941,30 @@ const EditProfilePage = () => {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="address.googleMapLink"
-                      render={({ field }) => (
-                        <FormItem className="md:col-span-2">
-                          <FormLabel className="text-xs font-medium">Google Maps Link</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="https://maps.google.com/..." className="p-4 bg-[#f0f0f0] h-11 border-none" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="mt-6">
+                      <FormField
+                        control={form.control}
+                        name="isInternational"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm bg-gray-50">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">International Vendor</FormLabel>
+                              <div className="text-sm text-gray-500">
+                                Check this if you are based outside the UAE. This will update the required documents.
+                              </div>
+                            </div>
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
 
                   <div className="border-t border-gray-200 pt-6 mt-6">
@@ -1007,9 +1061,9 @@ const EditProfilePage = () => {
               </div>
             </div>
           </Form>
-        </div>
-      </div>
-    </div>
+        </div >
+      </div >
+    </div >
   );
 };
 

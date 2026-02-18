@@ -111,13 +111,32 @@ function GalleryContent({ vendorId, refreshKey, bulkMode, selected, setSelected 
               <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10" />
             )}
 
-            <Image
-              src={item.url}
-              alt="Gallery Image"
-              width={300}
-              height={300}
-              className="h-72 w-full object-cover rounded-lg transition-all"
-            />
+            {item.mediaType === 'video' ? (
+              <div className="relative h-72 w-full">
+                <video
+                  src={item.url}
+                  className="h-72 w-full object-cover rounded-lg"
+                  preload="metadata"
+                  muted
+                />
+                {/* Play icon overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black/50 rounded-full p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Image
+                src={item.url}
+                alt="Gallery Image"
+                width={300}
+                height={300}
+                className="h-72 w-full object-cover rounded-lg transition-all"
+              />
+            )}
           </div>
         );
       })}

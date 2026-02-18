@@ -57,20 +57,28 @@ const DashboardGallery = () => {
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-5 w-full place-items-center gap-2 lg:gap-5">
-            {images.map((img, index) => (
-                <Image
-                    key={img._id || index}
-                    src={img.url}
-                    className="h-44 lg:h-72 w-full object-cover rounded-2xl border border-gray-300"
-                    width={300}
-                    height={300}
-                    alt="Gallery"
-                />
+            {images.map((item, index) => (
+                <div key={item._id || index} className="relative h-44 lg:h-72 w-full rounded-2xl border border-gray-300 overflow-hidden">
+                    {item.mediaType === 'video' ? (
+                        <video
+                            src={item.url}
+                            className="h-full w-full object-cover"
+                            controls
+                            preload="metadata"
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                    ) : (
+                        <Image
+                            src={item.url}
+                            className="h-full w-full object-cover"
+                            width={300}
+                            height={300}
+                            alt="Gallery"
+                        />
+                    )}
+                </div>
             ))}
-            {/* Fill remaining spots with placeholders if less than 5 images but more than 0? 
-                User asked for "first 5 images", implies if available. 
-                If fewer than 5, just showing what we have is standard behavior. 
-            */}
         </div>
     )
 }

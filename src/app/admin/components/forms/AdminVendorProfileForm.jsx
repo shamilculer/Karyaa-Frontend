@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ControlledFileUpload from '@/components/common/ControlledFileUploads';
 import { updateVendorDetailsAction, updateVendorDocumentsAction } from '@/app/actions/admin/vendors';
 import Image from 'next/image';
+import AvailabilityEditor from '@/components/common/AvailabilityEditor';
 
 const OCCASION_OPTIONS = [
     { slug: "wedding", name: "Wedding" },
@@ -47,7 +48,7 @@ const editProfileSchema = z.object({
         state: z.string().optional(),
         country: z.string().min(1, "Country is required"),
         zipCode: z.string().optional(),
-        googleMapLink: z.string().optional(),
+        zipCode: z.string().optional(),
     }),
     websiteLink: z.string().optional(),
     facebookLink: z.string().optional(),
@@ -55,6 +56,15 @@ const editProfileSchema = z.object({
     twitterLink: z.string().optional(),
     ownerProfileImage: z.string().optional(),
     businessLogo: z.string().optional(),
+    availability: z.object({
+        type: z.enum(['24/7', 'custom']).default('24/7'),
+        days: z.array(z.object({
+            day: z.string(),
+            isOpen: z.boolean(),
+            open: z.string(),
+            close: z.string()
+        })).optional()
+    }).optional(),
 });
 
 const ImagePreview = ({ src, alt, onRemove, label }) => {
@@ -189,6 +199,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
             businessDescription: vendor.businessDescription || "",
             whatsAppNumber: vendor.whatsAppNumber || "",
             pricingStartingFrom: vendor.pricingStartingFrom || 0,
+            pricingStartingFrom: vendor.pricingStartingFrom || 0,
             isInternational: vendor.isInternational || false,
             mainCategory: Array.isArray(vendor.mainCategory)
                 ? vendor.mainCategory.map(cat => typeof cat === 'object' ? cat._id : cat)
@@ -204,7 +215,8 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                 state: vendor.address?.state || "",
                 country: vendor.address?.country || "UAE",
                 zipCode: vendor.address?.zipCode || "",
-                googleMapLink: vendor.address?.googleMapLink || ""
+                country: vendor.address?.country || "UAE",
+                zipCode: vendor.address?.zipCode || "",
             },
             websiteLink: vendor.websiteLink || "",
             facebookLink: vendor.facebookLink || "",
@@ -212,6 +224,11 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
             twitterLink: vendor.twitterLink || "",
             ownerProfileImage: vendor.ownerProfileImage || "",
             businessLogo: vendor.businessLogo || "",
+            availability: vendor.availability || {
+                type: '24/7',
+                openingTime: '09:00',
+                closingTime: '17:00',
+            },
         },
         mode: "onBlur",
     });
@@ -451,6 +468,9 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                         </FormItem>
                                     )}
                                 />
+
+
+
                             </div>
 
                             <FormField
@@ -539,13 +559,30 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                     </FormItem>
                                 )}
                             />
+
+                            <FormField
+                                control={form.control}
+                                name="availability"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <AvailabilityEditor
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
                     )}
 
                     {activeTab === "documents" && (
                         <div className="space-y-6">
-                            {!isInternational ? (
-                                <>
+                            {(!isInternational || tradeLicenseCopy || emiratesIdNumber || emiratesIdCopy) && (
+                                <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
+                                    <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">UAE Vendor Documents</h3>
                                     <FormField
                                         control={form.control}
                                         name="tradeLicenseNumber"
@@ -553,7 +590,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                             <FormItem>
                                                 <FormLabel className="text-xs font-medium">Trade License Number *</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter number" className="bg-gray-50" />
+                                                    <Input {...field} placeholder="License number" className="bg-gray-50" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -635,9 +672,12 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                             </FormItem>
                                         )}
                                     />
-                                </>
-                            ) : (
-                                <>
+                                </div>
+                            )}
+
+                            {(isInternational || businessLicenseCopy || passportOrIdCopy) && (
+                                <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
+                                    <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">International Vendor Documents</h3>
                                     <FormField
                                         control={form.control}
                                         name="businessLicenseCopy"
@@ -699,7 +739,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                             </FormItem>
                                         )}
                                     />
-                                </>
+                                </div>
                             )}
                         </div>
                     )}
@@ -707,6 +747,30 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                     {activeTab === "address" && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="md:col-span-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="isInternational"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-gray-50 border-gray-500 cursor-pointer">
+                                                <div className="space-y-0.5">
+                                                    <FormLabel className="text-base font-medium">International Vendor</FormLabel>
+                                                    <div className="!text-xs text-gray-500">
+                                                        Check this if the vendor is based outside the UAE. This will update the required documents.
+                                                    </div>
+                                                </div>
+                                                <FormControl>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={field.value}
+                                                        onChange={field.onChange}
+                                                        className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                                 <FormField
                                     control={form.control}
                                     name="address.city"
@@ -791,24 +855,24 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="address.googleMapLink"
-                                    render={({ field }) => (
-                                        <FormItem className="md:col-span-2">
-                                            <FormLabel className="text-xs font-medium">Google Maps Link</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} placeholder="https://maps.google.com/..." className="bg-gray-50" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                             </div>
 
                             <div className="space-y-4 pt-4 border-t border-gray-100">
-                                <h3 className="text-sm font-medium text-gray-900">Social Media</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <h3 className="!text-base font-medium text-gray-900">Social Media & Website</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="websiteLink"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs font-medium">Website</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="https://example.com" className="bg-gray-50" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="facebookLink"

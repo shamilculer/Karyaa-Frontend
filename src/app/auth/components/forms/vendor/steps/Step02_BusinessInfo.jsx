@@ -17,6 +17,7 @@ import { getCategories as fetchCategoriesAction } from "@/app/actions/public/cat
 import { getBundleOptions } from "@/app/actions/vendor/bundles";
 import { Combobox } from "@/components/ui/combobox";
 import { countries } from "@/lib/countries";
+import AvailabilityEditor from "@/components/common/AvailabilityEditor";
 
 const OCCASION_OPTIONS = [
     { slug: "wedding", name: "Wedding" },
@@ -137,7 +138,7 @@ export default function Step02_BusinessInfo() {
                 state: formData.address?.state || "",
                 country: formData.address?.country || (isInternational ? "" : "United Arab Emirates"),
                 zipCode: formData.address?.zipCode || "",
-                googleMapLink: formData.address?.googleMapLink || "",
+
                 coordinates: {
                     latitude: formData.address?.coordinates?.latitude,
                     longitude: formData.address?.coordinates?.longitude,
@@ -147,6 +148,18 @@ export default function Step02_BusinessInfo() {
             facebookLink: formData.facebookLink || "",
             instagramLink: formData.instagramLink || "",
             twitterLink: formData.twitterLink || "",
+            availability: formData.availability || {
+                type: '24/7',
+                days: [
+                    { day: 'Monday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Tuesday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Wednesday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Thursday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Friday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Saturday', isOpen: true, open: '09:00', close: '17:00' },
+                    { day: 'Sunday', isOpen: false, open: '09:00', close: '17:00' },
+                ],
+            },
         },
         mode: "onBlur",
         reValidateMode: "onChange",
@@ -406,7 +419,7 @@ export default function Step02_BusinessInfo() {
                 )}
 
                 {renderInputField({ control: form.control, name: "address.zipCode", label: "Zip Code (Optional)", placeholder: "00000" })}
-                {renderInputField({ control: form.control, name: "address.googleMapLink", label: "Google Maps Link (Optional)", placeholder: "Paste a Google Maps location link" })}
+
 
                 <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Online Presence (Optional)</h5>
 
@@ -414,6 +427,24 @@ export default function Step02_BusinessInfo() {
                 {renderInputField({ control: form.control, name: "instagramLink", label: "Instagram Link", placeholder: "https://instagram.com/yourhandle" })}
                 {renderInputField({ control: form.control, name: "facebookLink", label: "Facebook Link", placeholder: "https://facebook.com/yourpage" })}
                 {renderInputField({ control: form.control, name: "twitterLink", label: "Twitter/X Link", placeholder: "https://twitter.com/yourhandle" })}
+
+                <h5 className="!text-xl font-bold text-gray-700 mt-10 mb-6 border-t border-gray-400 pt-6">Business Hours</h5>
+
+                <FormField
+                    control={form.control}
+                    name="availability"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                                <AvailabilityEditor
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <div className="flex justify-between pt-4">
                     <Button

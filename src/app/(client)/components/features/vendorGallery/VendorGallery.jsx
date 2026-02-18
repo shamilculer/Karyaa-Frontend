@@ -6,15 +6,29 @@ import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
+import "lightgallery/css/lg-video.css";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
+import lgVideo from "lightgallery/plugins/video";
 import { Button } from "@/components/ui/button";
 
 export default function VendorGallery({ images }) {
   const lightGalleryRef = useRef(null);
 
   const gallery = useMemo(
-    () => images?.map(item => ({ src: item.url, thumb: item.url })) || [],
+    () => images?.map(item => {
+      const isVideo = item.mediaType === 'video';
+      return {
+        src: item.url,
+        thumb: item.thumbnail || item.url,
+        ...(isVideo && {
+          video: {
+            source: [{ src: item.url, type: 'video/mp4' }],
+            attributes: { preload: false, controls: true }
+          }
+        })
+      };
+    }) || [],
     [images]
   );
 
@@ -22,7 +36,7 @@ export default function VendorGallery({ images }) {
 
   if (totalImages === 0) {
     return (
-      <div className="w-full h-[50px]"/>
+      <div className="w-full h-[50px]" />
     );
   }
 
@@ -53,15 +67,34 @@ export default function VendorGallery({ images }) {
           const isLast = i === Math.min(totalImages, 4) - 1;
           const showOverlay = isLast && totalImages > 4;
 
+          const isVideo = images[i]?.mediaType === 'video';
+
           return (
             <div key={i} className={classes} onClick={() => openGallery(i)}>
-              <Image
-                src={img.thumb}
-                alt={`Gallery Image ${i}`}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover hover:scale-105 transition-transform duration-300"
-              />
+              {isVideo ? (
+                <div className="relative w-full h-full bg-black">
+                  <video
+                    src={img.src}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Image
+                  src={img.thumb}
+                  alt={`Gallery Image ${i}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                />
+              )}
 
               {showOverlay && (
                 <div className="absolute inset-0 flex items-end justify-end p-3">
@@ -84,7 +117,7 @@ export default function VendorGallery({ images }) {
       <LightGallery
         dynamic
         dynamicEl={gallery}
-        plugins={[lgThumbnail, lgZoom]}
+        plugins={[lgThumbnail, lgZoom, lgVideo]}
         onInit={(ref) => {
           lightGalleryRef.current = ref.instance;
         }}

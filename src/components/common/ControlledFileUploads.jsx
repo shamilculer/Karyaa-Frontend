@@ -55,6 +55,20 @@ export default function ControlledFileUpload({
         return false;
     };
 
+    const isVideoUrl = (url) => {
+        if (!url) return false;
+        try {
+            const extension = url.split('.').pop().toLowerCase().split('?')[0];
+            if (['mp4', 'webm', 'ogg', 'mov'].includes(extension)) return true;
+        } catch (e) {
+            // ignore
+        }
+        // Fallback
+        if (allowedMimeType?.every(t => t.startsWith('video/'))) return true;
+
+        return false;
+    };
+
     const handleFileChange = async (e, onChange, value) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
@@ -243,7 +257,23 @@ export default function ControlledFileUpload({
                             <div key={index} className="group relative aspect-square rounded-xl overflow-hidden border bg-background shadow-sm hover:shadow-md transition-all">
                                 {isImageUrl(url) ? (
                                     <>
-                                        <img src={url} alt="Preview" className="w-full h-full object-contain" />
+                                        <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(url, onChange, value);
+                                                }}
+                                                className="h-8 w-8 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : isVideoUrl(url) ? (
+                                    <>
+                                        <video src={url} className="w-full h-full object-cover" controls={false} muted />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                             <button
                                                 type="button"
@@ -296,10 +326,26 @@ export default function ControlledFileUpload({
                         ))
                     ) : (
                         value && typeof value === 'string' && (
-                            <div className={`${isImageUrl(value) ? 'group relative rounded-xl overflow-hidden border bg-gray-200 shadow-sm hover:shadow-md transition-all aspect-video w-full' : 'w-full'}`}>
+                            <div className={`${(isImageUrl(value) || isVideoUrl(value)) ? 'group relative rounded-xl overflow-hidden border bg-gray-200 shadow-sm hover:shadow-md transition-all aspect-video w-full' : 'w-full'}`}>
                                 {isImageUrl(value) ? (
                                     <>
-                                        <img src={value} alt="Preview" className="w-full h-full object-contain" />
+                                        <img src={value} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemove(value, onChange, value);
+                                                }}
+                                                className="h-9 w-9 rounded-full bg-white/90 text-destructive hover:bg-destructive hover:text-white flex items-center justify-center transition-colors shadow-sm"
+                                            >
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : isVideoUrl(value) ? (
+                                    <>
+                                        <video src={value} className="w-full h-full object-cover" controls />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <button
                                                 type="button"

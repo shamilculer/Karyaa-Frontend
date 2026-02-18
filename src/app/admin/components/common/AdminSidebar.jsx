@@ -60,6 +60,7 @@ const items = [
             { title: "Content", url: "/admin/content-moderation/content" },
             { title: "Blog", url: "/admin/content-moderation/blog" },
             { title: "Ideas", url: "/admin/content-moderation/ideas" },
+            { title: "Media Kit", url: "/admin/content-moderation/content/media-kit" },
             { title: "SEO Management", url: "/admin/content-moderation/seo" },
             // { title: "Contact Details", url: "/admin/content-moderation/contact-details" },
         ],
@@ -231,7 +232,7 @@ function AdminSidebar() {
                                                 <SidebarGroupContent className="pl-4 pt-1">
                                                     <SidebarMenu>
                                                         {item.children.map((child) => {
-                                                            const childActive = pathname.startsWith(child.url);
+                                                            const childActive = pathname === child.url;
                                                             return (
                                                                 <SidebarMenuItem key={child.title}>
                                                                     <SidebarMenuButton
