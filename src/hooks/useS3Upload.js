@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getPresignedUrl } from '@/app/actions/s3-upload';
+import { toast } from 'sonner';
 
 export function useS3Upload() {
     const [uploading, setUploading] = useState(false);
@@ -49,8 +50,10 @@ export function useS3Upload() {
             };
 
         } catch (err) {
-            console.error("Upload failed:", err);
-            setError(err.message || "Upload failed");
+            console.warn("Upload failed:", err);
+            const message = err.message || "Upload failed";
+            setError(message);
+            toast.error(message);
             return null;
         } finally {
             setUploading(false);

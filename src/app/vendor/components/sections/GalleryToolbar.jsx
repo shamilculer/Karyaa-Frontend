@@ -1,9 +1,8 @@
-import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Trash2, CheckSquare, XSquare, Loader2 } from "lucide-react";
+import { Upload, Trash2, CheckSquare, XSquare, Loader2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { addVendorGalleryItems } from "@/app/actions/shared/gallery";
-import { useS3Upload } from "@/hooks/useS3Upload";
+import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 
 export default function GalleryToolBar({
   vendorId,
@@ -13,95 +12,9 @@ export default function GalleryToolBar({
   selectedCount,
   onDeleteSelected,
   clearSelection,
+  reorderMode = false,
+  onToggleReorder,
 }) {
-  const fileInputRef = useRef(null);
-  const { uploadFile, uploading } = useS3Upload();
-  const [localUploading, setLocalUploading] = useState(false);
-
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    if (!vendorId) {
-      toast.error("Vendor ID missing — refresh and try again.");
-      return;
-    }
-
-    setLocalUploading(true);
-    const loadingToast = toast.loading("Uploading media...");
-
-    try {
-      const uploadedItems = [];
-      const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
-      const SUPPORTED_VIDEO_FORMATS = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
-
-      // Upload files to S3
-      for (const file of files) {
-        const isImage = file.type.startsWith('image/');
-        const isVideo = SUPPORTED_VIDEO_FORMATS.includes(file.type);
-
-        // Validate type
-        if (!isImage && !isVideo) {
-          toast.error(`Unsupported file type: ${file.name}`);
-          continue;
-        }
-
-        // Validate video size
-        if (isVideo && file.size > MAX_VIDEO_SIZE) {
-          toast.error(`Video too large (max 50MB): ${file.name}`);
-          continue;
-        }
-
-        try {
-          const result = await uploadFile(file, {
-            folder: `vendors/${vendorId}/gallery`,
-            isPublic: false,
-            role: 'vendor'
-          });
-
-          if (result?.url) {
-            uploadedItems.push({
-              url: result.url,
-              mediaType: isVideo ? 'video' : 'image'
-            });
-          }
-        } catch (err) {
-          console.error(`Failed to upload ${file.name}:`, err);
-          toast.error(`Failed to upload ${file.name}`);
-        }
-      }
-
-      if (uploadedItems.length === 0) {
-        toast.dismiss(loadingToast);
-        setLocalUploading(false);
-        return;
-      }
-
-      // Save to database
-      toast.loading("Saving to gallery...", { id: loadingToast });
-
-      const res = await addVendorGalleryItems(vendorId, uploadedItems);
-
-      toast.dismiss(loadingToast);
-
-      if (res.error) {
-        toast.error(res.error);
-      } else {
-        toast.success(`${uploadedItems.length} item(s) added!`);
-        onUploadComplete?.();
-      }
-    } catch (err) {
-      console.error("Gallery upload error:", err);
-      toast.dismiss(loadingToast);
-      toast.error("Failed to save gallery items");
-    } finally {
-      setLocalUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
   if (!vendorId) {
     return (
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -112,6 +25,13 @@ export default function GalleryToolBar({
       </div>
     );
   }
+
+  const VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov", "avi", "quicktime"];
+  const isVideoFile = (url, file) => {
+    if (file?.type?.startsWith("video/")) return true;
+    const ext = url?.split(".").pop()?.toLowerCase()?.split("?")[0];
+    return VIDEO_EXTENSIONS.includes(ext);
+  };
 
   return (
     <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -138,42 +58,106 @@ export default function GalleryToolBar({
         </Button>
 
         {/* Delete Selected */}
-        <Button
-          variant="destructive"
-          disabled={!bulkMode || selectedCount === 0}
-          onClick={onDeleteSelected}
-          className="max-md:px-3.5 max-md:py-2 max-md:h-auto max-md:text-[0px]"
-        >
-          <Trash2 className="w-5" /> Delete ({selectedCount})
-        </Button>
+        {bulkMode && selectedCount > 0 && (
+          <Button
+            variant="destructive"
+            onClick={onDeleteSelected}
+            className="max-md:px-3.5 max-md:py-2 max-md:h-auto max-md:text-[0px]"
+          >
+            <Trash2 className="w-5 mr-2" />
+            Delete ({selectedCount})
+          </Button>
+        )}
+
+        {/* Reorder mode toggle */}
+        {!bulkMode && onToggleReorder && (
+          <Button
+            variant={reorderMode ? "secondary" : "outline"}
+            onClick={onToggleReorder}
+            className="max-md:px-3.5 max-md:py-2 max-md:h-auto max-md:text-[0px]"
+          >
+            <GripVertical className="w-5" />
+            {reorderMode ? "Done Reordering" : "Reorder"}
+          </Button>
+        )}
       </div>
 
-      {/* RIGHT SECTION — Upload */}
+      {/* RIGHT SECTION — Upload via ControlledFileUpload (with crop modal) */}
       <div>
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="image/*,video/*"
-          multiple
-          onChange={handleFileSelect}
-          disabled={localUploading || uploading}
-        />
-        <Button
-          className="max-md:px-3.5 max-md:py-2 max-md:h-auto"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={localUploading || uploading}
-        >
-          {localUploading || uploading ? (
-            <>
-              <Loader2 className="w-4 md:w-5 animate-spin mr-2" /> Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="w-4 md:w-5 mr-2" /> Upload
-            </>
+        <ControlledFileUpload
+          value={[]}
+          onChange={async (urls, files) => {
+            if (!urls || urls.length === 0) return;
+
+            const newUrls = Array.isArray(urls) ? urls : [urls];
+            const filesArray = Array.isArray(files)
+              ? files
+              : files
+                ? [files]
+                : [];
+
+            // Build a payload entry for every new URL
+            const payload = newUrls.map((url, i) => ({
+              url,
+              mediaType: isVideoFile(url, filesArray[i]) ? "video" : "image",
+            }));
+
+            const loadingToast = toast.loading(
+              payload.length > 1
+                ? `Saving ${payload.length} items to gallery...`
+                : `Saving item to gallery...`
+            );
+            try {
+              const res = await addVendorGalleryItems(vendorId, payload);
+              if (res.error) {
+                toast.error(res.error || "Failed to save gallery items");
+              } else {
+                toast.success(
+                  payload.length > 1
+                    ? `${payload.length} items added to gallery`
+                    : `Item added to gallery`
+                );
+                onUploadComplete?.();
+              }
+            } catch (err) {
+              console.error("Gallery save error:", err);
+              toast.error("Failed to save gallery items");
+            } finally {
+              toast.dismiss(loadingToast);
+            }
+          }}
+          folderPath={`vendors/${vendorId}/gallery`}
+          allowedMimeType={[
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "video/mp4",
+            "video/quicktime",
+            "video/x-msvideo",
+            "video/webm",
+          ]}
+          role="vendor"
+          enableCrop={true}
+          multiple={true}
+          customTrigger={({ onClick, disabled, uploading }) => (
+            <Button
+              onClick={onClick}
+              disabled={disabled || uploading}
+              className="max-md:px-3.5 max-md:py-2 max-md:h-auto"
+            >
+              {disabled || uploading ? (
+                <>
+                  <Loader2 className="w-4 md:w-5 animate-spin mr-2" />{" "}
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 md:w-5 mr-2" /> Upload
+                </>
+              )}
+            </Button>
           )}
-        </Button>
+        />
       </div>
     </div>
   );

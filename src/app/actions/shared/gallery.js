@@ -58,7 +58,7 @@ export const getVendorGalleryItems = async (
  * Server Action to add gallery items for a vendor
  *
  * @param {string} vendorId
- * @param {Array<{ url: string, type?: string, category?: string }>} items
+ * @param {Array<{ url: string, mediaType?: "image" | "video", thumbnail?: string }>} items
  * @returns {Promise<{ success?: string, error?: string }>}
  */
 export const addVendorGalleryItems = async (vendorId, items = []) => {
@@ -124,6 +124,32 @@ export const deleteVendorGalleryItems = async (ids) => {
   }
 };
 
+export const updateVendorGalleryItem = async (itemId, { url } = {}) => {
+  try {
+    if (!itemId || !url) {
+      return { error: "Missing itemId or url." };
+    }
+
+    const response = await apiFetch(`/gallery/item/${itemId}`, {
+      method: "PUT",
+      body: JSON.stringify({ url }),
+      role: "vendor",
+      auth: true,
+    });
+
+    if (!response || response.error || response.status >= 400) {
+      return { error: response?.message || "Failed to update gallery item." };
+    }
+
+    revalidatePath("/vendor/gallery");
+
+    return { success: true, item: response.item };
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error" };
+  }
+};
+
 export const getAllGalleryItems = async ({ page = 1, limit = 30 }) => {
   try {
     // FIXED: Corrected the apiFetch call
@@ -153,3 +179,56 @@ export const getAllGalleryItems = async ({ page = 1, limit = 30 }) => {
     };
   }
 };
+
+/**
+ * Reorder vendor gallery items (Vendor auth).
+ * @param {string[]} orderedIds - Full ordered list of gallery item IDs.
+ */
+export const reorderVendorGalleryItems = async (orderedIds) => {
+  try {
+    if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+      return { error: "orderedIds is required." };
+    }
+    const response = await apiFetch("/gallery/reorder", {
+      method: "PATCH",
+      body: JSON.stringify({ orderedIds }),
+      role: "vendor",
+      auth: true,
+    });
+    if (!response?.success) {
+      return { error: response?.message || "Failed to reorder gallery." };
+    }
+    revalidatePath("/vendor/gallery");
+    return { success: true };
+  } catch (err) {
+    console.error("reorderVendorGalleryItems error:", err);
+    return { error: "Unexpected error" };
+  }
+};
+
+/**
+ * Reorder vendor gallery items (Admin auth).
+ * @param {string} vendorId
+ * @param {string[]} orderedIds
+ */
+export const reorderAdminVendorGallery = async (vendorId, orderedIds) => {
+  try {
+    if (!vendorId || !Array.isArray(orderedIds) || orderedIds.length === 0) {
+      return { error: "vendorId and orderedIds are required." };
+    }
+    const response = await apiFetch(`/admin/vendors/${vendorId}/gallery/reorder`, {
+      method: "PATCH",
+      body: JSON.stringify({ orderedIds }),
+      role: "admin",
+      auth: true,
+    });
+    if (!response?.success) {
+      return { error: response?.message || "Failed to reorder gallery." };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error("reorderAdminVendorGallery error:", err);
+    return { error: "Unexpected error" };
+  }
+};
+

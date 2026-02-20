@@ -108,10 +108,15 @@ export default function ControlledFileUpload({
 
         // Store active onChange to use later
         setPendingOnChange(() => onChange);
+
+        // Track original files for the calling component (so it can detect mediaType etc.)
+        const directFiles = [];
+
         if (filesToUploadDirectly.length > 0) {
             // We iterate to upload
             for (const file of filesToUploadDirectly) {
-                await uploadOneFile(file, onChange);
+                const url = await uploadOneFile(file, onChange, false);
+                if (url) directFiles.push({ url, file });
             }
         }
 
@@ -209,11 +214,11 @@ export default function ControlledFileUpload({
 
                     const currentArray = Array.isArray(currentData) ? currentData : (currentData ? [currentData] : []);
                     const newValue = [...currentArray, result.url];
-                    if (onChange) onChange(newValue);
+                    if (onChange) onChange(newValue, [file]);
                     if (onSuccess) onSuccess(newValue);
 
                 } else {
-                    if (onChange) onChange(result.url);
+                    if (onChange) onChange(result.url, [file]);
                     if (onSuccess) onSuccess(result.url);
                 }
                 toast.success('File uploaded');

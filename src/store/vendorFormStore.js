@@ -19,13 +19,20 @@ const initialFormData = {
   phoneNumber: "",
   password: "",
   ownerProfileImage: "", // FIX: Corrected typo from 'ownerPofileImage'
+  isInternational: false,
+  vendorType: "business", // business | freelancer
+  tradeLicenseNumber: "",
+  tradeLicenseCopy: "",
+  personalEmiratesIdNumber: "",
+  emiratesIdCopy: "",
+  businessLicenseCopy: "",
+  passportOrIdCopy: "",
+  freelancerOtherDoc: "",
 
   // --- STEP 2 FIELDS ---
   businessName: "",
   businessLogo: "",
   tagline: "", // ADDED: New field from schema
-  tradeLicenseNumber: "",
-  tradeLicenseCopy: "",
   mainCategory: [],
   subCategories: [],
   yearsOfExperience: 0,

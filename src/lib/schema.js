@@ -46,6 +46,7 @@ export const Step1Schema = z
   .object({
     ownerName: z.string().trim().min(1, "Owner's Full name is required."),
     isInternational: z.boolean().default(false),
+    vendorType: z.enum(["business", "freelancer"]).default("business"),
 
     // UAE-specific fields
     tradeLicenseNumber: z.string().trim().optional().or(z.literal("")),
@@ -56,6 +57,7 @@ export const Step1Schema = z
     // International-specific fields
     businessLicenseCopy: z.string().optional().or(z.literal("")),
     passportOrIdCopy: z.string().optional().or(z.literal("")),
+    freelancerOtherDoc: z.string().optional().or(z.literal("")),
 
     // Common fields
     email: z
@@ -81,21 +83,8 @@ export const Step1Schema = z
   })
   .superRefine((data, ctx) => {
     if (!data.isInternational) {
+      const isFreelancer = data.vendorType === "freelancer";
       // UAE vendor validations
-      if (!data.tradeLicenseNumber?.trim()) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["tradeLicenseNumber"],
-          message: "Trade License Number is required for UAE vendors.",
-        });
-      }
-      if (!data.personalEmiratesIdNumber?.trim()) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["personalEmiratesIdNumber"],
-          message: "Emirates ID Number is required for UAE vendors.",
-        });
-      }
       if (!data.emiratesIdCopy) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -103,20 +92,37 @@ export const Step1Schema = z
           message: "Emirates ID Copy is required for UAE vendors.",
         });
       }
-      if (!data.tradeLicenseCopy) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["tradeLicenseCopy"],
-          message: "Trade License Copy is required for UAE vendors.",
-        });
+      if (!isFreelancer) {
+        if (!data.tradeLicenseNumber?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["tradeLicenseNumber"],
+            message: "Trade License Number is required for UAE businesses.",
+          });
+        }
+        if (!data.tradeLicenseCopy) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["tradeLicenseCopy"],
+            message: "Trade License Copy is required for UAE businesses.",
+          });
+        }
+        if (!data.personalEmiratesIdNumber?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["personalEmiratesIdNumber"],
+            message: "Emirates ID Number is required for UAE businesses.",
+          });
+        }
       }
     } else {
+      const isFreelancer = data.vendorType === "freelancer";
       // International vendor validations
-      if (!data.businessLicenseCopy) {
+      if (!isFreelancer && !data.businessLicenseCopy) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["businessLicenseCopy"],
-          message: "Business License is required for international vendors.",
+          message: "Business License is required for international businesses.",
         });
       }
       if (!data.passportOrIdCopy) {

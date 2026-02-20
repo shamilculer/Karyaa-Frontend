@@ -208,15 +208,11 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
                         src={img.url}
                         className="w-full h-48 object-cover rounded-3xl"
                         preload="metadata"
+                        autoPlay
+                        loop
                         muted
+                        playsInline
                       />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="bg-black/50 rounded-full p-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </div>
-                      </div>
                     </div>
                   ) : (
                     <Image
@@ -312,15 +308,11 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
                       src={img.url}
                       className="w-full h-60 object-cover rounded-3xl"
                       preload="metadata"
+                      autoPlay
+                      loop
                       muted
+                      playsInline
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="bg-black/50 rounded-full p-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    </div>
                   </div>
                 ) : (
                   <Image

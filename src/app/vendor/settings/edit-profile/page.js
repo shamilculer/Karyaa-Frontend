@@ -40,6 +40,7 @@ const editProfileSchema = z.object({
   whatsAppNumber: z.string().min(1, "WhatsApp number is required"),
   pricingStartingFrom: z.number().min(0).optional(),
   isInternational: z.boolean(),
+  vendorType: z.enum(["business", "freelancer"]).default("business"),
   // UAE-specific fields
   tradeLicenseNumber: z.string().optional(),
   tradeLicenseCopy: z.string().optional(),
@@ -76,13 +77,20 @@ const editProfileSchema = z.object({
     })).optional()
   }).optional(),
 }).refine((data) => {
-  // If UAE vendor, require UAE documents
+  const isFreelancer = data.vendorType === "freelancer";
   if (!data.isInternational) {
-    return !!(data.tradeLicenseNumber && data.tradeLicenseCopy &&
-      data.personalEmiratesIdNumber && data.emiratesIdCopy);
+    // UAE business: trade licence + Emirates ID number + copies required
+    if (!isFreelancer) {
+      return !!(data.tradeLicenseNumber && data.tradeLicenseCopy &&
+        data.personalEmiratesIdNumber && data.emiratesIdCopy);
+    }
+    // UAE freelancer: only Emirates ID copy required
+    return !!data.emiratesIdCopy;
   }
-  // If international vendor, require international documents
-  return !!(data.businessLicenseCopy && data.passportOrIdCopy);
+  // International business: business licence + passport required
+  if (!isFreelancer && !data.businessLicenseCopy) return false;
+  // International (both types): passport/ID required
+  return !!data.passportOrIdCopy;
 }, {
   message: "Required documents are missing",
   path: ["documents"]
@@ -226,6 +234,7 @@ const EditProfilePage = () => {
       businessDescription: "",
       whatsAppNumber: "",
       isInternational: false,
+      vendorType: "business",
       pricingStartingFrom: 0,
       tradeLicenseNumber: "",
       personalEmiratesIdNumber: "",
@@ -264,10 +273,13 @@ const EditProfilePage = () => {
   const ownerProfileImage = form.watch('ownerProfileImage');
   const businessLogo = form.watch('businessLogo');
   const isInternational = form.watch('isInternational');
+  const vendorType = form.watch('vendorType');
   const tradeLicenseCopy = form.watch('tradeLicenseCopy');
   const emiratesIdCopy = form.watch('emiratesIdCopy');
+  const personalEmiratesIdNumber = form.watch('personalEmiratesIdNumber');
   const businessLicenseCopy = form.watch('businessLicenseCopy');
   const passportOrIdCopy = form.watch('passportOrIdCopy');
+  const isFreelancer = vendorType === 'freelancer';
 
   const allSubCategories = categories.reduce((acc, cat) => {
     if (selectedMainCategoryIds.includes(cat._id)) {
@@ -312,6 +324,7 @@ const EditProfilePage = () => {
           whatsAppNumber: vendor.whatsAppNumber || "",
           pricingStartingFrom: vendor.pricingStartingFrom || 0,
           isInternational: vendor.isInternational || false,
+          vendorType: vendor.vendorType || "business",
           tradeLicenseNumber: vendor.tradeLicenseNumber || "",
           personalEmiratesIdNumber: vendor.personalEmiratesIdNumber || "",
           tradeLicenseCopy: vendor.tradeLicenseCopy || "",
@@ -712,101 +725,135 @@ const EditProfilePage = () => {
 
               {activeTab === "documents" && (
                 <div className="space-y-6">
-                  {(!isInternational || tradeLicenseCopy || personalEmiratesIdNumber || emiratesIdCopy) && (
+
+                  {/* ─── UAE Vendors ─── */}
+                  {!isInternational && (
                     <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
-                      <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">UAE Vendor Documents</h3>
-                      <FormField
-                        control={form.control}
-                        name="tradeLicenseNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs font-medium">Trade License Number *</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Enter trade license number" className="p-4 bg-[#f0f0f0] h-11 border-none" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">
+                        {isFreelancer ? 'UAE Freelancer Documents' : 'UAE Business Documents'}
+                      </h3>
 
-                      <FormField
-                        control={form.control}
-                        name="tradeLicenseCopy"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs font-medium">Trade License Copy *</FormLabel>
-                            <div className="space-y-4">
+                      {/* Trade Licence — Business only */}
+                      {!isFreelancer && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="tradeLicenseNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-medium">Trade License Number *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="Enter trade license number" className="p-4 bg-[#f0f0f0] h-11 border-none" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                              <FormControl>
-                                <ControlledFileUpload
-                                  control={form.control}
-                                  name="tradeLicenseCopy"
-                                  label={tradeLicenseCopy ? "Change Trade License" : "Upload Trade License"}
-                                  errors={form.formState.errors}
-                                  allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
-                                  folderPath="vendors/documents"
-                                  role="vendor"
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          <FormField
+                            control={form.control}
+                            name="tradeLicenseCopy"
+                            render={() => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-medium">Trade License Copy *</FormLabel>
+                                <FormControl>
+                                  <ControlledFileUpload
+                                    control={form.control}
+                                    name="tradeLicenseCopy"
+                                    label={tradeLicenseCopy ? "Change Trade License" : "Upload Trade License"}
+                                    errors={form.formState.errors}
+                                    allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
+                                    folderPath="vendors/documents"
+                                    role="vendor"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                      <FormField
-                        control={form.control}
-                        name="personalEmiratesIdNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs font-medium">Emirates ID Number *</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="784-1234-1234567-1" className="p-4 bg-[#f0f0f0] h-11 border-none" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          <FormField
+                            control={form.control}
+                            name="personalEmiratesIdNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-medium">Emirates ID Number *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="784-1234-1234567-1" className="p-4 bg-[#f0f0f0] h-11 border-none" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
 
+                      {/* Emirates ID — Both UAE types */}
                       <FormField
                         control={form.control}
                         name="emiratesIdCopy"
-                        render={({ field }) => (
+                        render={() => (
                           <FormItem>
                             <FormLabel className="text-xs font-medium">Emirates ID Copy *</FormLabel>
-                            <div className="space-y-4">
+                            <FormControl>
+                              <ControlledFileUpload
+                                control={form.control}
+                                name="emiratesIdCopy"
+                                label={emiratesIdCopy ? "Change Emirates ID" : "Upload Emirates ID"}
+                                errors={form.formState.errors}
+                                allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
+                                folderPath="vendors/documents"
+                                role="vendor"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
+                      {/* Optional extra doc — UAE Freelancer only */}
+                      {isFreelancer && (
+                        <FormField
+                          control={form.control}
+                          name="businessLicenseCopy"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-medium">Other Supporting Document <span className="text-gray-400 font-normal">(Optional)</span></FormLabel>
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
-                                  name="emiratesIdCopy"
-                                  label={emiratesIdCopy ? "Change Emirates ID" : "Upload Emirates ID"}
+                                  name="businessLicenseCopy"
+                                  label={businessLicenseCopy ? "Change Document" : "Upload Supporting Document"}
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
                                   role="vendor"
                                 />
                               </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
+                              <p className="!text-xs text-gray-500">Any additional document that supports your profile.</p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                     </div>
                   )}
 
-                  {(isInternational || businessLicenseCopy || passportOrIdCopy) && (
+                  {/* ─── International Vendors ─── */}
+                  {isInternational && (
                     <div className="space-y-4 rounded-lg border border-gray-100 p-4 bg-gray-50/50">
-                      <h3 className="text-sm font-medium text-gray-900 border-b pb-2 mb-4">International Vendor Documents</h3>
-                      <FormField
-                        control={form.control}
-                        name="businessLicenseCopy"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs font-medium">Business License Copy *</FormLabel>
-                            <div className="space-y-4">
+                      <h3 className="!text-base uppercase font-medium text-gray-900 border-b pb-2 mb-4">
+                        {isFreelancer ? 'International Freelancer Documents' : 'International Business Documents'}
+                      </h3>
 
+                      {/* Business Licence — International Business only */}
+                      {!isFreelancer && (
+                        <FormField
+                          control={form.control}
+                          name="businessLicenseCopy"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-medium">Business License Copy *</FormLabel>
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
@@ -818,39 +865,63 @@ const EditProfilePage = () => {
                                   role="vendor"
                                 />
                               </FormControl>
-                            </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                      {/* Passport/ID — Both international types */}
+                      <FormField
+                        control={form.control}
+                        name="passportOrIdCopy"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-medium">Passport or ID Copy *</FormLabel>
+                            <FormControl>
+                              <ControlledFileUpload
+                                control={form.control}
+                                name="passportOrIdCopy"
+                                label={passportOrIdCopy ? "Change Passport/ID" : "Upload Passport or ID"}
+                                errors={form.formState.errors}
+                                allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
+                                folderPath="vendors/documents"
+                                role="vendor"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="passportOrIdCopy"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs font-medium">Passport or ID Copy *</FormLabel>
-                            <div className="space-y-4">
-
+                      {/* Optional extra doc — International Freelancer */}
+                      {isFreelancer && (
+                        <FormField
+                          control={form.control}
+                          name="tradeLicenseCopy"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel className="text-xs font-medium">Other Supporting Document <span className="text-gray-400 font-normal">(Optional)</span></FormLabel>
                               <FormControl>
                                 <ControlledFileUpload
                                   control={form.control}
-                                  name="passportOrIdCopy"
-                                  label={passportOrIdCopy ? "Change Passport/ID" : "Upload Passport or ID"}
+                                  name="tradeLicenseCopy"
+                                  label={tradeLicenseCopy ? "Change Document" : "Upload Supporting Document"}
                                   errors={form.formState.errors}
                                   allowedMimeType={["application/pdf", "image/jpeg", "image/png"]}
                                   folderPath="vendors/documents"
                                   role="vendor"
                                 />
                               </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
+                              <p className="!text-xs text-gray-500">Any additional document that supports your profile.</p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                     </div>
                   )}
+
                 </div>
               )}
 
@@ -941,7 +1012,7 @@ const EditProfilePage = () => {
                       )}
                     />
 
-                    <div className="mt-6">
+                    <div className="mt-6 space-y-4 md:col-span-2">
                       <FormField
                         control={form.control}
                         name="isInternational"
@@ -960,6 +1031,31 @@ const EditProfilePage = () => {
                                 onChange={field.onChange}
                                 className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="vendorType"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm bg-gray-50">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Vendor Type</FormLabel>
+                              <div className="text-sm text-gray-500">
+                                Select whether you operate as a business or a freelancer.
+                              </div>
+                            </div>
+                            <FormControl>
+                              <select
+                                className="border border-gray-300 rounded-md text-sm px-3 py-2 bg-white"
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              >
+                                <option value="business">Business</option>
+                                <option value="freelancer">Freelancer</option>
+                              </select>
                             </FormControl>
                           </FormItem>
                         )}

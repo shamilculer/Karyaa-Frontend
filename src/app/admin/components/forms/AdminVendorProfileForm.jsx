@@ -38,6 +38,7 @@ const editProfileSchema = z.object({
     whatsAppNumber: z.string().min(1, "WhatsApp number is required"),
     pricingStartingFrom: z.number().min(0).optional(),
     isInternational: z.boolean(),
+    vendorType: z.enum(["business", "freelancer"]).default("business"),
     mainCategory: z.array(z.string()).min(1, "Select at least one category"),
     subCategories: z.array(z.string()),
     occasionsServed: z.array(z.string()),
@@ -199,8 +200,8 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
             businessDescription: vendor.businessDescription || "",
             whatsAppNumber: vendor.whatsAppNumber || "",
             pricingStartingFrom: vendor.pricingStartingFrom || 0,
-            pricingStartingFrom: vendor.pricingStartingFrom || 0,
             isInternational: vendor.isInternational || false,
+            vendorType: vendor.vendorType || "business",
             mainCategory: Array.isArray(vendor.mainCategory)
                 ? vendor.mainCategory.map(cat => typeof cat === 'object' ? cat._id : cat)
                 : [],
@@ -748,7 +749,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <FormField
+                                <FormField
                                         control={form.control}
                                         name="isInternational"
                                         render={({ field }) => (
@@ -766,6 +767,32 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                                                         onChange={field.onChange}
                                                         className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                     />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="vendorType"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-gray-50 cursor-pointer">
+                                                <div className="space-y-0.5">
+                                                    <FormLabel className="text-base font-medium">Vendor Type</FormLabel>
+                                                    <div className="!text-xs text-gray-500">
+                                                        Choose whether this vendor is a registered business or a freelancer.
+                                                    </div>
+                                                </div>
+                                                <FormControl>
+                                                    <select
+                                                        className="border border-gray-300 rounded-md text-sm px-2 py-1 bg-white"
+                                                        value={field.value}
+                                                        onChange={(e) => field.onChange(e.target.value)}
+                                                    >
+                                                        <option value="business">Business</option>
+                                                        <option value="freelancer">Freelancer</option>
+                                                    </select>
                                                 </FormControl>
                                             </FormItem>
                                         )}

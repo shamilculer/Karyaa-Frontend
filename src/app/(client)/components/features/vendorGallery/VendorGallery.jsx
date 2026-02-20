@@ -15,18 +15,33 @@ import { Button } from "@/components/ui/button";
 export default function VendorGallery({ images }) {
   const lightGalleryRef = useRef(null);
 
+  const getVideoMimeType = (url) => {
+    const lower = String(url || "").toLowerCase();
+    if (lower.includes(".webm")) return "video/webm";
+    if (lower.includes(".mov")) return "video/quicktime";
+    if (lower.includes(".m4v")) return "video/x-m4v";
+    return "video/mp4";
+  };
+
   const gallery = useMemo(
     () => images?.map(item => {
       const isVideo = item.mediaType === 'video';
+      if (isVideo) {
+        return {
+          // Match working LightGallery shape used elsewhere:
+          // keep `src` undefined and let lg-video handle `video.source`.
+          src: undefined,
+          thumb: item.thumbnail || item.url,
+          subHtml: `<h4>Gallery Video</h4>`,
+          video: {
+            source: [{ src: item.url, type: getVideoMimeType(item.url) }],
+            attributes: { preload: false, controls: true }
+          },
+        };
+      }
       return {
         src: item.url,
         thumb: item.thumbnail || item.url,
-        ...(isVideo && {
-          video: {
-            source: [{ src: item.url, type: 'video/mp4' }],
-            attributes: { preload: false, controls: true }
-          }
-        })
       };
     }) || [],
     [images]
@@ -74,17 +89,15 @@ export default function VendorGallery({ images }) {
               {isVideo ? (
                 <div className="relative w-full h-full bg-black">
                   <video
-                    src={img.src}
+                    src={images[i]?.url}
                     className="w-full h-full object-cover"
                     preload="metadata"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    poster={images[i]?.thumbnail || undefined}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <Image

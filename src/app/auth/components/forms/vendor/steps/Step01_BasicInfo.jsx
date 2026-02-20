@@ -61,6 +61,7 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
             email: formData.email || '',
             phoneNumber: formData.phoneNumber || '',
             password: formData.password || '',
+            vendorType: formData.vendorType || 'business',
 
             // UAE-specific fields
             ownerProfileImage: formData.ownerProfileImage || '',
@@ -74,6 +75,7 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
             passportOrIdCopy: formData.passportOrIdCopy || '',
 
             isInternational: formData.isInternational ?? false,
+            freelancerOtherDoc: formData.freelancerOtherDoc || '',
         },
         mode: 'onBlur',
     });
@@ -88,6 +90,8 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
     };
 
     const isInternational = form.watch("isInternational");
+    const vendorType = form.watch("vendorType");
+    const isFreelancer = vendorType === "freelancer";
 
     // Auto-clear fields when switching between UAE and International
     useEffect(() => {
@@ -103,6 +107,14 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
             form.setValue("passportOrIdCopy", "");
         }
     }, [isInternational, form]);
+
+    // Auto-clear business-only docs when switching to freelancer
+    useEffect(() => {
+        if (!isInternational && isFreelancer) {
+            form.setValue("tradeLicenseNumber", "");
+            form.setValue("tradeLicenseCopy", "");
+        }
+    }, [isInternational, isFreelancer, form]);
 
     return (
         <>
@@ -200,14 +212,50 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
                         />
                     </div>
 
+                    {/* Business or Freelancer Selection */}
+                    <div className="border border-primary/20 p-3 rounded-lg bg-primary/5 space-y-1">
+                        <FormField
+                            control={form.control}
+                            name="vendorType"
+                            render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                    <FormLabel className="font-semibold text-sm">
+                                        Are you registering as a business or a freelancer?
+                                    </FormLabel>
+                                    <FormControl>
+                                        <RadioGroup
+                                            onValueChange={(value) => field.onChange(value)}
+                                            value={field.value}
+                                            className="flex space-x-6 pt-2"
+                                        >
+                                            <div className={`flex items-center space-x-2 p-3 border rounded-lg transition-colors ${field.value === "business" ? 'border-primary bg-white shadow-sm' : 'border-gray-300'}`}>
+                                                <RadioGroupItem value="business" id="type_business" />
+                                                <label htmlFor="type_business" className="text-sm font-medium">Business</label>
+                                            </div>
+                                            <div className={`flex items-center space-x-2 p-3 border rounded-lg transition-colors ${field.value === "freelancer" ? 'border-primary bg-white shadow-sm' : 'border-gray-300'}`}>
+                                                <RadioGroupItem value="freelancer" id="type_freelancer" />
+                                                <label htmlFor="type_freelancer" className="text-sm font-medium">Freelancer</label>
+                                            </div>
+                                        </RadioGroup>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
                     {/* Phone always visible */}
                     {renderInputField(form, "phoneNumber", "Phone Number", "971501234567")}
 
                     {/* UAE-Only Conditional Fields */}
                     {!isInternational && (
                         <>
-                            {renderInputField(form, "tradeLicenseNumber", "Trade License Number", "Enter trade license number")}
-                            {renderInputField(form, "personalEmiratesIdNumber", "Personal Emirates ID Number", "Enter Emirates ID")}
+                            {!isFreelancer && (
+                                <>
+                                    {renderInputField(form, "tradeLicenseNumber", "Trade License Number", "Enter trade license number")}
+                                    {renderInputField(form, "personalEmiratesIdNumber", "Personal Emirates ID Number", "Enter Emirates ID")}
+                                </>
+                            )}
 
                             <FormField
                                 control={form.control}
@@ -233,62 +281,97 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
                                 )}
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="tradeLicenseCopy"
-                                render={() => (
-                                    <FormItem>
-                                        <FormLabel className="text-xs leading-0 font-medium">
-                                            Trade License Copy
-                                        </FormLabel>
-                                        <FormControl>
-                                            <ControlledFileUpload
-                                                control={form.control}
-                                                name="tradeLicenseCopy"
-                                                label="Upload Trade License Document"
-                                                errors={form.formState.errors}
-                                                allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
-                                                folderPath={FOLDER_PATH}
-                                                isPublic={true}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {!isFreelancer && (
+                                <FormField
+                                    control={form.control}
+                                    name="tradeLicenseCopy"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs leading-0 font-medium">
+                                                Trade License Copy
+                                            </FormLabel>
+                                            <FormControl>
+                                                <ControlledFileUpload
+                                                    control={form.control}
+                                                    name="tradeLicenseCopy"
+                                                    label="Upload Trade License Document"
+                                                    errors={form.formState.errors}
+                                                    allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                    folderPath={FOLDER_PATH}
+                                                    isPublic={true}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+
+                            {isFreelancer && !isInternational && (
+                                <FormField
+                                    control={form.control}
+                                    name="freelancerOtherDoc"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs leading-0 font-medium">
+                                                Other Supporting Document (Optional)
+                                            </FormLabel>
+                                            <FormControl>
+                                                <ControlledFileUpload
+                                                    control={form.control}
+                                                    name="freelancerOtherDoc"
+                                                    label="Upload Optional Document"
+                                                    errors={form.formState.errors}
+                                                    allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                    folderPath={FOLDER_PATH}
+                                                    isPublic={true}
+                                                />
+                                            </FormControl>
+                                            <p className="!text-[12px] text-gray-500 mt-1">
+                                                You can upload any additional document if needed.
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
                         </>
                     )}
 
                     {/* International-Only Conditional Fields */}
                     {isInternational && (
                         <>
-                            <FormField
-                                control={form.control}
-                                name="businessLicenseCopy"
-                                render={() => (
-                                    <FormItem>
-                                        <FormLabel className="text-xs leading-0 font-medium">
-                                            Business License Copy
-                                        </FormLabel>
-                                        <FormControl>
-                                            <ControlledFileUpload
-                                                control={form.control}
-                                                name="businessLicenseCopy"
-                                                label="Upload Business License"
-                                                errors={form.formState.errors}
-                                                allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
-                                                folderPath={FOLDER_PATH}
-                                                isPublic={true}
-                                            />
-                                        </FormControl>
-                                        <p className="!text-[12px] text-gray-500 mt-1">
-                                            Upload your valid business registration or license document.
-                                        </p>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {/* Business License is only needed for international businesses */}
+                            {!isFreelancer && (
+                                <FormField
+                                    control={form.control}
+                                    name="businessLicenseCopy"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs leading-0 font-medium">
+                                                Business License Copy
+                                            </FormLabel>
+                                            <FormControl>
+                                                <ControlledFileUpload
+                                                    control={form.control}
+                                                    name="businessLicenseCopy"
+                                                    label="Upload Business License"
+                                                    errors={form.formState.errors}
+                                                    allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                    folderPath={FOLDER_PATH}
+                                                    isPublic={true}
+                                                />
+                                            </FormControl>
+                                            <p className="!text-[12px] text-gray-500 mt-1">
+                                                Upload your valid business registration or license document.
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
 
+                            {/* Passport / ID is always required for international */}
                             <FormField
                                 control={form.control}
                                 name="passportOrIdCopy"
@@ -315,6 +398,36 @@ export default function Step01_BasicInfo({ customHeading, customTagline }) {
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Optional extra docs only for international freelancers */}
+                            {isFreelancer && (
+                                <FormField
+                                    control={form.control}
+                                    name="freelancerOtherDoc"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel className="text-xs leading-0 font-medium">
+                                                Other Supporting Document (Optional)
+                                            </FormLabel>
+                                            <FormControl>
+                                                <ControlledFileUpload
+                                                    control={form.control}
+                                                    name="freelancerOtherDoc"
+                                                    label="Upload Optional Document"
+                                                    errors={form.formState.errors}
+                                                    allowedMimeType={["image/jpeg", "image/png", "application/pdf"]}
+                                                    folderPath={FOLDER_PATH}
+                                                    isPublic={true}
+                                                />
+                                            </FormControl>
+                                            <p className="!text-[12px] text-gray-500 mt-1">
+                                                You can upload any additional document if needed.
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
                         </>
                     )}
 

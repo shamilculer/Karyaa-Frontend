@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Save, Loader2, Eye, Plus, Trash2, GripVertical, Image as ImageIcon, Video, Type, SplitSquareHorizontal, MoveUp, MoveDown, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import SimpleTiptapEditor from "@/components/admin/SimpleTiptapEditor";
 import ControlledFileUpload from "@/components/common/ControlledFileUploads";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { deleteS3FilesAction } from "@/app/actions/s3-upload";
 
 const StoryPageEditor = () => {
     const router = useRouter();
@@ -51,6 +52,9 @@ const StoryPageEditor = () => {
     // but persisting it in the form data (even transiently) is often easier to keep in sync with RHF array.
     // However, RHF 'fields' are stable IDs. We can use a local map of ID -> collapsed.
     const [collapsedState, setCollapsedState] = useState({});
+
+    // Track image/video URLs removed during this session for S3 cleanup on save
+    const removedUrls = useRef([]);
 
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -93,16 +97,25 @@ const StoryPageEditor = () => {
     const onSubmit = async (data) => {
         setSaving(true);
         try {
-            const result = await upsertContentAction("story-page", {
-                type: "section",
-                content: JSON.stringify(data)
-            });
+            // Capture removed URLs before clearing the ref
+            const urlsToDelete = [...removedUrls.current];
 
-            if (result.success) {
+            // Run S3 cleanup + DB save in parallel
+            await Promise.all([
+                upsertContentAction("story-page", {
+                    type: "section",
+                    content: JSON.stringify(data)
+                }),
+                // Best-effort S3 cleanup — errors are logged inside the action
+                urlsToDelete.length > 0 ? deleteS3FilesAction(urlsToDelete) : Promise.resolve(),
+            ]).then(([result]) => {
+                if (!result.success) {
+                    throw new Error(result.message || "Failed to save story page content");
+                }
+                // Clear the ref after a successful save
+                removedUrls.current = [];
                 toast.success("Story page content saved successfully!");
-            } else {
-                toast.error(result.message || "Failed to save story page content");
-            }
+            });
         } catch (error) {
             console.error("Error saving content:", error);
             toast.error("Failed to save story page content");
@@ -431,6 +444,14 @@ const StoryPageEditor = () => {
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     if (window.confirm("Are you sure you want to delete this block?")) {
+                                                                        // Collect image/video URLs by block type for S3 cleanup on save
+                                                                        const f = fields[index];
+                                                                        if (f?.type === 'split_section' && f.image) {
+                                                                            removedUrls.current.push(f.image);
+                                                                        } else if (f?.type === 'media_section') {
+                                                                            if (f.image) removedUrls.current.push(f.image);
+                                                                            if (f.video) removedUrls.current.push(f.video);
+                                                                        }
                                                                         remove(index);
                                                                     }
                                                                 }}

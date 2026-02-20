@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import {
     Building2, User, Mail, Phone, MapPin, Globe, Calendar, Download,
@@ -9,16 +9,24 @@ import {
     FileText, ArrowLeft, X, ChevronUp,
     BadgeCheck, Star, Facebook, Instagram, Twitter, MessageCircle,
     Link as LinkIcon, MoreVertical,
-    Package as PackageIcon, Tag, PlusCircle
+    Package as PackageIcon, Tag, PlusCircle,
+    GripVertical, SortAsc, SortDesc, FlipHorizontal2
 } from 'lucide-react';
 
 import {
-    updateVendorStatusAction, toggleVendorRecommendedAction, updateVendorBundleAction,
-    getVendorGalleryAction, deleteVendorGalleryItemAction,
+    updateVendorStatusAction,
+    toggleVendorRecommendedAction,
+    updateVendorBundleAction,
+    getVendorGalleryAction,
+    deleteVendorGalleryItemAction,
     getVendorPackagesAction,
-    updateVendorFeaturesAction, deleteVendorGalleryItemsAction,
-    updateVendorDurationAction
+    updateVendorFeaturesAction,
+    deleteVendorGalleryItemsAction,
+    updateVendorDurationAction,
+    updateVendorGalleryItemAction,
 } from '@/app/actions/admin/vendors';
+import { reorderAdminVendorGallery } from '@/app/actions/shared/gallery';
+import SortableGalleryGrid from '@/components/common/SortableGalleryGrid';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/utils';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +48,8 @@ import ViewPackageModal from '@/app/vendor/components/modals/packages/ViewPackag
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import DeletePackageModal from '../modals/packages/DeletePackageModal';
 import { formatAvailability, getGroupedAvailability, formatTime } from '@/lib/formatAvailability';
+import ImageCropModal from '@/components/common/ImageCropModal';
+import { useS3Upload } from '@/hooks/useS3Upload';
 
 const OCCASIONS = [
     { value: "baby-shower", label: "Baby Shower" },
@@ -77,6 +87,16 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
     const [customDurationUnit, setCustomDurationUnit] = useState(vendor.subscriptionDuration?.base?.unit || 'months');
     const [bonusPeriodValue, setBonusPeriodValue] = useState(vendor.subscriptionDuration?.bonus?.value || 0);
     const [bonusPeriodUnit, setBonusPeriodUnit] = useState(vendor.subscriptionDuration?.bonus?.unit || 'months');
+    const { uploadFile } = useS3Upload();
+    const [cropOpen, setCropOpen] = useState(false);
+    const [cropImages, setCropImages] = useState([]);
+    const [editingGalleryItemId, setEditingGalleryItemId] = useState(null);
+    const [isReplacingGalleryItem, setIsReplacingGalleryItem] = useState(false);
+    // Reorder state
+    const [reorderMode, setReorderMode] = useState(false);
+    const [localGalleryItems, setLocalGalleryItems] = useState([]);
+    const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false);
+    const [isSavingOrder, setIsSavingOrder] = useState(false);
 
     useEffect(() => {
         if (activeTab === "gallery") fetchGallery();
@@ -96,9 +116,81 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
     const fetchGallery = async () => {
         setIsGalleryLoading(true);
         const result = await getVendorGalleryAction(vendor._id);
-        if (result.success) setGalleryItems(result.data);
-        else toast.error(result.message);
+        if (result.success) {
+            setGalleryItems(result.data);
+            setLocalGalleryItems(result.data);
+            setHasUnsavedOrder(false);
+        } else {
+            toast.error(result.message);
+        }
         setIsGalleryLoading(false);
+    };
+
+    const urlToFile = (url) => {
+        const nameFromUrl = (() => {
+            try {
+                const u = new URL(url);
+                const last = u.pathname.split("/").pop() || "image";
+                return last.includes(".") ? last : `${last}.jpg`;
+            } catch {
+                return "image.jpg";
+            }
+        })();
+        const ext = nameFromUrl.split(".").pop()?.toLowerCase();
+        const type =
+            ext === "png" ? "image/png" :
+                ext === "webp" ? "image/webp" :
+                    "image/jpeg";
+        const emptyBlob = new Blob([], { type });
+        return new File([emptyBlob], nameFromUrl, { type, lastModified: Date.now() });
+    };
+
+    const openCropForGalleryItem = async (item) => {
+        try {
+            setIsReplacingGalleryItem(true);
+            setEditingGalleryItemId(item._id);
+            const file = urlToFile(item.url);
+            setCropImages([{ id: item._id, src: item.url, file }]);
+            setCropOpen(true);
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to load image for editing.");
+            setEditingGalleryItemId(null);
+        } finally {
+            setIsReplacingGalleryItem(false);
+        }
+    };
+
+    const handleCropComplete = async (files) => {
+        const file = files?.[0];
+        if (!file || !editingGalleryItemId) return;
+
+        setIsReplacingGalleryItem(true);
+        const loadingToast = toast.loading("Updating image...");
+        try {
+            const uploadRes = await uploadFile(file, {
+                folder: `vendors/${vendor._id}/gallery`,
+                isPublic: false,
+                role: "admin"
+            });
+
+            if (!uploadRes?.url) throw new Error("Upload failed");
+
+            const updateRes = await updateVendorGalleryItemAction(vendor._id, editingGalleryItemId, { url: uploadRes.url });
+            if (!updateRes?.success) throw new Error(updateRes?.message || "Failed to update gallery item");
+
+            setGalleryItems(prev => prev.map(it => it._id === editingGalleryItemId ? { ...it, url: uploadRes.url } : it));
+            toast.success("Image updated.");
+        } catch (e) {
+            console.error(e);
+            toast.error(e.message || "Failed to update image.");
+        } finally {
+            toast.dismiss(loadingToast);
+            setIsReplacingGalleryItem(false);
+            setCropOpen(false);
+            setCropImages([]);
+            setEditingGalleryItemId(null);
+        }
     };
 
     const fetchPackages = async () => {
@@ -135,7 +227,10 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
         if (!confirm("Delete this image?")) return;
         const result = await deleteVendorGalleryItemAction(vendor._id, itemId);
         if (result.success) {
-            setGalleryItems(prev => prev.filter(item => item._id !== itemId));
+            const updated = galleryItems.filter(item => item._id !== itemId);
+            setGalleryItems(updated);
+            setLocalGalleryItems(updated);
+            setHasUnsavedOrder(false);
             toast.success("Image deleted");
         } else toast.error(result.message);
     };
@@ -151,13 +246,57 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
 
         const result = await deleteVendorGalleryItemsAction(vendor._id, selectedGalleryItems);
         if (result.success) {
-            setGalleryItems(prev => prev.filter(item => !selectedGalleryItems.includes(item._id)));
+            const updated = galleryItems.filter(item => !selectedGalleryItems.includes(item._id));
+            setGalleryItems(updated);
+            setLocalGalleryItems(updated);
             setSelectedGalleryItems([]);
             setBulkMode(false);
-            toast.success("Items deleted successfully");
+            setHasUnsavedOrder(false);
+            toast.success('Items deleted successfully');
         } else {
             toast.error(result.message);
         }
+    };
+
+    const handleOrderChange = (newItems) => {
+        setLocalGalleryItems(newItems);
+        setHasUnsavedOrder(true);
+    };
+
+    const handleQuickSort = (type) => {
+        let sorted;
+        switch (type) {
+            case 'reverse': sorted = [...localGalleryItems].reverse(); break;
+            case 'newest': sorted = [...localGalleryItems].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); break;
+            case 'oldest': sorted = [...localGalleryItems].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); break;
+            default: return;
+        }
+        setLocalGalleryItems(sorted);
+        setHasUnsavedOrder(true);
+    };
+
+    const handleSaveOrder = async () => {
+        setIsSavingOrder(true);
+        const loadingToast = toast.loading('Saving order...');
+        try {
+            const orderedIds = localGalleryItems.map(i => i._id);
+            const res = await reorderAdminVendorGallery(vendor._id, orderedIds);
+            if (res.error) throw new Error(res.error);
+            setGalleryItems(localGalleryItems);
+            setHasUnsavedOrder(false);
+            toast.success('Gallery order saved!');
+        } catch (e) {
+            toast.error(e.message || 'Failed to save order.');
+        } finally {
+            toast.dismiss(loadingToast);
+            setIsSavingOrder(false);
+        }
+    };
+
+    const toggleReorderMode = () => {
+        setReorderMode(prev => !prev);
+        setBulkMode(false);
+        setSelectedGalleryItems([]);
     };
 
     const handleBundleUpdate = async (e) => {
@@ -347,6 +486,12 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                     )}
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {vendor.vendorType === 'freelancer' && (
+                                        <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-semibold px-3 py-1.5 text-xs uppercase tracking-wide flex items-center gap-1.5 rounded-full">
+                                            <User className="w-3.5 h-3.5" />
+                                            Freelancer
+                                        </Badge>
+                                    )}
                                     <Badge className={`${getStatusColor(vendor.vendorStatus)} border-0 font-semibold px-4 py-1.5 text-sm uppercase tracking-wide`}>
                                         {vendor.vendorStatus === 'approved' && <CheckCircle2 className="w-4 h-4 mr-1.5" />}
                                         {vendor.vendorStatus === 'pending' && <Clock className="w-4 h-4 mr-1.5" />}
@@ -960,63 +1105,87 @@ const VendorDetailsClient = ({ vendorData, bundles = [], categories = [], subcat
                                     vendorId={vendor._id}
                                     onUploadComplete={fetchGallery}
                                     bulkMode={bulkMode}
-                                    setBulkMode={setBulkMode}
+                                    setBulkMode={(val) => { setBulkMode(val); if (val) setReorderMode(false); }}
                                     selectedCount={selectedGalleryItems.length}
                                     onDeleteSelected={handleBulkDelete}
                                     clearSelection={() => setSelectedGalleryItems([])}
+                                    reorderMode={reorderMode}
+                                    onToggleReorder={toggleReorderMode}
                                 />
                             </div>
 
                             {isGalleryLoading ? (
                                 <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
-                            ) : galleryItems.length === 0 ? (
+                            ) : localGalleryItems.length === 0 ? (
                                 <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                                     <ImageIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                                     <p className="text-sm font-medium text-gray-500">No images in gallery</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                    {galleryItems.map((item) => (
-                                        <div
-                                            key={item._id}
-                                            className={`group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all shadow-sm ${selectedGalleryItems.includes(item._id) ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-100 hover:border-blue-300'
-                                                }`}
-                                            onClick={() => bulkMode && toggleSelection(item._id)}
-                                        >
-                                            {item.mediaType === 'video' ? (
-                                                <video
-                                                    src={item.url}
-                                                    className="w-full h-full object-cover"
-                                                    controls
-                                                    preload="metadata"
-                                                >
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            ) : (
-                                                <Image src={item.url} alt={item.caption || "Gallery"} fill className="w-full h-full object-cover" />
-                                            )}
+                                <div className="space-y-4">
+                                    {/* Reorder controls */}
+                                    {reorderMode && (
+                                        <div className="flex flex-wrap items-center gap-3 py-2">
+                                            <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                                                <GripVertical className="h-4 w-4" />
+                                                <span>Drag to reorder, or use quick-sort:</span>
+                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" size="sm">Quick Sort</Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start">
+                                                    <DropdownMenuItem onClick={() => handleQuickSort('newest')}>
+                                                        <SortDesc className="h-4 w-4 mr-2" /> Newest First
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleQuickSort('oldest')}>
+                                                        <SortAsc className="h-4 w-4 mr-2" /> Oldest First
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => handleQuickSort('reverse')}>
+                                                        <FlipHorizontal2 className="h-4 w-4 mr-2" /> Reverse Order
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
 
-                                            {bulkMode && (
-                                                <div className="absolute top-2 right-2 z-10">
-                                                    <Checkbox
-                                                        checked={selectedGalleryItems.includes(item._id)}
-                                                        onCheckedChange={() => toggleSelection(item._id)}
-                                                        className="bg-white border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 w-5 h-5"
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {!bulkMode && (
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-3 gap-2">
-                                                    <Button variant="destructive" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteGalleryItem(item._id); }} className="w-full shadow-lg">
-                                                        <Trash2 className="w-3.5 h-3.5 mr-1.5" />Delete
+                                            {hasUnsavedOrder && (
+                                                <div className="flex items-center gap-2 ml-auto">
+                                                    <Button variant="ghost" size="sm" onClick={() => { setLocalGalleryItems(galleryItems); setHasUnsavedOrder(false); }} disabled={isSavingOrder}>
+                                                        <X className="h-4 w-4 mr-1" /> Discard
+                                                    </Button>
+                                                    <Button size="sm" onClick={handleSaveOrder} disabled={isSavingOrder} className="bg-primary text-white hover:bg-primary/90">
+                                                        <Save className="h-4 w-4 mr-1" />
+                                                        {isSavingOrder ? 'Saving...' : 'Save Order'}
                                                     </Button>
                                                 </div>
                                             )}
                                         </div>
-                                    ))}
+                                    )}
+
+                                    <SortableGalleryGrid
+                                        items={localGalleryItems}
+                                        reorderMode={reorderMode}
+                                        bulkMode={bulkMode}
+                                        selected={selectedGalleryItems}
+                                        onToggleSelect={toggleSelection}
+                                        onEdit={openCropForGalleryItem}
+                                        isEditDisabled={isReplacingGalleryItem}
+                                        onOrderChange={handleOrderChange}
+                                    />
                                 </div>
                             )}
+
+                            <ImageCropModal
+                                open={cropOpen}
+                                onClose={() => {
+                                    if (isReplacingGalleryItem) return;
+                                    setCropOpen(false);
+                                    setCropImages([]);
+                                    setEditingGalleryItemId(null);
+                                }}
+                                images={cropImages}
+                                onCropComplete={handleCropComplete}
+                            />
                         </div>
                     </TabsContent >
 

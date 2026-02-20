@@ -24,9 +24,9 @@ export const createImage = (file) =>
  * @param {Object} flip - Flip settings { horizontal: boolean, vertical: boolean }
  * @returns {Promise<Blob>}
  */
-export async function getCroppedImg(imageSrc, pixelCrop, rotation = 0, flip = { horizontal: false, vertical: false }) {
+export async function getCroppedImg(imageSrc, pixelCrop, rotation = 0, flip = { horizontal: false, vertical: false }, zoom = 1) {
     try {
-        console.log('getCroppedImg called with:', { pixelCrop, rotation, flip });
+        console.log('getCroppedImg called with:', { pixelCrop, rotation, flip, zoom });
 
         const image = await createImageFromUrl(imageSrc);
         console.log('Original image loaded:', { width: image.width, height: image.height });
@@ -40,26 +40,24 @@ export async function getCroppedImg(imageSrc, pixelCrop, rotation = 0, flip = { 
 
         const rotRad = (rotation * Math.PI) / 180;
 
-        // Calculate bounding box of the rotated image
+        // Calculate bounding box of the rotated image at natural size
         const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
             image.width,
             image.height,
             rotation
         );
 
-        console.log('Rotated bounding box:', { bBoxWidth, bBoxHeight });
-
-        // Set canvas size to match the bounding box
+        // Canvas is at natural rotated size — zoom is baked into pixelCrop by the caller
         canvas.width = bBoxWidth;
         canvas.height = bBoxHeight;
 
-        // Apply transformations
+        // Apply rotation and flip (no zoom here)
         ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
         ctx.rotate(rotRad);
         ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1);
         ctx.translate(-image.width / 2, -image.height / 2);
 
-        // Draw rotated/flipped image
+        // Draw image at natural size
         ctx.drawImage(image, 0, 0);
 
         // Create cropped canvas
@@ -130,6 +128,8 @@ function rotateSize(width, height, rotation) {
 const createImageFromUrl = (url) =>
     new Promise((resolve, reject) => {
         const image = new Image();
+        // Required when using images from a different origin with CORS enabled
+        image.crossOrigin = 'anonymous';
         image.addEventListener('load', () => resolve(image));
         image.addEventListener('error', (error) => reject(error));
         image.src = url;

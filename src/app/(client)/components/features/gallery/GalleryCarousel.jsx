@@ -122,15 +122,11 @@ export default function GalleryCarousel({ initialItems, hasMore: initialHasMore 
                     src={item.url}
                     className="w-full h-full object-cover"
                     preload="metadata"
+                    autoPlay
+                    loop
                     muted
+                    playsInline
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
-                    <div className="bg-black/50 rounded-full p-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
                 </>
               ) : (
                 <Image

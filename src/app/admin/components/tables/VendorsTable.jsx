@@ -624,6 +624,11 @@ export default function VendorsTable({ controls = true }) {
                                                                 International
                                                             </Badge>
                                                         )}
+                                                        {row.vendorType === 'freelancer' && (
+                                                            <Badge variant="secondary" className="h-4 px-1 text-[9px] bg-amber-50 text-amber-800 border-amber-100 w-fit mt-0.5">
+                                                                Freelancer
+                                                            </Badge>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </HoverCardTrigger>

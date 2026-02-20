@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ import {
 import {
     upsertContentAction,
 } from "@/app/actions/admin/pages";
+import { deleteS3FilesAction } from "@/app/actions/s3-upload";
 import { cn } from "@/lib/utils";
 
 import { useForm, Controller, useFieldArray } from "react-hook-form";
@@ -53,6 +54,9 @@ const MediaKitManagementPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [openItems, setOpenItems] = useState([]);
+
+    // Track image URLs removed during this editing session for S3 cleanup on save
+    const removedUrls = useRef([]);
 
     const {
         control,
@@ -177,25 +181,33 @@ const MediaKitManagementPage = () => {
 
         setSaving(true);
         try {
-            // Save settings
-            const settingsResult = await upsertContentAction("media-kit-settings", {
-                type: "page",
-                content: data.settings,
-            });
+            // Capture removed URLs before clearing the ref
+            const urlsToDelete = [...removedUrls.current];
+
+            // Run S3 cleanup + DB save in parallel
+            const [settingsResult, itemsResult] = await Promise.all([
+                upsertContentAction("media-kit-settings", {
+                    type: "page",
+                    content: data.settings,
+                }),
+                upsertContentAction("media-kit-items", {
+                    type: "page",
+                    content: data.items,
+                }),
+                // Best-effort S3 cleanup — errors are logged inside the action
+                urlsToDelete.length > 0 ? deleteS3FilesAction(urlsToDelete) : Promise.resolve(),
+            ]);
 
             if (!settingsResult.success) {
                 throw new Error(settingsResult.message || "Failed to save settings");
             }
 
-            // Save items
-            const itemsResult = await upsertContentAction("media-kit-items", {
-                type: "page",
-                content: data.items,
-            });
-
             if (!itemsResult.success) {
                 throw new Error(itemsResult.message || "Failed to save items");
             }
+
+            // Clear the removed URLs ref after a successful save
+            removedUrls.current = [];
 
             toast.success("Media Kit page updated successfully!");
         } catch (error) {
@@ -553,6 +565,10 @@ const MediaKitManagementPage = () => {
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 if (window.confirm("Are you sure you want to delete this item?")) {
+                                                                    // Collect the image URL for S3 cleanup on next save
+                                                                    if (item?.image) {
+                                                                        removedUrls.current.push(item.image);
+                                                                    }
                                                                     remove(realIndex);
                                                                     if (isSearching) toast.success("Item deleted");
                                                                 }
