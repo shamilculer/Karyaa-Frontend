@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         className={`${greatVibes.variable} antialiased`}
       >
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17967949996"
+          src="https://www.googletagmanager.com/gtag/js?id=G-7HC2J17NSD"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -33,6 +33,7 @@ export default function RootLayout({ children }) {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
+            gtag('config', 'G-7HC2J17NSD');
             gtag('config', 'AW-17967949996');
           `}
         </Script>
