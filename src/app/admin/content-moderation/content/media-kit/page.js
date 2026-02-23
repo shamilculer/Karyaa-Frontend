@@ -67,6 +67,7 @@ const MediaKitManagementPage = () => {
     } = useForm({
         defaultValues: {
             settings: {
+                isActive: true, // Master toggle for the entire media kit page
                 heading: "In The Press",
                 tagline: "See what others are saying about us.",
                 bannerImage: "",
@@ -124,7 +125,10 @@ const MediaKitManagementPage = () => {
                 const itemsData = result.data.find((item) => item.key === "media-kit-items");
 
                 if (settingsData?.content) {
-                    setValue("settings", settingsData.content);
+                    // Ensure isActive exists on older payloads
+                    const contentSettings = { ...settingsData.content };
+                    if (contentSettings.isActive === undefined) contentSettings.isActive = true;
+                    setValue("settings", contentSettings);
                 }
                 if (itemsData?.content && Array.isArray(itemsData.content)) {
                     setValue("items", itemsData.content);
@@ -294,6 +298,30 @@ const MediaKitManagementPage = () => {
                             </AccordionTrigger>
                             <AccordionContent className="px-6 pb-6 pt-2 space-y-6">
                                 <div className="space-y-6 pt-2 border-t border-gray-100">
+                                    <div className="flex items-center justify-between bg-gray-50/50 p-4 rounded-lg border border-gray-200 mb-2">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base text-gray-900 font-semibold">Enable Media Kit Page</Label>
+                                            <p className="text-sm text-gray-500">Toggle this to make the Media Kit public or hide it from users.</p>
+                                        </div>
+                                        <Controller
+                                            name="settings.isActive"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => field.onChange(!field.value)}
+                                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${field.value ? 'bg-primary' : 'bg-gray-200'}`}
+                                                    role="switch"
+                                                    aria-checked={field.value}
+                                                >
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${field.value ? 'translate-x-5' : 'translate-x-0'}`}
+                                                    />
+                                                </button>
+                                            )}
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-5">
                                             <div className="space-y-2">

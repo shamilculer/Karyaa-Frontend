@@ -34,6 +34,7 @@ const StoryPageEditor = () => {
         formState: { errors },
     } = useForm({
         defaultValues: {
+            isActive: true, // Master toggle for the entire story page
             bannerHeading: "",
             bannerTagline: "",
             bannerType: "image", // image, video
@@ -75,6 +76,7 @@ const StoryPageEditor = () => {
                     : result.data.content;
 
                 // Set Banner values
+                setValue("isActive", parsedContent.isActive !== undefined ? parsedContent.isActive : true);
                 setValue("bannerHeading", parsedContent.bannerHeading || "");
                 setValue("bannerTagline", parsedContent.bannerTagline || "");
                 setValue("bannerType", parsedContent.bannerType || "image");
@@ -224,6 +226,31 @@ const StoryPageEditor = () => {
                                 </AccordionTrigger>
                                 <AccordionContent className="px-6 pb-6 pt-2 space-y-6">
                                     <div className="space-y-6 pt-2 border-t border-gray-100">
+                                        <div className="flex items-center justify-between bg-gray-50/50 p-4 rounded-lg border border-gray-200">
+                                            <div className="space-y-0.5">
+                                                <Label className="text-base text-gray-900 font-semibold">Enable Story Page</Label>
+                                                <p className="text-sm text-gray-500">Toggle this to make the Story Page public or hide it from users.</p>
+                                            </div>
+                                            <Controller
+                                                name="isActive"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => field.onChange(!field.value)}
+                                                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${field.value ? 'bg-primary' : 'bg-gray-200'}`}
+                                                        role="switch"
+                                                        aria-checked={field.value}
+                                                    >
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${field.value ? 'translate-x-5' : 'translate-x-0'}`}
+                                                        />
+                                                    </button>
+                                                )}
+                                            />
+                                        </div>
+
                                         <div className="space-y-2">
                                             <Label htmlFor="bannerHeading" className="text-gray-700 font-medium">Banner Heading</Label>
                                             <Input

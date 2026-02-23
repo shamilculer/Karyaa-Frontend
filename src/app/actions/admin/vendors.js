@@ -58,6 +58,59 @@ export const getAllVendorsAction = async ({
     }
 };
 
+// --- 1.B. EXPORT ALL VENDORS TO EXCEL (Admin - Filtered) ---
+export const exportVendorsAction = async ({
+    search = "",
+    vendorStatus = "",
+    city = "",
+    expiryStatus = "",
+    isInternational = "",
+    sortBy = "createdAt",
+    sortOrder = "desc"
+} = {}) => {
+
+    const queryParams = new URLSearchParams();
+    if (search) queryParams.append('search', search);
+    if (vendorStatus) queryParams.append('vendorStatus', vendorStatus);
+    if (city) queryParams.append('city', city);
+    if (expiryStatus) queryParams.append('expiryStatus', expiryStatus);
+    if (isInternational !== "") queryParams.append('isInternational', isInternational);
+    queryParams.append('sortBy', sortBy);
+    queryParams.append('sortOrder', sortOrder);
+
+    const endpoint = `/admin/vendors/export?${queryParams.toString()}`;
+
+    try {
+        const response = await apiFetch(endpoint, {
+            role: "admin",
+            auth: true,
+            responseType: "blob" 
+        });
+
+        if (response instanceof Blob) {
+            const arrayBuffer = await response.arrayBuffer();
+            const base64String = Buffer.from(arrayBuffer).toString('base64');
+            
+            return {
+                success: true,
+                data: base64String,
+                contentType: response.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                filename: `vendors_export_${Date.now()}.xlsx`
+            };
+        } else if (response.success === false) {
+             return response; // Pass through error from apiFetch
+        } else {
+            throw new Error("Unexpected response type");
+        }
+    } catch (error) {
+        console.error("Error exporting vendors list (Admin):", error);
+        return {
+            success: false,
+            message: error.message || "An unexpected network error occurred."
+        };
+    }
+};
+
 // --- 2. GET VENDOR BY ID (Detail View) ---
 export const getVendorByIdAction = async (id) => {
     if (!id) {

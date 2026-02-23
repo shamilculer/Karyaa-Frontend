@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { getContentByKeyAction } from "@/app/actions/public/content"
 import PageTitle from "../components/common/PageTitle";
 import { getMetaData } from "@/lib/seo";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -21,6 +22,7 @@ const StoryPage = async () => {
         bannerType: "image", // image | video
         bannerImage: "/banner-1.avif",
         bannerVideo: "",
+        isActive: true, // Added default
 
         contentBlocks: [] // Array of modular blocks
     }
@@ -39,6 +41,10 @@ const StoryPage = async () => {
         } catch (error) {
             console.error("Error parsing story page content:", error);
         }
+    }
+
+    if (pageContent.isActive === false) {
+        notFound();
     }
 
     // Helper to render blocks

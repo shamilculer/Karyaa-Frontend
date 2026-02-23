@@ -174,6 +174,10 @@ export async function apiFetch(url, options = {}) {
                 throw new Error(error.message || `HTTP ${response.status}`);
             }
 
+            if (fetchOptions.responseType === 'blob') {
+                return await response.blob();
+            }
+
             return await response.json().catch(() => ({}));
 
         } catch (error) {

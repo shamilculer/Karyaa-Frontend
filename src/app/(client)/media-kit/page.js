@@ -1,6 +1,7 @@
 import { getBulkContentAction } from "@/app/actions/public/content";
 import PageTitle from "../components/common/PageTitle";
 import { getMetaData } from "@/lib/seo";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Image from "next/image";
@@ -15,6 +16,7 @@ const MediaKitPage = async () => {
     const result = await getBulkContentAction(["media-kit-settings", "media-kit-items"]);
 
     let settings = {
+        isActive: true,
         heading: "In The Press",
         tagline: "See what others are saying about Karyaa.",
         bannerImage: "", // fallback if needed
@@ -35,6 +37,10 @@ const MediaKitPage = async () => {
         if (itemsData?.content && Array.isArray(itemsData.content)) {
             items = itemsData.content;
         }
+    }
+
+    if (settings.isActive === false) {
+        notFound();
     }
 
     return (

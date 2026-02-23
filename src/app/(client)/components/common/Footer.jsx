@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useClientStore } from "@/store/clientStore"
 import { getBrandDetailsAction } from "@/app/actions/public/brand";
-import { getContentByKeyAction } from "@/app/actions/public/content";
+import { getBulkContentAction } from "@/app/actions/public/content";
 import { useEffect, useState } from "react";
 import ReferModal from "../modals/ReferModal";
 import RaiseComplaintModal from "@/components/modals/RaiseComplaintModal";
@@ -20,6 +20,8 @@ const Footer = () => {
 
   const [contactDetails, setContactDetails] = useState({})
   const [ctaSections, setCtaSections] = useState(null)
+  const [isStoryActive, setIsStoryActive] = useState(true)
+  const [isMediaKitActive, setIsMediaKitActive] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,26 +31,49 @@ const Footer = () => {
 
     fetchData()
 
-    const fetchCtas = async () => {
+    const fetchFooterContent = async () => {
       try {
-        const res = await getContentByKeyAction("cta-sections")
+        const res = await getBulkContentAction(["cta-sections", "story-page", "media-kit-settings"])
 
-        // parse if string
-        if (res?.success && res.data?.content) {
-          try {
-            const parsed = typeof res.data.content === "string" ? JSON.parse(res.data.content) : res.data.content
-            setCtaSections(parsed)
-          } catch (e) {
-            console.warn("[Footer] failed to parse cta-sections content, using raw value", e)
-            setCtaSections(res.data.content)
+        if (res?.success && res.data?.length > 0) {
+          const ctaData = res.data.find(d => d.key === "cta-sections")
+          const storyData = res.data.find(d => d.key === "story-page")
+          const mediaKitData = res.data.find(d => d.key === "media-kit-settings")
+
+          if (ctaData?.content) {
+            try {
+              const parsed = typeof ctaData.content === "string" ? JSON.parse(ctaData.content) : ctaData.content
+              setCtaSections(parsed)
+            } catch (e) {
+              console.warn("[Footer] failed to parse cta-sections content", e)
+              setCtaSections(ctaData.content)
+            }
+          }
+
+          if (storyData?.content) {
+            try {
+              const parsed = typeof storyData.content === "string" ? JSON.parse(storyData.content) : storyData.content
+              setIsStoryActive(parsed.isActive !== false) // default true
+            } catch (e) {
+              console.warn("[Footer] failed to parse story-page content", e)
+            }
+          }
+
+          if (mediaKitData?.content) {
+            try {
+              const parsed = typeof mediaKitData.content === "string" ? JSON.parse(mediaKitData.content) : mediaKitData.content
+              setIsMediaKitActive(parsed.isActive !== false) // default true
+            } catch (e) {
+              console.warn("[Footer] failed to parse media-kit-settings content", e)
+            }
           }
         }
       } catch (err) {
-        console.error("[Footer] error fetching cta-sections:", err)
+        console.error("[Footer] error fetching footer content:", err)
       }
     }
 
-    fetchCtas()
+    fetchFooterContent()
   }, [])
 
   const leftHeading =
@@ -64,10 +89,7 @@ const Footer = () => {
   const rightImage = ctaSections?.cta2_image || "/cta-2.webp";
 
   const aboutKaryaaLink = [
-    {
-      text: "Our Story",
-      href: "/our-story"
-    },
+    ...(isStoryActive ? [{ text: "Our Story", href: "/our-story" }] : []),
     {
       text: "Categories",
       href: "/categories"
@@ -88,10 +110,7 @@ const Footer = () => {
       text: "Gallery",
       href: "/gallery"
     },
-    {
-      text: "Media Kit",
-      href: "/media-kit"
-    },
+    ...(isMediaKitActive ? [{ text: "Media Kit", href: "/media-kit" }] : []),
   ]
 
   const karyaacare = [

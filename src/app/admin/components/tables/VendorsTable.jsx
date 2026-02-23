@@ -54,11 +54,12 @@ import {
     Globe,
     MapPin,
     Trash2,
+    Download,
 } from "lucide-react"
 import Link from "next/link"
 
 import { getInitials } from "@/utils"
-import { getAllVendorsAction, updateVendorStatusAction, deleteVendorAction } from "@/app/actions/admin/vendors"
+import { getAllVendorsAction, updateVendorStatusAction, deleteVendorAction, exportVendorsAction } from "@/app/actions/admin/vendors"
 
 export const description = "Vendors Management Table with URL-based Filtering"
 
@@ -228,6 +229,7 @@ export default function VendorsTable({ controls = true }) {
     const [totalPages, setTotalPages] = useState(0)
     const [apiError, setApiError] = useState(null)
     const [rowSelection, setRowSelection] = useState({})
+    const [isExporting, setIsExporting] = useState(false)
 
     // Local state for search input (for debouncing)
     const [searchInput, setSearchInput] = useState('')
@@ -430,6 +432,54 @@ export default function VendorsTable({ controls = true }) {
         }
     }
 
+    const handleExport = async () => {
+        setIsExporting(true)
+        const toastId = toast.loading("Generating Excel file...")
+
+        try {
+            const res = await exportVendorsAction({
+                search: globalFilter,
+                vendorStatus: filterVendorStatus,
+                city: filterCity,
+                expiryStatus: filterExpiryStatus,
+                isInternational: filterIsInternational,
+            })
+
+            if (res.success && res.data) {
+                // Convert base64 to Blob
+                const byteCharacters = atob(res.data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: res.contentType });
+
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = res.filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+
+                toast.dismiss(toastId);
+                toast.success("Export downloaded successfully!")
+            } else {
+                toast.dismiss(toastId);
+                toast.error(res.message || "Failed to export vendors")
+            }
+        } catch (error) {
+            toast.dismiss(toastId);
+            toast.error("An error occurred during export")
+            console.error("Export error:", error)
+        } finally {
+            setIsExporting(false)
+        }
+    }
+
     const headers = [
         'Ref ID',
         'Business Name',
@@ -456,6 +506,15 @@ export default function VendorsTable({ controls = true }) {
                         />
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-end">
+                        <Button
+                            variant="outline"
+                            className="flex items-center gap-2 bg-[#F2F4FF] text-primary border border-gray-300"
+                            onClick={handleExport}
+                            disabled={isExporting || totalVendors === 0}
+                        >
+                            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                            Export to Excel
+                        </Button>
                         {selectedRowCount > 0 && (
                             <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
