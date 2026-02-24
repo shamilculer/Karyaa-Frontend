@@ -90,7 +90,7 @@ const MapVendorCard = ({ vendor, isAuthenticated, isInitialSaved }) => {
                         <div className="flex items-center gap-1 mt-1">
                             <MapPin className="w-3 h-3 text-gray-500 flex-shrink-0" />
                             <span className="!text-xs text-gray-600 truncate">
-                                {vendor.address.city}, UAE
+                                {vendor.address.city}, {vendor.address.country || 'UAE'}
                             </span>
                         </div>
                     </div>
