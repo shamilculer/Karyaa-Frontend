@@ -37,6 +37,9 @@ export default function SeoManagementPage() {
         { pageIdentifier: "gallery", route: "/gallery", metaTitle: "Event Inspiration Gallery | Karyaa", metaDescription: "Browse our gallery of stunning events and get inspired for your own celebration." },
         { pageIdentifier: "ideas", route: "/ideas", metaTitle: "Event Themes & Ideas | Karyaa", metaDescription: "Explore unique themes and creative ideas to make your event truly unforgettable." },
         { pageIdentifier: "compare", route: "/compare", metaTitle: "Compare Vendors | Karyaa", metaDescription: "Compare different vendors side-by-side to find the perfect match for your event budget and style." },
+        { pageIdentifier: "careers", route: "/careers", metaTitle: "Careers at Karyaa | Join Our Team", metaDescription: "Explore exciting career opportunities at Karyaa. Join our growing team and help shape the future of event planning in the UAE." },
+        { pageIdentifier: "our-story", route: "/story", metaTitle: "Our Story | Karyaa", metaDescription: "Learn about Karyaa's journey, our mission, and the passionate team behind the UAE's leading event planning marketplace." },
+        { pageIdentifier: "media-kit", route: "/media-kit", metaTitle: "Media Kit | Karyaa", metaDescription: "Download Karyaa's media kit for brand assets, press materials, and everything you need to feature us in your publication." },
     ];
 
     const fetchData = async () => {

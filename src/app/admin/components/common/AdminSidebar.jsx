@@ -11,11 +11,13 @@ import {
     Users,
     Settings,
     CircleQuestionMark,
-    SquareStack,
-    Headset,
     ChevronDown,
     Network,
     Megaphone,
+    Briefcase,
+    Headset,
+    SquareStack,
+    Mail
 } from "lucide-react";
 
 import {
@@ -60,7 +62,6 @@ const items = [
             { title: "Content", url: "/admin/content-moderation/content" },
             { title: "Blog", url: "/admin/content-moderation/blog" },
             { title: "Ideas", url: "/admin/content-moderation/ideas" },
-            { title: "Media Kit", url: "/admin/content-moderation/content/media-kit" },
             { title: "SEO Management", url: "/admin/content-moderation/seo" },
             // { title: "Contact Details", url: "/admin/content-moderation/contact-details" },
         ],
@@ -101,6 +102,28 @@ const items = [
         ],
     },
     {
+        title: "Ad Management",
+        url: "/admin/ad-management",
+        icon: CircleQuestionMark,
+        accessKey: "adManagement",
+    },
+    {
+        title: "Bundle Management",
+        url: "/admin/bundle-management",
+        icon: SquareStack,
+        accessKey: "bundleManagement",
+    },
+    {
+        title: "Careers",
+        icon: Briefcase,
+        isGroup: true,
+        accessKey: "careersManagement",
+        children: [
+            { title: "Job Postings", url: "/admin/careers/job-postings" },
+            { title: "Job Applications", url: "/admin/careers/job-applications" },
+        ],
+    },
+    {
         title: "Complaint Management",
         url: "/admin/complaints",
         icon: Megaphone,
@@ -113,22 +136,16 @@ const items = [
         accessKey: "supportTickets",
     },
     {
-        title: "Ad Management",
-        url: "/admin/ad-management",
-        icon: CircleQuestionMark,
-        accessKey: "adManagement",
+        title: "Newsletter Subscribers",
+        url: "/admin/newsletter-subscribers",
+        icon: Mail,
+        accessKey: "newsletterManagement",
     },
     {
         title: "Referrals Management",
         url: "/admin/referrals-management",
         icon: Network,
         accessKey: "referralManagement",
-    },
-    {
-        title: "Bundle Management",
-        url: "/admin/bundle-management",
-        icon: SquareStack,
-        accessKey: "bundleManagement",
     },
     {
         title: "Admin Users",

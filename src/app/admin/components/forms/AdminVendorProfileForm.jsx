@@ -32,7 +32,7 @@ const editProfileSchema = z.object({
     ownerName: z.string().min(1, "Owner name is required"),
     email: z.string().email("Invalid email"),
     phoneNumber: z.string().min(1, "Phone number is required"),
-    businessName: z.string().min(1, "Business name is required"),
+    businessName: z.string().min(1, "Business name is required").max(30, "Business name cannot exceed 30 characters"),
     tagline: z.string().max(120, "Tagline must be 120 characters or less").optional(),
     businessDescription: z.string().min(50, "Minimum 50 characters required").max(1500, "Maximum 1500 characters allowed"),
     whatsAppNumber: z.string().min(1, "WhatsApp number is required"),
@@ -48,7 +48,6 @@ const editProfileSchema = z.object({
         city: z.string().min(1, "City is required"),
         state: z.string().optional(),
         country: z.string().min(1, "Country is required"),
-        zipCode: z.string().optional(),
         zipCode: z.string().optional(),
     }),
     websiteLink: z.string().optional(),
@@ -214,8 +213,6 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                 area: vendor.address?.area || "",
                 city: vendor.address?.city || "",
                 state: vendor.address?.state || "",
-                country: vendor.address?.country || "UAE",
-                zipCode: vendor.address?.zipCode || "",
                 country: vendor.address?.country || "UAE",
                 zipCode: vendor.address?.zipCode || "",
             },
@@ -749,7 +746,7 @@ const AdminVendorProfileForm = ({ vendor, categories, subcategories, onSuccess, 
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                <FormField
+                                    <FormField
                                         control={form.control}
                                         name="isInternational"
                                         render={({ field }) => (

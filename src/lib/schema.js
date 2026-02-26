@@ -142,7 +142,7 @@ export const Step2Schema = z
     // when Step 2 form data is extracted by useForm.
     isInternational: z.boolean().optional(), // ✅ FIX APPLIED HERE
 
-    businessName: z.string().trim().min(1, "Business name is required."),
+    businessName: z.string().trim().min(1, "Business name is required.").max(30, "Business name cannot exceed 30 characters."),
 
     // Note: Assuming 'businessLogo' is a string URL after upload, not a File object
     businessLogo: z.string().min(1, "Business Logo is required."), // Simpler check for now. If it's a URL, z.url() is fine if you handle empty string with .or(z.literal(''))
@@ -319,6 +319,7 @@ export const AccessControlSchema = z.object({
   adManagement: z.boolean().default(false),
   referralManagement: z.boolean().default(false),
   bundleManagement: z.boolean().default(false),
+  careersManagement: z.boolean().default(false),
   adminUserSettings: z.boolean().default(false),
 });
 

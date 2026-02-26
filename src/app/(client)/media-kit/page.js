@@ -8,7 +8,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export async function generateMetadata() {
-    return await getMetaData("static", "Media Kit");
+    return await getMetaData("static", "media-kit");
 }
 
 const MediaKitPage = async () => {

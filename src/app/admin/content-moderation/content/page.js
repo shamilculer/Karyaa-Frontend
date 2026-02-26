@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FileText, Edit2, Eye, Calendar, Loader2 } from "lucide-react";
+import { FileText, Edit2, Eye, Calendar, Loader2, Search } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,12 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { getAllContentAction } from "@/app/actions/admin/pages";
 import { toast } from "sonner";
 
 const CMS = () => {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Define page metadata
   const pageConfig = {
@@ -76,6 +78,18 @@ const CMS = () => {
       description: "Our Story timeline and banner",
       type: "section",
     },
+    "careers-page": {
+      name: "Careers Page",
+      icon: FileText,
+      description: "Manage Careers text and job postings",
+      type: "section",
+    },
+    "media-kit": {
+      name: "Media Kit",
+      icon: FileText,
+      description: "Press coverage, banner, and page settings",
+      type: "section",
+    },
   };
 
   useEffect(() => {
@@ -111,6 +125,10 @@ const CMS = () => {
       return `/admin/content-moderation/content/refer-modal`;
     } else if (page.key === "story-page") {
       return `/admin/content-moderation/content/story-page`;
+    } else if (page.key === "careers-page") {
+      return `/admin/content-moderation/content/careers-page`;
+    } else if (page.key === "media-kit") {
+      return `/admin/content-moderation/content/media-kit`;
     } else if (page.type === "page") {
       return `/admin/content-moderation/content/${page.key}`;
     }
@@ -125,7 +143,9 @@ const CMS = () => {
       "faq-page": "/faq",
       "landing-page": "/",
       "contact-page": "/contact",
-      "story-page": "/story",
+      "story-page": "/our-story",
+      "careers-page": "/careers",
+      "media-kit": "/media-kit",
     };
     return previewUrls[page.key] || `/${page.key}`;
   };
@@ -139,7 +159,7 @@ const CMS = () => {
   }
 
   // Group contents for display
-  const displayPages = Object.keys(pageConfig).map((key) => {
+  const allDisplayPages = Object.keys(pageConfig).map((key) => {
     const content = contents.find((c) => c.key === key);
     return {
       key,
@@ -150,6 +170,14 @@ const CMS = () => {
     };
   });
 
+  // Filter by search query
+  const displayPages = searchQuery.trim()
+    ? allDisplayPages.filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allDisplayPages;
+
   return (
     <div className="dashboard-container space-y-6 mb-12">
       <div className="flex items-center justify-between">
@@ -157,8 +185,20 @@ const CMS = () => {
           <span className="text-sidebar-foreground font-semibold !text-2xl uppercase tracking-widest">Content Management</span>
           <p className="!text-sm text-gray-500">Manage static pages and content sections</p>
         </div>
-        <div className="!text-sm font-medium text-gray-500 bg-gray-100 px-3 rounded-full">
-          {displayPages.length} pages
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              type="search"
+              placeholder="Search pages..."
+              className="pl-8 bg-white w-56"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="!text-sm font-medium text-gray-500 bg-gray-100 px-3 rounded-full">
+            {displayPages.length} pages
+          </div>
         </div>
       </div>
 

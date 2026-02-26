@@ -5,7 +5,8 @@
  * @param {string} identifier - unique identifier or slug
  */
 export async function getMetaData(type, identifier) {
-    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+    // BACKEND_URL already includes /v1 (e.g. http://localhost:5000/v1)
+    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/v1';
 
     // Default metadata fallback
     const defaults = {
@@ -20,15 +21,14 @@ export async function getMetaData(type, identifier) {
     try {
         let url = "";
         if (type === "static") {
-            url = `${SERVER_URL}/api/v1/admin/seo/static/public/${identifier}`;
+            url = `${BACKEND_URL}/admin/seo/static/public/${identifier}`;
         } else if (type === "category") {
-            // Assuming public category API handles slug
-            url = `${SERVER_URL}/api/v1/categories/${identifier}`;
+            url = `${BACKEND_URL}/categories/${identifier}`;
         } else if (type === "subcategory") {
-            url = `${SERVER_URL}/api/v1/subcategories/${identifier}`;
+            url = `${BACKEND_URL}/subcategories/${identifier}`;
         }
 
-        const res = await fetch(url, { next: { revalidate: 60 } }); // Revalidate every 60s
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) return defaults;
 
         const json = await res.json();

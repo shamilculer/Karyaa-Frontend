@@ -30,7 +30,7 @@ import {
     Heading3,
 } from "lucide-react";
 
-const EditorToolbar = ({ editor }) => {
+const EditorToolbar = ({ editor, disableHeadings }) => {
     if (!editor) return null;
 
     const addLink = () => {
@@ -50,35 +50,39 @@ const EditorToolbar = ({ editor }) => {
     return (
         <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
             {/* Headings */}
-            <Button
-                type="button"
-                size="sm"
-                variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
-                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className="h-8 w-8 p-0"
-            >
-                <Heading1 className="w-4 h-4" />
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
-                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className="h-8 w-8 p-0"
-            >
-                <Heading2 className="w-4 h-4" />
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"}
-                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                className="h-8 w-8 p-0"
-            >
-                <Heading3 className="w-4 h-4" />
-            </Button>
+            {!disableHeadings && (
+                <>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                        className="h-8 w-8 p-0"
+                    >
+                        <Heading1 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                        className="h-8 w-8 p-0"
+                    >
+                        <Heading2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"}
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                        className="h-8 w-8 p-0"
+                    >
+                        <Heading3 className="w-4 h-4" />
+                    </Button>
 
-            <div className="w-px h-8 bg-gray-300 mx-1" />
+                    <div className="w-px h-8 bg-gray-300 mx-1" />
+                </>
+            )}
 
             {/* Text Formatting */}
             <Button
@@ -233,14 +237,16 @@ const EditorToolbar = ({ editor }) => {
     );
 };
 
-export default function RichTextEditor({ value, onChange, minHeight = "200px" }) {
+export default function RichTextEditor({ value, onChange, minHeight = "200px", disableHeadings = false }) {
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                heading: disableHeadings ? false : undefined,
+            }),
             Underline,
             Link.configure({ openOnClick: false }),
             Image,
-            TextAlign.configure({ types: ["heading", "paragraph"] }),
+            TextAlign.configure({ types: disableHeadings ? ["paragraph"] : ["heading", "paragraph"] }),
             TextStyle,
             Color,
         ],
@@ -262,7 +268,7 @@ export default function RichTextEditor({ value, onChange, minHeight = "200px" })
     return (
         <>
             <div className="rounded-lg border border-gray-300 overflow-hidden bg-white">
-                <EditorToolbar editor={editor} />
+                <EditorToolbar editor={editor} disableHeadings={disableHeadings} />
                 <EditorContent
                     editor={editor}
                     className="prose max-w-none border-0 p-4 focus:outline-none"

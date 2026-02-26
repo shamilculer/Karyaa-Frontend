@@ -34,7 +34,7 @@ const editProfileSchema = z.object({
   ownerName: z.string().min(1, "Owner name is required"),
   email: z.string().email("Invalid email"),
   phoneNumber: z.string().min(1, "Phone number is required"),
-  businessName: z.string().min(1, "Business name is required"),
+  businessName: z.string().min(1, "Business name is required").max(30, "Business name cannot exceed 30 characters"),
   tagline: z.string().max(120, "Tagline must be 120 characters or less").optional(),
   businessDescription: z.string().min(50, "Minimum 50 characters required").max(1500, "Maximum 1500 characters allowed"),
   whatsAppNumber: z.string().min(1, "WhatsApp number is required"),

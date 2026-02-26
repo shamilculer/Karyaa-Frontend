@@ -16,7 +16,7 @@ import {
  * Client Component: Contains the mobile menu navigation structure (links, accordion)
  * and handles closing the Sheet on click.
  */
-const MobileNavLinks = ({ categories, setOpen }) => {
+const MobileNavLinks = ({ categories, setOpen, isStoryActive }) => {
     const router = useRouter();
     const [openCategories, setOpenCategories] = useState("");
     const [openSubcategories, setOpenSubcategories] = useState({});
@@ -178,6 +178,7 @@ const MobileNavLinks = ({ categories, setOpen }) => {
                 {/* Other Main Links */}
                 {[
                     { href: "/gallery", name: "Gallery" },
+                    ...(isStoryActive ? [{ href: "/story", name: "Our Story" }] : []),
                     { href: "/ideas", name: "Ideas" },
                     { href: "/blog", name: "Blog" },
                     { href: "/contact", name: "Contact" }

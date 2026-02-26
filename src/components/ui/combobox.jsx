@@ -62,7 +62,7 @@ export function Combobox({ options, value, onChange, placeholder = "Select...", 
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    key={option.value}
+                                    key={`${option.value}-${option.label}`}
                                     value={option.label}
                                     className="cursor-pointer hover:bg-gray-100"
                                     onSelect={() => {

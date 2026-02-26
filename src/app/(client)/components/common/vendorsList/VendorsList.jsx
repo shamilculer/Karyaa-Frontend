@@ -345,7 +345,7 @@ export const VendorsCard = ({ vendor, isAuthenticated, isInitialSaved, compact =
           <span className="font-bold text-sm">AED {vendor.pricingStartingFrom}</span>
         </p>
         <div className="w-full relative">
-          <Link href={vendorUrl} className="!text-2xl max-md:!text-lg text-[#232536] font-heading !font-medium truncate">
+          <Link href={vendorUrl} className="!text-[22px] max-xl:!text-lg text-[#232536] font-heading !font-medium truncate">
             {vendor.businessName}
           </Link>
           <div>

@@ -22,7 +22,7 @@ import MobileNavLinks from "./MobileNavLinks";
 /**
  * Client Component: Manages the open/close state of the mobile menu Sheet.
  */
-const MobileSheetWrapper = ({ isAuthenticated, user, categories }) => {
+const MobileSheetWrapper = ({ isAuthenticated, user, categories, isStoryActive }) => {
     // State to control the Sheet's open/closed status
     const [open, setOpen] = useState(false);
 
@@ -47,7 +47,7 @@ const MobileSheetWrapper = ({ isAuthenticated, user, categories }) => {
 
                 {/* Pass categories data and the state setter (setOpen) to the links component */}
                 <div className="py-3 w-[280px] flex-grow overflow-y-auto">
-                    <MobileNavLinks categories={categories} setOpen={setOpen} />
+                    <MobileNavLinks categories={categories} setOpen={setOpen} isStoryActive={isStoryActive} />
                 </div>
 
                 <SheetFooter className="p-6 border-t border-gray-200 mt-auto">

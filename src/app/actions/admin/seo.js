@@ -1,6 +1,21 @@
 "use server"
 
 import { apiFetch } from "@/lib/api"
+import { revalidatePath } from "next/cache";
+
+// Map of pageIdentifier → route(s) to revalidate
+const ROUTE_MAP = {
+    home: ["/"],
+    categories: ["/categories"],
+    contact: ["/contact"],
+    blog: ["/blog"],
+    gallery: ["/gallery"],
+    ideas: ["/ideas"],
+    compare: ["/compare"],
+    careers: ["/careers"],
+    "our-story": ["/our-story"],
+    "media-kit": ["/media-kit"],
+};
 
 // --- 1. GET STATIC PAGES SEO ---
 export const getStaticSeoDataAction = async () => {
@@ -112,6 +127,11 @@ export const updateStaticPageSeoAction = async (identifier, data) => {
         });
 
         if (response.success) {
+            // Bust Next.js route cache so the new metadata is reflected immediately
+            const routes = ROUTE_MAP[identifier] || [];
+            routes.forEach((route) => revalidatePath(route));
+            // Also revalidate the layout so nested pages inherit updated metadata
+            revalidatePath("/", "layout");
             return {
                 success: true,
                 data: response.data,
@@ -145,6 +165,9 @@ export const updateCategorySeoAction = async (id, data) => {
         });
 
         if (response.success) {
+            revalidatePath("/categories");
+            revalidatePath("/categories/[category]", "page");
+            revalidatePath("/", "layout");
             return {
                 success: true,
                 data: response.data,
@@ -178,6 +201,10 @@ export const updateSubCategorySeoAction = async (id, data) => {
         });
 
         if (response.success) {
+            revalidatePath("/categories");
+            revalidatePath("/categories/[category]", "page");
+            revalidatePath("/categories/[category]/[subCategory]", "page");
+            revalidatePath("/", "layout");
             return {
                 success: true,
                 data: response.data,

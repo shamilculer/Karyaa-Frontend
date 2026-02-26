@@ -15,6 +15,7 @@ import UserMenu from "../ui/UserDropDownMenu"; // This is your client component
 import { checkAuthStatus } from "../../../actions/user/user";
 import { getCategoriesWithVendors } from "@/app/actions/public/categories";
 import MobileSheetWrapper from "./MobileSheetWrapper"; // 👈 New Import
+import { getBulkContentAction } from "@/app/actions/public/content";
 
 const Header = async () => {
     const categoriesResponse = await getCategoriesWithVendors();
@@ -22,12 +23,27 @@ const Header = async () => {
 
     const categories = categoriesResponse.categories || [];
 
+    // Check if Our Story page is active (same as footer)
+    let isStoryActive = false;
+    try {
+        const contentRes = await getBulkContentAction(["story-page"]);
+        if (contentRes?.success && contentRes.data?.length > 0) {
+            const storyData = contentRes.data.find(d => d.key === "story-page");
+            if (storyData?.content) {
+                const parsed = typeof storyData.content === "string" ? JSON.parse(storyData.content) : storyData.content;
+                isStoryActive = parsed.isActive !== false;
+            }
+        }
+    } catch (e) {
+        // silently fail — link just won't show
+    }
+
     return (
         <header className="sticky top-0 bg-[#fffef9] z-[1000]" suppressHydrationWarning>
 
             {/* -------------------- Desktop Header (Unchanged) -------------------- */}
             <div className="hidden lg:flex w-full py-4 h-[80px] border-b border-gray-300 items-center">
-                <div className="container flex items-center justify-between">
+                <div className="container relative flex items-center">
                     {/* Left Navigation */}
                     <NavigationMenu>
                         <NavigationMenuList className="flex gap-4">
@@ -42,7 +58,7 @@ const Header = async () => {
 
                             {/* Categories Dropdown */}
                             <NavigationMenuItem className="relative">
-                                <NavigationMenuTrigger className="text-sm font-semibold cursor-pointer hover:text-secondary hover:bg-primary/10">
+                                <NavigationMenuTrigger className="text-sm font-semibold cursor-pointer hover:text-secondary hover:bg-primary/10 !px-2 !py-0 h-auto bg-transparent">
                                     <Link href="/categories">Categories</Link>
                                 </NavigationMenuTrigger>
 
@@ -87,24 +103,35 @@ const Header = async () => {
                                     <Link href="/gallery">Gallery</Link>
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
+
+                            {isStoryActive && (
+                                <NavigationMenuItem>
+                                    <NavigationMenuLink
+                                        asChild
+                                        className="text-sm font-semibold hover:underline hover:text-secondary cursor-pointer"
+                                    >
+                                        <Link href="/our-story">Our Story</Link>
+                                    </NavigationMenuLink>
+                                </NavigationMenuItem>
+                            )}
                         </NavigationMenuList>
                     </NavigationMenu>
 
-                    {/* Logo */}
-                    <div className="flex items-center justify-between">
-                        <Link href="/" className="flex items-center gap-4">
+                    {/* Logo — absolutely centered so it's always in the exact middle */}
+                    <div className="absolute left-1/2 -translate-x-1/2">
+                        <Link href="/" className="flex items-center">
                             <Image
                                 src="/logo.svg"
                                 alt="Karyaa"
                                 width={132}
                                 height={24}
-                                className={`w-44 ${isAuthenticated ? "ml-16" : "ml-10"}`}
+                                className="w-44"
                             />
                         </Link>
                     </div>
 
                     {/* Right Navigation */}
-                    <div className="flex items-center gap-5">
+                    <div className="ml-auto flex items-center gap-5">
                         <NavigationMenu>
                             <NavigationMenuList className="flex gap-4">
                                 <NavigationMenuItem>
@@ -155,6 +182,7 @@ const Header = async () => {
                         isAuthenticated={isAuthenticated}
                         user={user}
                         categories={categories}
+                        isStoryActive={isStoryActive}
                     />
 
                     <Link href="/" className="flex-center gap-2 w-1/3">

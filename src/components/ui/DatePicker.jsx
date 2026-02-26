@@ -11,32 +11,36 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function DatePicker() {
+export function DatePicker({ date, setDate }) {
   const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState(undefined)
+
+  // the calendar component expects a Date object, but we might just pass an ISO string from the form
+  const parsedDate = (typeof date === "string" && date) ? new Date(date) : (date || undefined);
+
+  const handleSelect = (selectedDate) => {
+    setDate(selectedDate)
+    setOpen(false)
+  }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 w-full">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            id="date"
-            className="w-48 justify-between font-normal"
+            className="w-full justify-between font-normal"
+            type="button"
           >
-            {date ? date.toLocaleDateString() : "Select date"}
+            {parsedDate ? parsedDate.toLocaleDateString() : "Select date"}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={parsedDate}
             captionLayout="dropdown"
-            onSelect={(date) => {
-              setDate(date)
-              setOpen(false)
-            }}
+            onSelect={handleSelect}
           />
         </PopoverContent>
       </Popover>

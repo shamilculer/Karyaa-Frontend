@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export async function generateMetadata() {
-    return await getMetaData("static", "story");
+    return await getMetaData("static", "our-story");
 }
 
 const StoryPage = async () => {

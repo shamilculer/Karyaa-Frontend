@@ -110,6 +110,10 @@ const Footer = () => {
       text: "Gallery",
       href: "/gallery"
     },
+    {
+      text: "Careers",
+      href: "/careers"
+    },
     ...(isMediaKitActive ? [{ text: "Media Kit", href: "/media-kit" }] : []),
   ]
 
