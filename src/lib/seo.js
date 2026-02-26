@@ -18,6 +18,12 @@ export async function getMetaData(type, identifier) {
         },
     };
 
+    // During `next build`, the backend is not running so any fetch will fail
+    // with ECONNREFUSED. Return defaults immediately to keep the build clean.
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+        return defaults;
+    }
+
     try {
         let url = "";
         if (type === "static") {
@@ -56,7 +62,7 @@ export async function getMetaData(type, identifier) {
         };
 
     } catch (error) {
-        console.error(`Failed to fetch SEO for ${type}/${identifier}:`, error);
+        console.warn(`Failed to fetch SEO for ${type}/${identifier}:`, error.message);
         return defaults;
     }
 }
